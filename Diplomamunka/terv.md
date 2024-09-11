@@ -1,14 +1,13 @@
 # **Terv**
 A projektem egy átfogó, cégek számára tervezett webes alkalmazás, amely egyszerűsíti a mindennapi működést és a munkaerő-kezelést. A rendszer több kulcsfontosságú funkciót biztosít:
 
-**Raktárkészlet- és rendelések kezelése:**  
-- Hatékonyan követhető a raktárkészlet -> A cégek ezt teljesen személyre szabhatják, vehetnek fel új termékeket, törölhetnek belőle, képet tudnak hozzá feltölteni az adott termékről, ki tudják nyomtatni az egész raktárkészlete vagy annak egy részét
-- A weboldalon regisztrált cégek tudnak egymástól árut rendelni -> Az adott cég meg tudja adni, hogy mit szeretne (ha szeretne) árusítani, amit a többi cég egy "piac" oldalon lát és azt meg tudja rendelni és nyomonkövetni, hogy milyen fázisban és hol van a csomagja
-
 **Alkalmazottak kezelése:**  
 - A munkáltatók kiírhatják a beosztásokat, és üzeneteket válthatnak az alkalmazottakkal.
 - Az alkalmazottak hozzáférhetnek a beosztásukhoz, és a naptárban jelezhetik, hogy mikor szeretnének pihenőnapot kivenni részmunkaidő esetén, illetve szabadságot kérhetnek.
 - Betegség esetén feltölthetik az orvosi igazolásukat, és kommunikálhatnak a munkáltatóval. 
+- Alkalmazottak munkdaidejének nyomonkövetése -> Munkaidő megkezdésekor és befejezésekor be kell jelentkezni az oldara és ott valamilyen formában majd (valamilyen gomb használatával) jelezni kell ezeket
+- A munkáltató hozzáférhet különböző kimutatásokhoz az alkalmazotakkal kapcsolatban
+- (Megbeszélések szervezése) - utána kell még néznem, hogy milyen bonyolúlt egy teams jellegű videóbeszélgetés megvalósítása, de valószínüleg (80%) ez is bele fog kerülni a végleges tervbe
 
 **Adminisztrációs felület:**  
 - Egy licenckulcs megvásárlása után férhetnek hozzá a rendszerhez, ami a regisztráció során szükséges, ez egy random generált kód.
