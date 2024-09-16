@@ -1,0 +1,3 @@
+- felhasználó: ki küldte - szám (azonosító)
+- szöveg: mi az üzenet - szöveg
+
