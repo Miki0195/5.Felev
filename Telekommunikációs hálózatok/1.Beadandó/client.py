@@ -13,25 +13,23 @@ class CircuitSimulator:
         self.demands = data['simulation']['demands']
         self.duration = data['simulation']['duration']
 
-        # Élek kapacitásainak nyilvántartása
+        # Élek kapacitásai
         self.link_capacities = {}
         for link in self.links:
             node1, node2 = link['points']
             self.link_capacities[(node1, node2)] = link['capacity']
-            self.link_capacities[(node2, node1)] = link['capacity']  # Irányítatlan
+            self.link_capacities[(node2, node1)] = link['capacity'] 
 
-        self.current_allocations = []  # Aktív erőforrás foglalások
-        self.event_counter = 0         # Események számlálója
+        self.current_allocations = [] 
+        self.event_counter = 0       
 
     def find_circuit(self, from_node, to_node):
-        # Megkeresi a from_node és to_node közötti útvonalat a possible-circuits között
         for circuit in self.possible_circuits:
             if circuit[0] == from_node and circuit[-1] == to_node:
                 return circuit
         return None
 
     def check_capacity(self, path, demand):
-        # Ellenőrzi, hogy van-e elég kapacitás az útvonal minden linkjén
         for i in range(len(path) - 1):
             node1 = path[i]
             node2 = path[i + 1]
@@ -40,7 +38,6 @@ class CircuitSimulator:
         return True
 
     def allocate_resources(self, path, demand):
-        # Lefoglalja az erőforrásokat a megadott útvonalon
         for i in range(len(path) - 1):
             node1 = path[i]
             node2 = path[i + 1]
@@ -48,7 +45,6 @@ class CircuitSimulator:
             self.link_capacities[(node2, node1)] -= demand
 
     def release_resources(self, path, demand):
-        # Felszabadítja az erőforrásokat a megadott útvonalon
         for i in range(len(path) - 1):
             node1 = path[i]
             node2 = path[i + 1]
