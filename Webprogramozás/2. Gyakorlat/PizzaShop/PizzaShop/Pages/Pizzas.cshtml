@@ -1,0 +1,36 @@
+﻿@page
+@model PizzaShop.Pages.PizzasModel
+@{
+    ViewData["Title"] = "Pizzas";
+}
+
+<form asp-page="Pizzas" asp-page-handler="OrderPizza">
+    <input type="number" name="id" />
+    <input type="submit" />
+</form>
+
+@if (Model.SelectedPizza != null)
+{
+    <div>
+        <h2>@Model.SelectedPizza.Name</h2>
+        <img src="@Model.GetPizzaImageFileName(Model.SelectedPizza)" alt="@Model.SelectedPizza.Name" style="width:200px;height:200px;" />
+        <p>Ingredients: @Model.SelectedPizza.Ingredients</p>
+        <p>Allergens: @Model.SelectedPizza.Allergens</p>
+    </div>
+}
+    <h2>Available Pizzas</h2>
+    <ul>
+        @foreach (var pizza in Model.pizzaService.GetAllPizzas())
+        {
+            <li>@pizza.Name</li>
+            <li>@pizza.Id</li>
+
+        }
+    </ul>
+
+@*@foreach (var pizza in Model.pizzaService.GetAllPizzas())
+    {
+        <p>@pizza.Name</p>
+        <p>@pizza.Ingredients</p>
+        <p>@pizza.Allergens</p>
+    }*@

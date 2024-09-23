@@ -1,0 +1,51 @@
+﻿<Properties StartupConfiguration="{996CA2EA-CC38-4377-B3F6-30391798A2EC}|http">
+  <MonoDevelop.Ide.ItemProperties.PizzaShop PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="PizzaShop/Services/IPizzaService.cs">
+    <Files>
+      <File FileName="PizzaShop/Program.cs" Line="25" Column="57" />
+      <File FileName="PizzaShop/Model/Pizza.cs" Line="1" Column="1" />
+      <File FileName="PizzaShop/Pages/_ViewImports.cshtml" Line="1" Column="1" />
+      <File FileName="PizzaShop/Pages/_ViewStart.cshtml" Line="1" Column="1" />
+      <File FileName="PizzaShop/Pages/Error.cshtml" Line="7" Column="18" />
+      <File FileName="PizzaShop/Services/IPizzaService.cs" Line="8" Column="31" />
+      <File FileName="PizzaShop/Services/PizzaService.cs" Line="24" Column="27" />
+      <File FileName="PizzaShop/Pages/Privacy.cshtml.cs" Line="1" Column="1" />
+      <File FileName="PizzaShop/Pages/Privacy.cshtml" Line="4" Column="5" />
+      <File FileName="PizzaShop/Pages/Pizzas.cshtml" Line="22" Column="5" />
+      <File FileName="PizzaShop/Pages/Pizzas.cshtml.cs" Line="45" Column="1" />
+      <File FileName="PizzaShop/Pages/Index.cshtml" Line="1" Column="1" />
+      <File FileName="PizzaShop/appsettings.json" Line="1" Column="1" />
+      <File FileName="PizzaShop/Properties/launchSettings.json" Line="1" Column="1" />
+      <File FileName="PizzaShop/Pages/Shared/_Layout.cshtml" Line="32" Column="94" />
+      <File FileName="PizzaShop/Pages/Admin.cshtml" Line="63" Column="1" />
+      <File FileName="PizzaShop/Pages/Admin.cshtml.cs" Line="56" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="PizzaShop" expanded="True">
+            <Node name="PizzaShop">
+              <Node name="Pages" expanded="True">
+                <Node name="Shared" expanded="True" />
+                <Node name="Admin.cshtml" expanded="True" />
+                <Node name="Pizzas.cshtml" expanded="True" />
+                <Node name="Privacy.cshtml" expanded="True" />
+              </Node>
+              <Node name="Properties" expanded="True" />
+              <Node name="Services" expanded="True">
+                <Node name="IPizzaService.cs" selected="True" />
+              </Node>
+              <Node name="wwwroot" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+</Properties>

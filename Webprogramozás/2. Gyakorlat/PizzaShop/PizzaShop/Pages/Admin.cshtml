@@ -1,0 +1,62 @@
+﻿@page
+@model PizzaShop.Pages.AdminModel
+@{
+    ViewData["Title"] = "Admin - Pizza Management";
+}
+
+<h1>Pizza Management</h1>
+
+<!-- Pizza hozzáadása -->
+<h2>Add a new Pizza</h2>
+<form method="post" asp-page-handler="AddPizza">
+    <div>
+        <label>Name:</label>
+        <input type="text" name="pizza.Name" required />
+    </div>
+    <div>
+        <label>Ingredients:</label>
+        <input type="text" name="pizza.Ingredients" required />
+    </div>
+    <div>
+        <label>Allergens:</label>
+        <input type="text" name="pizza.Allergens" required />
+    </div>
+    <button type="submit">Add Pizza</button>
+</form>
+
+<hr />
+
+<!-- Pizza listázása frissítési és törlési lehetőséggel -->
+<h2>Manage Existing Pizzas</h2>
+@foreach (var pizza in Model.Pizzas)
+{
+    <div>
+        <h3>@pizza.Name</h3>
+
+        <!-- Pizza frissítése -->
+        <form method="post" asp-page-handler="UpdatePizza">
+            <input type="hidden" name="pizza.Id" value="@pizza.Id" />
+            <div>
+                <label>Name:</label>
+                <input type="text" name="pizza.Name" value="@pizza.Name" />
+            </div>
+            <div>
+                <label>Ingredients:</label>
+                <input type="text" name="pizza.Ingredients" value="@pizza.Ingredients" />
+            </div>
+            <div>
+                <label>Allergens:</label>
+                <input type="text" name="pizza.Allergens" value="@pizza.Allergens" />
+            </div>
+            <button type="submit">Update Pizza</button>
+        </form>
+
+        <!-- Pizza törlése -->
+        <form method="post" asp-page-handler="RemovePizza">
+            <input type="hidden" name="pizzaId" value="@pizza.Id" />
+            <button type="submit">Delete Pizza</button>
+        </form>
+
+        <hr />
+    </div>
+}

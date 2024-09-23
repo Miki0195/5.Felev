@@ -1,0 +1,94 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Workspaces\\salyam\\PizzaShop\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|c:\\workspaces\\salyam\\pizzashop\\pizzashop\\services\\pizzaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|solutionrelative:pizzashop\\services\\pizzaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|c:\\workspaces\\salyam\\pizzashop\\pizzashop\\services\\ipizzaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|solutionrelative:pizzashop\\services\\ipizzaservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|c:\\workspaces\\salyam\\pizzashop\\pizzashop\\model\\pizza.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{996CA2EA-CC38-4377-B3F6-30391798A2EC}|PizzaShop\\PizzaShop.csproj|solutionrelative:pizzashop\\model\\pizza.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PizzaService.cs",
+              "DocumentMoniker": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Services\\PizzaService.cs",
+              "RelativeDocumentMoniker": "PizzaShop\\Services\\PizzaService.cs",
+              "ToolTip": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Services\\PizzaService.cs",
+              "RelativeToolTip": "PizzaShop\\Services\\PizzaService.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-18T18:44:15.454Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "IPizzaService.cs",
+              "DocumentMoniker": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Services\\IPizzaService.cs",
+              "RelativeDocumentMoniker": "PizzaShop\\Services\\IPizzaService.cs",
+              "ToolTip": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Services\\IPizzaService.cs",
+              "RelativeToolTip": "PizzaShop\\Services\\IPizzaService.cs",
+              "ViewState": "AQIAAE0AAAAAAAAAAAAIwDAAAAAdAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-18T18:38:16.165Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Pizza.cs",
+              "DocumentMoniker": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Model\\Pizza.cs",
+              "RelativeDocumentMoniker": "PizzaShop\\Model\\Pizza.cs",
+              "ToolTip": "C:\\Workspaces\\salyam\\PizzaShop\\PizzaShop\\Model\\Pizza.cs",
+              "RelativeToolTip": "PizzaShop\\Model\\Pizza.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-18T18:22:59.988Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
