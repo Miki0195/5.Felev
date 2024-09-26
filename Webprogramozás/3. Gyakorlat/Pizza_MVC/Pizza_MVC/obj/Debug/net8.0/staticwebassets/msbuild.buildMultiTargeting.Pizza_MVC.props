@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/Pizza_MVC.props" />
+</Project>
