@@ -6,10 +6,10 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 formats = [
-    '9sif',  
-    'fb?',    
-    'c9si',   
-    'f9s?'   
+    'c9si',  
+    'if?',    
+    '?9sc',   
+    'icf'   
 ]
 
 for file, fmt in zip(sys.argv[1:], formats):
@@ -19,10 +19,10 @@ for file, fmt in zip(sys.argv[1:], formats):
         print(unpacked_data)
 
 data_to_pack = [
-    ("17s i ?", ("elso".encode(), 85, True)),
-    ("f ? c", (88.5, False, 'X'.encode())),
-    ("i 15s f", (76, "masodik".encode(), 95.9)),
-    ("c i 18s", ('Z'.encode(), 107, "harmadik".encode()))
+    ("13s i ?", ("elso".encode(), 53, True)),
+    ("f ? c", (56.5, False, 'X'.encode())),
+    ("i 11s f", (44, "masodik".encode(), 95.9)),
+    ("c i 14s", ('Z'.encode(), 75, "harmadik".encode()))
 ]
 
 def pack_values(fmt, *values):
