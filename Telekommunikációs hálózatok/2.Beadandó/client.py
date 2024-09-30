@@ -21,7 +21,7 @@ for file, fmt in zip(sys.argv[1:], formats):
 data_to_pack = [
     ("13s i ?", ("elso".encode(), 53, True)),
     ("f ? c", (56.5, False, 'X'.encode())),
-    ("i 11s f", (44, "masodik".encode(), 95.9)),
+    ("i 11s f", (44, "masodik".encode(), 63.9)),
     ("c i 14s", ('Z'.encode(), 75, "harmadik".encode()))
 ]
 
