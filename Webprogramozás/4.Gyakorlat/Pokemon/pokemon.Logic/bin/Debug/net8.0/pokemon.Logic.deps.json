@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "pokemon.Logic/1.0.0": {
+        "dependencies": {
+          "pokemon.Library": "1.0.0"
+        },
+        "runtime": {
+          "pokemon.Logic.dll": {}
+        }
+      },
+      "pokemon.Library/1.0.0": {
+        "runtime": {
+          "pokemon.Library.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "pokemon.Logic/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "pokemon.Library/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,32 @@
+﻿<Properties StartupConfiguration="{F0E27E01-4E7D-41AB-AE3D-5BD8A3135153}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="pokemon.Library/CSVReader.cs">
+    <Files>
+      <File FileName="pokemon.Console/Program.cs" Line="1" Column="1" />
+      <File FileName="pokemon.Library/Class1.cs" Line="1" Column="1" />
+      <File FileName="pokemon.Library/Data/pokedex.csv" Line="1" Column="1" />
+      <File FileName="pokemon.Library/Model/PokemonData.cs" Line="15" Column="1" />
+      <File FileName="pokemon.Library/CSVReader.cs" Line="41" Column="20" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Pokemon" expanded="True">
+            <Node name="pokemon.Console" selected="True" />
+            <Node name="pokemon.Library">
+              <Node name="Data" expanded="True" />
+              <Node name="Model" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.pokemon.Console PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.pokemon.API FirstBuild="True" />
+</Properties>

@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "0uQeOMjvh/q78knRRB/VvnBqDuBJvoeUpFbdncxSgU8oRUClrRxV1Zd1YvybKGwN11cLero/0jL2Atjk6DyUGg==",
+  "success": true,
+  "projectFilePath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/pokemon.API.csproj",
+  "expectedPackageFiles": [
+    "/Users/buchsbaummiklos/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "/Users/buchsbaummiklos/.nuget/packages/microsoft.openapi/1.2.3/microsoft.openapi.1.2.3.nupkg.sha512",
+    "/Users/buchsbaummiklos/.nuget/packages/swashbuckle.aspnetcore/6.4.0/swashbuckle.aspnetcore.6.4.0.nupkg.sha512",
+    "/Users/buchsbaummiklos/.nuget/packages/swashbuckle.aspnetcore.swagger/6.4.0/swashbuckle.aspnetcore.swagger.6.4.0.nupkg.sha512",
+    "/Users/buchsbaummiklos/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.4.0/swashbuckle.aspnetcore.swaggergen.6.4.0.nupkg.sha512",
+    "/Users/buchsbaummiklos/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.4.0/swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512"
+  ],
+  "logs": []
+}
