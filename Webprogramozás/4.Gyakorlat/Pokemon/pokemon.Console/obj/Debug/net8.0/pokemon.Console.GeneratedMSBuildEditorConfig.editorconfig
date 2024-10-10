@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = pokemon.Console
-build_property.ProjectDir = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/
+build_property.ProjectDir = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

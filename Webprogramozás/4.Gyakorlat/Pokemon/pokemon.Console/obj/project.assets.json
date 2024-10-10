@@ -50,11 +50,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/pokemon.Console.csproj",
+      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/pokemon.Console.csproj",
       "projectName": "pokemon.Console",
-      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/pokemon.Console.csproj",
+      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/pokemon.Console.csproj",
       "packagesPath": "/Users/buchsbaummiklos/.nuget/packages/",
-      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/obj/",
+      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Console/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/buchsbaummiklos/.nuget/NuGet/NuGet.Config"
@@ -70,8 +70,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj": {
-              "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj"
+            "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj": {
+              "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj"
             }
           }
         }
@@ -80,6 +80,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -101,7 +106,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

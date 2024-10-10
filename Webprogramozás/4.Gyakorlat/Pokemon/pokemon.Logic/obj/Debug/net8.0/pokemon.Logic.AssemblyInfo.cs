@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("pokemon.Logic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcfbc1d371a357202f93f608bdb77748552c59f8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1662d6c19a1ba1f79dfc8efa4b252eefa904fc07")]
 [assembly: System.Reflection.AssemblyProductAttribute("pokemon.Logic")]
 [assembly: System.Reflection.AssemblyTitleAttribute("pokemon.Logic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

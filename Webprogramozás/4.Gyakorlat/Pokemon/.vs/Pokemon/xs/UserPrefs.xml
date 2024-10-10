@@ -1,38 +1,34 @@
-﻿<Properties StartupConfiguration="{F9705637-25D7-4BE7-BEC2-3713595918F1}|http">
+﻿<Properties StartupConfiguration="{F9705637-25D7-4BE7-BEC2-3713595918F1}|https">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.pokemon.MVC FirstBuild="True" />
+  <MonoDevelop.Ide.ItemProperties.pokemon.Console PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="pokemon.Logic/DataHandler.cs">
     <Files>
-      <File FileName="pokemon.Console/Program.cs" Line="9" Column="6" />
-      <File FileName="pokemon.Library/Class1.cs" Line="1" Column="1" />
-      <File FileName="pokemon.Library/Data/pokedex.csv" Line="1" Column="1" />
-      <File FileName="pokemon.Library/Model/PokemonData.cs" Line="15" Column="1" />
-      <File FileName="pokemon.Library/CSVReader.cs" Line="27" Column="35" />
+      <File FileName="pokemon.Console/Program.cs" />
+      <File FileName="pokemon.Library/Class1.cs" />
+      <File FileName="pokemon.Library/Data/pokedex.csv" />
+      <File FileName="pokemon.Library/Model/PokemonData.cs" />
+      <File FileName="pokemon.Library/CSVReader.cs" />
       <File FileName="pokemon.Logic/DataHandler.cs" Line="9" Column="76" />
-      <File FileName="pokemon.API/WeatherForecast.cs" Line="1" Column="1" />
-      <File FileName="pokemon.API/Controllers/WeatherForecastController.cs" Line="21" Column="13" />
-      <File FileName="pokemon.API/Controllers/HomeController.cs" Line="19" Column="46" />
+      <File FileName="pokemon.API/WeatherForecast.cs" />
+      <File FileName="pokemon.API/Controllers/WeatherForecastController.cs" />
+      <File FileName="pokemon.API/Controllers/HomeController.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Pokemon" expanded="True">
-            <Node name="pokemon.API">
-              <Node name="Controllers" expanded="True" />
-            </Node>
-            <Node name="pokemon.Library" expanded="True" />
-            <Node name="pokemon.Logic">
-              <Node name="DataHandler.cs" selected="True" />
-            </Node>
+            <Node name="pokemon.Console" expanded="True" />
+            <Node name="pokemon.Logic" expanded="True" />
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.ItemProperties.pokemon.Console PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.ItemProperties.pokemon.API PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.ItemProperties.pokemon.API PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>

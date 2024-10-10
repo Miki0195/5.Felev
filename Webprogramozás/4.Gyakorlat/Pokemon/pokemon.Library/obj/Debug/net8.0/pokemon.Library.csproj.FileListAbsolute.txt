@@ -1,5 +1,3 @@
-/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/bin/Debug/net8.0/Data/pokedex.csv
-/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/bin/Debug/net8.0/pokemon.Library.deps.json
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/bin/Debug/net8.0/pokemon.Library.dll
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/bin/Debug/net8.0/pokemon.Library.pdb
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/obj/Debug/net8.0/pokemon.Library.GeneratedMSBuildEditorConfig.editorconfig
@@ -10,4 +8,4 @@
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/obj/Debug/net8.0/pokemon.Library.dll
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/obj/Debug/net8.0/refint/pokemon.Library.dll
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/obj/Debug/net8.0/pokemon.Library.pdb
-/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/obj/Debug/net8.0/ref/pokemon.Library.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Library/bin/Debug/net8.0/pokedex.csv

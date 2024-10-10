@@ -88,29 +88,6 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
-      },
-      "pokemon.Library/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
-        "compile": {
-          "bin/placeholder/pokemon.Library.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/pokemon.Library.dll": {}
-        }
-      },
-      "pokemon.Logic/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
-        "dependencies": {
-          "pokemon.Library": "1.0.0"
-        },
-        "compile": {
-          "bin/placeholder/pokemon.Logic.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/pokemon.Logic.dll": {}
-        }
       }
     }
   },
@@ -443,22 +420,11 @@
         "swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
-    },
-    "pokemon.Library/1.0.0": {
-      "type": "project",
-      "path": "../pokemon.Library/pokemon.Library.csproj",
-      "msbuildProject": "../pokemon.Library/pokemon.Library.csproj"
-    },
-    "pokemon.Logic/1.0.0": {
-      "type": "project",
-      "path": "../pokemon.Logic/pokemon.Logic.csproj",
-      "msbuildProject": "../pokemon.Logic/pokemon.Logic.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "Swashbuckle.AspNetCore >= 6.4.0",
-      "pokemon.Logic >= 1.0.0"
+      "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
   "packageFolders": {
@@ -467,11 +433,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/pokemon.API.csproj",
+      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/pokemon.API.csproj",
       "projectName": "pokemon.API",
-      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/pokemon.API.csproj",
+      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/pokemon.API.csproj",
       "packagesPath": "/Users/buchsbaummiklos/.nuget/packages/",
-      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/obj/",
+      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/buchsbaummiklos/.nuget/NuGet/NuGet.Config"
@@ -486,17 +452,18 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {
-            "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj": {
-              "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/4.Gyakorlat/Pokemon/pokemon.Logic/pokemon.Logic.csproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -527,7 +494,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

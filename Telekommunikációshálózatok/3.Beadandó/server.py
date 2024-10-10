@@ -10,7 +10,6 @@ def start_server(hostname, port):
 
     print(f"Szerver indítása: {hostname}:{port}")
     
-    # Véletlenszerű szám választása
     secret_number = random.randint(1, 100)
     print(f"A titkos szám: {secret_number}")
     
@@ -27,44 +26,65 @@ def start_server(hostname, port):
                 clients.append(client_socket)
             else:
                 try:
-                    data = sock.recv(8)  # 1 byte character + 4 byte integer
-                    if data:
-                        message = struct.unpack('!cI', data)
-                        command = message[0].decode('utf-8')
-                        guess = message[1]
-                        
-                        if command == '<':
-                            response = 'I' if guess < secret_number else 'N'
-                        elif command == '>':
-                            response = 'I' if guess > secret_number else 'N'
-                        elif command == '=':
-                            response = 'Y'
-                            game_over = True
-                        else:
-                            continue
-
-                        sock.send(struct.pack('!cI', response.encode('utf-8'), 0))
-
-                        if response == 'Y':
-                            print("Valaki nyert!")
-                            game_over = True
-                    else:
-                        print("A kliens bontotta a kapcsolatot.")
+                    data = sock.recv(8)
+                    if not data:
                         clients.remove(sock)
                         sock.close()
+                        continue
+
+                    guess_char, guess_number = struct.unpack('ci', data)
+                    guess_char = guess_char.decode('utf-8')
+
+                    print(f"Received guess: {guess_char} {guess_number}")
+
+                    if game_over:
+                        response = struct.pack('ci', b'V', 0)
+                        sock.send(response)
+                        clients.remove(sock)
+                        sock.close()
+                        continue
+
+                    if guess_char == '=':
+                        if guess_number == secret_number:
+                            response = struct.pack('ci', b'Y', 0)
+                            game_over = True
+                        else:
+                            response = struct.pack('ci', b'K', 0)
+                    elif guess_char == '<':
+                        if guess_number > secret_number:
+                            response = struct.pack('ci', b'I', 0)
+                        else:
+                            response = struct.pack('ci', b'N', 0)
+                    elif guess_char == '>':
+                        if guess_number < secret_number:
+                            response = struct.pack('ci', b'I', 0)
+                        else:
+                            response = struct.pack('ci', b'N', 0)
+
+                    print(f"Sending response: {response}")
+
+                    sock.send(response)
+
+                    if game_over:
+                        for client in clients:
+                            client.send(struct.pack('ci', b'V', 0))
+                            client.close()
+                        clients = []
+                        secret_number = random.randint(1, 100)
+                        print(f"Új titkos szám: {secret_number}")
+                        game_over = False
+
                 except Exception as e:
                     print(f"Hiba: {e}")
                     clients.remove(sock)
                     sock.close()
 
-        if game_over:
-            for client in clients:
-                client.send(struct.pack('!cI', b'V', 0))
-            break
-
-    for client in clients:
-        client.close()
-    server_socket.close()
-
 if __name__ == "__main__":
-    start_server('localhost', 10000)
+    import sys
+    if len(sys.argv) != 3:
+        print("Használat: python3 server.py <hostname> <port>")
+        sys.exit(1)
+
+    hostname = sys.argv[1]
+    port = int(sys.argv[2])
+    start_server(hostname, port)
