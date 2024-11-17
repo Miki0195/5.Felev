@@ -1,4 +1,4 @@
-class Empty {
+public class Empty {
     @Override
     public String toString() {
         return " ";
