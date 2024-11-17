@@ -16,7 +16,6 @@ def server():
         print("HALOGYVEZ server is listening...")
 
         inputs = [s]
-        outputs = []
         clients = {}
 
         max_requests = random.randint(1, 5)
@@ -24,7 +23,7 @@ def server():
         request_counter = 0
 
         while inputs:
-            readable, writable, exceptional = select.select(inputs, outputs, inputs)
+            readable, _, _ = select.select(inputs, [], inputs)
 
             for sock in readable:
                 if sock is s:
@@ -41,21 +40,24 @@ def server():
                             request_counter += 1
                             if request_counter < max_requests:
                                 response = 'Meg nincs'
+                                sock.sendall(response.encode('utf-8'))
                             else:
                                 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_sock:
                                     udp_sock.sendto(b'Keres', (tavalyi_zh_host, tavalyi_zh_port))
                                     udp_data, _ = udp_sock.recvfrom(1024)
                                     response = udp_data.decode('utf-8')
+                                for client_sock in clients:
+                                    client_sock.sendall(response.encode('utf-8'))
                                 request_counter = 0
                                 max_requests = random.randint(1, 5)
-                                #print(f"Max requests set to: {max_requests}")
+                                print(f"Max requests set to: {max_requests}")
                         elif message == 'Koszonjuk':
                             response = 'Szivesen'
+                            sock.sendall(response.encode('utf-8'))
                         else:
                             response = 'Ismeretlen uzenet'
-                        print(f"Sending response to {clients[sock]['addr']}: {response}")
-                        sock.sendall(response.encode('utf-8'))
-                        time.sleep(1)  
+                            sock.sendall(response.encode('utf-8'))
+                        time.sleep(1)
                     else:
                         print(f"Closing connection to {clients[sock]['addr']}")
                         inputs.remove(sock)
