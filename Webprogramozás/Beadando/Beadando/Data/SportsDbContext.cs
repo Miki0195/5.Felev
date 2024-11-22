@@ -1,10 +1,13 @@
 ﻿using System;
 using Beadando.Models;
+using Microsoft.AspNetCore.Identity;
+
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Beadando.Data
 {
-    public class SportsDbContext : DbContext
+    public class SportsDbContext : IdentityDbContext<IdentityUser>
     {
         public SportsDbContext(DbContextOptions<SportsDbContext> options) : base(options) { }
 

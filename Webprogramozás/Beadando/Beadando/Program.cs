@@ -1,11 +1,12 @@
 ﻿using Beadando.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Beadando;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,14 @@ public class Program
         builder.Services.AddDbContext<SportsDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("SportsDatabase")));
 
+        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+        .AddEntityFrameworkStores<SportsDbContext>()
+        .AddDefaultTokenProviders();
+
         var app = builder.Build();
+
+        await SeedDataAsync(app);
+
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
@@ -39,6 +47,8 @@ public class Program
         app.UseRouting();
 
         app.UseAuthorization();
+
+        app.UseAuthentication();
 
         app.UseSession();
 
@@ -56,6 +66,19 @@ public class Program
         });
 
         app.Run();
+    }
+
+    static async Task SeedDataAsync(WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+
+            await DbInitializer.SeedRoles(roleManager);
+            await DbInitializer.SeedAdminUser(userManager, roleManager);
+        }
     }
 }
 
