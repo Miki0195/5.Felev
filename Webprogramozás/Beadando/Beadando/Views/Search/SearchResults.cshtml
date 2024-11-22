@@ -1,0 +1,76 @@
+﻿@model Beadando.Models.TeamPerformanceViewModel
+
+@if (Model == null)
+{
+    <p>No results found. Please try a different team name.</p>
+}
+else
+{
+    <h2>Performance of @Model.TeamName</h2>
+
+    <div>
+        <canvas id="performanceChart" width="400" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Wins', 'Losses', 'Draws'],
+                datasets: [{
+                    label: 'Matches',
+                    data: [@Model.Wins, @Model.Losses, @Model.Draws],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    <h3>Match Details</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Home Team</th>
+                <th>Away Team</th>
+                <th>Final Score</th>
+                <th>Half Time Score</th>
+                <th>Start Time</th>
+                <th>League</th>
+                <th>Report</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var match in Model.Matches)
+            {
+                <tr>
+                    <td>@match.HomeTeam</td>
+                    <td>@match.AwayTeam</td>
+                    <td>@match.FinalScore</td>
+                    <td>@match.HalfTimeScore</td>
+                    <td>@match.StartTime</td>
+                    <td>@match.League</td>
+                    <td>@match.Report</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

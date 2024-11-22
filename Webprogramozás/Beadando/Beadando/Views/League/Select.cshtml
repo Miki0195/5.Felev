@@ -1,0 +1,20 @@
+﻿@model List<Beadando.Models.LeagueSelectionViewModel>
+
+<h1>Select Your Preferred League</h1>
+
+<form asp-action="Select" method="post">
+    <ul>
+        @foreach (var league in Model)
+        {
+            <li>
+                <input type="radio"
+                       name="selectedLeagueId"
+                       value="@league.Id"
+                       id="league_@league.Id"
+                       @(league.IsSelected ? "checked" : "") />
+                <label for="league_@league.Id">@league.Name</label>
+            </li>
+        }
+    </ul>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

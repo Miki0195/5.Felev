@@ -1,0 +1,52 @@
+﻿<Properties StartupConfiguration="{CED3EE38-FA36-45A3-A3CD-34F33DC1F796}|https">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Beadando/Controllers/SearchController.cs">
+    <Files>
+      <File FileName="Beadando/Program.cs" Line="43" Column="12" />
+      <File FileName="Beadando/Models/League.cs" Line="16" Column="1" />
+      <File FileName="Beadando/Models/Team.cs" Line="1" Column="1" />
+      <File FileName="Beadando/Models/Match.cs" Line="24" Column="2" />
+      <File FileName="Beadando/Data/SportsDbContext.cs" Line="53" Column="61" />
+      <File FileName="Beadando/appsettings.json" Line="11" Column="22" />
+      <File FileName="Beadando/Data/SportsDbContextFactory.cs" Line="18" Column="1" />
+      <File FileName="Beadando/Controllers/HomeController.cs" Line="42" Column="6" />
+      <File FileName="Beadando/Migrations/20241121130134_InitialCreate.cs" Line="1" Column="1" />
+      <File FileName="Beadando/Migrations/20241121130343_UpdateSeedData.cs" Line="1" Column="1" />
+      <File FileName="Beadando/Models/UserPreference.cs" Line="1" Column="1" />
+      <File FileName="Beadando/Models/ErrorViewModel.cs" Line="1" Column="1" />
+      <File FileName="Beadando/Views/Shared/_Layout.cshtml" Line="32" Column="36" />
+      <File FileName="Beadando/Views/Shared/_Layout.cshtml.css" Line="1" Column="1" />
+      <File FileName="Beadando/Models/MatchViewModel.cs" Line="18" Column="1" />
+      <File FileName="Beadando/Controllers/SearchController.cs" Line="35" Column="53" />
+      <File FileName="Beadando/Views/Search/SearchResults.cshtml" Line="39" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Beadando" expanded="True">
+            <Node name="Beadando" selected="True">
+              <Node name="Dependencies" expanded="True" />
+              <Node name="Controllers" expanded="True" />
+              <Node name="Data" expanded="True" />
+              <Node name="Migrations" expanded="True" />
+              <Node name="Models" expanded="True" />
+              <Node name="Views" expanded="True">
+                <Node name="Home" expanded="True" />
+                <Node name="Search" expanded="True" />
+                <Node name="Shared" expanded="True">
+                  <Node name="_Layout.cshtml" expanded="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.Beadando PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+</Properties>

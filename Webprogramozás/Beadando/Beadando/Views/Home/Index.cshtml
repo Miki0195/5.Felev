@@ -1,0 +1,46 @@
+﻿@model List<Beadando.Models.LeagueMatchesViewModel>
+@{
+    DateTime selectedDate = (DateTime)ViewData["SelectedDate"];
+}
+
+<h1>Matches for @selectedDate.ToString("yyyy-MM-dd")</h1>
+
+<div>
+    <a asp-action="Index" asp-route-date="@selectedDate.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-secondary">
+        &lt; Previous Day
+    </a>
+    <a asp-action="Index" asp-route-date="@selectedDate.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-secondary">
+        Next Day &gt;
+    </a>
+    @*
+        <form asp-action="Index" method="get">
+            <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" />
+            <button type="submit" class="btn btn-primary">Go</button>
+        </form>
+    *@
+</div>
+
+@foreach (var league in Model)
+{
+    <h2>@league.LeagueName</h2>
+    @if (!league.Matches.Any())
+    {
+        <p>No matches for this day.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var match in league.Matches)
+            {
+                <li>
+                    <a asp-controller="Match" asp-action="MatchDetails" asp-route-id="@match.Id">
+                        @match.StartTime.ToString("yyyy-MM-dd")
+                        @match.HomeTeam
+                        @match.FinalScore
+                        @match.AwayTeam
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+}

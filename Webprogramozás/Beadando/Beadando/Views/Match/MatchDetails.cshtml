@@ -1,0 +1,31 @@
+﻿@model Beadando.Models.MatchDetailsViewModel
+
+<h1>Match Details</h1>
+
+<div>
+    <h2>@Model.HomeTeam vs @Model.AwayTeam</h2>
+    <p><strong>Date:</strong> @Model.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
+    <p><strong>Final Score:</strong> @Model.FinalScore</p>
+    <p><strong>Halftime Score:</strong> @Model.HalfTimeScore</p>
+    <p><strong>Report:</strong> @Model.Report</p>
+</div>
+
+<h3>Last 3 Results Between These Teams</h3>
+@if (!Model.LastResults.Any())
+{
+    <p>No previous matches found.</p>
+}
+else
+{
+    <ul>
+        @foreach (var result in Model.LastResults)
+        {
+            <li>
+                @result.StartTime.ToString("yyyy-MM-dd")
+                @result.HomeTeam
+                @result.FinalScore
+                @result.AwayTeam
+            </li>
+        }
+    </ul>
+}
