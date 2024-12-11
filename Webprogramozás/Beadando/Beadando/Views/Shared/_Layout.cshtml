@@ -7,27 +7,30 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Beadando.styles.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Beadando</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
                             <form asp-controller="Search" asp-action="Matches" method="get" class="d-flex">
-                                <input type="text" name="teamName" class="form-control me-2" placeholder="Search Club" aria-label="Search" />
+                                <div class="autocomplete-wrapper">
+                                    <div class="suggestion-overlay"></div>
+                                    <input type="text" id="teamSearch" name="teamName" required pattern="[a-zA-Z                        ]+" class="form-control me-2" placeholder="Search Club" autocomplete="off" />
+                                </div>
                                 <button class="btn btn-outline-success" type="submit">Search</button>
                             </form>
                         </li>
@@ -37,44 +40,131 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <span class="navbar-text">
-                                    Hello, @User.Identity.Name!
-                                </span>
+                                <a class="nav-link" asp-controller="FavoriteTeam" asp-action="Index">Favorite Team</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin Actions
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-controller="EditMatch" asp-action="Create">Add Matches</a></li>
+                                    <li><a class="dropdown-item" asp-controller="EditMatch" asp-action="SearchMatches">Delete Matches</a></li>
+                                    <li><a class="dropdown-item" asp-controller="EditMatch" asp-action="SearchMatchesForEdit">Edit Matches</a></li>
+                                    <li><a class="dropdown-item" asp-controller="UserPreferences" asp-action="Index">User Preferences</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Export" asp-action="Index">Export Data</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    
+                    <ul class="navbar-nav ms-auto">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                             <li class="nav-item">
-                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
-                                    <button type="submit" class="btn btn-link nav-link" style="padding: 0; border: none; background: none;">Logout</button>
-                                </form>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button class="btn btn-link nav-link logout-button" type="submit">Logout</button>
+                                </form>
                             </li>
                         }
                     </ul>
                 </div>
             </div>
         </nav>
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - Beadando - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    @*
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2024 - Beadando - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        $(document).on('click', '.btn-primary.save-button', function () {
+            $('#confirmMessage').removeClass('d-none'); 
+        });
+
+        
+        $(document).on('click', '.cancel-confirmation', function () {
+            $('#confirmMessage').addClass('d-none'); 
+        });
+
+        
+        $(document).on('click', '.confirm-edit', function () {
+            $('#editMatchForm').submit();
+        });</script>
+
+    <script>$(document).ready(function () {
+            let suggestions = []; 
+            let currentSuggestion = "";
+
+            $('#teamSearch').on('input', function () {
+                const searchTerm = $(this).val();
+
+                if (searchTerm.length < 2) {
+                    
+                    suggestions = [];
+                    currentSuggestion = "";
+                    $('.suggestion-overlay').text('');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Search/GetTeamSuggestions',
+                    type: 'GET',
+                    data: { term: searchTerm },
+                    success: function (data) {
+                        suggestions = data;
+                        if (suggestions.length > 0) {
+                            currentSuggestion = suggestions[0]; 
+                            const remaining = currentSuggestion.slice(searchTerm.length);
+                            $('.suggestion-overlay').text(searchTerm + remaining); 
+                        } else {
+                            currentSuggestion = ""; 
+                            $('.suggestion-overlay').text('');
+                        }
+                    }
+                });
+            });
+
+            
+            $('#teamSearch').on('keydown', function (e) {
+                if (e.key === 'Tab' && currentSuggestion) {
+                    e.preventDefault(); 
+                    $(this).val(currentSuggestion); 
+                    $('.suggestion-overlay').text('');
+                    currentSuggestion = ""; 
+                }
+            });
+
+            
+            $('#teamSearch').on('blur', function () {
+                $('.suggestion-overlay').text('');
+            });
+        });
+</script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

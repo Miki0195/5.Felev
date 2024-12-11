@@ -201,3 +201,8 @@
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/Microsoft.Extensions.Identity.Core.dll
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/Microsoft.Extensions.Identity.Stores.dll
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/obj/Debug/net8.0/Beadando.MvcApplicationPartsAssemblyInfo.cs
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/xunit.runner.visualstudio.testadapter.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/xunit.runner.reporters.netcoreapp10.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/bin/Debug/net8.0/xunit.runner.utility.netcoreapp10.dll

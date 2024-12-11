@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Beadando.Models;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace Beadando.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        public static async Task SeedDataAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             if (!await roleManager.RoleExistsAsync("Admin"))
             {
@@ -16,33 +17,27 @@ namespace Beadando.Data
             {
                 await roleManager.CreateAsync(new IdentityRole("User"));
             }
-        }
 
-        public static async Task SeedAdminUser(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            var adminRole = "Admin";
-            var adminEmail = "admin@example.com";
-            var adminPassword = "Admin123!";
+            var adminEmail = "admin@admin.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
-            // Check if there are any users in the Admin role
-            var admins = await userManager.GetUsersInRoleAsync(adminRole);
-            if (admins.Count > 0)
+            if (adminUser == null)
             {
-                // Admin user already exists; exit the method
-                return;
-            }
+                adminUser = new ApplicationUser
+                {
+                    UserName = "Admin",
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
 
-            // Create the admin user if none exists
-            if (await userManager.FindByEmailAsync(adminEmail) == null)
-            {
-                var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail };
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
+                var result = await userManager.CreateAsync(adminUser, "Admin123!");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, adminRole);
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
             }
         }
+
     }
 }

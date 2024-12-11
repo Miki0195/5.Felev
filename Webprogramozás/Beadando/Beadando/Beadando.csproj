@@ -26,6 +26,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\" />
@@ -33,6 +39,9 @@
     <None Remove="Views\League\" />
     <None Remove="Views\Match\" />
     <None Remove="Views\Account\" />
+    <None Remove="Views\Export\" />
+    <None Remove="Views\FavoriteTeam\" />
+    <None Remove="Views\UserPreferences\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -40,8 +49,29 @@
     <Folder Include="Views\League\" />
     <Folder Include="Views\Match\" />
     <Folder Include="Views\Account\" />
+    <Folder Include="Views\Export\" />
+    <Folder Include="Views\FavoriteTeam\" />
+    <Folder Include="wwwroot\css\Match\" />
+    <Folder Include="wwwroot\css\Home\" />
+    <Folder Include="wwwroot\css\Search\" />
+    <Folder Include="wwwroot\css\League\" />
+    <Folder Include="wwwroot\css\Account\" />
+    <Folder Include="wwwroot\css\Match\" />
+    <Folder Include="Views\UserPreferences\" />
+    <Folder Include="wwwroot\css\UserPreferences\" />
+    <Folder Include="wwwroot\css\Export\" />
+    <Folder Include="wwwroot\css\FavoriteTeam\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Admin\Create.cshtml" />
+    <Content Remove="wwwroot\css\Match\" />
+    <Content Remove="wwwroot\css\Home\" />
+    <Content Remove="wwwroot\css\Search\" />
+    <Content Remove="wwwroot\css\League\" />
+    <Content Remove="wwwroot\css\Account\" />
+    <Content Remove="Models\TeamPreferenceViewModel.json" />
+    <Content Remove="wwwroot\css\UserPreferences\" />
+    <Content Remove="wwwroot\css\Export\" />
+    <Content Remove="wwwroot\css\FavoriteTeam\" />
   </ItemGroup>
 </Project>

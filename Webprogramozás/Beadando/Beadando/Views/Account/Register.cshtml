@@ -1,21 +1,34 @@
 ﻿@model Beadando.Models.RegisterViewModel
 
-<h2>Register</h2>
-<form asp-action="Register" method="post">
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+@section Styles {
+    <link rel="stylesheet" href="~/css/Account/Register.css" />
+}
+
+<h2 class="register-header"><strong>Register</strong></h2>
+
+<form asp-action="Register" method="post" class="register-form">
+    <div class="register-form-group">
+        <label asp-for="Username" class="register-label"></label>
+        <input asp-for="Username" class="form-control register-input" />
+        <span asp-validation-for="Username" class="register-validation text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+    <div class="register-form-group">
+        <label asp-for="Email" class="register-label"></label>
+        <input asp-for="Email" class="form-control register-input" />
+        <span asp-validation-for="Email" class="register-validation text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    <div class="register-form-group">
+        <label asp-for="Password" class="register-label"></label>
+        <input asp-for="Password" class="form-control register-input" />
+        <span asp-validation-for="Password" class="register-validation text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Register</button>
+    <div class="register-form-group">
+        <label asp-for="ConfirmPassword" class="register-label"></label>
+        <input asp-for="ConfirmPassword" class="form-control register-input" />
+        <span asp-validation-for="ConfirmPassword" class="register-validation text-danger"></span>
+    </div>
+    <div class="register-signin-prompt">
+        <span>Are you already registered? <a asp-controller="Account" asp-action="Login">Sign in</a></span>
+    </div>
+    <button type="submit" class="btn btn-primary register-button">Register</button>
 </form>

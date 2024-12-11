@@ -1,0 +1,122 @@
+﻿/* Login Page Styling */
+.login-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+
+/* Form Styling */
+.login-form {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Form Group */
+.login-form-group {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.login-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #495057;
+}
+
+/* Inputs */
+.login-input {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .login-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+/* Remember Me */
+.login-rememberme {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .login-rememberme input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #007bff;
+    }
+
+/* Validation Messages */
+.login-validation-summary {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.login-validation {
+    font-size: 0.9rem;
+}
+
+/* Register Prompt */
+.login-register-prompt {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 0.9rem; /* Smaller font size */
+    color: #6c757d; /* Muted gray text */
+}
+
+    .login-register-prompt a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+        .login-register-prompt a:hover {
+            color: #0056b3; /* Darker blue on hover */
+        }
+
+/* Submit Button */
+.login-button {
+    display: block;
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+    .login-button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .login-header {
+        font-size: 1.8rem;
+    }
+
+    .login-form {
+        padding: 15px;
+    }
+
+    .login-input {
+        font-size: 0.9rem;
+    }
+
+    .login-button {
+        font-size: 1rem;
+    }
+}

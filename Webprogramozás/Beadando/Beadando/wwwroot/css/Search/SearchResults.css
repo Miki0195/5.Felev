@@ -1,0 +1,87 @@
+﻿
+/* Header */
+.team-performance-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* No Results Message */
+.team-performance-no-results {
+    text-align: center;
+    color: #dc3545; /* Red for emphasis */
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+
+/* Chart Container */
+div.team-performance-chart-container {
+    max-width: 600px !important; /* Restrict maximum width */
+    margin: 0 auto !important; /* Center the chart horizontally */
+    padding: 20px !important;
+    background-color: white !important; /* Light background for better contrast */
+    border-radius: 10px !important; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; /* Subtle shadow for depth */
+
+}
+
+/* Subheader */
+.team-performance-subheader {
+    text-align: center;
+    font-size: 1.7rem;
+    color: #343a40;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+/* Team Performance Table Styling */
+.team-performance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    font-size: 1rem;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border-radius: 8px;
+    overflow: hidden; /* Rounded corners for the table */
+}
+
+    .team-performance-table thead {
+        background-color: #007bff; /* Blue header */
+        color: #ffffff;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .team-performance-table th, .team-performance-table td {
+        padding: 12px 15px;
+        border: 1px solid #dee2e6; /* Light gray borders */
+    }
+
+    .team-performance-table tbody tr:nth-child(odd) {
+        background-color: #f8f9fa; /* Alternating row color */
+    }
+
+    .team-performance-table tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    .team-performance-table tbody tr:hover {
+        background-color: #e9ecef; /* Light gray on hover */
+        transition: background-color 0.3s ease;
+    }
+
+/* Responsive Table for Small Screens */
+@media (max-width: 768px) {
+    .team-performance-table {
+        font-size: 0.9rem;
+    }
+
+        .team-performance-table th, .team-performance-table td {
+            padding: 8px 10px;
+        }
+}
+

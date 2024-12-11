@@ -1,19 +1,33 @@
 ﻿@model Beadando.Models.LoginViewModel
 
-<h2>Login</h2>
-<form asp-action="Login" method="post">
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+@section Styles {
+    <link rel="stylesheet" href="~/css/Account/Login.css" />
+}
+
+<h2 class="login-header"><strong>Login</strong></h2>
+
+<form asp-action="Login" method="post" class="login-form">
+
+
+    <div class="login-form-group">
+        <label asp-for="Email" class="login-label"></label>
+        <input asp-for="Email" class="form-control login-input" />
+        <span asp-validation-for="Email" class="login-validation text-danger"></span>
     </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+    <div class="login-form-group">
+        <label asp-for="Password" class="login-label"></label>
+        <input asp-for="Password" type="password" class="form-control login-input" />
+        <span asp-validation-for="Password" class="login-validation text-danger"></span>
     </div>
-    <div class="form-group">
-        <input asp-for="RememberMe" /> @Html.DisplayNameFor(m => m.RememberMe)
+    <div class="login-form-group login-rememberme">
+        <input asp-for="RememberMe" id="rememberMe" />
+        <label for="rememberMe">@Html.DisplayNameFor(m => m.RememberMe)</label>
     </div>
-    <button type="submit" class="btn btn-primary">Login</button>
+
+    <div class="login-register-prompt">
+        <span>Are you not registered? <a asp-controller="Account" asp-action="Register">Register</a></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary login-button">Login</button>
+    <div asp-validation-summary="ModelOnly" class="login-validation-summary text-danger"></div>
 </form>

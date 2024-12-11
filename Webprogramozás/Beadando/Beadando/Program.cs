@@ -1,6 +1,8 @@
 ﻿using Beadando.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Beadando.Models;
+using Beadando.Data;
 
 namespace Beadando;
 
@@ -13,6 +15,7 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllersWithViews();
         builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
@@ -24,14 +27,18 @@ public class Program
         builder.Services.AddDbContext<SportsDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("SportsDatabase")));
 
-        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+        })
         .AddEntityFrameworkStores<SportsDbContext>()
         .AddDefaultTokenProviders();
 
         var app = builder.Build();
-
-        await SeedDataAsync(app);
-
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
@@ -46,11 +53,19 @@ public class Program
 
         app.UseRouting();
 
-        app.UseAuthorization();
-
         app.UseAuthentication();
 
+        app.UseAuthorization();
+
         app.UseSession();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            await DbInitializer.SeedDataAsync(userManager, roleManager); // Custom method for seeding
+        }
 
         app.UseEndpoints(endpoints =>
         {
@@ -63,11 +78,14 @@ public class Program
             endpoints.MapControllerRoute(
                 name: "matchDetails",
                 pattern: "Match/{action=MatchDetails}/{id?}");
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
         });
 
         app.Run();
     }
-
+    /*
     static async Task SeedDataAsync(WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
@@ -79,6 +97,6 @@ public class Program
             await DbInitializer.SeedRoles(roleManager);
             await DbInitializer.SeedAdminUser(userManager, roleManager);
         }
-    }
+    }*/
 }
 

@@ -1,0 +1,33 @@
+﻿@model List<Beadando.Models.Team>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/FavoriteTeam/Index.css" />
+}
+
+
+
+@if (Model.Any())
+{
+    <ul class="select-favorite-team-list">
+        @foreach (var team in Model)
+        {
+            <li class="select-favorite-team-list-item">
+                <strong>@team.Name</strong> 
+                <form id="favoriteTeamForm-@team.Id" action="/FavoriteTeam/SetFavoriteTeam" method="post" style="margin: 0;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="teamId" value="@team.Id" />
+                    <button type="submit" class="select-favorite-team-button btn btn-primary">
+                        Set as Favorite
+                    </button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p><i>No teams found for the selected league.</i></p>
+}
+
+
+

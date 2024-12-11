@@ -1,0 +1,42 @@
+﻿/* Header */
+.user-preferences-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-weight: bold;
+    padding-top: 20px;
+}
+
+/* No Preferences Found Message */
+.user-preferences-no-data {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #6c757d; /* Muted gray */
+    margin-top: 20px;
+}
+
+/* Chart Container */
+.user-preferences-chart-container {
+    max-width: 600px; /* Restrict maximum width */
+    margin: 0 auto; /* Center the chart horizontally */
+    padding: 20px;
+    background-color: white; /* Light background for better contrast */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .user-preferences-header {
+        font-size: 1.8rem;
+    }
+
+    .user-preferences-no-data {
+        font-size: 1rem;
+    }
+
+    .user-preferences-chart-container {
+        padding: 15px;
+    }
+}

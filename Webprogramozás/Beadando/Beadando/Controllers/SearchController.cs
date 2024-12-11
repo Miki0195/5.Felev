@@ -20,7 +20,7 @@ public class SearchController : Controller
     {
         if (string.IsNullOrEmpty(teamName))
         {
-            return View("SearchResults", null); // Pass null if no input
+            return View("SearchResults", null); 
         }
 
         teamName = teamName.ToLower();
@@ -28,7 +28,7 @@ public class SearchController : Controller
         var team = _context.Teams.FirstOrDefault(t => t.Name.ToLower() == teamName);
         if (team == null)
         {
-            return View("SearchResults", null); // Pass null if team not found
+            return View("SearchResults", null); 
         }
 
         int teamId = team.Id;
@@ -45,20 +45,21 @@ public class SearchController : Controller
                 League = _context.Leagues.FirstOrDefault(l => l.Id == m.LeagueId).Name,
                 Report = m.Report
             })
+            .OrderByDescending(m => m.StartTime)
             .ToList();
 
         int wins = matches.Count(m =>
-            (m.HomeTeam == team.Name && GetScore(m.FinalScore, true) > GetScore(m.FinalScore, false)) || // Picked team wins as home
-            (m.AwayTeam == team.Name && GetScore(m.FinalScore, false) > GetScore(m.FinalScore, true))    // Picked team wins as away
+            (m.HomeTeam == team.Name && GetScore(m.FinalScore, true) > GetScore(m.FinalScore, false)) ||
+            (m.AwayTeam == team.Name && GetScore(m.FinalScore, false) > GetScore(m.FinalScore, true))    
         );
 
         int losses = matches.Count(m =>
-            (m.HomeTeam == team.Name && GetScore(m.FinalScore, true) < GetScore(m.FinalScore, false)) || // Picked team loses as home
-            (m.AwayTeam == team.Name && GetScore(m.FinalScore, false) < GetScore(m.FinalScore, true))    // Picked team loses as away
+            (m.HomeTeam == team.Name && GetScore(m.FinalScore, true) < GetScore(m.FinalScore, false)) || 
+            (m.AwayTeam == team.Name && GetScore(m.FinalScore, false) < GetScore(m.FinalScore, true))    
         );
 
         int draws = matches.Count(m =>
-            GetScore(m.FinalScore, true) == GetScore(m.FinalScore, false) // Scores are equal regardless of home/away
+            GetScore(m.FinalScore, true) == GetScore(m.FinalScore, false) 
         );
 
         var viewModel = new TeamPerformanceViewModel
@@ -89,4 +90,20 @@ public class SearchController : Controller
         return isHome ? homeScore : awayScore;
     }
 
+    [HttpGet]
+    public IActionResult GetTeamSuggestions(string term)
+    {
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            return Json(new List<string>()); 
+        }
+
+        var suggestions = _context.Teams
+            .Where(t => t.Name.ToLower().StartsWith(term.ToLower()))
+            .Select(t => t.Name)
+            .Take(5) 
+            .ToList();
+
+        return Json(suggestions);
+    }
 }

@@ -1,0 +1,100 @@
+﻿/* Match Details Page */
+.match-details {
+    font-family: 'Arial', sans-serif;
+    margin: 0 auto;
+    background-color: #f8f9fa;
+    color: #343a40;
+    padding: 20px 0;
+}
+
+/* Page Header */
+.match-details-header {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Match details container */
+.match-details-container {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .match-details-container h2 {
+        font-size: 1.8rem;
+        text-align: center;
+        color: #495057;
+        margin-bottom: 15px;
+    }
+
+    .match-details-container p {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+
+        .match-details-container p strong {
+            color: #007bff;
+        }
+
+/* Last Results Section */
+.match-details-last-results {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 30px;
+    color: #343a40;
+}
+
+/* Last Results List */
+.match-details-results-list {
+    list-style-type: none;
+    padding: 0;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+    .match-details-results-list li {
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        margin: 10px 0;
+        padding: 15px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .match-details-results-list li .date {
+            font-weight: bold;
+            color: #6c757d;
+        }
+
+        .match-details-results-list li .teams {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .match-details-results-list li .score {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+    .match-details-container {
+        padding: 15px;
+    }
+
+    .match-details-results-list li {
+        flex-direction: column;
+        text-align: center;
+    }
+}

@@ -1,31 +1,36 @@
 ﻿@model Beadando.Models.MatchDetailsViewModel
 
-<h1>Match Details</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/Match/matchDetails.css" />
+}
 
-<div>
-    <h2>@Model.HomeTeam vs @Model.AwayTeam</h2>
-    <p><strong>Date:</strong> @Model.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
-    <p><strong>Final Score:</strong> @Model.FinalScore</p>
-    <p><strong>Halftime Score:</strong> @Model.HalfTimeScore</p>
-    <p><strong>Report:</strong> @Model.Report</p>
+<div class="match-details">
+    <h1 class="match-details-header"><strong>Match Details</strong></h1>
+
+    <div class="match-details-container">
+        <h2>@Model.HomeTeam vs @Model.AwayTeam</h2>
+        <p><strong>Date:</strong> @Model.StartTime.ToString("yyyy-MM-dd HH:mm")</p>
+        <p><strong>Final Score:</strong> @Model.FinalScore</p>
+        <p><strong>Halftime Score:</strong> @Model.HalfTimeScore</p>
+        <p><strong>Report:</strong> @Model.Report</p>
+    </div>
+
+    <h3 class="match-details-last-results">Last 3 Results Between These Teams</h3>
+    @if (!Model.LastResults.Any())
+    {
+        <p>No previous matches found.</p>
+    }
+    else
+    {
+        <ul class="match-details-results-list">
+            @foreach (var result in Model.LastResults)
+            {
+                <li>
+                    <span class="date">@result.StartTime.ToString("yyyy-MM-dd")</span>
+                    <span class="teams">@result.HomeTeam vs @result.AwayTeam</span>
+                    <span class="score">@result.FinalScore</span>
+                </li>
+            }
+        </ul>
+    }
 </div>
-
-<h3>Last 3 Results Between These Teams</h3>
-@if (!Model.LastResults.Any())
-{
-    <p>No previous matches found.</p>
-}
-else
-{
-    <ul>
-        @foreach (var result in Model.LastResults)
-        {
-            <li>
-                @result.StartTime.ToString("yyyy-MM-dd")
-                @result.HomeTeam
-                @result.FinalScore
-                @result.AwayTeam
-            </li>
-        }
-    </ul>
-}

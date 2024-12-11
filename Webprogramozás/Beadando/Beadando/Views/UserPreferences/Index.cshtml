@@ -1,0 +1,98 @@
+﻿@model List<Beadando.Models.UserPreferenceViewModel>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css">
+    <link rel="stylesheet" href="~/css/UserPreferences/Index.css" />
+<style>
+    .team-performance-chart-container {
+        max-width: 600px !important; 
+        margin: 0 auto !important; 
+        padding: 20px !important;
+        background-color: white !important; 
+        border-radius: 10px !important; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+</style>
+}
+
+<h2 class="user-preferences-header">User Preferences</h2>
+
+@if (!Model.Any())
+{
+    <p class="user-preferences-no-data text-center">No team preferences found.</p>
+}
+else
+{
+    <div class="user-preferences-chart-container">
+        <div id="userPreferencesChart" style="max-width: 600px; margin: 0 auto;"></div>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const teamNames = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(m => m.TeamName)));
+        const preferenceCounts = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(m => m.PreferenceCount)));
+
+        var options = {
+            chart: {
+                type: 'pie',
+                height: 500, 
+                toolbar: {
+                    show: true,
+                },
+            },
+            labels: teamNames,
+            series: preferenceCounts,
+            colors: ['#FF4560', '#008FFB', '#00E396', '#FEB019', '#775DD0', '#FF7D00'],
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: '100%' 
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }],
+            title: {
+                text: 'Team Preferences',
+                align: 'center',
+                margin: 20,
+                style: {
+                    fontSize: '20px', 
+                    color: '#263238',
+                    padding: '10px'
+                }
+            },
+            legend: {
+                position: 'bottom', 
+                labels: {
+                    colors: ['#263238'], 
+                    useSeriesColors: false
+                },
+            },
+            dataLabels: {
+                enabled: true, 
+                formatter: (val) => `${val.toFixed(1)}%`, 
+                style: {
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    colors: ['#263238'] 
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: (val) => `${val} votes`,
+                },
+            },
+        };
+
+        var chart = new ApexCharts(document.querySelector("#userPreferencesChart"), options);
+        chart.render();
+    });
+
+    </script>
+}

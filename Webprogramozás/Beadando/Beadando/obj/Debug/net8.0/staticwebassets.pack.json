@@ -5,6 +5,54 @@
       "PackagePath": "staticwebassets/Beadando.bundle.scp.css"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Account/Login.css",
+      "PackagePath": "staticwebassets/css/Account/Login.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Account/Register.css",
+      "PackagePath": "staticwebassets/css/Account/Register.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Export/Index.css",
+      "PackagePath": "staticwebassets/css/Export/Index.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/FavoriteTeam/Index.css",
+      "PackagePath": "staticwebassets/css/FavoriteTeam/Index.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Home/indexPage.css",
+      "PackagePath": "staticwebassets/css/Home/indexPage.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/League/Select.css",
+      "PackagePath": "staticwebassets/css/League/Select.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Match/Create.css",
+      "PackagePath": "staticwebassets/css/Match/Create.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Match/DeleteMatch.css",
+      "PackagePath": "staticwebassets/css/Match/DeleteMatch.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Match/SearchMatchesForEdit.css",
+      "PackagePath": "staticwebassets/css/Match/SearchMatchesForEdit.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Match/matchDetails.css",
+      "PackagePath": "staticwebassets/css/Match/matchDetails.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/Search/SearchResults.css",
+      "PackagePath": "staticwebassets/css/Search/SearchResults.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/UserPreferences/Index.css",
+      "PackagePath": "staticwebassets/css/UserPreferences/Index.css"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
     },

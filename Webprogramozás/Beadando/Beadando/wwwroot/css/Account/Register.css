@@ -1,0 +1,110 @@
+﻿/* Register Page Styling */
+.register-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+
+/* Form Styling */
+.register-form {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Form Group */
+.register-form-group {
+    margin-bottom: 15px;
+}
+
+/* Labels */
+.register-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #495057;
+}
+
+/* Inputs */
+.register-input {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .register-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+/* Validation Messages */
+.register-validation-summary {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.register-validation {
+    font-size: 0.9rem;
+}
+
+/* Submit Button */
+.register-button {
+    display: block;
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+    .register-button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+
+/* Sign-In Prompt */
+.register-signin-prompt {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 0.9rem; /* Smaller font size */
+    color: #6c757d; /* Muted gray text */
+}
+
+    .register-signin-prompt a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+        .register-signin-prompt a:hover {
+            color: #0056b3; /* Darker blue on hover */
+        }
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .register-header {
+        font-size: 1.8rem;
+    }
+
+    .register-form {
+        padding: 15px;
+    }
+
+    .register-input {
+        font-size: 0.9rem;
+    }
+
+    .register-button {
+        font-size: 1rem;
+    }
+}

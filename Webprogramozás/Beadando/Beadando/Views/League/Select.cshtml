@@ -1,20 +1,26 @@
 ﻿@model List<Beadando.Models.LeagueSelectionViewModel>
 
-<h1>Select Your Preferred League</h1>
 
-<form asp-action="Select" method="post">
-    <ul>
+@section Styles {
+    <link rel="stylesheet" href="~/css/League/Select.css" />
+}
+
+
+<h2 class="league-selection-header"><strong>Select Your Preferred League</strong></h2>
+
+<form asp-action="Select" method="post" class="league-selection-form">
+    <div class="league-selection-options">
         @foreach (var league in Model)
         {
-            <li>
-                <input type="radio"
-                       name="selectedLeagueId"
-                       value="@league.Id"
-                       id="league_@league.Id"
-                       @(league.IsSelected ? "checked" : "") />
-                <label for="league_@league.Id">@league.Name</label>
-            </li>
+            <div class="league-selection-option container">
+                <input type="radio" name="selectedLeagueId" value="@league.Id"
+                       id="league-@league.Id"
+                       @(league.IsSelected ? "checked" : Model.IndexOf(league) == 0 ? "checked" : "") />
+                <div class="checkmark"></div>
+                <label for="league-@league.Id">@league.Name</label>
+            </div>
+
         }
-    </ul>
-    <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+    <button type="submit" class="btn btn-primary league-selection-btn">Save</button>
 </form>

@@ -1,0 +1,82 @@
+﻿@model List<Beadando.Models.MatchViewModel>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Match/SearchMatchesForEdit.css" />
+}
+
+<h2 class="edit-matches-header"><strong>Edit Matches</strong></h2>
+
+<form asp-action="SearchMatchesForEdit" method="get" class="edit-matches-form">
+
+    <div class="edit-matches-form-group">
+        <strong><label for="teamName" class="edit-matches-label">Team Name</label></strong>
+        <input type="text" id="teamName" name="teamName" class="form-control" value="@ViewData["SearchTerm"]" placeholder="@(!string.IsNullOrEmpty(ViewBag.TeamName) ? ViewBag.TeamName : "Enter team name")" />
+        <button type="submit" class="btn edit-matches-search-button">Search</button>
+    </div>
+</form>
+
+@if (TempData["NoValidTeam"] != null || TempData["NoGivenTeam"] != null)
+{
+    string message = TempData["NoValidTeam"] != null
+        ? TempData["NoValidTeam"].ToString()
+        : TempData["NoGivenTeam"].ToString();
+
+    <div class="alert alert-warning edit-matches-alert">
+        @message
+    </div>
+}
+
+@if (TempData["EditSuccessMessage"] != null)
+{
+    <div class="alert alert-success edit-matches-success-alert">
+        @TempData["EditSuccessMessage"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table edit-matches-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Home Team</th>
+                <th>Final Score</th>
+                <th>Away Team</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var match in Model)
+            {
+                <tr>
+                    <td>@match.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@match.HomeTeam</td>
+                    <td>@match.FinalScore</td>
+                    <td>@match.AwayTeam</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="showEditModal(@match.Id)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<div id="editMatchModalContainer"></div>
+
+
+@section Scripts {
+    <script>function showEditModal(matchId) {
+            $.get('/EditMatch/EditMatch', { id: matchId }, function (data) {
+                $('#editMatchModalContainer').html(data); 
+                var modal = new bootstrap.Modal(document.getElementById('editMatchModal'));
+                modal.show();
+
+                
+                $('#editMatchModalContainer').find('script').each(function () {
+                    eval($(this).text());
+                });
+            });
+        }</script>
+}
+
+

@@ -1,22 +1,248 @@
-﻿html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+﻿/* General body styling */
 body {
-  margin-bottom: 60px;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
 }
+
+/* Sticky Navbar */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030; /* Ensure navbar is above other elements */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+    transition: background-color 0.3s ease; /* Smooth background change */
+}
+
+.navbar-nav .nav-link {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #495057; /* Muted dark gray */
+    transition: color 0.3s ease;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #007bff; /* Bright blue on hover */
+    }
+
+/* Logout Button */
+.navbar-nav .logout-button {
+    color: #dc3545; /* Red for emphasis */
+    font-weight: bold;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+    .navbar-nav .logout-button:hover {
+        color: #ff0000; /* Darker red on hover */
+    }
+
+/* Navbar Alignment */
+.navbar-nav.me-auto {
+    margin-right: auto; /* Align general navigation links to the left */
+}
+
+.navbar-nav.ms-auto {
+    margin-left: auto; /* Align Login/Register/Logout to the right */
+}
+
+.navbar-light {
+    background-color: #ffffff; /* Light navbar background */
+}
+
+    .navbar-light .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff; /* Bright blue for branding */
+        transition: color 0.3s ease;
+    }
+
+        .navbar-light .navbar-brand:hover {
+            color: #0056b3; /* Darker blue on hover */
+        }
+
+    .navbar-light .navbar-nav .nav-link {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #495057; /* Muted dark gray */
+        margin-right: 15px;
+        transition: color 0.3s ease;
+    }
+
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: #007bff; /* Bright blue on hover */
+        }
+
+    .navbar-light .form-control {
+        border-radius: 20px; /* Rounded search bar */
+        border: 1px solid #ced4da;
+        padding: 5px 15px;
+        transition: box-shadow 0.3s ease;
+    }
+
+        .navbar-light .form-control:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            border-color: #007bff;
+        }
+
+    /* Search button */
+    .navbar-light .btn-outline-success {
+        border-radius: 20px;
+        border-color: #28a745;
+        color: #28a745;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .navbar-light .btn-outline-success:hover {
+            background-color: #28a745;
+            color: #ffffff;
+        }
+
+/* Navbar text (Hello, User) */
+.navbar-text {
+    font-weight: 500;
+    color: #6c757d;
+    margin-right: 10px;
+}
+
+/* Dropdown menu styling */
+.navbar .dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .navbar .dropdown-menu .dropdown-item {
+        font-size: 1rem;
+        padding: 10px 15px;
+        color: #495057;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+        .navbar .dropdown-menu .dropdown-item:hover {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+
+/* Dropdown toggle link */
+.navbar .dropdown-toggle {
+    font-weight: 500;
+    color: #495057;
+    transition: color 0.3s ease;
+}
+
+    .navbar .dropdown-toggle:hover {
+        color: #007bff;
+    }
+
+    .navbar .dropdown-toggle:focus {
+        outline: none;
+        box-shadow: none; /* Removes the blue shadow */
+    }
+
+    /* Ensure arrow icon is visible */
+    .navbar .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: 5px; /* Space between text and arrow */
+        vertical-align: middle;
+        content: "";
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-left: 0.3em solid transparent;
+    }
+
+    /* Arrow alignment when menu is open */
+    .navbar .dropdown-toggle[aria-expanded="true"]::after {
+        transform: rotate(180deg); /* Flip the arrow when menu is open */
+    }
+
+/* Footer */
+.footer {
+    background-color: #f8f9fa;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+    .footer a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .footer a:hover {
+            color: #0056b3;
+        }
+
+/* Wrapper for autocomplete functionality */
+.autocomplete-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Overlay for the suggestion text */
+.suggestion-overlay {
+    position: absolute;
+    top: 0; /* Align with the top of the input */
+    left: 0;
+    width: 100%;
+    height: 100%; /* Match the height of the input */
+    padding: 0.375rem 0.75rem; /* Match the input field padding */
+    color: #adb5bd; /* Pale color for suggestion text */
+    font-size: 1rem; /* Match the input field font size */
+    font-family: inherit; /* Match the font family of the input */
+    line-height: 1.5; /* Match the input field line height */
+    box-sizing: border-box; /* Include padding and border in the dimensions */
+    pointer-events: none; /* Make it unclickable */
+    z-index: 1; /* Place behind the input */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Adjust position slightly if needed */
+.suggestion-overlay {
+    transform: translateY(2px); /* Fine-tune vertical alignment */
+}
+
+/* Input field styling */
+#teamSearch {
+    position: relative;
+    background-color: transparent; /* Transparent to show overlay underneath */
+    z-index: 2; /* Place above the overlay */
+    font-size: 1rem; /* Match overlay font size */
+    font-family: inherit; /* Match overlay font family */
+    line-height: 1.5; /* Match overlay line height */
+    padding: 0.375rem 0.75rem; /* Ensure the padding matches the overlay */
+    box-sizing: border-box; /* Ensure dimensions include padding and border */
+}
+
+
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .navbar {
+        box-shadow: none; /* Remove shadow for mobile */
+    }
+
+    .navbar-nav {
+        text-align: center; /* Center-align links on smaller screens */
+    }
+
+        .navbar-nav .nav-link {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+
+    .navbar-collapse {
+        justify-content: center;
+    }
+
+}
+
+

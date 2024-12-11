@@ -1,0 +1,193 @@
+﻿/* Header */
+.search-matches-header {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+
+/* Form Styling */
+.search-matches-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-matches-group {
+    margin-bottom: 15px;
+}
+
+.search-matches-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #495057;
+}
+
+.search-matches-input {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .search-matches-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+.search-matches-button {
+    margin-top: 10px;
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+    .search-matches-button:hover {
+        background-color: #0056b3;
+    }
+
+/* Alerts */
+.search-matches-alert,
+.delete-matches-success-alert {
+    border: 1px solid !important;
+    margin-top: 20px !important;
+    padding: 10px 15px !important;
+    font-size: 0.9rem !important;
+    border-radius: 5px !important;
+    max-width: 400px !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Success Alert */
+.delete-matches-success-alert {
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+    border: 1px solid #c3e6cb; /* Green border */
+}
+
+/* Warning Alert */
+.search-matches-alert {
+    background-color: #f8d7da !important; /* Light red background */
+    color: #721c24 !important; /* Dark red text */
+    border: 1px solid #f5c6cb !important; /* Red border */
+} 
+
+
+
+/* Table Styling */
+.search-matches-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden; /* Ensures rounded corners apply to the table */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.search-matches-table th {
+    background-color: #007bff; /* Blue header */
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.search-matches-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 1rem;
+    color: #495057;
+}
+
+.search-matches-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa; /* Light gray for alternating rows */
+}
+
+.search-matches-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.search-matches-table tbody tr:hover {
+    background-color: #e9ecef; /* Highlight row on hover */
+    transition: background-color 0.3s ease;
+}
+
+/* Delete Button */
+.search-matches-delete-button {
+    color: #ffffff;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease;
+}
+
+    .search-matches-delete-button:hover {
+        background-color: #b02a37;
+    }
+
+/* Modal Styling */
+.search-matches-modal {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-matches-cancel-button {
+    background-color: #6c757d;
+    color: #ffffff;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+    .search-matches-cancel-button:hover {
+        background-color: #5a6268;
+    }
+
+.search-matches-confirm-button {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+    .search-matches-confirm-button:hover {
+        background-color: #b02a37;
+    }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .search-matches-header {
+        font-size: 1.8rem;
+    }
+
+    .search-matches-form {
+        padding: 15px;
+    }
+
+    .search-matches-button {
+        font-size: 1rem;
+    }
+
+    .search-matches-table th, .search-matches-table td {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+}

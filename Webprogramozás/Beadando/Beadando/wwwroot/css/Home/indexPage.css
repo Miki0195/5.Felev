@@ -1,0 +1,222 @@
+﻿/* General body styling */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+/* Header styling */
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 2rem;
+    color: #007bff;
+}
+
+/* Center align the navigation buttons */
+.navigation-buttons {
+    text-align: center; /* Center-align content */
+}
+
+    /* Add space between buttons */
+    .navigation-buttons a {
+        margin: 0 10px; /* Horizontal spacing */
+    }
+
+    /* Style for buttons */
+    .navigation-buttons .btn-secondary {
+        background-color: #007bff; /* Change to a primary blue color */
+        color: #ffffff; /* White text */
+        border: none; /* Remove border */
+        border-radius: 25px; /* Rounded edges */
+        font-size: 1rem; /* Slightly larger font */
+        padding: 10px 20px; /* Adjust padding */
+        transition: background-color 0.3s ease, transform 0.2s ease; /* Hover effect */
+    }
+
+        /* Hover effect for buttons */
+        .navigation-buttons .btn-secondary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slightly enlarge button */
+        }
+
+
+/* League titles */
+h2 {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+/* Match list */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+
+/* Match link styling */
+.match-link {
+    background-color: white;
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Vertically align items */
+    gap: 10px; /* Add space between elements */
+    text-decoration: none; /* Remove underline */
+    color: #343a40; /* Dark gray for text */
+    padding: 10px; /* Add padding for clickable area */
+    border: 1px solid #dee2e6; /* Light border around the link */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Hover effects */
+}
+
+    /* Hover effect */
+    .match-link:hover {
+        background-color: #f8f9fa; /* Light background on hover */
+        transform: scale(1.02); /* Slight enlargement */
+        text-decoration: none; /* Ensure no underline on hover */
+    }
+
+/* Match time styling */
+.match-time {
+    font-weight: bold; /* Make time bold */
+    color: #007bff; /* Blue color for the time */
+}
+
+/* Favorite team star */
+.favorite-team {
+    font-size: 1.2rem; /* Slightly larger size for star */
+    margin-right: 5px; /* Add space after the star */
+    color: #ffc107; /* Yellow color for favorite star */
+}
+
+/* Team names */
+.team-name {
+    font-weight: bold; /* Bold team names */
+    color: #495057; /* Darker gray for teams */
+}
+
+.home-team {
+    color: #0d6efd; /* Blue for the home team */
+}
+
+.away-team {
+    color: #dc3545; /* Red for the away team */
+}
+
+/* Match score styling */
+.match-score {
+    font-size: 1.1rem; /* Slightly larger font for score */
+    color: #6c757d; /* Muted gray for the score */
+}
+
+/* League Table Styling */
+.league-table-container {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 12px; /* Slightly larger border radius */
+}
+
+    .league-table-container h3 {
+        font-size: 2rem; /* Larger, modern font size */
+        color: #222; /* Darker, elegant text color */
+        margin-bottom: 20px; /* Extra spacing below heading */
+        text-align: center;
+        font-weight: 700; /* Bold for emphasis */
+        text-transform: uppercase; /* Add uppercase for style */
+        letter-spacing: 1px; /* Slight spacing between letters */
+    }
+
+.table.league-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    background-color: #ffffff; /* White background for the table */
+    overflow: hidden; /* Prevent overflow */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+    .table.league-table th, .table.league-table td {
+        padding: 14px 18px; /* Larger padding for readability */
+        border-bottom: 1px solid #eaeaea; /* Light border for rows */
+        font-size: 1rem; /* Modern font size */
+        font-family: 'Arial', sans-serif; /* Clean font */
+        vertical-align: middle; /* Center-align text vertically */
+        text-align: center;
+    }
+
+    .table.league-table th {
+        background-color: #0056b3; /* Richer blue for header */
+        color: #fff; /* White text for contrast */
+        text-transform: uppercase; /* Consistent styling */
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .table.league-table td {
+        color: #333; /* Darker text for better readability */
+        font-weight: 500;
+    }
+
+    .table.league-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .table.league-table tr:nth-child(odd) {
+        background-color: white;
+    }
+
+    .table.league-table td:nth-child(1) {
+        font-weight: bold; 
+    }
+
+    .table.league-table td:last-child {
+        font-weight: 700; /* Bold for points column */
+        color: #ff5722; /* Bright orange for emphasis */
+    }
+    
+
+/* Favorite team star */
+.text-warning {
+    color: #ffc107;
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+/* No matches message */
+.no-match {
+    font-style: italic;
+    color: #6c757d;
+    margin: 10px 0;
+}
+
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    .btn-secondary {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+
+    .table.league-table th, .table.league-table td {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+    }
+
+    .league-table-container h3 {
+        font-size: 1.5rem;
+    }
+}

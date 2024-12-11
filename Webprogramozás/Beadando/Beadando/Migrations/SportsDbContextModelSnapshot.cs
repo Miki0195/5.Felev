@@ -17,6 +17,76 @@ namespace Beadando.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
+            modelBuilder.Entity("Beadando.Models.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("FavoriteLeagueId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("FavoriteTeamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("Beadando.Models.League", b =>
                 {
                     b.Property<int>("Id")
@@ -35,12 +105,12 @@ namespace Beadando.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Football"
+                            Name = "LaLiga"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Basketball"
+                            Name = "Premier League"
                         });
                 });
 
@@ -89,56 +159,133 @@ namespace Beadando.Migrations
                         {
                             Id = 1,
                             AwayTeamId = 2,
-                            FinalScore = "2:1",
-                            HalfTimeScore = "1:1",
+                            FinalScore = "3:2",
+                            HalfTimeScore = "2:1",
                             HomeTeamId = 1,
                             LeagueId = 1,
-                            Report = "Manchester United secured a victory in the final minutes!",
-                            StartTime = new DateTime(2023, 11, 1, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                            Report = "Barcelona wins a thrilling El Clasico!",
+                            StartTime = new DateTime(2024, 12, 4, 18, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 2,
                             AwayTeamId = 4,
-                            FinalScore = "3:2",
-                            HalfTimeScore = "2:1",
+                            FinalScore = "1:1",
+                            HalfTimeScore = "0:1",
                             HomeTeamId = 3,
                             LeagueId = 1,
-                            Report = "Liverpool edged out Barcelona in a thrilling game.",
-                            StartTime = new DateTime(2023, 11, 3, 20, 30, 0, 0, DateTimeKind.Unspecified)
+                            Report = "Atletico Madrid equalizes late in the game.",
+                            StartTime = new DateTime(2024, 12, 5, 18, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 3,
                             AwayTeamId = 6,
-                            FinalScore = "112:108",
-                            HalfTimeScore = "55:50",
+                            FinalScore = "0:2",
+                            HalfTimeScore = "0:1",
                             HomeTeamId = 5,
-                            LeagueId = 2,
-                            Report = "LeBron James led the Lakers to a narrow victory over the Warriors.",
-                            StartTime = new DateTime(2023, 11, 5, 19, 0, 0, 0, DateTimeKind.Unspecified)
+                            LeagueId = 1,
+                            Report = "Real Betis dominates the game.",
+                            StartTime = new DateTime(2024, 12, 6, 18, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 4,
                             AwayTeamId = 8,
-                            FinalScore = "98:95",
-                            HalfTimeScore = "45:50",
+                            FinalScore = "2:2",
+                            HalfTimeScore = "1:0",
                             HomeTeamId = 7,
-                            LeagueId = 2,
-                            Report = "The Bulls triumphed in a tightly contested match.",
-                            StartTime = new DateTime(2023, 11, 6, 21, 0, 0, 0, DateTimeKind.Unspecified)
+                            LeagueId = 1,
+                            Report = "A balanced game ends in a draw.",
+                            StartTime = new DateTime(2024, 12, 7, 18, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 5,
-                            AwayTeamId = 3,
-                            FinalScore = "4:0",
-                            HalfTimeScore = "1:0",
-                            HomeTeamId = 4,
+                            AwayTeamId = 10,
+                            FinalScore = "1:3",
+                            HalfTimeScore = "0:2",
+                            HomeTeamId = 9,
                             LeagueId = 1,
-                            Report = "Epic victory for Barcelona",
-                            StartTime = new DateTime(2024, 11, 21, 19, 0, 0, 0, DateTimeKind.Unspecified)
+                            Report = "Celta Vigo shocks Valencia with a strong performance.",
+                            StartTime = new DateTime(2024, 12, 8, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AwayTeamId = 22,
+                            FinalScore = "2:0",
+                            HalfTimeScore = "1:0",
+                            HomeTeamId = 21,
+                            LeagueId = 2,
+                            Report = "Arsenal outclasses Manchester City.",
+                            StartTime = new DateTime(2024, 12, 9, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AwayTeamId = 24,
+                            FinalScore = "1:1",
+                            HalfTimeScore = "0:0",
+                            HomeTeamId = 23,
+                            LeagueId = 2,
+                            Report = "A tense derby ends in a draw.",
+                            StartTime = new DateTime(2024, 12, 10, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AwayTeamId = 26,
+                            FinalScore = "3:1",
+                            HalfTimeScore = "2:0",
+                            HomeTeamId = 25,
+                            LeagueId = 2,
+                            Report = "Chelsea secures a convincing win over Spurs.",
+                            StartTime = new DateTime(2024, 12, 11, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AwayTeamId = 28,
+                            FinalScore = "0:1",
+                            HalfTimeScore = "0:0",
+                            HomeTeamId = 27,
+                            LeagueId = 2,
+                            Report = "Brighton edges out Newcastle with a late goal.",
+                            StartTime = new DateTime(2024, 12, 12, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AwayTeamId = 30,
+                            FinalScore = "2:2",
+                            HalfTimeScore = "1:2",
+                            HomeTeamId = 29,
+                            LeagueId = 2,
+                            Report = "Aston Villa and Brentford share points in a thrilling match.",
+                            StartTime = new DateTime(2024, 12, 13, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 11,
+                            AwayTeamId = 3,
+                            FinalScore = "1:1",
+                            HalfTimeScore = "1:0",
+                            HomeTeamId = 1,
+                            LeagueId = 1,
+                            Report = "Barcelona and Atletico Madrid settle for a draw.",
+                            StartTime = new DateTime(2024, 12, 14, 18, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            Id = 12,
+                            AwayTeamId = 23,
+                            FinalScore = "2:2",
+                            HalfTimeScore = "1:2",
+                            HomeTeamId = 22,
+                            LeagueId = 2,
+                            Report = "The Manchester derby ends in a dramatic draw.",
+                            StartTime = new DateTime(2024, 12, 15, 18, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -148,11 +295,16 @@ namespace Beadando.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
 
                     b.ToTable("Teams");
 
@@ -160,42 +312,242 @@ namespace Beadando.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Manchester United"
+                            LeagueId = 1,
+                            Name = "Barcelona"
                         },
                         new
                         {
                             Id = 2,
+                            LeagueId = 1,
                             Name = "Real Madrid"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Liverpool"
+                            LeagueId = 1,
+                            Name = "Atletico Madrid"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Barcelona"
+                            LeagueId = 1,
+                            Name = "Sevilla"
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Los Angeles Lakers"
+                            LeagueId = 1,
+                            Name = "Real Sociedad"
                         },
                         new
                         {
                             Id = 6,
-                            Name = "Golden State Warriors"
+                            LeagueId = 1,
+                            Name = "Real Betis"
                         },
                         new
                         {
                             Id = 7,
-                            Name = "Chicago Bulls"
+                            LeagueId = 1,
+                            Name = "Villarreal"
                         },
                         new
                         {
                             Id = 8,
-                            Name = "Miami Heat"
+                            LeagueId = 1,
+                            Name = "Athletic Club"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            LeagueId = 1,
+                            Name = "Valencia"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            LeagueId = 1,
+                            Name = "Celta Vigo"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            LeagueId = 1,
+                            Name = "Osasuna"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            LeagueId = 1,
+                            Name = "Rayo Vallecano"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            LeagueId = 1,
+                            Name = "Espanyol"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            LeagueId = 1,
+                            Name = "Mallorca"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            LeagueId = 1,
+                            Name = "Almeria"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            LeagueId = 1,
+                            Name = "Girona"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            LeagueId = 1,
+                            Name = "Cadiz"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            LeagueId = 1,
+                            Name = "Getafe"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            LeagueId = 1,
+                            Name = "Real Valladolid"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            LeagueId = 1,
+                            Name = "Elche"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            LeagueId = 2,
+                            Name = "Arsenal"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            LeagueId = 2,
+                            Name = "Manchester City"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            LeagueId = 2,
+                            Name = "Manchester United"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            LeagueId = 2,
+                            Name = "Liverpool"
+                        },
+                        new
+                        {
+                            Id = 25,
+                            LeagueId = 2,
+                            Name = "Chelsea"
+                        },
+                        new
+                        {
+                            Id = 26,
+                            LeagueId = 2,
+                            Name = "Tottenham Hotspur"
+                        },
+                        new
+                        {
+                            Id = 27,
+                            LeagueId = 2,
+                            Name = "Newcastle United"
+                        },
+                        new
+                        {
+                            Id = 28,
+                            LeagueId = 2,
+                            Name = "Brighton & Hove Albion"
+                        },
+                        new
+                        {
+                            Id = 29,
+                            LeagueId = 2,
+                            Name = "Brentford"
+                        },
+                        new
+                        {
+                            Id = 30,
+                            LeagueId = 2,
+                            Name = "Aston Villa"
+                        },
+                        new
+                        {
+                            Id = 31,
+                            LeagueId = 2,
+                            Name = "Fulham"
+                        },
+                        new
+                        {
+                            Id = 32,
+                            LeagueId = 2,
+                            Name = "Crystal Palace"
+                        },
+                        new
+                        {
+                            Id = 33,
+                            LeagueId = 2,
+                            Name = "Wolverhampton Wanderers"
+                        },
+                        new
+                        {
+                            Id = 34,
+                            LeagueId = 2,
+                            Name = "West Ham United"
+                        },
+                        new
+                        {
+                            Id = 35,
+                            LeagueId = 2,
+                            Name = "Leeds United"
+                        },
+                        new
+                        {
+                            Id = 36,
+                            LeagueId = 2,
+                            Name = "Leicester City"
+                        },
+                        new
+                        {
+                            Id = 37,
+                            LeagueId = 2,
+                            Name = "Everton"
+                        },
+                        new
+                        {
+                            Id = 38,
+                            LeagueId = 2,
+                            Name = "Southampton"
+                        },
+                        new
+                        {
+                            Id = 39,
+                            LeagueId = 2,
+                            Name = "Nottingham Forest"
+                        },
+                        new
+                        {
+                            Id = 40,
+                            LeagueId = 2,
+                            Name = "Bournemouth"
                         });
                 });
 
@@ -266,70 +618,6 @@ namespace Beadando.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -438,6 +726,15 @@ namespace Beadando.Migrations
                     b.Navigation("League");
                 });
 
+            modelBuilder.Entity("Beadando.Models.Team", b =>
+                {
+                    b.HasOne("Beadando.Models.League", null)
+                        .WithMany()
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Beadando.Models.UserPreference", b =>
                 {
                     b.HasOne("Beadando.Models.League", "FavoriteLeague")
@@ -460,7 +757,7 @@ namespace Beadando.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Beadando.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -469,7 +766,7 @@ namespace Beadando.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Beadando.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -484,7 +781,7 @@ namespace Beadando.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Beadando.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -493,7 +790,7 @@ namespace Beadando.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                    b.HasOne("Beadando.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

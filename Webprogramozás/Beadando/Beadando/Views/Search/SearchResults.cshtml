@@ -1,52 +1,104 @@
 ﻿@model Beadando.Models.TeamPerformanceViewModel
 
-@if (Model == null)
+@section Styles {
+    <link rel="stylesheet" href="~/css/Search/SearchResults.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css">
+}
+
+@if (@Model == null)
 {
-    <p>No results found. Please try a different team name.</p>
+    <p class="team-performance-no-results">No results found. Please try a different team name.</p>
 }
 else
 {
-    <h2>Performance of @Model.TeamName</h2>
+    <h2 class="team-performance-header"><strong>Performance of @Model.TeamName</strong></h2>
 
-    <div>
-        <canvas id="performanceChart" width="400" height="200"></canvas>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <div id="performanceChart" style="max-width: 600px; margin: 0 auto;"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Wins', 'Losses', 'Draws'],
-                datasets: [{
-                    label: 'Matches',
+        document.addEventListener('DOMContentLoaded', function () {
+            const options = {
+                chart: {
+                    type: 'bar',
+                    height: 400,
+                    toolbar: {
+                        show: true,
+                    },
+                },
+                series: [{
+                    name: 'Matches',
                     data: [@Model.Wins, @Model.Losses, @Model.Draws],
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(255, 206, 86, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(255, 206, 86, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+                }],
+                colors: ['#28a745', '#dc3545', '#ffc107'], 
+                plotOptions: {
+                    bar: {
+                        distributed: true, 
+                        horizontal: false,
+                        dataLabels: {
+                            position: 'top',
+                        },
+                    },
+                },
+                xaxis: {
+                    categories: ['Wins', 'Losses', 'Draws'], 
+
+                },
+                yaxis: {
+                    title: {
+                        text: 'Number of Matches',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            color: '#495057'
+                        }
+                    },
+                },
+                title: {
+                    text: `Performance of ${'@Model.TeamName'}`,
+                    align: 'center',
+                    margin: 20,
+                    style: {
+                        fontSize: '18px',
+                        color: 'black'
                     }
-                }
-            }
+                },
+                tooltip: {
+                    enabled: true,
+                },
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        colors: ['#495057']
+                    },
+                    formatter: function (val) {
+                        return val.toFixed(0); 
+                    }
+                },
+                responsive: [{
+                    breakpoint: 768,
+                    options: {
+                        chart: {
+                            height: 300,
+                        },
+                        xaxis: {
+                            labels: {
+                                rotate: 0,
+                            },
+                        },
+                    }
+                }]
+            };
+
+            const chart = new ApexCharts(document.querySelector("#performanceChart"), options);
+            chart.render();
         });
     </script>
 
-    <h3>Match Details</h3>
-    <table class="table">
+    <h3 class="team-performance-subheader">Match Details</h3>
+    <table class="table team-performance-table">
         <thead>
             <tr>
                 <th>Home Team</th>
@@ -66,7 +118,7 @@ else
                     <td>@match.AwayTeam</td>
                     <td>@match.FinalScore</td>
                     <td>@match.HalfTimeScore</td>
-                    <td>@match.StartTime</td>
+                    <td>@match.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@match.League</td>
                     <td>@match.Report</td>
                 </tr>
@@ -74,3 +126,4 @@ else
         </tbody>
     </table>
 }
+

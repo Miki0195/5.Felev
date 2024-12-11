@@ -1,70 +1,105 @@
 ﻿<Properties StartupConfiguration="{CED3EE38-FA36-45A3-A3CD-34F33DC1F796}|https">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Beadando/Data/SportsDbContext.cs">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Tests/Controllers/EditMatchControllerTest.cs">
     <Files>
-      <File FileName="Beadando/Program.cs" Line="58" Column="1" />
-      <File FileName="Beadando/Models/League.cs" Line="17" Column="1" />
-      <File FileName="Beadando/Models/Team.cs" Line="1" Column="1" />
-      <File FileName="Beadando/Models/Match.cs" Line="12" Column="1" />
-      <File FileName="Beadando/Data/SportsDbContext.cs" Line="4" Column="57" />
-      <File FileName="Beadando/appsettings.json" Line="11" Column="22" />
-      <File FileName="Beadando/Data/SportsDbContextFactory.cs" Line="18" Column="1" />
-      <File FileName="Beadando/Controllers/HomeController.cs" Line="38" Column="35" />
-      <File FileName="Beadando/Migrations/20241121130134_InitialCreate.cs" Line="1" Column="1" />
-      <File FileName="Beadando/Migrations/20241121130343_UpdateSeedData.cs" Line="1" Column="1" />
-      <File FileName="Beadando/Models/UserPreference.cs" Line="1" Column="1" />
-      <File FileName="Beadando/Models/ErrorViewModel.cs" Line="1" Column="1" />
-      <File FileName="Beadando/Views/Shared/_Layout.cshtml" Line="36" Column="30" />
-      <File FileName="Beadando/Views/Shared/_Layout.cshtml.css" Line="1" Column="1" />
-      <File FileName="Beadando/Models/MatchViewModel.cs" Line="15" Column="35" />
-      <File FileName="Beadando/Controllers/SearchController.cs" Line="43" Column="17" />
-      <File FileName="Beadando/Views/Search/SearchResults.cshtml" Line="68" Column="32" />
-      <File FileName="Beadando/Views/Shared/_ValidationScriptsPartial.cshtml" Line="1" Column="1" />
-      <File FileName="Beadando/Models/TeamPerformanceViewModel.cs" Line="16" Column="1" />
-      <File FileName="Beadando/Models/LeagueMatchesViewModel.cs" Line="9" Column="35" />
-      <File FileName="Beadando/Views/Home/Index.cshtml" Line="20" Column="7" />
-      <File FileName="Beadando/Controllers/LeagueController.cs" Line="14" Column="6" />
-      <File FileName="Beadando/Models/LeagueSelectionViewModel.cs" Line="5" Column="42" />
-      <File FileName="Beadando/Views/League/SelectLeague.cshtml" Line="21" Column="1" />
-      <File FileName="Beadando/Views/Home/Privacy.cshtml" Line="1" Column="1" />
-      <File FileName="Beadando/Controllers/MatchDetailsController.cs" Line="45" Column="15" />
-      <File FileName="Beadando/Views/MatchDetails/MatchDetails.cshtml" Line="1" Column="45" />
-      <File FileName="Beadando/Models/MatchViewModel.cs" Line="7" Column="8" />
+      <File FileName="Beadando/Program.cs" />
+      <File FileName="Beadando/Models/League.cs" />
+      <File FileName="Beadando/Models/Team.cs" />
+      <File FileName="Beadando/Models/Match.cs" />
+      <File FileName="Beadando/Data/SportsDbContext.cs" />
+      <File FileName="Beadando/appsettings.json" />
+      <File FileName="Beadando/Data/SportsDbContextFactory.cs" />
+      <File FileName="Beadando/Controllers/HomeController.cs" Line="165" Column="55" />
+      <File FileName="Beadando/Models/UserPreference.cs" />
+      <File FileName="Beadando/Models/ErrorViewModel.cs" />
+      <File FileName="Beadando/Views/Shared/_Layout.cshtml" />
+      <File FileName="Beadando/Views/Shared/_Layout.cshtml.css" />
+      <File FileName="Beadando/Models/MatchViewModel.cs" />
+      <File FileName="Beadando/Controllers/SearchController.cs" />
+      <File FileName="Beadando/Views/Search/SearchResults.cshtml" />
+      <File FileName="Beadando/Views/Shared/_ValidationScriptsPartial.cshtml" />
+      <File FileName="Beadando/Models/TeamPerformanceViewModel.cs" />
+      <File FileName="Beadando/Models/LeagueMatchesViewModel.cs" />
+      <File FileName="Beadando/Views/Home/Index.cshtml" />
+      <File FileName="Beadando/Controllers/LeagueController.cs" />
+      <File FileName="Beadando/Models/LeagueSelectionViewModel.cs" />
+      <File FileName="Beadando/Views/Home/Privacy.cshtml" />
+      <File FileName="Beadando/Controllers/AccountController.cs" Line="25" Column="31" />
+      <File FileName="Beadando/Models/RegisterViewModel.cs" />
+      <File FileName="Beadando/Models/LoginViewModel.cs" />
+      <File FileName="Beadando/Data/DbInitializer.cs" />
+      <File FileName="Beadando/Views/Account/Register.cshtml" />
+      <File FileName="Beadando/Views/Account/Login.cshtml" />
+      <File FileName="Beadando/Models/ApplicationUser.cs" />
+      <File FileName="Beadando/Views/League/Select.cshtml" />
+      <File FileName="Beadando/Controllers/MatchController.cs" />
+      <File FileName="Beadando/Controllers/EditMatchController.cs" Line="27" Column="19" />
+      <File FileName="Beadando/Views/Match/Create.cshtml" />
+      <File FileName="Beadando/Views/Match/MatchDetails.cshtml" />
+      <File FileName="Beadando/Views/Match/SearchMatches.cshtml" />
+      <File FileName="Beadando/Views/Match/SearchMatchesForEdit.cshtml" />
+      <File FileName="Beadando/Models/MatchDetailsViewModel.cs" />
+      <File FileName="Beadando/Views/Match/_EditMatchModal.cshtml" />
+      <File FileName="Beadando/Controllers/ExportController.cs" />
+      <File FileName="Beadando/Views/Export/Index.cshtml" />
+      <File FileName="Beadando/Controllers/FavoriteTeamController.cs" />
+      <File FileName="Beadando/Views/FavoriteTeam/Index.cshtml" />
+      <File FileName="Beadando/Views/FavoriteTeam/_TeamsList.cshtml" />
+      <File FileName="Beadando/Migrations/20241129133050_AddLeagueIdToTeams.cs" />
+      <File FileName="Beadando/Views/Shared/Error.cshtml" />
+      <File FileName="Beadando/wwwroot/css/site.css" />
+      <File FileName="Beadando/wwwroot/css/Match/matchDetails.css" />
+      <File FileName="Beadando/wwwroot/css/League/Select.css" />
+      <File FileName="Beadando/wwwroot/css/Account/Register.css" />
+      <File FileName="Beadando/wwwroot/css/Account/Login.css" />
+      <File FileName="Beadando/Properties/launchSettings.json" />
+      <File FileName="Beadando/wwwroot/css/Match/Create.css" />
+      <File FileName="Beadando/wwwroot/css/Match/DeleteMatch.css" />
+      <File FileName="Beadando/Views/UserPreferences/Index.cshtml" />
+      <File FileName="Beadando/wwwroot/css/UserPreferences/Index.css" />
+      <File FileName="Beadando/wwwroot/css/Search/SearchResults.css" />
+      <File FileName="Beadando/wwwroot/css/Match/SearchMatchesForEdit.css" />
+      <File FileName="Beadando/wwwroot/css/Export/Index.css" />
+      <File FileName="Beadando/wwwroot/css/FavoriteTeam/Index.css" />
+      <File FileName="Beadando/Models/UserPreferenceViewModel.cs" />
+      <File FileName="Beadando/Views/_ViewStart.cshtml" />
+      <File FileName="Beadando/Views/_ViewImports.cshtml" />
+      <File FileName="Beadando/Controllers/UserPreferencesController.cs" />
+      <File FileName="Beadando/wwwroot/css/Home/indexPage.css" />
+      <File FileName="Beadando/Migrations/20241121143010_InitialCreate.cs" />
+      <File FileName="Tests/UnitTest1.cs" Line="11" Column="1" />
+      <File FileName="Tests/Controllers/AccountControllerTest.cs" Line="89" Column="1" />
+      <File FileName="Tests/Controllers/EditMatchControllerTest.cs" Line="18" Column="22" />
+      <File FileName="Tests/Controllers/ExportControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/FavoriteTeamControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/HomeControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/LeagueControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/MatchControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/SearchControllerTest.cs" Line="1" Column="1" />
+      <File FileName="Tests/Controllers/UserPreferencesControllerTest.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Beadando" expanded="True">
-            <Node name="Beadando">
-              <Node name="Dependencies" expanded="True" />
+            <Node name="Beadando" expanded="True">
               <Node name="Controllers" expanded="True" />
-              <Node name="Data" expanded="True">
-                <Node name="SportsDbContext.cs" selected="True" />
-              </Node>
-              <Node name="Migrations" expanded="True" />
-              <Node name="Models" expanded="True" />
-              <Node name="Views" expanded="True">
-                <Node name="Home" expanded="True" />
-                <Node name="League" expanded="True" />
-                <Node name="Match" expanded="True" />
-                <Node name="Search" expanded="True" />
-                <Node name="Shared" expanded="True">
-                  <Node name="_Layout.cshtml" expanded="True" />
-                </Node>
+            </Node>
+            <Node name="Tests">
+              <Node name="Controllers" expanded="True">
+                <Node name="EditMatchControllerTest.cs" selected="True" />
               </Node>
             </Node>
           </Node>
         </State>
       </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State />
-      </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.ItemProperties.Beadando PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Tests PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Beadando PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>

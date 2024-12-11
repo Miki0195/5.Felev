@@ -1,31 +1,35 @@
 ﻿@model List<Beadando.Models.LeagueMatchesViewModel>
-@{
-    DateTime selectedDate = (DateTime)ViewData["SelectedDate"];
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Home/indexPage.css" />
 }
 
-<h1>Matches for @selectedDate.ToString("yyyy-MM-dd")</h1>
+@{
+    DateTime selectedDate = (DateTime)ViewData["SelectedDate"];
+    var leagueTable = ViewData["LeagueTable"] as List<Beadando.Models.LeagueTableRow>;
+    var favoriteLeagueName = ViewBag.FavoriteLeagueName as string;
+}
+
+<h1><strong>Matches for @selectedDate.ToString("yyyy-MM-dd")</strong></h1>
 
 <div>
-    <a asp-action="Index" asp-route-date="@selectedDate.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-secondary">
-        &lt; Previous Day
-    </a>
-    <a asp-action="Index" asp-route-date="@selectedDate.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-secondary">
-        Next Day &gt;
-    </a>
-    @*
-        <form asp-action="Index" method="get">
-            <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" />
-            <button type="submit" class="btn btn-primary">Go</button>
-        </form>
-    *@
+    <div class="navigation-buttons text-center my-3">
+        <a asp-action="Index" asp-route-date="@selectedDate.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-secondary mx-2">
+            &lt; Previous Day
+        </a>
+        <a asp-action="Index" asp-route-date="@selectedDate.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-secondary mx-2">
+            Next Day &gt;
+        </a>
+    </div>
 </div>
 
 @foreach (var league in Model)
 {
     <h2>@league.LeagueName</h2>
+
     @if (!league.Matches.Any())
     {
-        <p>No matches for this day.</p>
+        <p class="no-match">No matches for this day.</p>
     }
     else
     {
@@ -33,14 +37,59 @@
             @foreach (var match in league.Matches)
             {
                 <li>
-                    <a asp-controller="Match" asp-action="MatchDetails" asp-route-id="@match.Id">
-                        @match.StartTime.ToString("yyyy-MM-dd")
-                        @match.HomeTeam
-                        @match.FinalScore
-                        @match.AwayTeam
+                    <a asp-controller="Match" asp-action="MatchDetails" asp-route-id="@match.Id" class="match-link">
+                        <span class="match-time">@match.StartTime.ToString("yyyy-MM-dd HH:mm") :</span>
+                        @if (match.HomeTeamId == ViewBag.FavoriteTeamId)
+                        {
+                            <span class="favorite-team text-warning">★</span>
+                        }
+                        <span class="team-name home-team">@match.HomeTeam</span>
+                        <span class="match-score">@match.FinalScore</span>
+                        <span class="team-name away-team">@match.AwayTeam</span>
+                        @if (match.AwayTeamId == ViewBag.FavoriteTeamId)
+                        {
+                            <span class="favorite-team text-warning">★</span>
+                        }
                     </a>
                 </li>
             }
         </ul>
     }
 }
+
+<div class="league-table-container">
+    @if (leagueTable != null && leagueTable.Any())
+    {
+        <h3>@favoriteLeagueName Table</h3>
+        <table class="table league-table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Matches</th>
+                    <th>Wins</th>
+                    <th>Ties</th>
+                    <th>Losses</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in leagueTable)
+                {
+                    <tr>
+                        <td>@row.TeamName</td>
+                        <td>@row.MatchesPlayed</td>
+                        <td>@row.Wins</td>
+                        <td>@row.Ties</td>
+                        <td>@row.Losses</td>
+                        <td>@row.Points</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="text-center text-muted">No league table available. Please select a favorite league.</p>
+    }
+</div>
+

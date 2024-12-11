@@ -15,10 +15,10 @@ public class MatchController : Controller
 
     public IActionResult MatchDetails(int id)
     {
-        // Fetch the match details
+        
         var match = _context.Matches
-            .Include(m => m.HomeTeam) // Load HomeTeam navigation property
-            .Include(m => m.AwayTeam) // Load AwayTeam navigation property
+            .Include(m => m.HomeTeam) 
+            .Include(m => m.AwayTeam) 
             .FirstOrDefault(m => m.Id == id);
 
         if (match == null)
@@ -26,7 +26,7 @@ public class MatchController : Controller
             return NotFound();
         }
 
-        // Fetch the last 3 results between the two teams
+        
         var lastResults = _context.Matches
             .Include(m => m.HomeTeam)
             .Include(m => m.AwayTeam)
@@ -45,7 +45,7 @@ public class MatchController : Controller
             })
             .ToList();
 
-        // Prepare the view model
+        
         var viewModel = new MatchDetailsViewModel
         {
             HomeTeam = match.HomeTeam?.Name ?? "Unknown Home Team",

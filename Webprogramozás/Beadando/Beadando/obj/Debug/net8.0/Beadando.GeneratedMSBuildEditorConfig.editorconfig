@@ -34,6 +34,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Export/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRXhwb3J0L0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/FavoriteTeam/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRmF2b3JpdGVUZWFtL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/FavoriteTeam/_TeamsList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRmF2b3JpdGVUZWFtL19UZWFtc0xpc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -46,8 +58,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGVhZ3VlL1NlbGVjdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Match/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Match/MatchDetails.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvTWF0Y2hEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Match/SearchMatches.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvU2VhcmNoTWF0Y2hlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Match/SearchMatchesForEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvU2VhcmNoTWF0Y2hlc0ZvckVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Match/_EditMatchModal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTWF0Y2gvX0VkaXRNYXRjaE1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Search/SearchResults.cshtml]
@@ -60,6 +88,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/UserPreferences/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlclByZWZlcmVuY2VzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/Views/_ViewImports.cshtml]

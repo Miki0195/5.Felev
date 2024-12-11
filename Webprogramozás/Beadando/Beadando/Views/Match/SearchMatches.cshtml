@@ -1,0 +1,95 @@
+﻿@model List<Beadando.Models.MatchViewModel>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Match/DeleteMatch.css" />
+
+}
+
+@section Scripts {
+    <script>function showDeleteModal(matchId) {
+            document.getElementById('matchId').value = matchId;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+}
+
+
+    </script>
+}
+
+<h2 class="search-matches-header"><strong>Delete Matches</strong></h2>
+
+<form asp-action="SearchMatches" method="get" class="search-matches-form">
+    <div class="search-matches-group">
+        <label for="teamName" class="search-matches-label">Team Name</label>
+        <input type="text" id="teamName" name="teamName" class="form-control search-matches-input" placeholder="Enter team name" />
+        <button type="submit" class="btn btn-primary search-matches-button">Search</button>
+    </div>
+</form>
+
+@if (TempData["NoValidTeam"] != null || TempData["NoGivenTeam"] != null)
+{
+    string message = TempData["NoValidTeam"] != null
+        ? TempData["NoValidTeam"].ToString()
+        : TempData["NoGivenTeam"].ToString();
+
+    <div class="alert alert-warning search-matches-alert">
+        @message
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table search-matches-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Home Team</th>
+                <th>Final Score</th>
+                <th>Away Team</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var match in Model)
+            {
+                <tr>
+                    <td>@match.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@match.HomeTeam</td>
+                    <td>@match.FinalScore</td>
+                    <td>@match.AwayTeam</td>
+                    <td>
+                        <button class="btn btn-danger search-matches-delete-button" onclick="showDeleteModal(@match.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content search-matches-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Match</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this match?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary search-matches-cancel-button" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" asp-action="DeleteMatch" method="post">
+                    <input type="hidden" id="matchId" name="id" />
+                    <button type="submit" class="btn btn-danger search-matches-confirm-button">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["DeleteSuccessMessage"] != null)
+{
+    <div class="alert alert-success delete-matches-success-alert">
+        @TempData["DeleteSuccessMessage"]
+    </div>
+}
