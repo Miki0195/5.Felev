@@ -61,6 +61,26 @@
       "PackagePath": "staticwebassets/favicon.ico"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/Export/Index.js",
+      "PackagePath": "staticwebassets/js/Export/Index.js"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/FavoriteTeam/Index.js",
+      "PackagePath": "staticwebassets/js/FavoriteTeam/Index.js"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/Match/Create.js",
+      "PackagePath": "staticwebassets/js/Match/Create.js"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/Match/SearchMatches.js",
+      "PackagePath": "staticwebassets/js/Match/SearchMatches.js"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/Match/SearchMatchesForEdit.js",
+      "PackagePath": "staticwebassets/js/Match/SearchMatchesForEdit.js"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Webprogramozás/Beadando/Beadando/wwwroot/js/site.js",
       "PackagePath": "staticwebassets/js/site.js"
     },

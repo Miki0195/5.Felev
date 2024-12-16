@@ -34,6 +34,7 @@ public class MatchController : Controller
                 (m.HomeTeamId == match.HomeTeamId && m.AwayTeamId == match.AwayTeamId) ||
                 (m.HomeTeamId == match.AwayTeamId && m.AwayTeamId == match.HomeTeamId))
             .OrderByDescending(m => m.StartTime)
+            .Skip(1)
             .Take(3)
             .Select(m => new MatchViewModel
             {

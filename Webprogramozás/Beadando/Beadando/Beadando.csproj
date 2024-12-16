@@ -61,6 +61,9 @@
     <Folder Include="wwwroot\css\UserPreferences\" />
     <Folder Include="wwwroot\css\Export\" />
     <Folder Include="wwwroot\css\FavoriteTeam\" />
+    <Folder Include="wwwroot\js\Export\" />
+    <Folder Include="wwwroot\js\FavoriteTeam\" />
+    <Folder Include="wwwroot\js\Match\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Views\Admin\Create.cshtml" />
@@ -73,5 +76,8 @@
     <Content Remove="wwwroot\css\UserPreferences\" />
     <Content Remove="wwwroot\css\Export\" />
     <Content Remove="wwwroot\css\FavoriteTeam\" />
+    <Content Remove="wwwroot\js\Export\" />
+    <Content Remove="wwwroot\js\FavoriteTeam\" />
+    <Content Remove="wwwroot\js\Match\" />
   </ItemGroup>
 </Project>

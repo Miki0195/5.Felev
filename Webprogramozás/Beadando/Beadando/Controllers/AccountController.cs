@@ -76,8 +76,6 @@ namespace Beadando.Controllers
                     return View(model);
                 }
 
-                
-
                 var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
 
                 var roles = await _userManager.GetRolesAsync(user);

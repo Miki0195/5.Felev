@@ -31,6 +31,7 @@ namespace Beadando.Models
         [Required(ErrorMessage = "Start Time is required.")]
         public DateTime StartTime { get; set; }
 
+        [Required(ErrorMessage = "Report is required.")]
         public string Report { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "League is required.")]

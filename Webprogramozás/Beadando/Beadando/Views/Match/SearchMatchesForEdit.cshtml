@@ -3,6 +3,9 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/Match/SearchMatchesForEdit.css" />
 }
+@section Scripts {
+    <script src="~/js/Match/SearchMatchesForEdit.js"></script>
+}
 
 <h2 class="edit-matches-header"><strong>Edit Matches</strong></h2>
 
@@ -63,20 +66,5 @@
 }
 <div id="editMatchModalContainer"></div>
 
-
-@section Scripts {
-    <script>function showEditModal(matchId) {
-            $.get('/EditMatch/EditMatch', { id: matchId }, function (data) {
-                $('#editMatchModalContainer').html(data); 
-                var modal = new bootstrap.Modal(document.getElementById('editMatchModal'));
-                modal.show();
-
-                
-                $('#editMatchModalContainer').find('script').each(function () {
-                    eval($(this).text());
-                });
-            });
-        }</script>
-}
 
 

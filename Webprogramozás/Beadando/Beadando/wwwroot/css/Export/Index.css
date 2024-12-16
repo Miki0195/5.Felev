@@ -1,4 +1,4 @@
-﻿/* Export Data Page */
+﻿
 .export-data {
     font-family: 'Arial', sans-serif;
     margin: 0 auto;
@@ -6,7 +6,7 @@
     padding: 20px 0;
 }
 
-/* Page Header */
+
 .export-data-header {
     text-align: center;
     font-size: 2.5rem;
@@ -15,7 +15,7 @@
     margin-bottom: 20px;
 }
 
-/* Export Form Container */
+
 .export-data-form-container {
     background-color: #ffffff;
     border: 1px solid #dee2e6;
@@ -68,11 +68,11 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-/* Alerts */
+
 .export-alert-message,
 .export-success-message {
-    margin: 0 auto; /* Centers the element horizontally */
-    max-width: 400px; /* Limits the width */
+    margin: 0 auto; 
+    max-width: 400px; 
     width: auto;
     border: 1px solid !important;
     margin-top: 20px !important;
@@ -87,20 +87,20 @@
     margin-right: auto !important;
 }
 
-/* Success Alert */
+
 .export-success-message {
-    background-color: #d4edda; /* Light green background */
-    color: #155724; /* Dark green text */
-    border: 1px solid #c3e6cb; /* Green border */
+    background-color: #d4edda; 
+    color: #155724; 
+    border: 1px solid #c3e6cb; 
 }
 
 .export-alert-message {
-    background-color: #f8d7da !important; /* Light red background */
-    color: #721c24 !important; /* Dark red text */
-    border: 1px solid #f5c6cb !important; /* Red border */
+    background-color: #f8d7da !important; 
+    color: #721c24 !important; 
+    border: 1px solid #f5c6cb !important; 
 }
 
-/* Responsive Layout */
+
 @media (max-width: 768px) {
     .export-data-form-container {
         padding: 15px;
@@ -112,7 +112,7 @@
         }
 }
 
-/* General Form Styling */
+
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -123,7 +123,7 @@
     color: #333;
 }
 
-/* Dropdown Styling */
+
 .form-select {
     font-size: 1rem;
     border-radius: 8px;
@@ -132,7 +132,7 @@
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    appearance: none; /* Remove default browser styling for dropdown arrow */
+    appearance: none; 
     position: relative;
     
     background-repeat: no-repeat;
@@ -151,7 +151,7 @@
         min-height: 150px;
     }
 
-/* Selected Items List Styling */
+
 .mt-2 {
     margin-top: 1rem !important;
 }
@@ -183,14 +183,14 @@
         cursor: pointer;
     }
 
-/* Dropdown Container Styling */
+
 #teamsDropdown, #leaguesDropdown {
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Transition Effects */
+
 .transition {
     transition: all 0.3s ease-in-out;
 }
@@ -199,7 +199,7 @@
     display: none;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .form-select {
         font-size: 0.9rem;
@@ -218,7 +218,7 @@
     }
 }
 
-/* Container Styling */
+
 .custom-dropdown-container {
     display: flex;
     flex-direction: column;
@@ -232,14 +232,14 @@
     margin-bottom: 0.2rem;
 }
 
-/* Wrapper for Dropdown */
+
 .custom-dropdown-wrapper {
     position: relative;
     display: inline-block;
     width: 100%;
 }
 
-/* Dropdown Styling */
+
 .custom-dropdown {
     font-size: 1rem;
     font-weight: 500;
@@ -268,7 +268,7 @@
         box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
     }
 
-    /* Dropdown Options */
+    
     .custom-dropdown option {
         font-size: 1rem;
         padding: 0.5rem;
@@ -282,7 +282,7 @@
             color: #007bff;
         }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .custom-dropdown-label {
         font-size: 1rem;

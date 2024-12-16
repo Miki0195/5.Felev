@@ -1,4 +1,4 @@
-﻿/* Register Page Styling */
+﻿
 .register-header {
     text-align: center;
     font-size: 2rem;
@@ -7,22 +7,22 @@
     padding-top: 20px;
 }
 
-/* Form Styling */
+
 .register-form {
     max-width: 400px;
     margin: 0 auto;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
-/* Form Group */
+
 .register-form-group {
     margin-bottom: 15px;
 }
 
-/* Labels */
+
 .register-label {
     font-weight: 600;
     margin-bottom: 5px;
@@ -30,7 +30,7 @@
     color: #495057;
 }
 
-/* Inputs */
+
 .register-input {
     border-radius: 5px;
     border: 1px solid #ced4da;
@@ -43,7 +43,7 @@
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
-/* Validation Messages */
+
 .register-validation-summary {
     margin-bottom: 15px;
     font-size: 0.9rem;
@@ -53,7 +53,7 @@
     font-size: 0.9rem;
 }
 
-/* Submit Button */
+
 .register-button {
     display: block;
     width: 100%;
@@ -67,15 +67,15 @@
 }
 
     .register-button:hover {
-        background-color: #0056b3; /* Darker blue on hover */
+        background-color: #0056b3; 
     }
 
-/* Sign-In Prompt */
+
 .register-signin-prompt {
     text-align: center;
     margin-bottom: 15px;
-    font-size: 0.9rem; /* Smaller font size */
-    color: #6c757d; /* Muted gray text */
+    font-size: 0.9rem; 
+    color: #6c757d; 
 }
 
     .register-signin-prompt a {
@@ -86,11 +86,11 @@
     }
 
         .register-signin-prompt a:hover {
-            color: #0056b3; /* Darker blue on hover */
+            color: #0056b3; 
         }
 
 
-/* Responsive Adjustments */
+
 @media (max-width: 768px) {
     .register-header {
         font-size: 1.8rem;

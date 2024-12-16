@@ -23,13 +23,10 @@
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
                             <form asp-controller="Search" asp-action="Matches" method="get" class="d-flex">
                                 <div class="autocomplete-wrapper">
                                     <div class="suggestion-overlay"></div>
-                                    <input type="text" id="teamSearch" name="teamName" required pattern="[a-zA-Z                        ]+" class="form-control me-2" placeholder="Search Club" autocomplete="off" />
+                                    <input type="text" id="teamSearch" name="teamName" required pattern="[a-zA-Z]+" class="form-control me-2" placeholder="Search Club" autocomplete="off" />
                                 </div>
                                 <button class="btn btn-outline-success" type="submit">Search</button>
                             </form>
@@ -60,7 +57,7 @@
                         }
                     </ul>
 
-                    
+
                     <ul class="navbar-nav ms-auto">
                         @if (!User.Identity.IsAuthenticated)
                         {
@@ -99,31 +96,35 @@
     *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        $(document).on('click', '.btn-primary.save-button', function () {
-            $('#confirmMessage').removeClass('d-none'); 
+
+    <script>$(document).on('click', '.btn-primary.save-button', function () {
+            $('#confirmMessage').removeClass('d-none');
         });
 
-        
+
         $(document).on('click', '.cancel-confirmation', function () {
-            $('#confirmMessage').addClass('d-none'); 
+            $('#confirmMessage').addClass('d-none');
         });
 
-        
+
         $(document).on('click', '.confirm-edit', function () {
             $('#editMatchForm').submit();
         });</script>
 
     <script>$(document).ready(function () {
-            let suggestions = []; 
+            let suggestions = [];
             let currentSuggestion = "";
 
             $('#teamSearch').on('input', function () {
                 const searchTerm = $(this).val();
 
                 if (searchTerm.length < 2) {
-                    
+
                     suggestions = [];
                     currentSuggestion = "";
                     $('.suggestion-overlay').text('');
@@ -137,33 +138,32 @@
                     success: function (data) {
                         suggestions = data;
                         if (suggestions.length > 0) {
-                            currentSuggestion = suggestions[0]; 
+                            currentSuggestion = suggestions[0];
                             const remaining = currentSuggestion.slice(searchTerm.length);
-                            $('.suggestion-overlay').text(searchTerm + remaining); 
+                            $('.suggestion-overlay').text(searchTerm + remaining);
                         } else {
-                            currentSuggestion = ""; 
+                            currentSuggestion = "";
                             $('.suggestion-overlay').text('');
                         }
                     }
                 });
             });
 
-            
+
             $('#teamSearch').on('keydown', function (e) {
                 if (e.key === 'Tab' && currentSuggestion) {
-                    e.preventDefault(); 
-                    $(this).val(currentSuggestion); 
+                    e.preventDefault();
+                    $(this).val(currentSuggestion);
                     $('.suggestion-overlay').text('');
-                    currentSuggestion = ""; 
+                    currentSuggestion = "";
                 }
             });
 
-            
+
             $('#teamSearch').on('blur', function () {
                 $('.suggestion-overlay').text('');
             });
-        });
-</script>
+        });</script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

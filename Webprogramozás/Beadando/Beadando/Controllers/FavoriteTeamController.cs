@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Beadando.Controllers
 {
-    [Authorize] 
+    [Authorize]
     public class FavoriteTeamController : Controller
     {
         private readonly SportsDbContext _context;
@@ -25,19 +25,25 @@ namespace Beadando.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
             var leagues = _context.Leagues.OrderBy(l => l.Name).ToList();
             ViewBag.Leagues = leagues;
 
-            
             if (leagueId.HasValue)
             {
                 var teams = _context.Teams.Where(t => t.LeagueId == leagueId).ToList();
                 ViewBag.Teams = teams;
             }
+            else
+            {
+                ViewBag.Teams = Enumerable.Empty<Team>();
+            }
 
-           
-            int? favoriteTeamId = user?.FavoriteTeamId;
+            int? favoriteTeamId = user.FavoriteTeamId;
             Team favoriteTeam = null;
 
             if (favoriteTeamId.HasValue)
@@ -49,12 +55,14 @@ namespace Beadando.Controllers
             return View();
         }
 
-
-
         [HttpGet]
         public IActionResult TeamsByLeague(int leagueId)
         {
-            
+            if (leagueId <= 0)
+            {
+                return BadRequest("Invalid league ID.");
+            }
+
             var teams = _context.Teams
                 .Where(t => t.LeagueId == leagueId)
                 .OrderBy(t => t.Id)
@@ -68,15 +76,27 @@ namespace Beadando.Controllers
             return PartialView("~/Views/FavoriteTeam/_TeamsList.cshtml", teams);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetFavoriteTeam(int teamId)
         {
+            if (teamId <= 0)
+            {
+                TempData["ErrorMessage"] = "Invalid team ID.";
+                return RedirectToAction("Index");
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return Unauthorized();
+            }
+
+            var team = _context.Teams.FirstOrDefault(t => t.Id == teamId);
+            if (team == null)
+            {
+                TempData["ErrorMessage"] = "Team not found.";
+                return RedirectToAction("Index");
             }
 
             user.FavoriteTeamId = teamId;
@@ -91,7 +111,5 @@ namespace Beadando.Controllers
             TempData["SuccessMessage"] = "Favorite team updated successfully!";
             return RedirectToAction("Index");
         }
-
-
     }
 }

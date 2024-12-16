@@ -1,4 +1,4 @@
-﻿/* Header */
+﻿
 .league-selection-header {
     text-align: center;
     font-size: 2rem;
@@ -7,22 +7,22 @@
     padding-top: 20px;
 }
 
-/* Form Styling */
+
 .league-selection-form {
     max-width: 600px;
     margin: 0 auto;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
-/* Options Container */
+
 .league-selection-options {
     margin-bottom: 20px;
 }
 
-/* Individual Option */
+
 .league-selection-option {
     display: flex;
     align-items: center;
@@ -35,26 +35,26 @@
 }
 
     .league-selection-option:hover {
-        background-color: #e9ecef; /* Light gray on hover */
+        background-color: #e9ecef; 
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* Radio Button */
+    
     .league-selection-option input[type="radio"] {
         margin-right: 10px;
-        accent-color: #007bff; /* Blue radio button */
+        accent-color: #007bff; 
         width: 18px;
         height: 18px;
     }
 
-    /* Label Styling */
+    
     .league-selection-option label {
         font-size: 1rem;
         font-weight: 500;
         color: #343a40;
     }
 
-/* Save Button */
+
 .league-selection-btn {
     display: block;
     width: 100%;
@@ -68,6 +68,6 @@
 }
 
     .league-selection-btn:hover {
-        background-color: #0056b3; /* Darker blue on hover */
+        background-color: #0056b3; 
     }
 

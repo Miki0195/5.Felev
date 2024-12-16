@@ -1,5 +1,5 @@
 ﻿
-/* Header */
+
 .team-performance-header {
     text-align: center;
     font-size: 2rem;
@@ -8,26 +8,26 @@
     margin-bottom: 20px;
 }
 
-/* No Results Message */
+
 .team-performance-no-results {
     text-align: center;
-    color: #dc3545; /* Red for emphasis */
+    color: #dc3545; 
     font-size: 1.2rem;
     margin-top: 20px;
 }
 
-/* Chart Container */
+
 div.team-performance-chart-container {
-    max-width: 600px !important; /* Restrict maximum width */
-    margin: 0 auto !important; /* Center the chart horizontally */
+    max-width: 600px !important; 
+    margin: 0 auto !important; 
     padding: 20px !important;
-    background-color: white !important; /* Light background for better contrast */
-    border-radius: 10px !important; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; /* Subtle shadow for depth */
+    background-color: white !important; 
+    border-radius: 10px !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; 
 
 }
 
-/* Subheader */
+
 .team-performance-subheader {
     text-align: center;
     font-size: 1.7rem;
@@ -36,7 +36,7 @@ div.team-performance-chart-container {
     margin-bottom: 20px;
 }
 
-/* Team Performance Table Styling */
+
 .team-performance-table {
     width: 100%;
     border-collapse: collapse;
@@ -44,13 +44,13 @@ div.team-performance-chart-container {
     font-size: 1rem;
     text-align: center;
     background-color: #ffffff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
     border-radius: 8px;
-    overflow: hidden; /* Rounded corners for the table */
+    overflow: hidden; 
 }
 
     .team-performance-table thead {
-        background-color: #007bff; /* Blue header */
+        background-color: #007bff; 
         color: #ffffff;
         font-weight: bold;
         text-transform: uppercase;
@@ -58,11 +58,11 @@ div.team-performance-chart-container {
 
     .team-performance-table th, .team-performance-table td {
         padding: 12px 15px;
-        border: 1px solid #dee2e6; /* Light gray borders */
+        border: 1px solid #dee2e6; 
     }
 
     .team-performance-table tbody tr:nth-child(odd) {
-        background-color: #f8f9fa; /* Alternating row color */
+        background-color: #f8f9fa; 
     }
 
     .team-performance-table tbody tr:nth-child(even) {
@@ -70,11 +70,11 @@ div.team-performance-chart-container {
     }
 
     .team-performance-table tbody tr:hover {
-        background-color: #e9ecef; /* Light gray on hover */
+        background-color: #e9ecef; 
         transition: background-color 0.3s ease;
     }
 
-/* Responsive Table for Small Screens */
+
 @media (max-width: 768px) {
     .team-performance-table {
         font-size: 0.9rem;

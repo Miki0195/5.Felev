@@ -1,4 +1,4 @@
-﻿/* Header Styling */
+﻿
 .edit-matches-header {
     text-align: center;
     font-size: 2rem;
@@ -7,7 +7,7 @@
     padding-top: 20px;
 }
 
-/* Search Form */
+
 .edit-matches-form {
     max-width: 600px;
     margin: 0 auto;
@@ -51,7 +51,7 @@ edit-matches-label {
         color: #ffffff;
     }
 
-/* Table Styling */
+
 .edit-matches-table {
     width: 100%;
     border-collapse: collapse;
@@ -89,7 +89,7 @@ edit-matches-label {
         transition: background-color 0.3s ease;
     }
 
-/* Modal Styling */
+
 .edit-matches-modal {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -165,7 +165,7 @@ edit-matches-label {
             background-color: #218838;
         }
 
-/* Alerts */
+
 .edit-matches-alert,
 .edit-matches-success-alert {
     border: 1px solid !important;
@@ -181,21 +181,21 @@ edit-matches-label {
     margin-right: auto !important;
 }
 
-/* Success Alert */
+
 .edit-matches-success-alert {
-    background-color: #d4edda; /* Light green background */
-    color: #155724; /* Dark green text */
-    border: 1px solid #c3e6cb; /* Green border */
+    background-color: #d4edda; 
+    color: #155724; 
+    border: 1px solid #c3e6cb; 
 }
 
-/* Warning Alert */
+
 .edit-matches-alert {
-    background-color: #f8d7da !important; /* Light red background */
-    color: #721c24 !important; /* Dark red text */
-    border: 1px solid #f5c6cb !important; /* Red border */
+    background-color: #f8d7da !important; 
+    color: #721c24 !important; 
+    border: 1px solid #f5c6cb !important; 
 } 
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
     .edit-matches-header {
         font-size: 1.8rem;

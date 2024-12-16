@@ -98,9 +98,6 @@ public class HomeController : Controller
         return View(leagues);
     }
 
-
-
-
     public IActionResult Privacy()
     {
         return View();
@@ -140,7 +137,6 @@ public class HomeController : Controller
                 }
             }
 
-            
             int points = (wins * 3) + (ties * 1);
 
             return new LeagueTableRow

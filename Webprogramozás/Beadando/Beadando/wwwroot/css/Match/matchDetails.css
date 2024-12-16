@@ -1,4 +1,4 @@
-﻿/* Match Details Page */
+﻿
 .match-details {
     font-family: 'Arial', sans-serif;
     margin: 0 auto;
@@ -7,7 +7,7 @@
     padding: 20px 0;
 }
 
-/* Page Header */
+
 .match-details-header {
     text-align: center;
     font-size: 2.5rem;
@@ -16,7 +16,7 @@
     margin-bottom: 20px;
 }
 
-/* Match details container */
+
 .match-details-container {
     background-color: #ffffff;
     border: 1px solid #dee2e6;
@@ -44,7 +44,7 @@
             color: #007bff;
         }
 
-/* Last Results Section */
+
 .match-details-last-results {
     text-align: center;
     font-size: 1.5rem;
@@ -52,7 +52,7 @@
     color: #343a40;
 }
 
-/* Last Results List */
+
 .match-details-results-list {
     list-style-type: none;
     padding: 0;
@@ -87,7 +87,7 @@
             color: #007bff;
         }
 
-/* Responsive Layout */
+
 @media (max-width: 768px) {
     .match-details-container {
         padding: 15px;

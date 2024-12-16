@@ -1,5 +1,4 @@
-﻿/* Login Page Styling */
-.login-header {
+﻿.login-header {
     text-align: center;
     font-size: 2rem;
     color: #007bff;
@@ -7,22 +6,19 @@
     padding-top: 20px;
 }
 
-/* Form Styling */
 .login-form {
     max-width: 400px;
     margin: 0 auto;
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 
-/* Form Group */
 .login-form-group {
     margin-bottom: 15px;
 }
 
-/* Labels */
 .login-label {
     font-weight: 600;
     margin-bottom: 5px;
@@ -30,7 +26,6 @@
     color: #495057;
 }
 
-/* Inputs */
 .login-input {
     border-radius: 5px;
     border: 1px solid #ced4da;
@@ -43,7 +38,6 @@
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 
-/* Remember Me */
 .login-rememberme {
     display: flex;
     align-items: center;
@@ -56,7 +50,6 @@
         accent-color: #007bff;
     }
 
-/* Validation Messages */
 .login-validation-summary {
     margin-bottom: 15px;
     font-size: 0.9rem;
@@ -66,12 +59,11 @@
     font-size: 0.9rem;
 }
 
-/* Register Prompt */
 .login-register-prompt {
     text-align: center;
     margin-bottom: 15px;
-    font-size: 0.9rem; /* Smaller font size */
-    color: #6c757d; /* Muted gray text */
+    font-size: 0.9rem; 
+    color: #6c757d; 
 }
 
     .login-register-prompt a {
@@ -82,10 +74,9 @@
     }
 
         .login-register-prompt a:hover {
-            color: #0056b3; /* Darker blue on hover */
+            color: #0056b3; 
         }
 
-/* Submit Button */
 .login-button {
     display: block;
     width: 100%;
@@ -99,10 +90,9 @@
 }
 
     .login-button:hover {
-        background-color: #0056b3; /* Darker blue on hover */
+        background-color: #0056b3; 
     }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
     .login-header {
         font-size: 1.8rem;
