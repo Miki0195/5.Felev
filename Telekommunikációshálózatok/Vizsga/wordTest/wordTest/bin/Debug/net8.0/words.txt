@@ -24,7 +24,7 @@ hálózati réteg - network layer
 adatkapcsolati réteg - data link layer
 fizikai réteg - physical layer
 munkamenet réteg - session layer
-megjelenítési réteg - representaion layer
+megjelenítési réteg - representation layer
 szolgáltatás - service
 interfész - interface
 ugrásonkénti - per-hop

@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/wordTest.csproj",
+      "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/wordTest.csproj",
       "projectName": "wordTest",
-      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/wordTest.csproj",
+      "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/wordTest.csproj",
       "packagesPath": "/Users/buchsbaummiklos/.nuget/packages/",
-      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/obj/",
+      "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Telekommunikációshálózatok/Vizsga/wordTest/wordTest/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/buchsbaummiklos/.nuget/NuGet/NuGet.Config"
@@ -39,11 +39,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
