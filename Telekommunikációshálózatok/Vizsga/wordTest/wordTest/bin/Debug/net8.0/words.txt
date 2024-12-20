@@ -1,0 +1,153 @@
+hálózati él - link
+hálózati állomás - host
+forgalomirányítás - routing
+hálózati kapcsoló - switch
+vezetékes - wired
+vezeték nélküli - wireless
+csatorna - channel
+koax kábel - coaxial cable
+optikai kábel - optical cable
+sodort réz érpár - twisted pair copper
+teljesen összekötött topológia - full mesh topology
+adatfolyam - flow (data flow)
+erőforrás - resource
+előre foglalás - reservation
+igény szerinti - on demand
+áramkör kapcsolt hálózat - circuit switched network
+csomagkapcsolt hálózat - packet switched network
+meghibásodás - failure
+Internet szolgáltató - Internet service provider (ISP)
+hálózati protokoll - network protocol
+alkalmazási réteg - application layer
+szállítói réteg - transport layer
+hálózati réteg - network layer
+adatkapcsolati réteg - data link layer
+fizikai réteg - physical layer
+munkamenet réteg - session layer
+megjelenítési réteg - representaion layer
+szolgáltatás - service
+interfész - interface
+ugrásonkénti - per-hop
+megbízhatóság - reliability
+folyamvezérlés - flow control
+címzés - addressing
+cím - address
+keret - frame
+csomag - packet
+szegmens - segment
+üzenet - message
+sebesség - speed
+rugalmasság - flexibility
+késleltetés - delay
+vesztés - loss
+átvitel - throughput
+jelterjedés - signal propagation
+feldolgozás - processing
+sorban állás - queueing
+sávszélesség - bandwidth
+fénysebesség - speed of light
+ráta - rate
+löket - burst
+frekvencia - frequency
+zaj - noise
+szimbólum - symbol
+hullámhossz - wavelength
+mikrohullám - microwave
+kódolás - encoding
+alapsáv - baseband
+szélessáv - broadband
+moduláció - modulation
+amplitúdó - amplitude
+fázis - phase
+frekvencia osztás - frequency division
+közeg - medium
+bájt beszúrás - byte stuffing
+bit beszúrás - bit stuffing
+bit hiba - bit error
+paritás bit - parity bit
+előre hibajavítás - forward error correction (FEC)
+ellenörző összeg - checksum
+megáll és vár protokoll - stop and wait protocol
+alternáló bit protokoll - alternating bit protocol
+kihasználtság - utilization
+sorszám - sequence number
+szelektív ismétlés - selective repeat
+ütközés - collision
+bit-térkép protokoll - bitmap protocol
+bináris visszaszámlálás - binary countdown
+adaptív fa protokoll - adaptive tree protocol
+terhelés - load
+fairség - fairness
+valószínűség - probability
+eloszlás - distribution
+hurok - loop
+feszítőfa - spanning tree
+híd - bridge
+gyökér - root
+csomópont - node
+útvonal - path
+skálázódás - scalability
+teljesítmény - performance
+hatékonyság - efficiency
+továbbító tábla - forwarding table
+csomagtovábbítás - packet forwarding
+csomag ütmezés - packet scheduling
+nyelőfa - sink tree
+legrövidebb út - shortest path
+távolság vektor - distance vector
+kapcsolatállapot - link state
+iteráció - iteration
+végetelenig számolás - count to infinity
+visszairányú továbbítás - reverse path forwarding
+többes-küldés - multicasting
+fejléc - header
+mező - field
+forrás - source
+cél (állomás) - destination
+eltolás - offset
+sík - flat
+hierarchikus - hierarchical
+aggregálás - aggregation
+hálózati címfordítás - network address translation (NAT)
+adatszórás - broadcasting
+csomag darabolás - packet fragmentation
+szomszéd - neighbor
+következő ugrás - next hop
+költség - cost
+autonóm rendszer - autonomous system
+útvonal vektor - path vector
+házirend - policy
+ügyfél - customer
+forrás forgalomirányítás - source routing
+nyugta - acknowledgement
+meghírdetett ablak - advertised window
+forrás hamisítás - source spoofing
+maximális szegmens méret - maximum segment size
+csúszóablak - sliding window
+körülfordulási idő - round-trip time
+virtuális magánhálózat - virtual private network (VPN)
+alagút - tunnel
+torlódás - congestion
+puffer - buffer
+szírt - cliff
+könyök - knee
+torlódás vezérlés - congestion control
+torlódás elkerülés - congestion avoidance
+lassú indulás - slow start
+gyors újraküldés - fast retransmit
+gyors helyreállítás - fast recovery
+köbös függvény - cubic function
+explicit torlódás jelzés - explicit congestion notification (ECN)
+adatközpont - data center
+lekérdezés - query
+domén név rendszer - domain name system (DNS)
+zóna fájl - zone file
+helyi - local
+szerver - server
+kliens - client
+gyorsítótár - cache
+
+
+
+
+
