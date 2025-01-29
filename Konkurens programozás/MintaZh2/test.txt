@@ -1,0 +1,30 @@
+public class ProducerConsumerPractice {
+
+    // TODO Create a list for integers
+
+    // TODO Create a producer that will periodically put random numbers ( between 1 and 5 )
+    // TODO between 1 and 100 to this list
+
+    // TODO Create a consumer that will periodically pick values randomly out of the list
+    // TODO The consumer then will keep track of the average of the number that have been
+    // TODO in the list
+
+    // TODO The actual contents of the list should be printed out periodically
+
+    // TODO The producers should stop working after 30 seconds, the consumer stop when the
+    // TODO list have been empty for 5 seconds
+
+    // TODO The whole simulation should end after 50 seconds
+
+    // TODO At the end print out the number of elements consumed and the total average
+    // TODO of the elements that have been in the list
+
+    private static final int PRODUCING_PERIOD_MS = 500;
+    private static final int CONSUME_PERIOD_MS = 100;
+    private static final int PRINT_PERIOD_MS = 2000;
+
+    // TODO After all this is done, try with more producers and more consumers
+
+    public static void main(String[] args) {
+    }
+}

@@ -1,0 +1,30 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Account Deleted";
+}
+
+<link rel="stylesheet" href="~/css/Account/AccessDenied.css" />
+
+<div class="access-denied-container">
+    <h2>Your Account Has Been Deleted</h2>
+    <p>You no longer have access to this application.</p>
+    <p>You will be redirected to the login page in <span id="countdown">10</span> seconds.</p>
+
+    <a href="@Url.Action("Login", "Home")" class="btn-home">Go to Login Now</a>
+</div>
+
+<!-- Auto Redirect Script -->
+<script>
+    let countdown = 10;
+    const countdownElement = document.getElementById("countdown");
+
+    function updateCountdown() {
+        countdown--;
+        countdownElement.innerText = countdown;
+        if (countdown <= 0) {
+            window.location.href = "@Url.Action("Login", "Home")";
+        }
+    }
+
+    setInterval(updateCountdown, 1000);
+</script>

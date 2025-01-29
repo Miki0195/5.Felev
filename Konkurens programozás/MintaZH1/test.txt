@@ -1,0 +1,143 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
+public class AuctionHouse {
+    static class NFT {
+        public final int artistIdx;
+        public final int price;
+
+        public NFT(int artistIdx, int price) {
+            this.artistIdx = artistIdx;
+            this.price = price;
+        }
+    }
+
+    static class AuctionOffer {
+        public int offeredSum;
+        public String collectorName;
+
+        public AuctionOffer(int offeredSum, String collectorName) {
+            this.offeredSum = offeredSum;
+            this.collectorName = collectorName;
+        }
+    }
+
+    static int failCount = 0;
+
+    static final int MAX_NFT_PRICE = 100;
+    static final int MAX_NFT_IDX = 100_000;
+    static final int MAX_COLLECTOR_OFFER = MAX_NFT_IDX / 100;
+
+    private static final int COLLECTOR_MIN_SLEEP = 10;
+    private static final int COLLECTOR_MAX_SLEEP = 20;
+    private static final int MAX_AUCTION_OFFERS = 10;
+
+    static final int ARTIST_COUNT = 10;
+    static final int COLLECTOR_COUNT = 5;
+
+    static final int INIT_ASSETS = MAX_NFT_IDX / 10 * MAX_NFT_PRICE;
+
+    static int nftIdx = 0;
+    static int remainingNftPrice = INIT_ASSETS;
+    static NFT[] nfts = new NFT[MAX_NFT_IDX];
+
+    static int totalCommission = 0;
+    static int noAuctionAvailableCount = 0;
+    static int soldItemCount = 0;
+
+    // TODO for Task 2: data structure "auctionQueue"
+
+    // TODO for Task 3: data structure "owners"
+
+    static CyclicBarrier barrier = new CyclicBarrier(ARTIST_COUNT + COLLECTOR_COUNT + 1);
+
+    public static void main(String[] args) throws InterruptedException {
+        // Task 1
+        List<Thread> artists = makeArtists();
+
+        // Task 2
+        Thread auctioneer = makeAuctioneer(artists);
+
+        // Task 3
+        List<Thread> collectors = makeCollectors(auctioneer);
+
+        // TODO make sure that everybody starts working
+
+        // TODO make sure that everybody finishes working
+    }
+
+    private static void awaitBarrier()
+    {
+        try {
+            barrier.await();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Task 1
+
+    private static List<Thread> makeArtists() {
+        // TODO create ARTIST_COUNT artists as threads, all of whom do the following, and return them as a list
+                // every 20 milliseconds, try to create an NFT in the following way
+                        // the artist chooses a price for the nft between 100 and 1000
+
+                        // if the nfts array is already fully filled, the artist is done
+                        // if the price is more than remainingNftPrice, the artist is done
+
+                        // ... and deduces the price from remainingNftPrice
+                        // the artist creates the NFT in the next nfts array slot
+    }
+
+    // ------------------------------------------------------------------------
+    // Task 2
+
+    private static Thread makeAuctioneer(List<Thread> artists) {
+        // TODO create and return the auctioneer thread that does the following
+                // run an auction if 1. any artists are still working
+                // 2. run 100 auctions after all artists are finished
+        // otherwise, the auctioneer is done
+    }
+    
+    // a single auction is done like this:
+    private static void doAuction()
+    {
+        // pick a random NFT from nfts (keep in mind that nfts can still be empty)
+        // create the auctionQueue
+        // wait for auction offers
+            // if there were already MAX_AUCTION_OFFERS, the auction is done
+            // if no offer is made in 1ms, the auction is done
+            // System.out.println("start wait");
+        
+        // once the auction is done, add the commission to totalCommission
+                // only for Task 3: if an offer is made and it has a better price than all previous ones, this is the currently winning offer
+
+        // the commission is 10% of the price of the NFT (including the sum in the highest offer, if there was any)
+        
+        // only for Task 3: if there was an offer, increase soldItemCount and remember that the collector owns an NFT
+        // now set auctionQueue to null and keep it like that for 3 milliseconds
+    }
+
+    // ------------------------------------------------------------------------
+    // Task 3
+
+    private static List<Thread> makeCollectors(Thread auctioneer) {
+        // TODO create collectors now, the collectors' names are simply Collector1, Collector2, ...
+                // work until the auctioneer is done (it is not isAlive() anymore)
+                    // sleep for COLLECTOR_MIN_SLEEP..COLLECTOR_MAX_SLEEP milliseconds randomly between each step
+                        // if there is no auction available, just increase noAuctionAvailableCount
+                        // if there is an ongoing auction, and you haven't bid on it already, make an offer
+                            // choose your offer between 1..MAX_COLLECTOR_OFFER randomly
+    }
+}

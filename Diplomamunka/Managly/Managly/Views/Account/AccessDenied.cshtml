@@ -1,0 +1,12 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Access Denied";
+}
+
+<link rel="stylesheet" href="~/css/Account/AccessDenied.css" />
+
+<div class="access-denied-container">
+    <h2>Access Denied</h2>
+    <p>You do not have permission to access this page.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn-home">Go to Home</a>
+</div>

@@ -1,0 +1,62 @@
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+
+/**
+ * Egy koncertre negyfajta jegy kaphato: az A, B, C es D szektorokba.
+ * Mindegyik jegyfajtabol 5 erheto el, osszesen tehat 20 jegy kaphato.
+ * Mindegyik vasarlo eseten adott, melyik szektorba tartozo jegyet szeretne venni.
+ */
+public class TicketSaleSimulator {
+    private static final int SLEEP_TIME_MIN = 100;
+    private static final int SLEEP_TIME_MAX = 500;
+    private static final int SHUTDOWN_TIME = 15000;
+
+    private static final List<String> TICKET_TYPES = List.of("SECTOR A", "SECTOR B", "SECTOR C", "SECTOR D");
+
+    private static final int TICKET_COUNT_PER_SELLER = 5;
+    private static final int SELLER_COUNT = TICKET_TYPES.size();
+    private static final int CUSTOMER_COUNT = SELLER_COUNT * TICKET_COUNT_PER_SELLER;
+
+    private static Map<String, Integer> TICKET_INVENTORY = /* TODO Hozzuk letre a map-et */;
+    private static Queue<String> TICKET_QUEUE = /* TODO Hozzunk letre egy sort 1-es kapacitassal */;
+    // TODO Hozzuk letre a megfelelo meretu ExecutorService-t: minden vasarlo es mindegyik elado szamara legyen egy szalnak hely benne
+
+    public static void main(String[] args) {
+        // Jegykeszlet feltoltese
+        TICKET_TYPES.forEach(str -> TICKET_INVENTORY.put(str, TICKET_COUNT_PER_SELLER));
+
+        // TODO Inditsuk el a sellerAction-t minden jegytipusra kulon szalon
+        // TODO Inditsuk el a customerAction-t minden kliensre a megfelelo jegytipussal kulon szalon
+        // TODO - Jegyfajtankent 5 vasarlonak kell lennie
+        // TODO A szimulacionak SHUTDOWN_TIME elteltevel le kell allnia
+    }
+
+    /**
+     * Ez a jegyarus mukodesenek megvalositasa.
+     */
+    private static void sellerAction(String ticketType) {
+        System.out.printf("Started seller for %s%n", ticketType);
+
+        // TODO Ha a TICKET_INVENTORY-ban az adott jegyfajta meg nem fogyott el:
+        // TODO - A TICKET_INVENTORY-ban csokkenjen eggyel a jegyek szama
+        // TODO - Adjuk a megfelelo fajta jegyet a TICKET_QUEUE-hoz
+        // TODO - Irjuk ki az alabbi szoveget:
+        System.out.println("New ticket available for " + ticketType);
+        // TODO - Varjunk valamennyit SLEEP_TIME_MIN es SLEEP_TIME_MAX kozott a jegy eladasa utan
+
+        // TODO Miutan elfogyott a raktarrol az osszes ilyen tipusu jegy, irjuk ki az alabbit, es fejezzuk be a futast
+        System.out.printf("Tickets for %s sold out%n", ticketType);
+    }
+
+    /**
+     * Ez a vasarlo mukodesenek megvalositasa.
+     */
+    private static void customerAction(int customerId, String ticketType) {
+        // TODO Amig a vasarlo nem vett meg jegyet, tegye a kovetkezoket:
+        // TODO - Nezze meg, van-e jegy a TICKET_QUEUE-ban a megfelelo jegytipusbol (peek muvelet)
+        // TODO - Ha van, akkor vegye ki es menjen el a koncertre: irja ki az alabbi szoveget, es fejezze be a futasat
+        System.out.printf("Customer %d got a ticket to %s%n", customerId, ticketType);
+        // TODO - Varjon valamennyit SLEEP_TIME_MIN es SLEEP_TIME_MAX kozott a kovetkezo vizsgalat elott
+    }
+}
