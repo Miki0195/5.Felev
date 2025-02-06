@@ -26,6 +26,11 @@ namespace Managly.Models
 
         public bool IsUsingPreGeneratedPassword { get; set; }
 
+        public DateTime? DateOfBirth { get; set; }
+
+        public string Gender { get; set; } = "Other";
+
+        public string ProfilePicturePath { get; set; } = "/images/default/default-profile.png";
     }
 }
 

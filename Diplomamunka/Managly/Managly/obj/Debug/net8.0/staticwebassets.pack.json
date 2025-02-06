@@ -13,12 +13,28 @@
       "PackagePath": "staticwebassets/css/Account/ChangePassword.css"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Account/Profile.css",
+      "PackagePath": "staticwebassets/css/Account/Profile.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Admin/UserManagement.css",
+      "PackagePath": "staticwebassets/css/Admin/UserManagement.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Chat/Index.css",
+      "PackagePath": "staticwebassets/css/Chat/Index.css"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Login.css",
       "PackagePath": "staticwebassets/css/Home/Login.css"
     },
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Register.css",
       "PackagePath": "staticwebassets/css/Home/Register.css"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Schedule/Manage.css",
+      "PackagePath": "staticwebassets/css/Schedule/Manage.css"
     },
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/site.css",
@@ -29,8 +45,16 @@
       "PackagePath": "staticwebassets/favicon.ico"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/images/default/default-profile.png",
+      "PackagePath": "staticwebassets/images/default/default-profile.png"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/Account/PasswordVisibility.js",
       "PackagePath": "staticwebassets/js/Account/PasswordVisibility.js"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/Chat/chat.js",
+      "PackagePath": "staticwebassets/js/Chat/chat.js"
     },
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/site.js",
@@ -263,6 +287,14 @@
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery/dist/jquery.min.map",
       "PackagePath": "staticwebassets/lib/jquery/dist/jquery.min.map"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg",
+      "PackagePath": "staticwebassets/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg",
+      "PackagePath": "staticwebassets/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg"
     },
     {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.Managly.Microsoft.AspNetCore.StaticWebAssets.props",

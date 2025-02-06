@@ -1,0 +1,9 @@
+﻿.fc-event {
+    transition: transform 0.2s ease-in-out;
+    cursor: grab;
+}
+
+    .fc-event:active {
+        transform: scale(1.05);
+        cursor: grabbing;
+    }

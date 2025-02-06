@@ -1,0 +1,599 @@
+﻿@{
+    ViewData["Title"] = "Messages";
+}
+
+<link rel="stylesheet" href="~/css/Chat/Index.css">
+
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+</div>
+
+<input type="hidden" id="currentUserId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+
+<div class="chat-container">
+    <div class="search-area">
+        <input type="text" id="searchInput" placeholder="Search users...">
+        <div id="searchResults"></div>
+
+        <h3>Recent Chats</h3>
+        <div id="recentChats"></div>
+    </div>
+
+    <div class="chat-area">
+        <div id="chatHeader" class="chat-header">Select a user to start chatting</div>
+        <div id="chatBox"></div>
+
+        <div class="chat-input-container">
+            <input type="text" id="messageInput" placeholder="Type a message">
+            <button id="sendMessageBtn">Send</button>
+        </div>
+    </div>
+</div>
+
+<div id="messageOptionsModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessagePreview" class="text-muted"></p>
+                <button class="btn btn-outline-danger w-100 my-2" id="deleteForMeBtn">Delete for Me</button>
+                <button class="btn btn-danger w-100" id="deleteForEveryoneBtn">Delete for Everyone</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+@*<script src="~/js/Chat/chat.js"></script>*@
+
+<script>
+    let selectedUserId = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadRecentChats();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("userId");
+
+        if (userId) {
+            console.log(`✅ Opening chat with user: ${userId}`); 
+
+            selectedUserId = userId;
+            loadMessages(userId);
+            document.getElementById("chatBox").style.display = "block";
+            document.getElementById("messageInput").focus();
+        }
+    });
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+        let query = this.value.trim(); 
+        let resultsDiv = document.getElementById("searchResults");
+
+        if (query.length === 0) {
+            resultsDiv.innerHTML = "";
+            return;
+        }
+
+        if (query.length > 2) {
+            fetch(`/chat/search/${query}`)
+                .then(response => response.json())
+                .then(users => {
+                    resultsDiv.innerHTML = ""; 
+
+                    if (users.length === 0) {
+                        resultsDiv.innerHTML = "<p>No users found</p>";
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        let userDiv = document.createElement("div");
+                        userDiv.textContent = user.fullName;
+                        userDiv.classList.add("user-search-result");
+
+                        userDiv.onclick = function () {
+                            selectedUserId = user.id;
+                            loadMessages(selectedUserId);
+                            document.getElementById("chatBox").style.display = "block";
+                            document.getElementById("messageInput").focus();
+                            resultsDiv.innerHTML = ""; 
+                        };
+
+                        resultsDiv.appendChild(userDiv);
+                    });
+                })
+                .catch(err => console.error("Search error: ", err));
+        }
+    });
+
+    function loadMessages(userId) {
+        fetch(`/chat/messages/${userId}`)
+            .then(response => response.json())
+            .then(messages => {
+                let chatBox = document.getElementById("chatBox");
+                chatBox.innerHTML = "";
+
+                fetch(`/chat/user/${userId}`)
+                    .then(response => response.json())
+                    .then(user => {
+                        document.getElementById("chatHeader").innerHTML = `
+                    <img src="${user.profilePicturePath}" class="chat-header-img" alt="Profile">
+                    <span>${user.fullName}</span>
+                    `;
+                    })
+                    .catch(err => console.error("Error fetching user details: ", err));
+
+                let lastDate = null;
+                let deletedMessages = JSON.parse(localStorage.getItem("deletedMessages")) || []; // ✅ Get deleted messages
+
+                messages.forEach(msg => {
+                    if (!msg.id) {
+                        console.warn("⚠ Warning: Message without ID found, skipping.");
+                        return;
+                    }
+
+                    if (deletedMessages.includes(msg.id.toString())) {
+                        console.log(`⛔ Hiding deleted message ID: ${msg.id}`);
+                        return; // ✅ Hide deleted messages only for the sender
+                    }
+
+                    let isSentByMe = msg.senderId === document.getElementById("currentUserId").value;
+                    let messageDate = new Date(msg.timestamp);
+                    let formattedDate = messageDate.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric"
+                    });
+
+                    if (lastDate !== formattedDate) {
+                        let dateSeparator = document.createElement("div");
+                        dateSeparator.classList.add("date-separator");
+                        dateSeparator.textContent = formattedDate;
+                        chatBox.appendChild(dateSeparator);
+                        lastDate = formattedDate;
+                    }
+
+                    let wrapper = document.createElement("div");
+                    wrapper.classList.add("message-wrapper", isSentByMe ? "sent" : "received");
+                    wrapper.setAttribute("data-message-id", msg.id);
+                    wrapper.setAttribute("data-user-id", msg.senderId);
+
+                    let messageDiv = document.createElement("div");
+                    messageDiv.classList.add(isSentByMe ? "my-message" : "other-message");
+
+                    if (msg.isDeleted) {
+                        messageDiv.classList.add("deleted-message");
+                        messageDiv.innerHTML = `<em>Deleted message</em>`; // ✅ Only for "Delete for Both"
+                    } else {
+                        messageDiv.textContent = msg.content;
+                    }
+
+                    let profileImg = document.createElement("img");
+                    profileImg.src = msg.senderProfilePicture;
+                    profileImg.classList.add("message-profile-img");
+
+                    if (isSentByMe) {
+                        messageDiv.onclick = function () {
+                            openMessageOptionsModal(msg.id, msg.content);
+                        };
+                    }
+
+                    if (isSentByMe) {
+                        wrapper.appendChild(messageDiv);
+                        wrapper.appendChild(profileImg);
+                    } else {
+                        wrapper.appendChild(profileImg);
+                        wrapper.appendChild(messageDiv);
+                    }
+
+                    chatBox.appendChild(wrapper);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+            })
+            .catch(err => console.error("Load messages error: ", err));
+    }
+
+    document.getElementById("sendMessageBtn").addEventListener("click", function () {
+        const message = document.getElementById("messageInput").value.trim();
+        const senderId = document.getElementById("currentUserId").value;
+
+        if (!selectedUserId) {
+            showToast("Select a user to chat with first!", "error");
+            return;
+        }
+
+        if (message === "") {
+            showToast("Message cannot be empty!", "error");
+            return;
+        }
+
+        fetch(`/chat/user/${senderId}`)
+            .then(response => response.json())
+            .then(user => {
+                let chatBox = document.getElementById("chatBox");
+
+                let wrapper = document.createElement("div");
+                wrapper.classList.add("message-wrapper", "sent");
+
+                let messageDiv = document.createElement("div");
+                messageDiv.classList.add("my-message");
+                messageDiv.textContent = message;
+
+                let profileImg = document.createElement("img");
+                profileImg.src = user.profilePicturePath;
+                profileImg.classList.add("message-profile-img");
+
+                wrapper.appendChild(messageDiv);
+                wrapper.appendChild(profileImg);
+                chatBox.appendChild(wrapper);
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+
+        document.getElementById("messageInput").value = "";
+
+        fetch("/chat/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ SenderId: senderId, ReceiverId: selectedUserId, Content: message })
+        }).then(response => response.json())
+            .then(data => {
+                if (!data.messageId) {
+                    console.error("❌ Error: Message ID is undefined.");
+                    return;
+                }
+
+                let sentMessage = document.querySelector(".message-wrapper.sent:last-child .my-message");
+                if (sentMessage) {
+                    sentMessage.setAttribute("data-message-id", data.messageId);
+                    sentMessage.onclick = function () {
+                        openMessageOptionsModal(data.messageId, message);
+                    };
+                }
+
+                //connection.invoke("SendMessage", senderId, selectedUserId, message, data.messageId)
+                connection.invoke("SendMessage", senderId, selectedUserId, message)
+                    .catch(err => console.error("❌ Error calling SendMessage:", err));
+
+            }).catch(err => console.error("❌ Error saving message: ", err));
+
+        updateRecentChat(selectedUserId, message, true);
+    });
+
+
+
+    connection.on("ReceiveMessage", function (senderId, message, messageId) {
+        let chatBox = document.getElementById("chatBox");
+
+        if (selectedUserId === senderId) {
+            let isSentByMe = senderId === document.getElementById("currentUserId").value;
+            let wrapper = document.createElement("div");
+            wrapper.classList.add("message-wrapper", "received");
+            wrapper.setAttribute("data-message-id", messageId);
+
+            let messageDiv = document.createElement("div");
+            messageDiv.classList.add("other-message");
+            messageDiv.textContent = message;
+
+            if (isSentByMe) {
+                messageDiv.onclick = function () {
+                    openMessageOptionsModal(messageId, message);
+                };
+            }
+
+            fetch(`/chat/user/${senderId}`)
+                .then(response => response.json())
+                .then(user => {
+                    let profileImg = document.createElement("img");
+                    profileImg.src = user.profilePicturePath;
+                    profileImg.classList.add("message-profile-img");
+
+                    wrapper.appendChild(profileImg);
+                    wrapper.appendChild(messageDiv);
+                    chatBox.appendChild(wrapper);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                })
+                .catch(err => console.error("Error fetching user details: ", err));
+
+            fetch(`/chat/mark-as-read/${senderId}`, { method: "POST" }) 
+                .then(() => {
+                    let recentChat = document.querySelector(`.user-recent-chat[data-user-id="${senderId}"]`);
+                    if (recentChat) {
+                        recentChat.classList.remove("unread-message");
+                        let badge = recentChat.querySelector(".unread-badge");
+                        if (badge) badge.remove();
+                    }
+                })
+                .catch(err => console.error("❌ Error marking messages as read: ", err));
+        }
+
+        updateRecentChat(senderId, message, false);
+    });
+
+    if (typeof connection !== "undefined") {
+        connection.on("MessageDeleted", function (messageId) {
+
+            applyDeletedMessageStyle(messageId);
+
+            // ✅ Update recent chat preview for sender & receiver
+            updateRecentChat(selectedUserId, "Deleted message", true);
+        });
+    }
+
+    if (typeof connection !== "undefined") {
+        connection.on("MessageDeletedForMe", function (messageId) {
+            let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                messageElement.remove();
+
+                // ✅ Store in LocalStorage so it stays deleted after reload
+                let deletedMessages = JSON.parse(localStorage.getItem("deletedMessages")) || [];
+                if (!deletedMessages.includes(messageId.toString())) {
+                    deletedMessages.push(messageId.toString());
+                    localStorage.setItem("deletedMessages", JSON.stringify(deletedMessages));
+                }
+            }
+        });
+    }
+
+    function loadRecentChats() {
+        fetch(`/chat/recent-chats`)
+            .then(response => response.json())
+            .then(users => {
+
+                let recentChatsDiv = document.getElementById("recentChats");
+                recentChatsDiv.innerHTML = "";
+
+                if (users.length === 0) {
+                    recentChatsDiv.innerHTML = "<p>No recent chats</p>";
+                    return;
+                }
+
+                users.forEach(user => {
+                    let userDiv = document.createElement("div");
+                    userDiv.classList.add("user-recent-chat");
+                    userDiv.setAttribute("data-user-id", user.id);
+
+                    let profileImg = document.createElement("img");
+                    profileImg.src = user.profilePicturePath;
+                    profileImg.classList.add("recent-chat-img");
+
+                    let nameDiv = document.createElement("div");
+                    nameDiv.classList.add("user-name");
+                    nameDiv.textContent = user.fullName;
+
+                    let messagePreviewDiv = document.createElement("div");
+                    messagePreviewDiv.classList.add("message-preview");
+
+                    if (user.lastMessage && user.lastMessage.content) {
+                        let messageText = user.lastMessage.isFromUser ? "You: " + user.lastMessage.content : user.lastMessage.content;
+                        messagePreviewDiv.textContent = messageText.length > 30 ? messageText.substring(0, 27) + "..." : messageText;
+                    } else {
+                        messagePreviewDiv.textContent = "No messages yet";
+                    }
+
+                    let textWrapper = document.createElement("div");
+                    textWrapper.classList.add("recent-chat-text");
+                    textWrapper.appendChild(nameDiv);
+                    textWrapper.appendChild(messagePreviewDiv);
+
+                    if (user.unreadCount > 0 && selectedUserId !== user.id) {
+                        userDiv.classList.add("unread-message");
+
+                        let unreadBadge = document.createElement("span");
+                        unreadBadge.classList.add("unread-badge");
+                        unreadBadge.textContent = user.UnreadCount;
+                        userDiv.appendChild(unreadBadge);
+                    }
+
+                    userDiv.appendChild(profileImg);
+                    userDiv.appendChild(textWrapper);
+
+                    userDiv.onclick = function () {
+                        selectedUserId = user.id;
+                        loadMessages(selectedUserId);
+                        document.getElementById("chatBox").style.display = "block";
+                        document.getElementById("messageInput").focus();
+
+                        const newUrl = `/chat?userId=${selectedUserId}`;
+                        history.pushState(null, "", newUrl);
+
+                        fetch(`/chat/mark-as-read/${user.id}`, { method: "POST" })
+                            .then(() => {
+                                userDiv.classList.remove("unread-message");
+                                let badge = userDiv.querySelector(".unread-badge");
+                                if (badge) badge.remove();
+                            });
+                    };
+
+
+
+                    recentChatsDiv.appendChild(userDiv);
+                });
+            })
+            .catch(err => console.error("❌ Error loading recent chats:", err));
+    }
+
+    function updateRecentChat(userId, newMessage, isSentByMe) {
+        let recentChatsDiv = document.getElementById("recentChats");
+        let existingChat = document.querySelector(`.user-recent-chat[data-user-id="${userId}"]`);
+
+        let messageText = isSentByMe ? `You: ${newMessage}` : newMessage;
+        let truncatedMessage = messageText.length > 30 ? messageText.substring(0, 27) + "..." : messageText;
+
+        if (existingChat) {
+            let messagePreview = existingChat.querySelector(".message-preview");
+            // ✅ If the message is deleted, show "Deleted message" in italic
+            if (newMessage === "Deleted message") {
+                messagePreview.innerHTML = `<em>${newMessage}</em>`;
+            } else {
+                messagePreview.textContent = truncatedMessage;
+            }
+
+            if (selectedUserId === userId) {
+                existingChat.classList.remove("unread-message");
+                let badge = existingChat.querySelector(".unread-badge");
+                if (badge) badge.remove();
+
+                fetch(`/chat/mark-as-read/${userId}`, { method: "POST" }) // ✅ Mark as read in DB
+                    .catch(err => console.error("❌ Error marking chat as read: ", err));
+            } else {
+                existingChat.classList.add("unread-message");
+
+                let unreadBadge = existingChat.querySelector(".unread-badge");
+                if (!unreadBadge) {
+                    unreadBadge = document.createElement("span");
+                    unreadBadge.classList.add("unread-badge");
+                    unreadBadge.textContent = "●";
+                    existingChat.appendChild(unreadBadge);
+                }
+            }
+
+            recentChatsDiv.prepend(existingChat);
+        } else {
+            fetch(`/chat/user/${userId}`)
+                .then(response => response.json())
+                .then(user => {
+                    let userDiv = document.createElement("div");
+                    userDiv.classList.add("user-recent-chat");
+                    userDiv.setAttribute("data-user-id", userId);
+
+                    let profileImg = document.createElement("img");
+                    profileImg.src = user.profilePicturePath;
+                    profileImg.classList.add("recent-chat-img");
+
+                    let nameDiv = document.createElement("div");
+                    nameDiv.classList.add("user-name");
+                    nameDiv.textContent = user.fullName;
+
+                    let messagePreviewDiv = document.createElement("div");
+                    messagePreviewDiv.classList.add("message-preview");
+                    // ✅ If the message is deleted, show "Deleted message" in italic
+                    if (newMessage === "Deleted message") {
+                        messagePreview.innerHTML = `<em>${newMessage}</em>`;
+                    } else {
+                        messagePreview.textContent = truncatedMessage;
+                    }
+
+                    let textWrapper = document.createElement("div");
+                    textWrapper.classList.add("recent-chat-text");
+                    textWrapper.appendChild(nameDiv);
+                    textWrapper.appendChild(messagePreviewDiv);
+
+                    if (selectedUserId !== userId) {
+                        userDiv.classList.add("unread-message");
+
+                        let unreadBadge = document.createElement("span");
+                        unreadBadge.classList.add("unread-badge");
+                        unreadBadge.textContent = "●";
+                        userDiv.appendChild(unreadBadge);
+                    }
+
+                    userDiv.appendChild(profileImg);
+                    userDiv.appendChild(textWrapper);
+
+                    userDiv.onclick = function () {
+                        selectedUserId = userId;
+                        loadMessages(selectedUserId);
+                        document.getElementById("chatBox").style.display = "block";
+                        document.getElementById("messageInput").focus();
+
+                        fetch(`/chat/mark-as-read/${userId}`, { method: "POST" })
+                            .then(() => {
+                                userDiv.classList.remove("unread-message");
+                                let badge = userDiv.querySelector(".unread-badge");
+                                if (badge) badge.remove();
+                            });
+                    };
+
+                    recentChatsDiv.prepend(userDiv);
+                })
+                .catch(err => console.error("❌ Error fetching user details:", err));
+        }
+    }
+
+    function openMessageOptionsModal(messageId, messageText) {
+        let modal = new bootstrap.Modal(document.getElementById("messageOptionsModal"));
+
+        document.getElementById("modalMessagePreview").textContent = messageText;
+
+        document.getElementById("deleteForMeBtn").onclick = function () {
+            deleteMessageForMe(messageId);
+            modal.hide();
+        };
+
+        document.getElementById("deleteForEveryoneBtn").onclick = function () {
+            deleteMessageForEveryone(messageId);
+            modal.hide();
+        };
+
+        modal.show();
+    }
+
+    function deleteMessageForMe(messageId) {
+        let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+
+        if (messageElement) {
+            messageElement.remove(); // ✅ Instantly hide the message
+
+            // ✅ Ensure deletedMessages array is properly updated
+            let deletedMessages = JSON.parse(localStorage.getItem("deletedMessages")) || [];
+            if (!deletedMessages.includes(messageId.toString())) {
+                deletedMessages.push(messageId.toString());
+                localStorage.setItem("deletedMessages", JSON.stringify(deletedMessages));
+            }
+
+            // ✅ Send real-time update only for the sender
+            connection.invoke("MessageDeletedForMe", messageId, document.getElementById("currentUserId").value)
+                .catch(err => console.error("❌ Error sending delete update:", err));
+        }
+    }
+
+    function deleteMessageForEveryone(messageId) {
+        if (!messageId) {
+            console.error("❌ Error: Message ID is undefined.");
+            return;
+        }
+
+        fetch(`/chat/messages/delete/${messageId}`, { method: "DELETE" })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+                    if (messageElement) {
+                        let messageDiv = messageElement.querySelector(".my-message, .other-message");
+                        if (messageDiv) {
+                            messageDiv.classList.add("deleted-message");
+                            messageDiv.innerHTML = `<em>Deleted message</em>`;
+                        }
+                    }
+
+                    applyDeletedMessageStyle(messageId);
+
+                    connection.invoke("MessageDeleted", messageId)
+                        .catch(err => console.error("❌ Error sending delete update:", err));
+
+                    updateRecentChat(selectedUserId, "Deleted message", true);
+                } else {
+                    console.error("❌ Error deleting message on both ends:", result);
+                }
+            })
+            .catch(err => console.error("❌ Server Error:", err));
+    }
+
+    function applyDeletedMessageStyle(messageId) {
+        let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+        if (messageElement) {
+            let messageDiv = messageElement.querySelector(".my-message, .other-message");
+            if (messageDiv) {
+                messageDiv.classList.add("deleted-message");
+                messageDiv.innerHTML = `<em>Deleted message</em>`;
+            }
+        }
+    }
+    </script>   

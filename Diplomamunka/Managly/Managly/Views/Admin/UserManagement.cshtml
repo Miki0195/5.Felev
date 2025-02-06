@@ -1,61 +1,222 @@
 ﻿@model IEnumerable<Managly.Models.UserManagement>
 
-<h2>User Management</h2>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+@{
+    ViewData["Title"] = "User Management";
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
+<!-- Include Custom CSS -->
+<link rel="stylesheet" href="~/css/Admin/UserManagement.css">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>@user.Name</td>
-                <td>@user.Email</td>
-                <td>@user.Roles</td>
-                <td>
-                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.UserId">
-                        Delete
-                    </button>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="deleteModal-@user.UserId" tabindex="-1" aria-labelledby="deleteModalLabel-@user.UserId" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteModalLabel-@user.UserId">Confirm Delete</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+<div class="user-management-container">
+    <h2 class="text-center mb-4">User Management</h2>
+
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Modern Table -->
+    <div class="table-responsive user-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>
+                            <select class="form-select role-select" data-user-id="@user.UserId">
+                                <option value="Employee" selected="@(user.Roles.Contains("Employee") ? "selected" : null)">Employee</option>
+                                <option value="Manager" selected="@(user.Roles.Contains("Manager") ? "selected" : null)">Manager</option>
+                                <option value="Admin" selected="@(user.Roles.Contains("Admin") ? "selected" : null)">Admin</option>
+                            </select>
+                        </td>
+                        <td class="action-buttons">
+                            <!-- Delete Button -->
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.UserId">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal-@user.UserId" tabindex="-1" aria-labelledby="deleteModalLabel-@user.UserId" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel-@user.UserId">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete <strong>@user.Name</strong> (<strong>@user.Email</strong>)?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form asp-action="DeleteUser" asp-controller="Admin" method="post">
+                                                <input type="hidden" name="userId" value="@user.UserId" />
+                                                <button type="submit" class="btn btn-danger">Confirm</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="modal-body">
-                                    Are you sure you want to delete the user profile for <strong>@user.Name</strong> (<strong>@user.Email</strong>)? This action cannot be undone.
-                                </div>
-                                <div class="modal-footer">
-                                    <form asp-action="DeleteUser" asp-controller="Admin" method="post">
-                                        <input type="hidden" name="userId" value="@user.UserId" />
-                                        <button type="submit" class="btn btn-danger">Confirm</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </form>
+                            </div> <!-- End Modal -->
+                            <!-- Confirmation Modal -->
+                            <div class="modal fade" id="confirmRoleChangeModal" tabindex="-1" aria-labelledby="confirmRoleChangeLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="confirmRoleChangeLabel">Confirm Role Change</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to change the role of <strong id="roleUserName"></strong> to <strong id="newRole"></strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-success" id="confirmRoleChangeBtn">Confirm</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Include Bootstrap Icons for UI Enhancements -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+
+<script>document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
+
+        let selectedUserId = null;
+        let selectedRole = null;
+        let originalRole = null;
+        let selectedUserName = null;
+
+        document.querySelectorAll(".role-select").forEach(select => {
+            select.setAttribute("data-original-role", select.value); // Save initial role
+        });
+
+        document.querySelectorAll(".role-select").forEach(select => {
+            select.addEventListener("change", function () {
+                selectedUserId = this.getAttribute("data-user-id");
+                selectedRole = this.value;
+                originalRole = this.getAttribute("data-original-role");
+                selectedUserName = this.closest("tr").querySelector("td:first-child").textContent; // Get user name
+
+                document.getElementById("roleUserName").textContent = selectedUserName;
+                document.getElementById("newRole").textContent = selectedRole;
+
+                // Show the confirmation modal
+                let modal = new bootstrap.Modal(document.getElementById("confirmRoleChangeModal"));
+                modal.show();
+            });
+        });
+
+        document.getElementById("confirmRoleChangeBtn").addEventListener("click", function () {
+            if (!selectedUserId || !selectedRole) return;
+
+            fetch(`/Admin/updateRole/${selectedUserId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role: selectedRole })
+            })
+                .then(async response => {
+                    let data = await response.json();
+                    if (!response.ok) {
+                        console.error("Error Response:", data);
+                        throw new Error(data.message || "Failed to update role.");
+                    }
+                    return data;
+                })
+                .then(data => {
+                    showToast(`Role changed to <strong>${selectedRole}</strong> for <strong>${selectedUserName}</strong>`, "success");
+
+                    // 🚀 Update the dropdown UI without a page refresh
+                    let selectElement = document.querySelector(`.role-select[data-user-id="${selectedUserId}"]`);
+                    if (selectElement) {
+                        let selectedOption = selectElement.querySelector(`option[value="${selectedRole}"]`);
+                        if (selectedOption) {
+                            selectedOption.selected = true;
+                        }
+                    }
+
+                    let modalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmRoleChangeModal"));
+                    if (modalInstance) modalInstance.hide(); // Close modal after successful update
+                })
+                .catch(error => {
+                    console.error("Error updating role:", error);
+                    showToast(`Error: ${error.message}`, "error");
+
+                    let modalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmRoleChangeModal"));
+                    if (modalInstance) modalInstance.hide();
+                });
+        });
+
+        document.querySelector("#confirmRoleChangeModal .btn-secondary").addEventListener("click", function () {
+            if (selectedUserId && originalRole) {
+                let selectElement = document.querySelector(`.role-select[data-user-id="${selectedUserId}"]`);
+                if (selectElement) {
+                    selectElement.value = originalRole; // Reset selection to original role
+                }
+            }
+        });
+    });
+    //function showToast(message, type = "success") {
+    //    let toastContainer = document.getElementById("toastContainer");
+
+    //    let bgColor = type === "success" ? "bg-success" : "bg-danger";
+
+    //    let toastElement = document.createElement("div");
+    //    toastElement.classList.add("toast", "align-items-center", "text-white", bgColor, "border-0");
+    //    toastElement.setAttribute("role", "alert");
+    //    toastElement.setAttribute("aria-live", "assertive");
+    //    toastElement.setAttribute("aria-atomic", "true");
+
+    //    toastElement.innerHTML = `
+    //        <div class="d-flex">
+    //            <div class="toast-body">${message}</div>
+    //            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    //        </div>
+    //    `;
+
+    //    toastContainer.appendChild(toastElement);
+
+    //    let toast = new bootstrap.Toast(toastElement);
+    //    toast.show();
+
+    //    toastElement.addEventListener("hidden.bs.toast", () => {
+    //        toastElement.remove();
+    //    });
+    //}
+
+
+    </script>

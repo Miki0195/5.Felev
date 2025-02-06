@@ -1,0 +1,217 @@
+﻿@{
+    ViewData["Title"] = "My Schedule";
+}
+
+<h2 class="text-center mb-4">My Schedule</h2>
+
+<button id="editScheduleBtn" class="btn btn-warning">Edit</button>
+<button id="doneEditingBtn" class="btn btn-success d-none">Done Editing</button>
+
+<div class="container">
+    <div class="card p-4 shadow">
+        <h5 class="text-center">Your Work Schedule</h5>
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Vacation Exists Modal -->
+<div class="modal fade" id="vacationExistsModal" tabindex="-1" aria-labelledby="vacationExistsModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vacationExistsModal">Cannot Select This Date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You cannot select this date because you already have a <strong>pending or approved vacation</strong>.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shit Exists Modal -->
+<div class="modal fade" id="shiftExistsModal" tabindex="-1" aria-labelledby="shiftExistsLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shiftExistsLabel">Cannot Select This Date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You cannot select this date because a <strong>work shift</strong> already exists.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot Add Past Vacation Modal -->
+<div class="modal fade" id="cannotAddPastVacationModal" tabindex="-1" aria-labelledby="cannotAddPastVacationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cannotAddPastVacationLabel">Cannot Request Vacation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You cannot request a vacation for a <strong>past date</strong>. Please select a future date.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script>document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
+        let calendar = null;
+        let editMode = false;
+        let selectedDates = [];
+
+        loadUserSchedule();
+
+        function loadUserSchedule() {
+            var calendarEl = document.getElementById("calendar");
+
+            if (calendar) {
+                calendar.destroy();
+            }
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: "dayGridMonth",
+                editable: false,
+                selectable: true,
+                events: async function (fetchInfo, successCallback, failureCallback) {
+                    try {
+                        let scheduleResponse = await fetch("/api/schedule/myschedule");
+                        let leaveResponse = await fetch("/api/leave/myleaves");
+
+                        let scheduleEvents = await scheduleResponse.json();
+                        let leaveEvents = await leaveResponse.json();
+
+                        if (!Array.isArray(scheduleEvents) || !Array.isArray(leaveEvents)) {
+                            throw new Error("Invalid API response format");
+                        }
+
+                        successCallback([...scheduleEvents, ...leaveEvents]);
+                    } catch (error) {
+                        console.error("Error fetching events:", error);
+                        failureCallback(error);
+                    }
+                },
+                eventDidMount: function (info) {
+                    let eventTitle = info.event.title;
+                    let parts = eventTitle.split("\n");
+
+                    let timeText = parts[0] || "";
+                    let commentText = parts.length > 1 ? parts[1] : "";
+
+                    if (eventTitle.includes("Vacation")) {
+                        info.el.innerHTML = `<div style="color: white; font-weight: bold;">${eventTitle}</div>`;
+                    } else {
+                        info.el.innerHTML = `
+                        <div style="color: white; font-weight: bold;">${timeText}</div>
+                        ${commentText ? `<div style="font-size: 0.8rem; color: black;">${commentText}</div>` : ""}`;
+                    }
+                },
+                dateClick: function (info) {
+                    let today = new Date().toISOString().split("T")[0];
+
+                    if (editMode) {
+                        let existingIndex = selectedDates.indexOf(info.dateStr);
+                        let existingEvent = calendar.getEvents().find(event => event.startStr === info.dateStr);
+
+                        if (info.dateStr < today) {
+                            showCannotAddPastVacationModal();
+                            return;
+                        }
+
+                        if (existingEvent) {
+                            if (existingEvent.title.includes("Vacation")) {
+                                showVacationExistsModal();
+                            } else {
+                                showShiftExistsModal();
+                            }
+                            return;
+                        }
+
+                        if (existingIndex === -1) {
+                            selectedDates.push(info.dateStr);
+                            info.dayEl.style.backgroundColor = "orange";
+                        } else {
+                            selectedDates.splice(existingIndex, 1);
+                            info.dayEl.style.backgroundColor = "";
+                        }
+                    }
+                }
+            });
+
+            calendar.render();
+        }
+
+        document.getElementById("editScheduleBtn").addEventListener("click", function () {
+            editMode = true;
+            document.getElementById("editScheduleBtn").classList.add("d-none");
+            document.getElementById("doneEditingBtn").classList.remove("d-none");
+        });
+
+        document.getElementById("doneEditingBtn").addEventListener("click", function () {
+            editMode = false;
+            document.getElementById("editScheduleBtn").classList.remove("d-none");
+            document.getElementById("doneEditingBtn").classList.add("d-none");
+
+            if (selectedDates.length === 0) {
+                // Create a modal
+                alert("No leave days selected.");
+                return;
+            }
+
+            submitLeaveRequest(selectedDates);
+        });
+
+        function submitLeaveRequest(selectedDates) {
+            fetch("/api/leave/request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(selectedDates.map(date => ({
+                    LeaveDate: new Date(date).toISOString().split("T")[0], 
+                    Reason: "Vacation",
+                    MedicalProof: "" 
+                })))
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        calendar.refetchEvents(); 
+                        selectedDates = []; 
+                    } else {
+                        alert("Failed to submit leave request.");
+                    }
+                }).catch(error => console.error("Error:", error));
+        }
+
+        function showVacationExistsModal() {
+            let modal = new bootstrap.Modal(document.getElementById("vacationExistsModal"));
+            modal.show();
+        }
+
+        function showShiftExistsModal() {
+            let modal = new bootstrap.Modal(document.getElementById("shiftExistsModal"));
+            modal.show();
+        }
+
+        function showCannotAddPastVacationModal() {
+            let modal = new bootstrap.Modal(document.getElementById("cannotAddPastVacationModal"));
+            modal.show();
+        }
+
+    });</script>

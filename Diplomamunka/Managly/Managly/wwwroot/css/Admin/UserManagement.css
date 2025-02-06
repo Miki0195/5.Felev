@@ -1,0 +1,87 @@
+﻿/* ====== Modern User Management Table ====== */
+.user-management-container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+.user-table {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.table th {
+    background: #343a40;
+    color: white;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 12px;
+    text-align: left;
+}
+
+.table tbody tr {
+    transition: background 0.3s ease;
+}
+
+    .table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+.table td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* ====== Action Buttons ====== */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-danger, .btn-primary {
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+    .btn-danger:hover {
+        background: #e60000;
+        transform: scale(1.05);
+    }
+
+    .btn-primary:hover {
+        background: #007bff;
+        transform: scale(1.05);
+    }
+
+/* ====== Modal Customization ====== */
+.modal-content {
+    border-radius: 8px;
+}
+
+.modal-header {
+    background: #343a40;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-footer {
+    border-top: 1px solid #ddd;
+}
+
+.btn-close {
+    color: white;
+}
+
+/* ====== Responsive Design ====== */
+@media (max-width: 768px) {
+    .user-table {
+        font-size: 14px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}

@@ -12,11 +12,79 @@
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* 🔔 Notification Bell Styling */
+#notificationBell {
+    font-size: 1.5rem;
+    color: black; /* Default color */
+    transition: color 0.3s ease-in-out;
 }
 
-body {
-  margin-bottom: 60px;
+    #notificationBell.has-notifications {
+        color: red !important; /* Turns red when there are new notifications */
+    }
+
+/* 🔴 Notification Badge */
+.notification-badge {
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* 🔽 Notification Dropdown Styling */
+#notificationDropdown {
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+    .notification-item:hover {
+        background: #f8f9fa;
+    }
+
+/* 🔵 Unread Notifications - Highlight */
+.unread-notification {
+    font-weight: bold;
+    background: #e8f4ff;
+    border-left: 4px solid #007bff;
+    padding: 10px;
+    margin-bottom: 5px;
+    transition: background 0.3s ease;
+}
+
+/* ✅ Read Notifications (Still Visible) */
+.read-notification {
+    font-weight: normal;
+    background: #f8f9fa;
+    border-left: 4px solid #ccc;
+    opacity: 0.8;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.notification-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 🔴 Message Count for Bulk Messages */
+.message-count {
+    background-color: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    margin-left: 5px;
 }

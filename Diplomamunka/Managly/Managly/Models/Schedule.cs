@@ -21,6 +21,8 @@ namespace Managly.Models
         [Required]
         public TimeSpan EndTime { get; set; }
 
+        public string Comment { get; set; }
+
         public bool IsHolidayRequest { get; set; } = false;
 
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Managly.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Managly.Hubs;
 
 namespace Managly;
 
@@ -24,6 +25,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddControllersWithViews();
 
+        builder.Services.AddSignalR();
+
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
         {
@@ -40,6 +43,14 @@ public class Program
             options.SlidingExpiration = true; // Reset expiration time on activity
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll",
+                builder => builder.AllowAnyOrigin()
+                                  .AllowAnyMethod()
+                                  .AllowAnyHeader());
+        });
+
         builder.Services.AddIdentity<User, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
@@ -51,6 +62,8 @@ public class Program
         });
 
         builder.Services.AddScoped<IAuthorizationHandler, PreGeneratedPasswordHandler>();
+
+        builder.Services.AddScoped<ChatHub>();
 
         builder.Services.AddSingleton<EmailService>();
 
@@ -90,8 +103,10 @@ public class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
+
         app.UseRouting();
 
+        app.UseCors("AllowAll");
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -118,9 +133,21 @@ public class Program
             await next();
         });
 
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Login}/{id?}");
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapHub<ChatHub>("/chathub"); // ✅ Ensure this matches the correct namespace
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Login}/{id?}");
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+        });
+
+        //app.MapControllerRoute(
+        //    name: "default",
+        //    pattern: "{controller=Home}/{action=Login}/{id?}");
 
         app.Run();
     }

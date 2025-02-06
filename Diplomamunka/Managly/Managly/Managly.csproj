@@ -15,6 +15,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,6 +31,10 @@
     <None Remove="Views\Admin\" />
     <None Remove="Services\" />
     <None Remove="Authorization\" />
+    <None Remove="Helpers\" />
+    <None Remove="Views\Schedule\" />
+    <None Remove="Hubs\" />
+    <None Remove="Views\Chat\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -39,10 +45,40 @@
     <Folder Include="wwwroot\css\Account\" />
     <Folder Include="Authorization\" />
     <Folder Include="wwwroot\js\Account\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="wwwroot\uploads\" />
+    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\images\default\" />
+    <Folder Include="Views\Schedule\" />
+    <Folder Include="wwwroot\css\Schedule\" />
+    <Folder Include="wwwroot\css\Admin\" />
+    <Folder Include="Hubs\" />
+    <Folder Include="Views\Chat\" />
+    <Folder Include="wwwroot\js\Chat\" />
+    <Folder Include="wwwroot\css\Chat\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />
     <Content Remove="wwwroot\css\Account\" />
     <Content Remove="wwwroot\js\Account\" />
+    <Content Remove="wwwroot\uploads\" />
+    <Content Remove="wwwroot\images\" />
+    <Content Remove="wwwroot\images\default\" />
+    <Content Remove="Views\Schedule\ManageSchedule.cshtml" />
+    <Content Remove="wwwroot\css\Schedule\" />
+    <Content Remove="wwwroot\css\Admin\" />
+    <Content Remove="wwwroot\js\Chat\" />
+    <Content Remove="wwwroot\css\Chat\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="Views\Account\Profile.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Views\Schedule\namespace Managly.Models&#xA;{&#xA;    public class ScheduleEvent&#xA;    {&#xA;        public string Title { get%3B set%3B }&#xA;        public string Start { get%3B set%3B }&#xA;        public string WorkerId { get%3B set%3B }&#xA;    }&#xA;}&#xA;Manag">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 </Project>

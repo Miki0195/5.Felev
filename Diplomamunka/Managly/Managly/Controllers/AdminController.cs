@@ -63,7 +63,14 @@ namespace Managly.Controllers
                 Email = model.Email,
                 UserName = model.Email,
                 CompanyId = adminUser.CompanyId,
-                IsUsingPreGeneratedPassword = true
+                IsUsingPreGeneratedPassword = true,
+                LastName = "",
+                Country = "",
+                City = "",
+                Address = "",
+                DateOfBirth = new DateTime(2000, 1, 1), 
+                Gender = "Other", 
+                ProfilePicturePath = "/images/default/default-profile.png"
             };
 
             var result = await _userManager.CreateAsync(newUser, randomPassword);
@@ -129,12 +136,13 @@ namespace Managly.Controllers
             foreach (var user in usersInCompany)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                string role = roles.FirstOrDefault() ?? "Employee";
                 userRoles.Add(new UserManagement
                 {
                     UserId = user.Id,
                     Name = user.Name,
                     Email = user.Email,
-                    Roles = string.Join(", ", roles)
+                    Roles = role
                 });
             }
 
@@ -174,5 +182,55 @@ namespace Managly.Controllers
             return RedirectToAction("UserManagement");
         }
 
+        /// <summary>
+        /// Updates a user's role dynamically
+        /// </summary>
+        [HttpPut]
+        [Route("Admin/updateRole/{userId}")]
+        public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] RoleUpdateViewModel request)
+        {
+            if (string.IsNullOrEmpty(userId) || request == null || string.IsNullOrEmpty(request.Role))
+            {
+                return BadRequest(new { success = false, message = "Invalid request data." });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { success = false, message = $"User not found with ID {userId}." });
+            }
+
+            var validRoles = new List<string> { "Admin", "Manager", "Employee" };
+            if (!validRoles.Contains(request.Role))
+            {
+                return BadRequest(new { success = false, message = "Invalid role specified." });
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            var rolesToRemove = currentRoles.Intersect(validRoles).ToList();
+
+            // 🚀 Ensure roles are removed before adding new role
+            if (rolesToRemove.Any())
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    return BadRequest(new { success = false, message = "Failed to remove old roles." });
+                }
+            }
+
+            // 🚀 Add new role and verify it succeeds
+            var addResult = await _userManager.AddToRoleAsync(user, request.Role);
+            if (!addResult.Succeeded)
+            {
+                return BadRequest(new { success = false, message = "Failed to assign new role." });
+            }
+
+            // 🚀 Save changes in the database to persist the new role
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Role updated successfully!" });
+        }
     }
 }
+

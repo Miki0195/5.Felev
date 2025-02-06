@@ -1,0 +1,715 @@
+﻿@model List<Managly.Models.User>
+@{
+    ViewData["Title"] = "Manage Schedule";
+}
+
+<link rel="stylesheet" href="~/css/Schedule/Manage.css">
+
+<h2 class="text-center mb-4">Manage Worker Schedules</h2>
+
+<!-- Step 1: Select Worker -->
+<div class="container">
+    <div class="card p-4 shadow">
+        <h5>Select a Worker</h5>
+        <select id="workerSelect" class="form-select">
+            <option value="">-- Select a Worker --</option>
+            @foreach (var worker in Model)
+            {
+                <option value="@worker.Id">@worker.Name @worker.LastName</option>
+            }
+        </select>
+    </div>
+
+    <!-- Step 2: Show Schedule after Worker is Selected -->
+    <div id="scheduleContainer" class="mt-4 d-none">
+        <h5 class="mb-3">Schedule for <span id="workerName"></span></h5>
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+</div>
+
+
+<div class="modal fade" id="timePickerModal" tabindex="-1" aria-labelledby="timePickerLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="timePickerLabel">Add Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="shiftStartTime">Start Time:</label>
+                <input type="time" id="shiftStartTime" class="form-control">
+
+                <label for="shiftEndTime" class="mt-2">End Time:</label>
+                <input type="time" id="shiftEndTime" class="form-control">
+
+                <label for="shiftComment" class="mt-2">Comment:</label>
+                <textarea id="shiftComment" class="form-control" placeholder="Add any comments regarding this shift..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveShift">Save Shift</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete shift modal -->
+<div class="modal fade" id="deleteShiftModal" tabindex="-1" aria-labelledby="deleteShiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteShiftLabel">Delete Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>A shift already exists for this day. Do you want to delete it?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteShift">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Shift Modal -->
+<div class="modal fade" id="editShiftModal" tabindex="-1" aria-labelledby="editShiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editShiftLabel">Edit Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label for="editShiftStartTime">Start Time:</label>
+                <input type="time" id="editShiftStartTime" class="form-control">
+
+                <label for="editShiftEndTime" class="mt-2">End Time:</label>
+                <input type="time" id="editShiftEndTime" class="form-control">
+
+                <label for="editShiftComment" class="mt-2">Comment:</label>
+                <textarea id="editShiftComment" class="form-control" placeholder="Modify shift comments..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="saveEditShift">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot add shift modal -->
+<div class="modal fade" id="cannotAddShiftModal" tabindex="-1" aria-labelledby="cannotAddShiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cannotAddShiftLabel">Shift Addition Not Allowed</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This day already has an <strong>approved vacation</strong>. You cannot add a shift.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vacation Approval Modal -->
+<div class="modal fade" id="approveRejectVacationModal" tabindex="-1" aria-labelledby="approveRejectVacationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveRejectVacationLabel">Review Vacation Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>The employee has requested a vacation on <strong id="vacationDate"></strong>.</p>
+                <p>Would you like to approve or reject this request?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="rejectVacationBtn">Reject</button>
+                <button type="button" class="btn btn-success" id="approveVacationBtn">Approve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Vacation Modal -->
+<div class="modal fade" id="updateVacationModal" tabindex="-1" aria-labelledby="updateVacationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateVacationLabel">Manage Approved Vacation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Approved vacation on <strong id="vacationDateText"></strong>.</p>
+                <p>Would you like to delete this approved vacation?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteVacationBtn">Delete Vacation</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot Add Past Shift Modal -->
+<div class="modal fade" id="cannotAddPastShiftModal" tabindex="-1" aria-labelledby="cannotAddPastShiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cannotAddPastShiftLabel">Cannot Add Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You cannot add a shift to a <strong>past date</strong>. Please select a future date.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+
+<script>document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
+        const workerSelect = document.getElementById("workerSelect");
+        const scheduleContainer = document.getElementById("scheduleContainer");
+        const workerName = document.getElementById("workerName");
+        let selectedDate = null;
+        let selectedWorkerId = null;
+        let existingShiftId = null;
+        let calendar = null;
+
+        workerSelect.addEventListener("change", function () {
+            selectedWorkerId = this.value;
+            if (selectedWorkerId) {
+                scheduleContainer.classList.remove("d-none");
+                workerName.textContent = this.options[this.selectedIndex].text;
+                loadSchedule(selectedWorkerId);
+            } else {
+                scheduleContainer.classList.add("d-none");
+            }
+        });
+
+        function loadSchedule(workerId) {
+            var calendarEl = document.getElementById("calendar");
+
+            if (calendar) {
+                calendar.destroy();
+            }
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: "dayGridMonth",
+                editable: true,
+                selectable: true,
+                eventStartEditable: true, 
+                droppable: true,
+                headerToolbar: { 
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay"
+                },
+                events: async function (fetchInfo, successCallback, failureCallback) {
+                    try {
+                        let scheduleResponse = await fetch(`/api/schedule/${workerId}`);
+                        let leaveResponse = await fetch(`/api/leave/${workerId}`);
+
+                        let scheduleEvents = await scheduleResponse.json();
+                        let leaveEvents = await leaveResponse.json();
+
+                        if (!Array.isArray(scheduleEvents) || !Array.isArray(leaveEvents)) {
+                            throw new Error("Invalid API response format");
+                        }
+
+                        successCallback([...scheduleEvents, ...leaveEvents]);
+                    } catch (error) {
+                        console.error("Error fetching events:", error);
+                        failureCallback(error);
+                    }
+                },
+                eventDrop: function (info) {
+                    let eventId = info.event.id;
+                    let newDate = info.event.startStr; 
+                    let today = new Date().toISOString().split("T")[0]; 
+                    let isVacation = info.event.title.includes("Vacation");
+                    let isPendingVacation = info.event.title.includes("Pending");
+                    let isApprovedVacation = info.event.title.includes("Approved");
+
+                    if (newDate < today) {
+                        showToast("Cannot move events to a past date!", "error");
+                        info.revert();
+                        return;
+                    }
+
+                    if (isVacation && isPendingVacation) {
+                        showToast("Pending vacations cannot be moved!", "error");
+                        info.revert();
+                        calendar.refetchEvents();
+                        return;
+                    }
+
+                    Promise.all([
+                        fetch(`/api/schedule/${selectedWorkerId}`).then(response => response.json()),
+                        fetch(`/api/leave/${selectedWorkerId}`).then(response => response.json())
+                    ])
+                        .then(([scheduleEvents, leaveEvents]) => {
+                            let shiftExists = scheduleEvents.find(event => event.start === newDate);
+                            let vacationExists = leaveEvents.find(event => event.start === newDate && (event.color === "orange" || event.color === "green"));
+
+                            if (isVacation && vacationExists) {
+                                showToast("Cannot move vacation to a day that already has a vacation!", "error");
+                                info.revert();
+                                calendar.refetchEvents();
+                                return;
+                            }
+
+                            if (!isVacation && (shiftExists || vacationExists)) {
+                                showToast("A shift or vacation already exists on this date!", "error");
+                                info.revert();
+                                calendar.refetchEvents();
+                                return;
+                            }
+
+                            let deleteShiftPromise = shiftExists
+                                ? fetch(`/api/schedule/delete/${shiftExists.id}`, { method: "DELETE" }).then(res => res.json())
+                                : Promise.resolve({ success: true });
+
+                            deleteShiftPromise.then(shiftDeleteResult => {
+                                if (!shiftDeleteResult.success) {
+                                    showToast("Failed to remove conflicting shift.", "error");
+                                    info.revert();
+                                    calendar.refetchEvents();
+                                    return;
+                                }
+
+                                if (isVacation) {
+                                    fetch(`/api/leave/${eventId}/move`, {
+                                        method: "PUT",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(newDate) 
+                                    })
+                                        .then(response => {
+                                            if (!response.ok) {
+                                                throw new Error("Vacation move failed");
+                                            }
+                                            return response.json();
+                                        })
+                                        .then((data) => {
+                                            if (data.success) {
+                                                showToast("Vacation moved successfully!", "success");
+                                                calendar.refetchEvents(); 
+                                            } else {
+                                                showToast("Failed to move vacation.", "error");
+                                                info.revert();
+                                                calendar.refetchEvents();
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error moving vacation:", error);
+                                            showToast("Failed to move vacation.", "error");
+                                            info.revert();
+                                            calendar.refetchEvents();
+                                        });
+                                    return;
+                                }
+
+                                let shiftData = extractShiftDetails(info);
+
+                                fetch(`/api/schedule/update/${eventId}`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(shiftData)
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error("Shift move failed");
+                                        }
+                                        return response.json();
+                                    })
+                                    .then((data) => {
+                                        if (data.success) {
+                                            showToast("Shift moved successfully!", "success");
+                                            calendar.refetchEvents();
+                                        } else {
+                                            showToast("Failed to move shift.", "error");
+                                            info.revert();
+                                            calendar.refetchEvents();
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error moving shift:", error);
+                                        showToast("Failed to move shift.", "error");
+                                        info.revert();
+                                        calendar.refetchEvents();
+                                    });
+
+                            });
+
+                        })
+                        .catch(error => {
+                            console.error("Error checking existing schedules:", error);
+                            showToast("Failed to verify event move.", "error");
+                            info.revert();
+                            calendar.refetchEvents();
+                        });
+                },
+
+                eventDidMount: function (info) {
+                    let eventTitle = info.event.title;
+                    let parts = eventTitle.split("\n");
+
+                    let timeText = parts[0] || "";
+                    let commentText = parts.length > 1 ? parts[1] : "";
+
+                    if (info.el.querySelector(".event-content")) return;
+
+                    let contentHtml = "";
+
+                    if (eventTitle.includes("Vacation")) {
+                        contentHtml = `<div class="event-content" style="color: white; font-weight: bold;">Vacation</div>`;
+                    } else {
+                        contentHtml = `<div class="event-content" style="color: white;"><strong>${timeText}</strong></div>
+                                         <div class="event-content" style="font-size: 0.8rem; color: black">${commentText}</div>`;
+                    }
+
+                    info.el.innerHTML = contentHtml;
+                },
+                dateClick: function (info) {
+                    let today = new Date().toISOString().split("T")[0];
+                    selectedDate = info.dateStr;
+
+                    Promise.all([
+                        fetch(`/api/schedule/${selectedWorkerId}`).then(response => response.json()),
+                        fetch(`/api/leave/${selectedWorkerId}`).then(response => response.json())
+                    ])
+                        .then(([scheduleEvents, leaveEvents]) => {
+                            let shiftExists = scheduleEvents.find(event => event.start === selectedDate);
+                            let approvedVacationExists = leaveEvents.find(event => event.start === selectedDate && event.color === "green");
+
+                            if (approvedVacationExists) {
+                                showCannotAddShiftModal();
+                                return;
+                            }
+
+                            if (info.dateStr < today) {
+                                if (shiftExists) {
+                                    existingShiftId = shiftExists.id;
+                                    showDeleteShiftModal();
+                                } else {
+                                    showCannotAddPastShiftModal();
+                                }
+                                return;
+                            }
+
+                            if (shiftExists) {
+                                existingShiftId = shiftExists.id;
+                                showDeleteShiftModal();
+                            } else {
+                                showTimePickerModal();
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                },
+                eventClick: function (info) {
+                    selectedShiftId = info.event.id;
+                    let shiftParts = info.event.title.split("\n");
+                    let shiftTime = shiftParts[0].split(" - ");
+                    let eventTitle = info.event.title;
+
+                    if (eventTitle.includes("Vacation") && eventTitle.includes("Approved")) {
+                        selectedVacationId = info.event.id;
+                        document.getElementById("vacationDateText").textContent = info.event.startStr;
+
+                        updateVacationStatus();
+                    }
+
+                    if (!info.event.title.includes("Vacation")) {
+                        document.getElementById("editShiftStartTime").value = shiftTime[0];
+                        document.getElementById("editShiftEndTime").value = shiftTime[1];
+                        document.getElementById("editShiftComment").value = shiftParts[1] || "";
+
+                        showEditShiftModal();
+                    } else {
+                        let leaveId = info.event.id;
+                        if (info.event.title.includes("Pending")) {
+                            document.getElementById("vacationDate").textContent = info.event.startStr;
+                            selectedVacationId = leaveId;
+
+                            approveRejectVacationRequest();
+                        }
+                    }
+                }
+
+
+            });
+
+            calendar.render();
+        }
+
+        function extractShiftDetails(info) {
+            let shiftParts = info.event.title.split("\n");
+            let shiftTime = shiftParts[0].split(" - "); 
+            let comment = shiftParts.length > 1 ? shiftParts[1] : ""; 
+
+            if (!shiftTime[0] || !shiftTime[1]) {
+                showToast("Invalid shift time format.", "error");
+                info.revert();
+                return null;
+            }
+
+            return {
+                shiftDate: info.event.startStr,
+                startTime: shiftTime[0],
+                endTime: shiftTime[1],
+                comment: comment
+            };
+        }
+
+        function checkExistingShift(workerId, date) {
+            fetch(`/api/schedule/${workerId}`)
+                .then(response => response.json())
+                .then(events => {
+                    let shiftExists = events.find(event => event.start === date);
+                    if (shiftExists) {
+                        existingShiftId = shiftExists.id;
+                        showDeleteShiftModal();
+                    } else {
+                        showTimePickerModal();
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function updateLeaveStatus(leaveId, status) {
+            fetch(`/api/leave/${leaveId}/status`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(status)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+
+                        calendar.refetchEvents();
+
+                        let modalElement = document.getElementById("approveRejectVacationModal");
+                        let modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide(); 
+                        }
+                    } else {
+                        alert("Failed to update leave status.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function showTimePickerModal() {
+            let modal = new bootstrap.Modal(document.getElementById("timePickerModal"));
+            modal.show();
+        }
+
+        function showEditShiftModal() {
+            let modal = new bootstrap.Modal(document.getElementById("editShiftModal"));
+            modal.show();
+        }
+
+        function showDeleteShiftModal() {
+            let modal = new bootstrap.Modal(document.getElementById("deleteShiftModal"));
+            modal.show();
+        }
+
+        function showCannotAddShiftModal() {
+            let modal = new bootstrap.Modal(document.getElementById("cannotAddShiftModal"));
+            modal.show();
+        }
+
+        function approveRejectVacationRequest() {
+            let modal = new bootstrap.Modal(document.getElementById("approveRejectVacationModal"));
+            modal.show();
+        }
+
+        function updateVacationStatus() {
+            let modal = new bootstrap.Modal(document.getElementById("updateVacationModal"));
+            modal.show();
+        }
+
+        function showCannotAddPastShiftModal() {
+            let modal = new bootstrap.Modal(document.getElementById("cannotAddPastShiftModal"));
+            modal.show();
+        }
+
+        document.getElementById("saveShift").addEventListener("click", function () {
+            let startTime = document.getElementById("shiftStartTime").value;
+            let endTime = document.getElementById("shiftEndTime").value;
+
+            if (!startTime || !endTime) {
+                alert("Please select both start and end times.");
+                return;
+            }
+
+            saveShift(selectedWorkerId, selectedDate, startTime, endTime);
+        });
+
+        function saveShift(workerId, date, startTime, endTime) {
+            let comment = document.getElementById("shiftComment").value;
+
+            fetch("/api/schedule", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: workerId, shiftDate: date, startTime: startTime, endTime: endTime, comment: comment })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        calendar.refetchEvents();
+                        var modal = bootstrap.Modal.getInstance(document.getElementById("timePickerModal"));
+                        modal.hide();
+                    } else {
+                        alert("Failed to add shift.");
+                    }
+                });
+        }
+
+        document.getElementById("saveEditShift").addEventListener("click", function () {
+            let newStartTime = document.getElementById("editShiftStartTime").value;
+            let newEndTime = document.getElementById("editShiftEndTime").value;
+            let newComment = document.getElementById("editShiftComment").value;
+
+            if (!newStartTime || !newEndTime) {
+                alert("Please select both start and end times.");
+                return;
+            }
+            let shiftEvent = calendar.getEventById(selectedShiftId);
+            if (!shiftEvent) {
+                alert("Error: Shift not found.");
+                return;
+            }
+
+            let shiftDate = shiftEvent.startStr; 
+
+            updateShift(selectedShiftId, newStartTime, newEndTime, shiftDate, newComment);
+        });
+
+        function updateShift(shiftId, startTime, endTime, shiftDate, comment) {
+            fetch(`/api/schedule/update/${shiftId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ startTime: startTime, endTime: endTime, shiftDate : shiftDate, comment: comment })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    //if (data.success) {
+                    //    //showToast("Shift updated successfully!", "success");
+
+                    //    calendar.refetchEvents();
+
+                    //    let modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
+                    //    modal.hide();
+                    //} else {
+                    //    showToast("Failed to update shift.", "error");
+                    //}
+                    calendar.refetchEvents();
+                    var modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
+                    modal.hide();
+
+                    showToast("Shift updated successfully!", "success");
+                });
+        }
+
+        document.getElementById("confirmDeleteShift").addEventListener("click", function () {
+            deleteShift(existingShiftId);
+        });
+
+
+        function deleteShift(shiftId) {
+            fetch(`/api/schedule/delete/${shiftId}`, {
+                method: "DELETE"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        calendar.refetchEvents();
+                        var modal = bootstrap.Modal.getInstance(document.getElementById("deleteShiftModal"));
+                        modal.hide();
+                    } else {
+                        alert("Failed to delete shift.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        document.getElementById("deleteVacationBtn").addEventListener("click", function () {
+            deleteVacation(selectedVacationId);
+        });
+
+        function deleteVacation(vacationId) {
+            fetch(`/api/leave/delete/${vacationId}`, {
+                method: "DELETE"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        calendar.refetchEvents();
+                        let event = calendar.getEventById(vacationId);
+                        if (event) {
+                            event.remove();
+                        }
+
+                        var modal = bootstrap.Modal.getInstance(document.getElementById("updateVacationModal"));
+                        modal.hide();
+                    } else {
+                        alert("Failed to delete vacation.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        document.getElementById("approveVacationBtn").addEventListener("click", function () {
+            updateLeaveStatus(selectedVacationId, "Approved");
+        });
+
+        document.getElementById("rejectVacationBtn").addEventListener("click", function () {
+            updateLeaveStatus(selectedVacationId, "Rejected");
+        });
+
+        //function showToast(message, type = "success") {
+        //    let toastContainer = document.getElementById("toastContainer");
+
+        //    let bgColor = type === "success" ? "bg-success" : "bg-danger";
+
+        //    let toastElement = document.createElement("div");
+        //    toastElement.classList.add("toast", "align-items-center", "text-white", bgColor, "border-0");
+        //    toastElement.setAttribute("role", "alert");
+        //    toastElement.setAttribute("aria-live", "assertive");
+        //    toastElement.setAttribute("aria-atomic", "true");
+
+        //    toastElement.innerHTML = `
+        //    <div class="d-flex">
+        //        <div class="toast-body">${message}</div>
+        //        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        //    </div>
+        //`;
+
+        //    toastContainer.appendChild(toastElement);
+
+        //    let toast = new bootstrap.Toast(toastElement);
+        //    toast.show();
+
+        //    toastElement.addEventListener("hidden.bs.toast", () => {
+        //        toastElement.remove();
+        //    });
+        //}
+
+
+    });</script>

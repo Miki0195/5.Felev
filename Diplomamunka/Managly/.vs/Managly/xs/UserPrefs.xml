@@ -1,69 +1,101 @@
 ﻿<Properties StartupConfiguration="{E04E5547-FD09-490D-B102-55B6442A62E8}|https">
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Views/Account/AccessDenied.cshtml">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Hubs/ChatHub.cs">
     <Files>
-      <File FileName="Managly/Models/User.cs" />
+      <File FileName="Managly/Models/User.cs" Line="37" Column="1" />
       <File FileName="Managly/Models/Company.cs" />
-      <File FileName="Managly/Models/Schedule.cs" />
-      <File FileName="Managly/Models/Message.cs" />
+      <File FileName="Managly/Models/Schedule.cs" Line="33" Column="2" />
+      <File FileName="Managly/Models/Message.cs" Line="30" Column="1" />
       <File FileName="Managly/Models/Attendance.cs" />
-      <File FileName="Managly/Models/Leave.cs" />
-      <File FileName="Managly/Data/ApplicationDbContext.cs" />
-      <File FileName="Managly/appsettings.json" Line="18" Column="34" />
-      <File FileName="Managly/Program.cs" Line="51" Column="58" />
+      <File FileName="Managly/Models/Leave.cs" Line="24" Column="31" />
+      <File FileName="Managly/Data/ApplicationDbContext.cs" Line="18" Column="48" />
+      <File FileName="Managly/appsettings.json" />
+      <File FileName="Managly/Program.cs" Line="156" Column="1" />
       <File FileName="Managly/Managly.csproj" />
-      <File FileName="Managly/Controllers/HomeController.cs" Line="177" Column="82" />
-      <File FileName="Managly/Views/_ViewImports.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/HomeController.cs" Line="204" Column="78" />
+      <File FileName="Managly/Views/_ViewImports.cshtml" />
       <File FileName="Managly/Views/_ViewStart.cshtml" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml.css" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml" Line="42" Column="23" />
-      <File FileName="Managly/Views/Home/Index.cshtml" Line="1" Column="1" />
-      <File FileName="Managly/Models/LicenseKey.cs" />
-      <File FileName="Managly/Views/Home/Login.cshtml" Line="8" Column="1" />
+      <File FileName="Managly/Views/Shared/_Layout.cshtml.css" Line="1" Column="1" />
+      <File FileName="Managly/Views/Shared/_Layout.cshtml" Line="208" Column="17" />
+      <File FileName="Managly/Views/Home/Index.cshtml" />
+      <File FileName="Managly/Models/LicenseKey.cs" Line="1" Column="1" />
+      <File FileName="Managly/Views/Home/Login.cshtml" />
       <File FileName="Managly/wwwroot/css/Home/Login.css" />
-      <File FileName="Managly/wwwroot/css/site.css" />
+      <File FileName="Managly/wwwroot/css/site.css" Line="57" Column="4" />
       <File FileName="Managly/Models/Login.cs" />
-      <File FileName="Managly/Views/Home/Register.cshtml" />
-      <File FileName="Managly/Models/Register.cs" />
+      <File FileName="Managly/Views/Home/Register.cshtml" Line="9" Column="65" />
+      <File FileName="Managly/Models/Register.cs" Line="1" Column="1" />
       <File FileName="Managly/wwwroot/css/Home/Register.css" />
       <File FileName="Managly/Models/ErrorViewModel.cs" />
-      <File FileName="Managly/Migrations/ApplicationDbContextModelSnapshot.cs" />
-      <File FileName="Managly/Controllers/AccountController.cs" Line="23" Column="10" />
-      <File FileName="Managly/Views/Account/ChangePassword.cshtml" Line="8" Column="58" />
-      <File FileName="Managly/Views/Admin/CreateProfile.cshtml" />
+      <File FileName="Managly/Migrations/ApplicationDbContextModelSnapshot.cs" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/AccountController.cs" Line="87" Column="49" />
+      <File FileName="Managly/Views/Account/ChangePassword.cshtml" Line="43" Column="64" />
+      <File FileName="Managly/Views/Admin/CreateProfile.cshtml" Line="40" Column="1" />
       <File FileName="Managly/Models/CreateProfile.cs" />
       <File FileName="Managly/Models/ChangePassword.cs" />
       <File FileName="Managly/Properties/launchSettings.json" />
       <File FileName="Managly/Views/Home/Privacy.cshtml" />
       <File FileName="Managly/wwwroot/css/Account/ChangePassword.css" />
-      <File FileName="Managly/Services/EmailService.cs" Line="21" Column="116" />
-      <File FileName="Managly/Controllers/AdminController.cs" Line="129" Column="49" />
-      <File FileName="Managly/Authorization/PreGeneratedPasswordRequirement.cs" Line="5" Column="1" />
-      <File FileName="Managly/Authorization/PreGeneratedPasswordHandler.cs" Line="27" Column="43" />
-      <File FileName="Managly/Views/Account/AccessDenied.cshtml" Line="9" Column="35" />
+      <File FileName="Managly/Services/EmailService.cs" />
+      <File FileName="Managly/Controllers/AdminController.cs" Line="203" Column="78" />
+      <File FileName="Managly/Authorization/PreGeneratedPasswordRequirement.cs" />
+      <File FileName="Managly/Authorization/PreGeneratedPasswordHandler.cs" />
+      <File FileName="Managly/Views/Account/AccessDenied.cshtml" />
       <File FileName="Managly/Models/UserManagement.cs" Line="13" Column="1" />
-      <File FileName="Managly/Views/Admin/UserManagement.cshtml" Line="10" Column="4" />
+      <File FileName="Managly/Views/Admin/UserManagement.cshtml" Line="121" Column="33" />
+      <File FileName="Managly/wwwroot/css/Account/AccessDenied.css" />
+      <File FileName="Managly/Views/Account/AccountDeleted.cshtml" />
+      <File FileName="Managly/wwwroot/js/site.js" Line="29" Column="1" />
+      <File FileName="Managly/wwwroot/js/Account/PasswordVisibility.js" />
+      <File FileName="Managly/Models/UserProfile.cs" Line="19" Column="60" />
+      <File FileName="Managly/Views/Account/Profile.cshtml" Line="4" Column="1" />
+      <File FileName="Managly/Migrations/20250129192513_DatabaseSync.cs" />
+      <File FileName="Managly/Helpers/CountryCallingCodes.cs" />
+      <File FileName="Managly/wwwroot/css/Account/Profile.css" />
+      <File FileName="Managly/Controllers/ScheduleController.cs" Line="15" Column="46" />
+      <File FileName="Managly/Views/Schedule/Manage.cshtml" Line="184" Column="9" />
+      <File FileName="Managly/Models/ScheduleDTO.cs" Line="10" Column="42" />
+      <File FileName="Managly/Models/ScheduleUpdateDTO.cs" Line="8" Column="48" />
+      <File FileName="Managly/Views/Schedule/ViewSchedule.cshtml" Line="76" Column="9" />
+      <File FileName="Managly/wwwroot/css/Schedule/Manage.css" Line="10" Column="1" />
+      <File FileName="Managly/Models/LeaveUpdateDTO.cs" Line="8" Column="1" />
+      <File FileName="Managly/Views/Schedule/MergedSchedule.cshtml" Line="19" Column="25" />
+      <File FileName="Managly/wwwroot/css/Admin/UserManagement.css" Line="88" Column="1" />
+      <File FileName="Managly/Models/RoleUpdateViewModel.cs" Line="4" Column="37" />
+      <File FileName="Managly/Hubs/ChatHub.cs" Line="97" Column="1" />
+      <File FileName="Managly/Controllers/ChatController.cs" Line="112" Column="18" />
+      <File FileName="Managly/Views/Chat/Index.cshtml" Line="219" Column="32" />
+      <File FileName="Managly/wwwroot/js/Chat/chat.js" Line="82" Column="28" />
+      <File FileName="Managly/wwwroot/css/Chat/Index.css" Line="248" Column="2" />
+      <File FileName="Managly/Models/Notification.cs" Line="25" Column="67" />
+      <File FileName="Managly/Migrations/20250204181520_AddNotificationToDatabase.cs" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/NotificationController.cs" Line="37" Column="47" />
+      <File FileName="Managly/Migrations/20250204231636_DatabaseCorrection.cs" Line="44" Column="1" />
+      <File FileName="Managly/Migrations/20250204232807_DatabaseUpdated.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Managly" expanded="True">
-            <Node name="Managly" expanded="True" selected="True">
+            <Node name="Managly" expanded="True">
               <Node name="Authorization" expanded="True" />
               <Node name="Controllers" expanded="True" />
               <Node name="Data" expanded="True" />
-              <Node name="Models" expanded="True" />
-              <Node name="Properties" expanded="True" />
+              <Node name="Helpers" expanded="True" />
+              <Node name="Hubs" expanded="True">
+                <Node name="ChatHub.cs" selected="True" />
+              </Node>
               <Node name="Services" expanded="True" />
               <Node name="Views" expanded="True">
-                <Node name="Account" expanded="True" />
                 <Node name="Admin" expanded="True" />
+                <Node name="Chat" expanded="True" />
                 <Node name="Home" expanded="True" />
+                <Node name="Schedule" expanded="True" />
                 <Node name="Shared" expanded="True">
                   <Node name="_Layout.cshtml" expanded="True" />
                 </Node>
@@ -71,8 +103,15 @@
               <Node name="wwwroot" expanded="True">
                 <Node name="css" expanded="True">
                   <Node name="Account" expanded="True" />
-                  <Node name="Home" expanded="True" />
+                  <Node name="Admin" expanded="True" />
+                  <Node name="Chat" expanded="True" />
+                  <Node name="Schedule" expanded="True" />
                 </Node>
+                <Node name="images" expanded="True" />
+                <Node name="js" expanded="True">
+                  <Node name="Chat" expanded="True" />
+                </Node>
+                <Node name="uploads" expanded="True" />
               </Node>
             </Node>
           </Node>
@@ -80,5 +119,5 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>

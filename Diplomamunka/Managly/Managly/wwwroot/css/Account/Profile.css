@@ -1,0 +1,65 @@
+﻿.container {
+    max-width: 600px;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.form-floating label {
+    color: #6c757d;
+}
+
+.profile-picture-container {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #ddd;
+}
+
+.btn-outline-primary {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-radius: 10px;
+    font-size: 18px;
+    padding: 10px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+.form-floating label {
+    left: 0.8rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-out;
+}
+.custom-label {
+    left: 0.8rem;
+    transition: all 0.2s ease-out;
+}
+

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Managly.Models;
 using System.Security.Claims;
+using Managly.Helpers;
 
 namespace Managly.Controllers
 {
@@ -82,15 +83,34 @@ namespace Managly.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
+            string fullPhoneNumber = await _userManager.GetPhoneNumberAsync(user) ?? "";
+            string selectedCountryCode = "+36"; 
+            string phoneNumberWithoutCode = fullPhoneNumber;
+
+            foreach (var country in CountryCallingCodes.GetCountryCodes())
+            {
+                if (fullPhoneNumber.StartsWith(country.Code))
+                {
+                    selectedCountryCode = country.Code;
+                    phoneNumberWithoutCode = fullPhoneNumber.Substring(country.Code.Length);
+                    break;
+                }
+            }
+
             var model = new UserProfile
             {
                 Name = user.Name ?? "",
                 LastName = user.LastName ?? "",
                 Email = user.Email ?? "",
-                PhoneNumber = await _userManager.GetPhoneNumberAsync(user) ?? "", // ✅ Retrieve manually
+                SelectedCountryCode = selectedCountryCode,
+                PhoneNumber = phoneNumberWithoutCode.Trim(), 
                 Country = user.Country ?? "",
                 City = user.City ?? "",
-                Address = user.Address ?? ""
+                Address = user.Address ?? "",
+                DateOfBirth = user.DateOfBirth,
+                Gender = user.Gender ?? "",
+                ProfilePicturePath = user.ProfilePicturePath ?? "/images/default/default-profile.png", 
+                GenderOptions = new List<string> { "Male", "Female", "Other" } 
             };
 
             return View(model);
@@ -112,16 +132,36 @@ namespace Managly.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
-            // ✅ Update fields manually
             user.Name = model.Name;
             user.LastName = model.LastName;
             user.Country = model.Country;
             user.City = model.City;
             user.Address = model.Address;
+            user.DateOfBirth = model.DateOfBirth;
+            user.Gender = model.Gender;
 
-            // ✅ Update phone number separately (since EF is not tracking it)
-            var phoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadsFolder);
 
+                var uniqueFileName = user.Id + Path.GetExtension(model.ProfilePicture.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfilePicture.CopyToAsync(stream);
+                }
+
+                user.ProfilePicturePath = "/uploads/" + uniqueFileName;
+            }
+            //else
+            //{
+            //    model.ProfilePicturePath = user.ProfilePicturePath;
+            //}
+
+            var fullPhoneNumber = model.SelectedCountryCode + model.PhoneNumber;
+            var phoneResult = await _userManager.SetPhoneNumberAsync(user, fullPhoneNumber);
             if (!phoneResult.Succeeded)
             {
                 ViewBag.ErrorMessage = "Failed to update phone number.";
@@ -132,6 +172,7 @@ namespace Managly.Controllers
 
             if (result.Succeeded)
             {
+                model.ProfilePicturePath = user.ProfilePicturePath;
                 ViewBag.SuccessMessage = "Your profile has been updated successfully!";
             }
             else

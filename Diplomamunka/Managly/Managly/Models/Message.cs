@@ -10,15 +10,26 @@ namespace Managly.Models
         public int Id { get; set; }
 
         [Required]
-        public string MessageContent { get; set; }
+        public string SenderId { get; set; }
 
-        public DateTime SentDate { get; set; } = DateTime.Now;
+        [Required]
+        public string ReceiverId { get; set; }
 
-        public string SenderId { get; set; } 
-        public User Sender { get; set; }
+        [Required]
+        public string Content { get; set; }
 
-        public string ReceiverId { get; set; } 
-        public User Receiver { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+        [ForeignKey("SenderId")]
+        public virtual User Sender { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public virtual User Receiver { get; set; }
+
+        public bool IsRead { get; set; } = false;
+
+        public bool IsDeleted { get; set; } = false;
+
     }
 }
 

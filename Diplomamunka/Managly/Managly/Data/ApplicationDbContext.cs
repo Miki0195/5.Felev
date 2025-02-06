@@ -15,6 +15,7 @@ namespace Managly.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Leave> Leaves { get; set; }

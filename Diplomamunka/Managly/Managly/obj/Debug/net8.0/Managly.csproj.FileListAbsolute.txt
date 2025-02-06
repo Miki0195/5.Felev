@@ -122,3 +122,5 @@
 /Users/buchsbaummiklos/Documents/Elte/Managly/Managly/bin/Debug/net8.0/Newtonsoft.Json.dll
 /Users/buchsbaummiklos/Documents/Elte/Managly/Managly/bin/Debug/net8.0/SendGrid.dll
 /Users/buchsbaummiklos/Documents/Elte/Managly/Managly/bin/Debug/net8.0/StarkbankEcdsa.dll
+/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/bin/Debug/net8.0/Views/Account/Profile.cshtml
+/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/bin/Debug/net8.0/System.Net.WebSockets.WebSocketProtocol.dll

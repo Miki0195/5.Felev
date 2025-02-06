@@ -186,7 +186,14 @@ public class HomeController : Controller
             Name = model.AdminEmail.Split('@')[0],
             Email = model.AdminEmail,
             UserName = model.AdminEmail, // Required by Identity
-            CompanyId = company.Id
+            CompanyId = company.Id,
+            LastName = "",
+            Country = "",
+            City = "",
+            Address = "",
+            DateOfBirth = new DateTime(2000, 1, 1),
+            Gender = "Other",
+            ProfilePicturePath = "/images/default/default-profile.png"
         };
 
         var result = await _userManager.CreateAsync(adminUser, model.Password);
@@ -194,7 +201,8 @@ public class HomeController : Controller
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(adminUser, "Admin");
-            return RedirectToAction("Index");
+            await _signInManager.SignInAsync(adminUser, isPersistent: false);
+            return RedirectToAction("Index", "Home");
         }
         else
         {
