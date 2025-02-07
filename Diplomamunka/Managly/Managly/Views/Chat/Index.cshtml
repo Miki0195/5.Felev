@@ -248,9 +248,20 @@
                     return;
                 }
 
-                let sentMessage = document.querySelector(".message-wrapper.sent:last-child .my-message");
-                if (sentMessage) {
-                    sentMessage.setAttribute("data-message-id", data.messageId);
+                //let sentMessage = document.querySelector(".message-wrapper.sent:last-child .my-message");
+                //if (sentMessage) {
+                //    sentMessage.setAttribute("data-message-id", data.messageId);
+                //    sentMessage.onclick = function () {
+                //        openMessageOptionsModal(data.messageId, message);
+                //    };
+                //}
+
+                let sentMessageWrapper = document.querySelector(".message-wrapper.sent:last-child");
+                let sentMessage = sentMessageWrapper.querySelector(".my-message");
+
+                if (sentMessageWrapper && sentMessage) {
+                    // ✅ Assign the message ID once backend responds
+                    sentMessageWrapper.setAttribute("data-message-id", data.messageId);
                     sentMessage.onclick = function () {
                         openMessageOptionsModal(data.messageId, message);
                     };
@@ -264,8 +275,6 @@
 
         updateRecentChat(selectedUserId, message, true);
     });
-
-
 
     connection.on("ReceiveMessage", function (senderId, message, messageId) {
         let chatBox = document.getElementById("chatBox");
@@ -473,7 +482,7 @@
 
                     let messagePreviewDiv = document.createElement("div");
                     messagePreviewDiv.classList.add("message-preview");
-                    // ✅ If the message is deleted, show "Deleted message" in italic
+
                     if (newMessage === "Deleted message") {
                         messagePreview.innerHTML = `<em>${newMessage}</em>`;
                     } else {
@@ -536,23 +545,56 @@
     }
 
     function deleteMessageForMe(messageId) {
+        console.error("deleteMessageForMe method called.");
+        let userId = document.getElementById("currentUserId").value;
         let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
 
         if (messageElement) {
-            messageElement.remove(); // ✅ Instantly hide the message
+            messageElement.remove();
+            console.error("message removed");
 
-            // ✅ Ensure deletedMessages array is properly updated
             let deletedMessages = JSON.parse(localStorage.getItem("deletedMessages")) || [];
             if (!deletedMessages.includes(messageId.toString())) {
                 deletedMessages.push(messageId.toString());
                 localStorage.setItem("deletedMessages", JSON.stringify(deletedMessages));
             }
 
-            // ✅ Send real-time update only for the sender
-            connection.invoke("MessageDeletedForMe", messageId, document.getElementById("currentUserId").value)
-                .catch(err => console.error("❌ Error sending delete update:", err));
+            fetch(`/chat/messages/delete-for-me/${messageId}`, { method: "POST" })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        console.error(`✅ Sending delete update to SignalR for message ${messageId}`);
+                        console.error(messageId);
+                        console.error(userId);
+                        connection.invoke("MessageDeletedForMe", messageId, userId)
+                            .then(response => {
+                                console.error(`✅ SignalR Delete Response: ${response}`);
+                            })
+                            .catch(err => {
+                                console.error("❌ Error sending delete update:", err);
+                            });
+
+                    } else {
+                        console.error("❌ Server Error deleting for me:", result);
+                    }
+                })
+                .catch(err => console.error("❌ Server error deleting for me: ", err));
         }
     }
+
+
+    // ✅ Real-time listener to remove message for sender only
+    //connection.on("MessageDeletedForMe", function (messageId) {
+    //    console.error(`✅ Received MessageDeletedForMe event for message ${messageId}`);
+
+    //    let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
+    //    if (messageElement) {
+    //        console.error(`⛔ Removing message ${messageId} from UI`);
+    //        messageElement.remove();
+    //    } else {
+    //        console.error(`⚠ Warning: Message ${messageId} not found in DOM`);
+    //    }
+    //});
 
     function deleteMessageForEveryone(messageId) {
         if (!messageId) {
@@ -585,6 +627,10 @@
             })
             .catch(err => console.error("❌ Server Error:", err));
     }
+
+    connection.on("MessageDeleted", function (messageId) {
+        applyDeletedMessageStyle(messageId);
+    });
 
     function applyDeletedMessageStyle(messageId) {
         let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);

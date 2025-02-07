@@ -6,9 +6,11 @@ using System;
 using Managly.Models;
 using Managly.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Managly.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private static Dictionary<string, string> _connections = new Dictionary<string, string>();
@@ -19,16 +21,33 @@ namespace Managly.Hubs
         {
             _context = context; 
         }
+        //public override Task OnConnectedAsync()
+        //{
+        //    string userId = Context.UserIdentifier;
+        //    if (userId != null && !_connections.ContainsKey(userId))
+        //    {
+        //        _connections[userId] = Context.ConnectionId;
+        //    }
+        //    return base.OnConnectedAsync();
+        //}
         public override Task OnConnectedAsync()
         {
-            Console.WriteLine("✅ ChatHub Connected!");
             string userId = Context.UserIdentifier;
-            if (userId != null && !_connections.ContainsKey(userId))
+            if (!string.IsNullOrEmpty(userId))
             {
                 _connections[userId] = Context.ConnectionId;
+                Console.WriteLine($"✅ [SignalR] User {userId} connected with connection ID: {Context.ConnectionId}");
             }
+            else
+            {
+                Console.WriteLine("❌ [SignalR] Error: UserIdentifier is null in OnConnectedAsync");
+            }
+
+
             return base.OnConnectedAsync();
         }
+
+
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
@@ -87,6 +106,13 @@ namespace Managly.Hubs
             }
         }
 
+        public async Task MessageDeleted(string messageId)
+        {
+            Console.WriteLine($"🔴 Deleting message {messageId} for all clients...");
+
+            await Clients.All.SendAsync("MessageDeleted", messageId);
+        }
+
         public async Task DeleteMessage(string messageId, string senderId, string receiverId)
         {
             var message = await _context.Messages.FindAsync(Guid.Parse(messageId));
@@ -101,20 +127,35 @@ namespace Managly.Hubs
             }
         }
 
-        public async Task MessageDeleted(string messageId)
+        public async Task<string> MessageDeletedForMe(string messageId, string userId)
         {
-            Console.WriteLine($"🔴 Deleting message {messageId} for all clients...");
+            try
+            {
+                Console.WriteLine($"🔴 [SignalR] Trying to delete message {messageId} for user {userId}");
 
-            await Clients.All.SendAsync("MessageDeleted", messageId);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("❌ [SignalR] Error: User ID is null in MessageDeletedForMe");
+                    return "User ID is null";
+                }
+
+                if (string.IsNullOrEmpty(messageId))
+                {
+                    Console.WriteLine("❌ [SignalR] Error: Message ID is null in MessageDeletedForMe");
+                    return "Message ID is null";
+                }
+
+                Console.WriteLine($"✅ [SignalR] Sending MessageDeletedForMe event to user {userId}");
+                await Clients.User(userId).SendAsync("MessageDeletedForMe", messageId);
+
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [SignalR] Exception in MessageDeletedForMe: {ex.Message}");
+                return $"Error: {ex.Message}";
+            }
         }
-
-        public async Task MessageDeletedForMe(string messageId, string userId)
-        {
-            Console.WriteLine($"🔴 Message {messageId} deleted for user {userId}");
-
-            await Clients.User(userId).SendAsync("MessageDeletedForMe", messageId);
-        }
-
 
 
     }

@@ -247,5 +247,27 @@ namespace Managly.Controllers
             return Ok(new { success = true, message = "Message deleted for both users." });
         }
 
+        [HttpPost("messages/delete-for-me/{messageId}")]
+        public async Task<IActionResult> MessageDeletedForMe(string messageId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var message = await _context.Messages.FindAsync(int.Parse(messageId));
+
+            if (message == null)
+                return BadRequest(new { error = "Message not found" });
+
+            Console.WriteLine($"✅ [API] Sending delete event for message {messageId} to user {userId}");
+
+
+            await _hubContext.Clients.User(userId).SendAsync("MessageDeletedForMe", messageId, userId);
+
+            return Ok(new { success = true, message = "Message hidden for you." });
+        }
+
+       
     }
 }
