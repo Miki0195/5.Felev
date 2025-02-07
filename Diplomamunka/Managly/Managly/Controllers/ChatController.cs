@@ -170,8 +170,9 @@ namespace Managly.Controllers
                         .OrderByDescending(m => m.Timestamp)
                         .Select(m => new
                         {
-                            Content = m.Content ?? "",
+                            Content = m.IsDeleted ? "Deleted message" : m.Content,
                             IsFromUser = m.SenderId == userId,
+                            IsDeleted = m.IsDeleted,
                             IsRead = m.IsRead,
                             Timestamp = m.Timestamp
                         })

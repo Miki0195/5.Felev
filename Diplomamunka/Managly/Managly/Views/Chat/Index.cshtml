@@ -248,24 +248,17 @@
                     return;
                 }
 
-                //let sentMessage = document.querySelector(".message-wrapper.sent:last-child .my-message");
-                //if (sentMessage) {
-                //    sentMessage.setAttribute("data-message-id", data.messageId);
-                //    sentMessage.onclick = function () {
-                //        openMessageOptionsModal(data.messageId, message);
-                //    };
-                //}
-
                 let sentMessageWrapper = document.querySelector(".message-wrapper.sent:last-child");
                 let sentMessage = sentMessageWrapper.querySelector(".my-message");
 
                 if (sentMessageWrapper && sentMessage) {
-                    // ✅ Assign the message ID once backend responds
                     sentMessageWrapper.setAttribute("data-message-id", data.messageId);
                     sentMessage.onclick = function () {
                         openMessageOptionsModal(data.messageId, message);
                     };
                 }
+
+                updateRecentChat(selectedUserId, message, true);
 
                 //connection.invoke("SendMessage", senderId, selectedUserId, message, data.messageId)
                 connection.invoke("SendMessage", senderId, selectedUserId, message)
@@ -354,7 +347,6 @@
         fetch(`/chat/recent-chats`)
             .then(response => response.json())
             .then(users => {
-
                 let recentChatsDiv = document.getElementById("recentChats");
                 recentChatsDiv.innerHTML = "";
 
@@ -379,9 +371,14 @@
                     let messagePreviewDiv = document.createElement("div");
                     messagePreviewDiv.classList.add("message-preview");
 
-                    if (user.lastMessage && user.lastMessage.content) {
-                        let messageText = user.lastMessage.isFromUser ? "You: " + user.lastMessage.content : user.lastMessage.content;
-                        messagePreviewDiv.textContent = messageText.length > 30 ? messageText.substring(0, 27) + "..." : messageText;
+                    if (user.lastMessage) {
+                        if (user.lastMessage.isDeleted) {
+                            // ✅ Ensure correct display for sender vs receiver
+                            messagePreviewDiv.innerHTML = `<em>${user.lastMessage.isFromUser ? "You: Deleted message" : "Deleted message"}</em>`;
+                        } else {
+                            let messageText = user.lastMessage.isFromUser ? "You: " + user.lastMessage.content : user.lastMessage.content;
+                            messagePreviewDiv.textContent = messageText.length > 30 ? messageText.substring(0, 27) + "..." : messageText;
+                        }
                     } else {
                         messagePreviewDiv.textContent = "No messages yet";
                     }
@@ -420,13 +417,13 @@
                             });
                     };
 
-
-
                     recentChatsDiv.appendChild(userDiv);
                 });
             })
             .catch(err => console.error("❌ Error loading recent chats:", err));
     }
+
+
 
     function updateRecentChat(userId, newMessage, isSentByMe) {
         let recentChatsDiv = document.getElementById("recentChats");
@@ -437,12 +434,23 @@
 
         if (existingChat) {
             let messagePreview = existingChat.querySelector(".message-preview");
-            // ✅ If the message is deleted, show "Deleted message" in italic
-            if (newMessage === "Deleted message") {
-                messagePreview.innerHTML = `<em>${newMessage}</em>`;
-            } else {
-                messagePreview.textContent = truncatedMessage;
-            }
+
+            // ✅ Check if the last message in chat history is the one being deleted
+            fetch(`/chat/messages/${userId}`)
+                .then(response => response.json())
+                .then(messages => {
+                    if (messages.length > 0) {
+                        let lastMessage = messages[messages.length - 1]; // Get last message
+
+                        // ✅ Ensure correct formatting for sender & receiver
+                        if (lastMessage.isDeleted) {
+                            messagePreview.innerHTML = `<em>${lastMessage.senderId === document.getElementById("currentUserId").value ? "You: Deleted message" : "Deleted message"}</em>`;
+                        } else {
+                            messagePreview.textContent = truncatedMessage;
+                        }
+                    }
+                })
+                .catch(err => console.error("❌ Error checking last message:", err));
 
             if (selectedUserId === userId) {
                 existingChat.classList.remove("unread-message");
@@ -483,11 +491,21 @@
                     let messagePreviewDiv = document.createElement("div");
                     messagePreviewDiv.classList.add("message-preview");
 
-                    if (newMessage === "Deleted message") {
-                        messagePreview.innerHTML = `<em>${newMessage}</em>`;
-                    } else {
-                        messagePreview.textContent = truncatedMessage;
-                    }
+                    fetch(`/chat/messages/${userId}`)
+                        .then(response => response.json())
+                        .then(messages => {
+                            if (messages.length > 0) {
+                                let lastMessage = messages[messages.length - 1];
+
+                                // ✅ Ensure correct formatting for sender & receiver
+                                if (lastMessage.isDeleted) {
+                                    messagePreviewDiv.innerHTML = `<em>${lastMessage.senderId === document.getElementById("currentUserId").value ? "You: Deleted message" : "Deleted message"}</em>`;
+                                } else {
+                                    messagePreviewDiv.textContent = truncatedMessage;
+                                }
+                            }
+                        })
+                        .catch(err => console.error("❌ Error checking last message:", err));
 
                     let textWrapper = document.createElement("div");
                     textWrapper.classList.add("recent-chat-text");
