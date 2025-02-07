@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Clock In";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/css/ClockIn/Index.css">
+
+<div class="page-container">
+    <div class="clock-container">
+        <h2>Work Time Tracker</h2>
+        <h4 id="workTimer">00:00:00</h4>
+
+        <div class="button-group">
+            <button id="clockInBtn" class="btn btn-primary btn-modern">Clock In</button>
+            <button id="clockOutBtn" class="btn btn-danger btn-modern d-none">Clock Out</button>
+        </div>
+
+        <h4 class="mt-4">Recent Work Sessions</h4>
+        <table class="table table-dark table-modern">
+            <thead>
+                <tr>
+                    <th>Clock-In</th>
+                    <th>Clock-Out</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody id="workHistory">
+                <tr><td colspan="3">Loading...</td></tr>
+            </tbody>
+        </table>
+
+        <div class="progress-container">
+            <h4>Weekly Work Progress</h4>
+            <div class="progress">
+                <div id="workProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+            <p id="weeklyHoursText">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let startTime;
+    let timerInterval;
+    let liveUpdateInterval;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadWorkHistory();
+        checkSessionStatus();
+        loadWeeklyHours();
+    });
+
+    function startTimer(elapsedSeconds = 0) {
+        startTime = new Date();
+        startTime.setSeconds(startTime.getSeconds() - elapsedSeconds); // Adjust timer with elapsed time
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+        const now = new Date();
+        const elapsedTime = new Date(now - startTime);
+        const hours = elapsedTime.getUTCHours().toString().padStart(2, '0');
+        const minutes = elapsedTime.getUTCMinutes().toString().padStart(2, '0');
+        const seconds = elapsedTime.getUTCSeconds().toString().padStart(2, '0');
+        document.getElementById("workTimer").innerText = `${hours}:${minutes}:${seconds}`;
+    }
+
+    document.getElementById("clockInBtn").addEventListener("click", async () => {
+        const response = await fetch("/api/attendance/clock-in", { method: "POST" });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById("clockOutBtn").classList.remove("d-none");
+            document.getElementById("clockInBtn").classList.add("d-none");
+
+            startTimer();
+            loadWorkHistory();
+            loadWeeklyHours(true);
+        }
+    });
+
+    document.getElementById("clockOutBtn").addEventListener("click", async () => {
+        const response = await fetch("/api/attendance/clock-out", { method: "POST" });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById("clockInBtn").classList.remove("d-none");
+            document.getElementById("clockOutBtn").classList.add("d-none");
+            clearInterval(timerInterval);
+            document.getElementById("workTimer").innerText = "00:00:00";
+
+            loadWorkHistory();
+            loadWeeklyHours(false);
+        }
+    });
+
+    async function loadWorkHistory() {
+        try {
+            const response = await fetch("/api/attendance/work-history");
+            if (!response.ok) throw new Error("Failed to fetch work history");
+
+            const data = await response.json();
+            let tableBody = document.getElementById("workHistory");
+            tableBody.innerHTML = "";
+
+            if (!data || data.length === 0 || data.message) {
+                tableBody.innerHTML = "<tr><td colspan='3'>No records found</td></tr>";
+            } else {
+                data.forEach(session => {
+                    let row = `<tr>
+                    <td>${new Date(session.checkInTime).toLocaleString()}</td>
+                    <td>${session.checkOutTime ? new Date(session.checkOutTime).toLocaleString() : "Active"}</td>
+                    <td>${session.duration}</td>
+                </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+        } catch (error) {
+            console.error("Error loading work history:", error);
+            document.getElementById("workHistory").innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+        }
+    }
+
+    
+
+    async function checkSessionStatus() {
+        try {
+            const response = await fetch("/api/attendance/current-session");
+            if (!response.ok) throw new Error("Failed to fetch session status");
+
+            const data = await response.json();
+            if (data.active) {
+                document.getElementById("clockOutBtn").classList.remove("d-none");
+                document.getElementById("clockInBtn").classList.add("d-none");
+
+                let elapsedSeconds = Math.round(data.elapsedMinutes * 60);
+                startTimer(elapsedSeconds); // Start timer from correct time
+
+                loadWeeklyHours(true);
+            }
+        } catch (error) {
+            console.error("Error checking session status:", error);
+        }
+    }
+
+    
+
+    async function loadWeeklyHours(updateLive = false) {
+        try {
+            const response = await fetch("/api/attendance/weekly-hours");
+            if (!response.ok) throw new Error("Failed to fetch weekly hours");
+
+            const data = await response.json();
+            let totalHours = data.totalHours || 0;
+            let totalMinutes = data.totalMinutes || 0;
+
+            // Update total hours text
+            document.getElementById("weeklyHoursText").innerText = `Total Hours Worked: ${totalHours}h ${totalMinutes}m`;
+
+            // Calculate progress percentage
+            let progressPercentage = ((totalHours * 60 + totalMinutes) / (40 * 60)) * 100;
+            document.getElementById("workProgress").style.width = `${progressPercentage}%`;
+
+            if (totalHours === 0 && totalMinutes === 0) {
+                document.getElementById("workProgress").classList.add("bg-warning");
+            } else {
+                document.getElementById("workProgress").classList.remove("bg-warning");
+                document.getElementById("workProgress").classList.add("bg-success");
+            }
+
+            if (updateLive) {
+                if (liveUpdateInterval) clearInterval(liveUpdateInterval);
+                liveUpdateInterval = setInterval(() => {
+                    totalMinutes += 1; // ✅ Increment total minutes in real-time
+                    if (totalMinutes >= 60) {
+                        totalMinutes = 0;
+                        totalHours += 1;
+                    }
+                    document.getElementById("weeklyHoursText").innerText = `Total Hours Worked: ${totalHours}h ${totalMinutes}m`;
+                    let progressPercentage = ((totalHours * 60 + totalMinutes) / (40 * 60)) * 100;
+                    document.getElementById("workProgress").style.width = `${progressPercentage}%`;
+                }, 60000); // ✅ Update every 60 seconds
+            }
+        } catch (error) {
+            console.error("Error loading weekly hours:", error);
+            document.getElementById("weeklyHoursText").innerText = "Error loading data";
+        }
+    }
+
+
+
+
+    
+
+    </script>

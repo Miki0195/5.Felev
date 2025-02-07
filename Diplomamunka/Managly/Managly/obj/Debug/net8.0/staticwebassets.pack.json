@@ -25,6 +25,10 @@
       "PackagePath": "staticwebassets/css/Chat/Index.css"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/ClockIn/Index.css",
+      "PackagePath": "staticwebassets/css/ClockIn/Index.css"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Login.css",
       "PackagePath": "staticwebassets/css/Home/Login.css"
     },

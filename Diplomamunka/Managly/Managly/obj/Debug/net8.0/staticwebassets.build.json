@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "trTKHS10dRFurQjQZJ2GRMpm/FM60SvW8n11n5pRqlY=",
+  "Hash": "Vc4N70Uenx+6tG2Dn+7sLaLdoqoi5LM8/NTWAbiJkGI=",
   "Source": "Managly",
   "BasePath": "_content/Managly",
   "Mode": "Default",
@@ -148,6 +148,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/css/Chat/Index.css"
+    },
+    {
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/ClockIn/Index.css",
+      "SourceId": "Managly",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "BasePath": "_content/Managly",
+      "RelativePath": "css/ClockIn/Index.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/ClockIn/Index.css"
     },
     {
       "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Login.css",

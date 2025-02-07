@@ -1,0 +1,106 @@
+﻿.page-container {
+    font-family: 'Poppins', sans-serif;
+    color: black;
+    min-height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* Modern Glassmorphic UI */
+.clock-container {
+    background: rgba(255, 255, 255);
+    backdrop-filter: blur(15px);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 700px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.btn-modern {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 30px;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #42a5f5, #007BFF);
+    border: none;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #007BFF, #42a5f5);
+        transform: scale(1.05);
+    }
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff5252, #e53935);
+    border: none;
+}
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #e53935, #ff5252);
+        transform: scale(1.05);
+    }
+
+#workTimer {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #42a5f5;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Modern Table */
+.table-modern {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 12px;
+}
+
+/* Progress Bar */
+.progress-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.progress {
+    height: 15px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    margin-top: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #42a5f5, #007BFF);
+    transition: width 0.5s ease-in-out;
+}
