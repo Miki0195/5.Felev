@@ -36,6 +36,7 @@
     <None Remove="Hubs\" />
     <None Remove="Views\Chat\" />
     <None Remove="Views\ClockIn\" />
+    <None Remove="Views\VideoConference\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -59,6 +60,7 @@
     <Folder Include="wwwroot\css\Chat\" />
     <Folder Include="Views\ClockIn\" />
     <Folder Include="wwwroot\css\ClockIn\" />
+    <Folder Include="Views\VideoConference\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />

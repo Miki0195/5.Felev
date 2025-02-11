@@ -1,4 +1,4 @@
-﻿if (typeof connection === "undefined") { 
+﻿if (!window.chatSignalR) { 
     var connection = new signalR.HubConnectionBuilder()
         .withUrl("/chathub", { withCredentials: false })
         .withAutomaticReconnect()

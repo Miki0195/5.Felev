@@ -166,6 +166,7 @@
                 document.getElementById("workProgress").classList.add("bg-success");
             }
 
+            // Rethink this because it doesnt work
             if (updateLive) {
                 if (liveUpdateInterval) clearInterval(liveUpdateInterval);
                 liveUpdateInterval = setInterval(() => {
@@ -184,10 +185,5 @@
             document.getElementById("weeklyHoursText").innerText = "Error loading data";
         }
     }
-
-
-
-
-    
 
     </script>

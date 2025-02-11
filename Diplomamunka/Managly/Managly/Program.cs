@@ -43,12 +43,21 @@ public class Program
             options.SlidingExpiration = true; // Reset expiration time on activity
         });
 
+        //builder.Services.AddCors(options =>
+        //{
+        //    options.AddPolicy("AllowAll",
+        //        builder => builder.AllowAnyOrigin()
+        //                          .AllowAnyMethod()
+        //                          .AllowAnyHeader());
+        //});
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll",
-                builder => builder.AllowAnyOrigin()
-                                  .AllowAnyMethod()
-                                  .AllowAnyHeader());
+            options.AddPolicy("CorsPolicy",
+                builder => builder
+                    .WithOrigins("https://192.168.1.145:7221", "https://localhost:7221") // Add your actual frontend URLs
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
         });
 
         builder.Services.AddIdentity<User, IdentityRole>()
@@ -106,7 +115,7 @@ public class Program
 
         app.UseRouting();
 
-        app.UseCors("AllowAll");
+        app.UseCors();
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -133,9 +142,11 @@ public class Program
             await next();
         });
 
+        app.MapControllers();
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapHub<VideoCallHub>("/videocallhub").RequireCors("CorsPolicy");
             endpoints.MapHub<ChatHub>("/chathub"); // ✅ Ensure this matches the correct namespace
             endpoints.MapControllerRoute(
                 name: "default",

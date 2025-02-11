@@ -48,6 +48,11 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="ClockIn" asp-action="Index">Clock</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="VideoConference" asp-action="Index">
+                                    <i class="bi bi-camera-video"></i> Video Conference
+                                </a>
+                            </li>
                         }
                         @if (User.Identity.IsAuthenticated)
                         {

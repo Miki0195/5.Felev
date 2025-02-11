@@ -1,0 +1,439 @@
+﻿@{
+    ViewData["Title"] = "Video Conference";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    .video-call-container {
+        background: #181818;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .conference-container {
+        max-width: 700px;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        text-align: center;
+    }
+
+    .video-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 20px;
+    }
+
+    video {
+        width: 45%;
+        max-width: 500px;
+        height: auto;
+        border-radius: 15px;
+        background: black;
+    }
+
+
+    .call-controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        border-radius: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .call-controls button {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        font-size: 18px;
+        padding: 12px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .call-controls button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+
+    .end-call {
+        background: red;
+    }
+
+    .end-call:hover {
+        background: darkred;
+    }
+</style>
+
+<div class="video-call-container">
+    <div class="conference-container">
+        <h2>Start a Video Call</h2>
+        <input type="text" id="searchUsers" class="form-control mt-3" placeholder="Search users..." />
+        <ul id="userResults" class="user-list mt-3"></ul>
+        <h4 class="mt-4">Selected Users</h4>
+        <ul id="selectedUsers" class="user-list"></ul>
+        <button id="startCallBtn" class="btn btn-primary btn-modern mt-3 d-none">Start Call</button>
+        <div class="waiting-room mt-3" id="waitingRoom">
+            <h4>Waiting for the other user to accept...</h4>
+        </div>
+        <div class="mt-4" id="incomingCall" style="display: none;">
+            <h3 id="callMessage"></h3>
+            <button id="joinCallBtn" class="btn btn-success">Join Call</button>
+        </div>
+    </div>
+
+    <div class="video-container">
+        <video id="localVideo" autoplay playsinline muted></video>
+        <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+
+    <div class="call-controls">
+        <button id="muteAudioBtn"><i class="fas fa-microphone"></i></button>
+        <button id="toggleVideoBtn"><i class="fas fa-video"></i></button>
+        <button id="endCallBtn" class="end-call"><i class="fas fa-phone-slash"></i></button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>const startCallBtn = document.getElementById("startCallBtn");
+    const endCallBtn = document.getElementById("endCallBtn");
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+
+    let localStream;
+    let peerConnection;
+    let signalRConnection;
+    let currentUserId = "USER_ID_FROM_SERVER";
+    let targetUserId = null;
+
+    const muteAudioBtn = document.getElementById("muteAudioBtn");
+    const toggleVideoBtn = document.getElementById("toggleVideoBtn");
+    //const endCallBtn = document.getElementById("endCallBtn");
+    //const localVideo = document.getElementById("localVideo");
+    let isMuted = false;
+    let isVideoOff = false;
+
+    muteAudioBtn.addEventListener("click", function () {
+        if (localStream) {
+            localStream.getAudioTracks()[0].enabled = isMuted;
+            isMuted = !isMuted;
+            muteAudioBtn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+        }
+    });
+
+    toggleVideoBtn.addEventListener("click", function () {
+        if (localStream) {
+            localStream.getVideoTracks()[0].enabled = isVideoOff;
+            isVideoOff = !isVideoOff;
+            toggleVideoBtn.innerHTML = isVideoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+        }
+    });
+
+    //endCallBtn.addEventListener("click", function () {
+    //    alert("Call ended.");
+    //    location.reload();
+    //});
+
+    
+    async function connectToSignalR() {
+        signalRConnection = new signalR.HubConnectionBuilder()
+            .withUrl("https://192.168.1.145:7221/videocallhub", {  // Ensure this matches backend CORS setup
+                transport: signalR.HttpTransportType.WebSockets,
+                skipNegotiation: true, // THESE TWO JUST FOR LOCAL TESTING
+                withCredentials: false
+            })
+            .configureLogging(signalR.LogLevel.Information)
+            .withAutomaticReconnect()
+            .build();
+
+        try {
+            await signalRConnection.start();
+            console.error("✅ SignalR connected successfully");
+        } catch (error) {
+            console.error("❌ SignalR connection failed:", error);
+        }
+
+        signalRConnection.on("ReceiveCallRequest", (callerId) => {
+            console.error(`📩 Incoming call from ${callerId}`);
+            targetUserId = callerId;
+            document.getElementById("startCallBtn").innerText = "Accept Call";
+        });
+
+        signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
+            console.error(`📡 Signal received from ${senderId}`, signal);
+
+            let parsedSignal;
+            try {
+                parsedSignal = JSON.parse(signal);
+            } catch (error) {
+                console.error("❌ Error parsing signal JSON:", error.message);
+                return;
+            }
+
+            if (parsedSignal.type === "offer") {
+                console.error("📡 Received offer. Sending answer...");
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                signalRConnection.invoke("SendSignal", senderId, JSON.stringify(answer));
+            } else if (parsedSignal.type === "answer") {
+                console.error("📡 Received answer. Setting remote description.");
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+            } else if (parsedSignal.type === "candidate") {
+                console.error("📡 Adding ICE candidate:", parsedSignal.candidate);
+                if (parsedSignal.candidate) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(parsedSignal.candidate));
+                }
+            }
+        });
+    }
+
+    async function startCall() {
+        if (!targetUserId || targetUserId === "TARGET_USER_ID_FROM_SERVER") {
+            console.error("❌ Error: No target user for the call.");
+            return;
+        }
+
+        console.error(`📞 Starting call with ${targetUserId}`);
+
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+
+        peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
+            ]
+        });
+
+        localStream.getTracks().forEach(track => {
+            console.log("🎥 Adding local track:", track.kind);
+            peerConnection.addTrack(track, localStream);
+        });
+
+        peerConnection.ontrack = (event) => {
+            console.log("📡 Received remote video stream.", event.streams[0]);
+
+            if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== event.streams[0].id) {
+                remoteVideo.srcObject = event.streams[0]; 
+            } else {
+                console.warn("⚠️ Remote video already assigned.");
+            }
+        };
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                console.log("📡 Sending ICE candidate:", event.candidate);
+
+                if (signalRConnection && signalRConnection.state === signalR.HubConnectionState.Connected) {
+                    signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify({
+                        type: "candidate",
+                        candidate: event.candidate
+                    })).catch(err => console.error("❌ Failed to send ICE candidate:", err));
+                } else {
+                    console.error("❌ SignalR is not connected! ICE candidate not sent.");
+                }
+            }
+        };
+
+        if (signalRConnection) {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify(offer))
+                .catch(err => console.error("❌ Failed to send WebRTC Offer:", err));
+        } else {
+            console.error("❌ Cannot send WebRTC offer because SignalR connection is undefined.");
+        }
+    }
+
+    async function endCall() {
+        console.error("📴 Ending call");
+        peerConnection.close();
+        localStream.getTracks().forEach(track => track.stop());
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+    }
+
+    startCallBtn.addEventListener("click", startCall);
+    endCallBtn.addEventListener("click", endCall);
+
+    connectToSignalR();
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let selectedUsers = [];
+
+        checkForInvites();
+
+        document.getElementById("searchUsers").addEventListener("input", function () {
+            let query = this.value.trim();
+            if (query.length < 2) return;
+
+            fetch(`/api/videoconference/search-users?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error || "Unknown error"); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let resultsList = document.getElementById("userResults");
+                    resultsList.innerHTML = "";
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        resultsList.innerHTML = `<li>No users found</li>`;
+                        return;
+                    }
+
+                    data.forEach(user => {
+                        if (!user.id || !user.fullName) return;
+
+                        let li = document.createElement("li");
+                        li.textContent = user.fullName;
+                        li.setAttribute("data-user-id", user.id);
+                        li.classList.add("user-result-item");
+                        li.addEventListener("click", function () {
+                            addUserToCall(user.id, user.fullName);
+                        });
+                        resultsList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error("User search failed:", error);
+                    document.getElementById("userResults").innerHTML = `<li>Error: ${error.message}</li>`;
+                });
+        });
+
+        function addUserToCall(userId, fullName) {
+            if (!selectedUsers.some(u => u.id === userId)) {
+                selectedUsers.push({ id: userId, name: fullName });
+
+                let list = document.getElementById("selectedUsers");
+                let li = document.createElement("li");
+                li.textContent = fullName;
+                li.setAttribute("data-user-id", userId);
+                list.appendChild(li);
+            }
+
+            document.getElementById("startCallBtn").classList.remove("d-none");
+        }
+
+        document.getElementById("startCallBtn").addEventListener("click", function () {
+            document.getElementById("waitingRoom").style.display = "block";
+
+            selectedUsers.forEach(user => {
+                if (!user.id) {
+                    console.error("❌ Error: User ID is missing!", user);
+                } else {
+                    sendCallInvitation(user.id);
+                }
+            });
+        });
+
+        function sendCallInvitation(userId) {
+            if (!userId) {
+                console.error("❌ Error: ReceiverId is undefined.");
+                return;
+            }
+
+            targetUserId = userId; 
+
+            let requestBody = JSON.stringify({
+                ReceiverId: userId
+            });
+
+            console.log("📩 Sending request:", requestBody);
+
+            fetch("/api/videoconference/invite", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: requestBody
+            })
+                .then(async response => {
+                    let responseBody = await response.json();
+                    console.error("🟢 Server Response:", responseBody);
+
+                    if (!response.ok) {
+                        throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
+                    }
+
+                    startCall();
+                })
+                .catch(error => console.error("❌ Error:", error.message));
+        }
+
+        function checkForInvites() {
+            fetch("/api/videoconference/check-invite")
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(`Server Error: ${JSON.stringify(errorData)}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("📩 Invite Check Response:", data);
+
+                    if (data.hasInvite) {
+                        document.getElementById("incomingCall").style.display = "block";
+                        document.getElementById("callMessage").innerText = `You have been invited to a video call by ${data.senderName}`;
+                        document.getElementById("joinCallBtn").setAttribute("data-sender-id", data.senderId);
+                    }
+                })
+                .catch(error => console.error("❌ Error checking for invites:", error.message));
+        }
+
+        document.getElementById("joinCallBtn").addEventListener("click", function () {
+            let senderId = this.getAttribute("data-sender-id");
+
+            fetch(`/api/videoconference/accept-invite/${senderId}`, { method: "POST" })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error || "Unexpected server error"); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.error("✅ Call accepted. Starting video.");
+
+                    if (data.success) {
+                        targetUserId = senderId; 
+                        startCall();
+                    } else {
+                        console.error("❌ Call was not accepted properly.");
+                    }
+                })
+                .catch(error => console.error("❌ Error accepting invite:", error.message));
+        });
+
+
+    });
+
+
+    </script>

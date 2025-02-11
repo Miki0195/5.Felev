@@ -94,5 +94,20 @@ namespace Managly.Controllers
 
             return Ok(new { success = true });
         }
+
+        //[HttpPost("video-call")]
+        //public async Task<IActionResult> SendVideoCallInvitation([FromBody] Notification model)
+        //{
+        //    if (model == null || string.IsNullOrEmpty(model.UserId))
+        //        return BadRequest(new { error = "Invalid data." });
+
+        //    model.Message = "You have been invited to a video call.";
+        //    model.Timestamp = DateTime.UtcNow;
+        //    _context.Notifications.Add(model);
+        //    await _context.SaveChangesAsync();
+
+        //    return Ok(new { success = true });
+        //}
+
     }
 }
