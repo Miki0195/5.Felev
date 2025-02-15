@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+</div>
+
 <div class="bg-gray-900 text-white h-screen flex">
     <div class="w-1/4 bg-gray-800 p-5 border-r border-gray-700 flex flex-col">
         <h2 class="text-xl font-semibold mb-4">Users</h2>
@@ -60,6 +63,8 @@
     let signalRConnection;
     let currentUserId = "USER_ID_FROM_SERVER";
     let targetUserId = null;
+    let callId = null;
+    selectedUsers = [];
 
     const muteAudioBtn = document.getElementById("muteAudioBtn");
     const toggleVideoBtn = document.getElementById("toggleVideoBtn");
@@ -109,13 +114,47 @@
             console.error("❌ SignalR connection failed:", error);
         }
 
-        signalRConnection.on("ReceiveCallRequest", (callerId) => {
-            console.error(`📩 Incoming call from ${callerId}`);
+        signalRConnection.on("ReceiveCallRequest", (callerId, callerName, receivedCallId) => {
+            console.error(`📩 Incoming call from ${callerName} (Call ID: ${receivedCallId})`);
             targetUserId = callerId;
-            document.getElementById("startCallBtn").innerText = "Accept Call";
+            callId = receivedCallId;
+
+            // ✅ Update the UI in real-time without needing a refresh
+            document.getElementById("incomingCall").style.display = "block";
+            document.getElementById("callMessage").innerText = `You have been invited to a video call by ${callerName}`;
+            document.getElementById("joinCallBtn").setAttribute("data-sender-id", callerId);
         });
 
 
+        //signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
+        //    console.error(`📡 Signal received from ${senderId}`, signal);
+
+        //    let parsedSignal;
+        //    try {
+        //        parsedSignal = JSON.parse(signal);
+        //    } catch (error) {
+        //        console.error("❌ Error parsing signal JSON:", error.message);
+        //        return;
+        //    }
+
+        //    if (parsedSignal.type === "offer") {
+        //        console.error("📡 Received offer. Sending answer...");
+        //        await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+
+        //        const answer = await peerConnection.createAnswer();
+        //        await peerConnection.setLocalDescription(answer);
+
+        //        signalRConnection.invoke("SendSignal", senderId, JSON.stringify(answer));
+        //    } else if (parsedSignal.type === "answer") {
+        //        console.error("📡 Received answer. Setting remote description.");
+        //        await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+        //    } else if (parsedSignal.type === "candidate") {
+        //        console.error("📡 Adding ICE candidate:", parsedSignal.candidate);
+        //        if (parsedSignal.candidate) {
+        //            await peerConnection.addIceCandidate(new RTCIceCandidate(parsedSignal.candidate));
+        //        }
+        //    }
+        //});
         signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
             console.error(`📡 Signal received from ${senderId}`, signal);
 
@@ -124,6 +163,11 @@
                 parsedSignal = JSON.parse(signal);
             } catch (error) {
                 console.error("❌ Error parsing signal JSON:", error.message);
+                return;
+            }
+
+            if (!peerConnection) {
+                console.warn("⚠️ PeerConnection is not initialized yet. Delaying ICE candidate processing.");
                 return;
             }
 
@@ -140,11 +184,39 @@
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
             } else if (parsedSignal.type === "candidate") {
                 console.error("📡 Adding ICE candidate:", parsedSignal.candidate);
-                if (parsedSignal.candidate) {
+                if (peerConnection) {
                     await peerConnection.addIceCandidate(new RTCIceCandidate(parsedSignal.candidate));
+                } else {
+                    console.warn("⚠️ Skipping ICE candidate. PeerConnection is not ready.");
                 }
             }
         });
+
+        // ✅ Ensure both users receive the "CallEnded" event and immediately stop the call
+        signalRConnection.on("CallEnded", (endedCallId, duration) => {
+            if (callId === endedCallId) {
+                console.error("📴 Call has ended. Duration:", duration);
+
+                let statusElement = document.getElementById("noVideoText");
+                if (statusElement) {
+                    // ✅ Show call ended message
+                    statusElement.innerHTML = `<p class="text-red-500 font-bold text-xl">Call Ended</p>
+                                       <p class="text-white text-lg">Duration: ${duration}</p>`;
+
+                    // ✅ Hide the message after 5 seconds
+                    setTimeout(() => {
+                        statusElement.innerHTML = `<p class="text-gray-500">No active video feed</p>`;
+                    }, 5000);
+                } else {
+                    console.warn("⚠️ callStatus element not found.");
+                }
+
+                // ✅ Immediately clean up UI
+                cleanupCallUI();
+            }
+        });
+
+
     }
 
     // ✅ Swapping Video Streams on Click
@@ -162,12 +234,20 @@
             selfViewVideo.srcObject = remoteVideo.srcObject;
             remoteVideo.srcObject = tempStream;
 
+            // 🔇 Ensure local video remains muted (prevents self-audio loop)
+            remoteVideo.muted = false;
+            selfViewVideo.muted = true;
+
             console.log("📢 Reverted: Self view in small box, remote in big.");
         } else {
             // 🔄 Swap: Small video -> Remote, Big video -> Self
             let tempStream = selfViewVideo.srcObject;
             selfViewVideo.srcObject = remoteVideo.srcObject;
             remoteVideo.srcObject = tempStream;
+
+            // 🔇 Ensure local video remains muted
+            remoteVideo.muted = true;
+            selfViewVideo.muted = false;
 
             console.log("📢 Swapped: Remote view in small box, self in big.");
         }
@@ -179,19 +259,40 @@
 
     async function startCall() {
         if (!targetUserId || targetUserId === "TARGET_USER_ID_FROM_SERVER") {
-            console.error("❌ Error: No target user for the call.");
+            showToast("No target user for the call.", "danger");
             return;
         }
 
         console.error(`📞 Starting call with ${targetUserId}`);
 
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-        selfViewVideo.srcObject = localStream;
+        // ✅ Ensure old PeerConnection is closed
+        if (peerConnection) {
+            console.log("🛑 Closing previous PeerConnection...");
+            peerConnection.onicecandidate = null;
+            peerConnection.ontrack = null;
+            peerConnection.close();
+            peerConnection = null;
+        }
 
-        //document.getElementById("selfView").srcObject = localStream;
-        //document.getElementById("localVideoSmall").classList.remove = "hidden";
+        // ✅ Ensure previous localStream is stopped
+        if (localStream) {
+            console.log("🛑 Stopping previous media tracks...");
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
 
+        // ✅ Request new camera/microphone access
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localVideo.srcObject = localStream;
+            selfViewVideo.srcObject = localStream;
+        } catch (error) {
+            console.error("❌ Failed to access camera/microphone:", error);
+            showToast("Failed to access camera/microphone!", "danger");
+            return;
+        }
+
+        // ✅ Create a new PeerConnection instance
         peerConnection = new RTCPeerConnection({
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" },
@@ -199,6 +300,7 @@
             ]
         });
 
+        // ✅ Add new local tracks to the PeerConnection
         localStream.getTracks().forEach(track => {
             console.log("🎥 Adding local track:", track.kind);
             peerConnection.addTrack(track, localStream);
@@ -206,20 +308,11 @@
 
         peerConnection.ontrack = (event) => {
             console.log("📡 Received remote video stream.", event.streams[0]);
+            remoteVideo.srcObject = event.streams[0];
 
-            if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== event.streams[0].id) {
-                remoteVideo.srcObject = event.streams[0];
-            } else {
-                console.warn("⚠️ Remote video already assigned.");
-            }
-
-            if (localStream) {
-                selfViewVideo.srcObject = localStream;
-
-                document.getElementById("waitingRoomText").innerHTML = "";
-                smallSelfView.classList.remove("opacity-0", "scale-95", "hidden");
-                smallSelfView.classList.add("opacity-100", "scale-100");
-            }
+            // ✅ Show small self-view when remote user joins
+            smallSelfView.classList.remove("opacity-0", "scale-95", "hidden");
+            smallSelfView.classList.add("opacity-100", "scale-100");
         };
 
         peerConnection.onicecandidate = (event) => {
@@ -229,7 +322,8 @@
                 if (signalRConnection && signalRConnection.state === signalR.HubConnectionState.Connected) {
                     signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify({
                         type: "candidate",
-                        candidate: event.candidate
+                        candidate: event.candidate,
+                        callId: callId
                     })).catch(err => console.error("❌ Failed to send ICE candidate:", err));
                 } else {
                     console.error("❌ SignalR is not connected! ICE candidate not sent.");
@@ -237,30 +331,91 @@
             }
         };
 
-
-
-        if (signalRConnection) {
+        // ✅ Create and send WebRTC offer
+        try {
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
 
             signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify(offer))
                 .catch(err => console.error("❌ Failed to send WebRTC Offer:", err));
-        } else {
-            console.error("❌ Cannot send WebRTC offer because SignalR connection is undefined.");
+        } catch (error) {
+            console.error("❌ Error creating or setting offer:", error);
+            showToast("Failed to start the call!", "danger");
         }
     }
 
+
+
     async function endCall() {
-        console.error("📴 Ending call");
-        peerConnection.close();
-        localStream.getTracks().forEach(track => track.stop());
+        console.error("📴 Ending call...");
+
+        if (!callId) {
+            console.error("❌ Error: No Call ID found. Cannot end call.");
+            return;
+        }
+
+        // ✅ Notify the server to end the call for both users
+        fetch(`/api/videoconference/end-call/${callId}`, { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                console.log("📴 Call ended. Duration:", data.duration);
+
+                // ✅ Notify both users in real time
+                signalRConnection.invoke("EndCall", callId);
+
+                // ✅ Hide "Waiting for other user" text
+                document.getElementById("waitingRoomText").innerHTML = "";
+
+                // ✅ Call UI Cleanup
+                cleanupCallUI();
+            })
+            .catch(error => console.error("❌ Failed to update call end time:", error));
+    }
+
+
+    // ✅ Function to properly stop all tracks and clean up UI
+    function cleanupCallUI() {
+        console.log("🧹 Cleaning up video call UI...");
+
+        // ✅ Close the existing peerConnection
+        if (peerConnection) {
+            peerConnection.ontrack = null;
+            peerConnection.onicecandidate = null;
+            peerConnection.close();
+            peerConnection = null;
+        }
+
+        // ✅ Stop and clear the local media stream
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+
+        // ✅ Remove video sources
         localVideo.srcObject = null;
         remoteVideo.srcObject = null;
 
-        // ✅ Hide self-view with smooth animation
+        // ✅ Hide small self-view smoothly
         smallSelfView.classList.remove("opacity-100", "scale-100");
         smallSelfView.classList.add("opacity-0", "scale-95");
+
+        // ✅ Reset call variables
+        callId = null;
+        targetUserId = null;
+        selectedUsers = [];
+
+        // ✅ Reset UI elements
+        document.getElementById("searchUsers").value = "";
+        document.getElementById("userResults").innerHTML = "";
+        document.getElementById("selectedUsers").innerHTML = "";
+        document.getElementById("startCallBtn").classList.add("d-none");
+
+        // ✅ Remove "Waiting for other user" message
+        document.getElementById("waitingRoomText").innerHTML = "";
+
+        console.log("🎥 Camera and microphone have been turned off.");
     }
+
 
     startCallBtn.addEventListener("click", startCall);
     endCallBtn.addEventListener("click", endCall);
@@ -269,62 +424,11 @@
 
 
     document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
         let selectedUsers = [];
 
         checkForInvites();
 
-        //document.getElementById("searchUsers").addEventListener("input", function () {
-        //    let query = this.value.trim();
-        //    if (query.length < 2) return;
-
-        //    fetch(`/api/videoconference/search-users?query=${encodeURIComponent(query)}`)
-        //        .then(response => {
-        //            if (!response.ok) {
-        //                return response.json().then(err => { throw new Error(err.error || "Unknown error"); });
-        //            }
-        //            return response.json();
-        //        })
-        //        .then(data => {
-        //            let resultsList = document.getElementById("userResults");
-        //            resultsList.innerHTML = "";
-
-        //            if (!Array.isArray(data) || data.length === 0) {
-        //                resultsList.innerHTML = `<li>No users found</li>`;
-        //                return;
-        //            }
-
-        //            data.forEach(user => {
-        //                if (!user.id || !user.fullName) return;
-
-        //                let li = document.createElement("li");
-        //                li.textContent = user.fullName;
-        //                li.setAttribute("data-user-id", user.id);
-        //                li.classList.add("user-result-item");
-        //                li.addEventListener("click", function () {
-        //                    addUserToCall(user.id, user.fullName);
-        //                });
-        //                resultsList.appendChild(li);
-        //            });
-        //        })
-        //        .catch(error => {
-        //            console.error("User search failed:", error);
-        //            document.getElementById("userResults").innerHTML = `<li>Error: ${error.message}</li>`;
-        //        });
-        //});
-
-        //function addUserToCall(userId, fullName) {
-        //    if (!selectedUsers.some(u => u.id === userId)) {
-        //        selectedUsers.push({ id: userId, name: fullName });
-
-        //        let list = document.getElementById("selectedUsers");
-        //        let li = document.createElement("li");
-        //        li.textContent = fullName;
-        //        li.setAttribute("data-user-id", userId);
-        //        list.appendChild(li);
-        //    }
-
-        //    document.getElementById("startCallBtn").classList.remove("d-none");
-        //}
         document.getElementById("searchUsers").addEventListener("input", function () {
             let query = this.value.trim();
             if (query.length < 2) return;
@@ -365,6 +469,11 @@
         });
 
         function addUserToCall(userId, fullName) {
+            if (!selectedUsers) {
+                selectedUsers = [];
+            }
+
+            // ✅ Ensure the user isn't already selected
             if (!selectedUsers.some(u => u.id === userId)) {
                 selectedUsers.push({ id: userId, name: fullName });
 
@@ -382,67 +491,50 @@
             document.getElementById("userResults").innerHTML = "";
         }
 
+
+
+
         document.getElementById("startCallBtn").addEventListener("click", function () {
-            document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept...";
+            if (selectedUsers.length === 0) {
+                return;
+            }
+
+            let hasValidUser = false;
 
             selectedUsers.forEach(user => {
                 if (!user.id) {
                     console.error("❌ Error: User ID is missing!", user);
                 } else {
+                    hasValidUser = true;
                     sendCallInvitation(user.id);
                 }
             });
+
+            if (hasValidUser) {
+                document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept...";
+            }
         });
 
-        //function sendCallInvitation(userId) {
-        //    if (!userId) {
-        //        console.error("❌ Error: ReceiverId is undefined.");
-        //        return;
-        //    }
 
-        //    targetUserId = userId;
 
-        //    let requestBody = JSON.stringify({
-        //        ReceiverId: userId
-        //    });
-
-        //    console.log("📩 Sending request:", requestBody);
-
-        //    fetch("/api/videoconference/invite", {
-        //        method: "POST",
-        //        headers: { "Content-Type": "application/json" },
-        //        body: requestBody
-        //    })
-        //        .then(async response => {
-        //            let responseBody = await response.json();
-        //            console.error("🟢 Server Response:", responseBody);
-
-        //            if (!response.ok) {
-        //                throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
-        //            }
-
-        //            document.getElementById("searchUsers").value = "";
-        //            document.getElementById("userResults").innerHTML = "";
-        //            document.getElementById("selectedUsers").innerHTML = "";
-        //            document.getElementById("startCallBtn").classList.add("d-none");
-
-        //            document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
-
-        //            startCall();
-        //        })
-        //        .catch(error => console.error("❌ Error:", error.message));
-        //}
 
         function sendCallInvitation(userId) {
             if (!userId) {
-                console.error("❌ Error: ReceiverId is undefined.");
+                showToast("Please select a user before starting a call!", "danger");
+                return;
+            }
+
+            if (callId) {
+                showToast("You are already in a call!", "danger");
                 return;
             }
 
             targetUserId = userId;
             console.log(`📩 Sending call request to: ${userId}`);
 
-            // ✅ First, invoke the SignalR hub method for real-time updates
+            // ✅ Reset waiting text in case a previous call ended
+            document.getElementById("waitingRoomText").innerHTML = "";
+
             signalRConnection.invoke("SendCallRequest", userId)
                 .then(() => {
                     console.log("✅ Call request sent successfully via SignalR.");
@@ -451,7 +543,12 @@
                     console.error("❌ SignalR call request failed. Falling back to API:", error);
                 });
 
-            // ✅ Then, send a backup request to the API to save the call invitation
+            signalRConnection.on("ReceiveCallId", (receivedCallId) => {
+                callId = receivedCallId;
+                console.log("✅ Received Call ID from server:", callId);
+                startCall();
+            });
+
             let requestBody = JSON.stringify({ ReceiverId: userId });
 
             fetch("/api/videoconference/invite", {
@@ -467,18 +564,24 @@
                         throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
                     }
 
-                    // ✅ Clear UI fields after sending the invitation
+                    if (!callId && responseBody.callId) {
+                        callId = responseBody.callId;
+                        console.log("✅ Call ID received from API:", callId);
+                        startCall();
+                    }
+
                     document.getElementById("searchUsers").value = "";
                     document.getElementById("userResults").innerHTML = "";
                     document.getElementById("selectedUsers").innerHTML = "";
                     document.getElementById("startCallBtn").classList.add("d-none");
 
                     document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
-
-                    startCall();
                 })
                 .catch(error => console.error("❌ API request failed:", error));
         }
+
+
+
 
 
         function checkForInvites() {
@@ -518,7 +621,7 @@
 
                     if (data.success) {
                         targetUserId = senderId;
-
+                        callId = data.callId;
                         document.getElementById("incomingCall").style.display = "none";
                         document.getElementById("callMessage").innerText = "";
                         document.getElementById("joinCallBtn").style.display = "none";

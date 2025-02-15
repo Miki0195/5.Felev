@@ -121,6 +121,7 @@ function loadNotifications() {
 
 document.addEventListener("DOMContentLoaded", function () {
     loadNotifications();
+    setInterval(loadNotifications, 2000); // Fetch every 2 seconds
 
     let isMessagesPage = window.location.pathname.startsWith("/chat");
 
@@ -190,10 +191,17 @@ if (typeof connection !== "undefined") {
 
         let senderId = new URLSearchParams(link.split("?")[1]).get("userId");
         let isMessagesPage = window.location.pathname.startsWith("/chat");
+        let isVideoPage = window.location.pathname.startsWith("/api/videoconference");
 
         let formattedTimestamp = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        if (isMessagesPage) {
+        if (isVideoPage) {
+            fetch(`/api/notifications/mark-as-read/${senderId}`, { method: "POST" })
+                .then(() => console.log(`✅ Auto-marked messages from ${senderId} as read on chat page`))
+                .catch(err => console.error("❌ Error auto-marking messages as read:", err));
+
+        }
+        else if (isMessagesPage) {
             fetch(`/api/notifications/mark-as-read/${senderId}`, { method: "POST" })
                 .then(() => console.log(`✅ Auto-marked messages from ${senderId} as read on chat page`))
                 .catch(err => console.error("❌ Error auto-marking messages as read:", err));
