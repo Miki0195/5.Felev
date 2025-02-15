@@ -95,6 +95,10 @@ namespace Managly.Controllers
                 _context.VideoCallInvitations.Add(newInvitation);
                 await _context.SaveChangesAsync();
 
+                await _hubContext.Clients.User(model.ReceiverId).SendAsync("ReceiveNotification",
+                        $"{sender.Name} {sender.LastName} invited you to a video call.", "/videoconference");
+
+
                 return Ok(new { success = true });
             }
             catch (Exception ex)
@@ -102,6 +106,9 @@ namespace Managly.Controllers
                 return StatusCode(500, new { error = "Internal server error.", details = ex.Message });
             }
         }
+
+
+
 
         [HttpGet("check-invite")]
         public async Task<IActionResult> CheckForInvites()
@@ -116,7 +123,7 @@ namespace Managly.Controllers
             // 🔥 Log user ID for debugging
             Console.WriteLine($"🔍 Checking invites for user: {user.Id}");
 
-            // 🔥 Include `Sender` in the query to avoid NullReferenceException
+            // 🔥 Include Sender in the query to avoid NullReferenceException
             var invitation = await _context.VideoCallInvitations
                 .Where(i => i.ReceiverId == user.Id && !i.IsAccepted)
                 .Include(i => i.Sender) // ✅ Ensure sender data is loaded
@@ -173,4 +180,3 @@ namespace Managly.Controllers
 
     }
 }
-

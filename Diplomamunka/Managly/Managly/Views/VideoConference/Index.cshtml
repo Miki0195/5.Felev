@@ -4,118 +4,51 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 
-<style>
-    .video-call-container {
-        background: #181818;
-        color: white;
-        font-family: 'Poppins', sans-serif;
-        overflow: hidden;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .conference-container {
-        max-width: 700px;
-        padding: 30px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 15px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        text-align: center;
-    }
-
-    .video-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
-        padding: 20px;
-    }
-
-    video {
-        width: 45%;
-        max-width: 500px;
-        height: auto;
-        border-radius: 15px;
-        background: black;
-    }
-
-
-    .call-controls {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
-        padding: 10px 20px;
-        border-radius: 30px;
-        display: flex;
-        gap: 15px;
-        align-items: center;
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .call-controls button {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: white;
-        font-size: 18px;
-        padding: 12px;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .call-controls button:hover {
-        background: rgba(255, 255, 255, 0.2);
-        transform: scale(1.1);
-    }
-
-    .end-call {
-        background: red;
-    }
-
-    .end-call:hover {
-        background: darkred;
-    }
-</style>
-
-<div class="video-call-container">
-    <div class="conference-container">
-        <h2>Start a Video Call</h2>
-        <input type="text" id="searchUsers" class="form-control mt-3" placeholder="Search users..." />
-        <ul id="userResults" class="user-list mt-3"></ul>
-        <h4 class="mt-4">Selected Users</h4>
-        <ul id="selectedUsers" class="user-list"></ul>
-        <button id="startCallBtn" class="btn btn-primary btn-modern mt-3 d-none">Start Call</button>
-        <div class="waiting-room mt-3" id="waitingRoom">
-            <h4>Waiting for the other user to accept...</h4>
+<div class="bg-gray-900 text-white h-screen flex">
+    <div class="w-1/4 bg-gray-800 p-5 border-r border-gray-700 flex flex-col">
+        <h2 class="text-xl font-semibold mb-4">Users</h2>
+        <input type="text" id="searchUsers" class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400" placeholder="Search users...">
+        <ul id="userResults" class="mt-4 space-y-3"></ul>
+        <h4 class="mt-4 text-lg font-semibold">Selected Users</h4>
+        <ul id="selectedUsers" class="space-y-2"></ul>
+        @*hidden*@
+        <button id="startCallBtn" class="bg-blue-500 text-white w-full py-2 rounded-lg mt-3">Start Call</button>
+        @*hidden*@
+        <div class="mt-4 text-yellow-400" id="waitingRoom">
+            <h4 id="waitingRoomText"></h4>
         </div>
-        <div class="mt-4" id="incomingCall" style="display: none;">
+        <div class="mt-4 text-yellow-400" id="incomingCall" style="display: none;">
             <h3 id="callMessage"></h3>
-            <button id="joinCallBtn" class="btn btn-success">Join Call</button>
+            <button id="joinCallBtn" class="bg-blue-500 text-white w-full py-2 rounded-lg mt-3">Join Call</button>
         </div>
     </div>
 
-    <div class="video-container">
-        <video id="localVideo" autoplay playsinline muted></video>
-        <video id="remoteVideo" autoplay playsinline></video>
-    </div>
+    <!-- Video Call Section -->
+    <div class="flex-1 flex flex-col items-center justify-center p-5 relative">
+        <div class="relative w-3/4 h-3/4 bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
+            <video id="localVideo" class="absolute w-full h-full object-cover" autoplay playsinline muted></video>
+            <video id="remoteVideo" class="absolute w-full h-full object-cover" autoplay playsinline></video>
 
-    <div class="call-controls">
-        <button id="muteAudioBtn"><i class="fas fa-microphone"></i></button>
-        <button id="toggleVideoBtn"><i class="fas fa-video"></i></button>
-        <button id="endCallBtn" class="end-call"><i class="fas fa-phone-slash"></i></button>
+            <!-- Small Self-View (Initially Hidden) -->
+            <div id="localVideoSmall" class="absolute top-3 right-3 w-24 h-24 border-2 border-white rounded-lg overflow-hidden transition-all duration-500 opacity-0 scale-95 cursor-pointer">
+                <video id="selfView" class="w-full h-full object-cover" autoplay playsinline muted></video>
+            </div>
+
+            <span id="noVideoText" class="text-gray-500">No active video feed</span>
+        </div>
+
+        <!-- Call Controls -->
+        <div class="flex space-x-4 mt-4">
+            <button id="endCallBtn" class="bg-red-500 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-phone-slash mr-2"></i>End Call</button>
+            <button id="muteAudioBtn" class="bg-gray-700 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-microphone mr-2"></i>Mute</button>
+            <button id="toggleVideoBtn" class="bg-gray-700 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-video mr-2"></i>Video</button>
+        </div>
     </div>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
 
 <script>const startCallBtn = document.getElementById("startCallBtn");
     const endCallBtn = document.getElementById("endCallBtn");
@@ -130,16 +63,20 @@
 
     const muteAudioBtn = document.getElementById("muteAudioBtn");
     const toggleVideoBtn = document.getElementById("toggleVideoBtn");
-    //const endCallBtn = document.getElementById("endCallBtn");
-    //const localVideo = document.getElementById("localVideo");
     let isMuted = false;
     let isVideoOff = false;
+
+    const smallSelfView = document.getElementById("localVideoSmall");
+    const selfViewVideo = document.getElementById("selfView");
+    let isSwapped = false;
 
     muteAudioBtn.addEventListener("click", function () {
         if (localStream) {
             localStream.getAudioTracks()[0].enabled = isMuted;
             isMuted = !isMuted;
-            muteAudioBtn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+            this.classList.toggle("bg-red-500");
+            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-microphone-slash mr-2"></i>Unmute' : '<i class="fas fa-microphone mr-2"></i>Mute';
+            //muteAudioBtn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
         }
     });
 
@@ -147,19 +84,16 @@
         if (localStream) {
             localStream.getVideoTracks()[0].enabled = isVideoOff;
             isVideoOff = !isVideoOff;
-            toggleVideoBtn.innerHTML = isVideoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+            this.classList.toggle("bg-red-500");
+            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-video-slash mr-2"></i>Enable Video' : '<i class="fas fa-video mr-2"></i>Disable Video';
+            //toggleVideoBtn.innerHTML = isVideoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
         }
     });
 
-    //endCallBtn.addEventListener("click", function () {
-    //    alert("Call ended.");
-    //    location.reload();
-    //});
 
-    
     async function connectToSignalR() {
         signalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl("https://192.168.1.145:7221/videocallhub", {  // Ensure this matches backend CORS setup
+            .withUrl("https://192.168.0.109:7221/videocallhub", {  // Ensure this matches backend CORS setup
                 transport: signalR.HttpTransportType.WebSockets,
                 skipNegotiation: true, // THESE TWO JUST FOR LOCAL TESTING
                 withCredentials: false
@@ -180,6 +114,7 @@
             targetUserId = callerId;
             document.getElementById("startCallBtn").innerText = "Accept Call";
         });
+
 
         signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
             console.error(`📡 Signal received from ${senderId}`, signal);
@@ -212,6 +147,36 @@
         });
     }
 
+    // ✅ Swapping Video Streams on Click
+    smallSelfView.addEventListener("click", function () {
+        console.log("🔄 Swapping video feeds...");
+
+        if (!localStream || !remoteVideo.srcObject) {
+            console.error("❌ Missing video streams, swap not possible.");
+            return;
+        }
+
+        if (isSwapped) {
+            // 🔄 Swap back to default: Small video -> Self, Big video -> Remote
+            let tempStream = selfViewVideo.srcObject;
+            selfViewVideo.srcObject = remoteVideo.srcObject;
+            remoteVideo.srcObject = tempStream;
+
+            console.log("📢 Reverted: Self view in small box, remote in big.");
+        } else {
+            // 🔄 Swap: Small video -> Remote, Big video -> Self
+            let tempStream = selfViewVideo.srcObject;
+            selfViewVideo.srcObject = remoteVideo.srcObject;
+            remoteVideo.srcObject = tempStream;
+
+            console.log("📢 Swapped: Remote view in small box, self in big.");
+        }
+
+        isSwapped = !isSwapped;
+    });
+
+
+
     async function startCall() {
         if (!targetUserId || targetUserId === "TARGET_USER_ID_FROM_SERVER") {
             console.error("❌ Error: No target user for the call.");
@@ -222,6 +187,10 @@
 
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
+        selfViewVideo.srcObject = localStream;
+
+        //document.getElementById("selfView").srcObject = localStream;
+        //document.getElementById("localVideoSmall").classList.remove = "hidden";
 
         peerConnection = new RTCPeerConnection({
             iceServers: [
@@ -239,9 +208,17 @@
             console.log("📡 Received remote video stream.", event.streams[0]);
 
             if (!remoteVideo.srcObject || remoteVideo.srcObject.id !== event.streams[0].id) {
-                remoteVideo.srcObject = event.streams[0]; 
+                remoteVideo.srcObject = event.streams[0];
             } else {
                 console.warn("⚠️ Remote video already assigned.");
+            }
+
+            if (localStream) {
+                selfViewVideo.srcObject = localStream;
+
+                document.getElementById("waitingRoomText").innerHTML = "";
+                smallSelfView.classList.remove("opacity-0", "scale-95", "hidden");
+                smallSelfView.classList.add("opacity-100", "scale-100");
             }
         };
 
@@ -260,6 +237,8 @@
             }
         };
 
+
+
         if (signalRConnection) {
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
@@ -277,6 +256,10 @@
         localStream.getTracks().forEach(track => track.stop());
         localVideo.srcObject = null;
         remoteVideo.srcObject = null;
+
+        // ✅ Hide self-view with smooth animation
+        smallSelfView.classList.remove("opacity-100", "scale-100");
+        smallSelfView.classList.add("opacity-0", "scale-95");
     }
 
     startCallBtn.addEventListener("click", startCall);
@@ -290,6 +273,58 @@
 
         checkForInvites();
 
+        //document.getElementById("searchUsers").addEventListener("input", function () {
+        //    let query = this.value.trim();
+        //    if (query.length < 2) return;
+
+        //    fetch(`/api/videoconference/search-users?query=${encodeURIComponent(query)}`)
+        //        .then(response => {
+        //            if (!response.ok) {
+        //                return response.json().then(err => { throw new Error(err.error || "Unknown error"); });
+        //            }
+        //            return response.json();
+        //        })
+        //        .then(data => {
+        //            let resultsList = document.getElementById("userResults");
+        //            resultsList.innerHTML = "";
+
+        //            if (!Array.isArray(data) || data.length === 0) {
+        //                resultsList.innerHTML = `<li>No users found</li>`;
+        //                return;
+        //            }
+
+        //            data.forEach(user => {
+        //                if (!user.id || !user.fullName) return;
+
+        //                let li = document.createElement("li");
+        //                li.textContent = user.fullName;
+        //                li.setAttribute("data-user-id", user.id);
+        //                li.classList.add("user-result-item");
+        //                li.addEventListener("click", function () {
+        //                    addUserToCall(user.id, user.fullName);
+        //                });
+        //                resultsList.appendChild(li);
+        //            });
+        //        })
+        //        .catch(error => {
+        //            console.error("User search failed:", error);
+        //            document.getElementById("userResults").innerHTML = `<li>Error: ${error.message}</li>`;
+        //        });
+        //});
+
+        //function addUserToCall(userId, fullName) {
+        //    if (!selectedUsers.some(u => u.id === userId)) {
+        //        selectedUsers.push({ id: userId, name: fullName });
+
+        //        let list = document.getElementById("selectedUsers");
+        //        let li = document.createElement("li");
+        //        li.textContent = fullName;
+        //        li.setAttribute("data-user-id", userId);
+        //        list.appendChild(li);
+        //    }
+
+        //    document.getElementById("startCallBtn").classList.remove("d-none");
+        //}
         document.getElementById("searchUsers").addEventListener("input", function () {
             let query = this.value.trim();
             if (query.length < 2) return;
@@ -341,10 +376,14 @@
             }
 
             document.getElementById("startCallBtn").classList.remove("d-none");
+
+            // ✅ Reset the search field and search results
+            document.getElementById("searchUsers").value = "";
+            document.getElementById("userResults").innerHTML = "";
         }
 
         document.getElementById("startCallBtn").addEventListener("click", function () {
-            document.getElementById("waitingRoom").style.display = "block";
+            document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept...";
 
             selectedUsers.forEach(user => {
                 if (!user.id) {
@@ -355,19 +394,65 @@
             });
         });
 
+        //function sendCallInvitation(userId) {
+        //    if (!userId) {
+        //        console.error("❌ Error: ReceiverId is undefined.");
+        //        return;
+        //    }
+
+        //    targetUserId = userId;
+
+        //    let requestBody = JSON.stringify({
+        //        ReceiverId: userId
+        //    });
+
+        //    console.log("📩 Sending request:", requestBody);
+
+        //    fetch("/api/videoconference/invite", {
+        //        method: "POST",
+        //        headers: { "Content-Type": "application/json" },
+        //        body: requestBody
+        //    })
+        //        .then(async response => {
+        //            let responseBody = await response.json();
+        //            console.error("🟢 Server Response:", responseBody);
+
+        //            if (!response.ok) {
+        //                throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
+        //            }
+
+        //            document.getElementById("searchUsers").value = "";
+        //            document.getElementById("userResults").innerHTML = "";
+        //            document.getElementById("selectedUsers").innerHTML = "";
+        //            document.getElementById("startCallBtn").classList.add("d-none");
+
+        //            document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
+
+        //            startCall();
+        //        })
+        //        .catch(error => console.error("❌ Error:", error.message));
+        //}
+
         function sendCallInvitation(userId) {
             if (!userId) {
                 console.error("❌ Error: ReceiverId is undefined.");
                 return;
             }
 
-            targetUserId = userId; 
+            targetUserId = userId;
+            console.log(`📩 Sending call request to: ${userId}`);
 
-            let requestBody = JSON.stringify({
-                ReceiverId: userId
-            });
+            // ✅ First, invoke the SignalR hub method for real-time updates
+            signalRConnection.invoke("SendCallRequest", userId)
+                .then(() => {
+                    console.log("✅ Call request sent successfully via SignalR.");
+                })
+                .catch(error => {
+                    console.error("❌ SignalR call request failed. Falling back to API:", error);
+                });
 
-            console.log("📩 Sending request:", requestBody);
+            // ✅ Then, send a backup request to the API to save the call invitation
+            let requestBody = JSON.stringify({ ReceiverId: userId });
 
             fetch("/api/videoconference/invite", {
                 method: "POST",
@@ -376,16 +461,25 @@
             })
                 .then(async response => {
                     let responseBody = await response.json();
-                    console.error("🟢 Server Response:", responseBody);
+                    console.log("🟢 Server Response (API):", responseBody);
 
                     if (!response.ok) {
                         throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
                     }
 
+                    // ✅ Clear UI fields after sending the invitation
+                    document.getElementById("searchUsers").value = "";
+                    document.getElementById("userResults").innerHTML = "";
+                    document.getElementById("selectedUsers").innerHTML = "";
+                    document.getElementById("startCallBtn").classList.add("d-none");
+
+                    document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
+
                     startCall();
                 })
-                .catch(error => console.error("❌ Error:", error.message));
+                .catch(error => console.error("❌ API request failed:", error));
         }
+
 
         function checkForInvites() {
             fetch("/api/videoconference/check-invite")
@@ -423,7 +517,12 @@
                     console.error("✅ Call accepted. Starting video.");
 
                     if (data.success) {
-                        targetUserId = senderId; 
+                        targetUserId = senderId;
+
+                        document.getElementById("incomingCall").style.display = "none";
+                        document.getElementById("callMessage").innerText = "";
+                        document.getElementById("joinCallBtn").style.display = "none";
+
                         startCall();
                     } else {
                         console.error("❌ Call was not accepted properly.");
@@ -433,7 +532,4 @@
         });
 
 
-    });
-
-
-    </script>
+    });</script> 

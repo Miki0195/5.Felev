@@ -1,21 +1,74 @@
-﻿html {
-  font-size: 14px;
+﻿.navbar {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    .navbar .nav-link {
+        color: #fff !important;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+        .navbar .nav-link:hover {
+            color: #ffdd57 !important;
+        }
+
+.navbar-brand {
+    font-size: 1.8rem !important;
+    font-weight: bold;
+    color: #fff !important;
+    transition: transform 0.3s ease;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    .navbar-brand:hover {
+        transform: scale(1.05);
+    }
+
+.navbar-toggler {
+    border: none;
+    outline: none;
 }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+
+.search-box {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 10px;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+    .search-box:focus {
+        background: rgba(255, 255, 255, 0.3);
+        outline: none;
+    }
+
+.dropdown-menu {
+    background-color: transparent;
+    border: none;
+}
+
+    .dropdown-menu a {
+        color: black !important;
+        background-color: transparent;
+    }
+
+        .dropdown-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+.nav-link {
+    font-size: 1.2rem !important;
+}
+
 
 /* 🔔 Notification Bell Styling */
 #notificationBell {
-    font-size: 1.5rem;
-    color: black; /* Default color */
     transition: color 0.3s ease-in-out;
 }
 

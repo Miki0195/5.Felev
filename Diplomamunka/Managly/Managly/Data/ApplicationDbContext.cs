@@ -21,6 +21,7 @@ namespace Managly.Data
         public DbSet<Leave> Leaves { get; set; }
         public DbSet<LicenseKey> LicenseKeys { get; set; }
         public DbSet<VideoCallInvitation> VideoCallInvitations { get; set; }
+        public DbSet<VideoConference> VideoConferences { get; set; }
     }
 }
 

@@ -54,11 +54,23 @@ public class Program
         {
             options.AddPolicy("CorsPolicy",
                 builder => builder
-                    .WithOrigins("https://192.168.1.145:7221", "https://localhost:7221") // Add your actual frontend URLs
+                    .WithOrigins("https://192.168.0.109:7221", "https://localhost:7221") // Add your actual frontend URLs
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
         });
+
+        //builder.WebHost.ConfigureKestrel(serverOptions =>
+        //{
+        //    serverOptions.ListenAnyIP(7221, listenOptions =>
+        //    {
+        //        listenOptions.UseHttps("/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/localhost.pfx", "yourpassword");
+        //    });
+        //    serverOptions.ListenAnyIP(5050); // HTTP for local testing
+        //});
+
+
+
 
         builder.Services.AddIdentity<User, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>()

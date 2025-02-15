@@ -1,4 +1,5 @@
 ﻿<Properties StartupConfiguration="{E04E5547-FD09-490D-B102-55B6442A62E8}|https">
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Hubs/VideoCallHub.cs">
     <Files>
       <File FileName="Managly/Models/User.cs" />
@@ -7,20 +8,20 @@
       <File FileName="Managly/Models/Message.cs" />
       <File FileName="Managly/Models/Attendance.cs" />
       <File FileName="Managly/Models/Leave.cs" />
-      <File FileName="Managly/Data/ApplicationDbContext.cs" />
+      <File FileName="Managly/Data/ApplicationDbContext.cs" Line="28" Column="1" />
       <File FileName="Managly/appsettings.json" />
-      <File FileName="Managly/Program.cs" Line="57" Column="65" />
+      <File FileName="Managly/Program.cs" Line="70" Column="14" />
       <File FileName="Managly/Managly.csproj" />
       <File FileName="Managly/Controllers/HomeController.cs" />
-      <File FileName="Managly/Views/_ViewImports.cshtml" />
-      <File FileName="Managly/Views/_ViewStart.cshtml" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml.css" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml" />
+      <File FileName="Managly/Views/_ViewImports.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Views/_ViewStart.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Views/Shared/_Layout.cshtml.css" Line="16" Column="29" />
+      <File FileName="Managly/Views/Shared/_Layout.cshtml" Line="89" Column="50" />
       <File FileName="Managly/Views/Home/Index.cshtml" />
       <File FileName="Managly/Models/LicenseKey.cs" />
       <File FileName="Managly/Views/Home/Login.cshtml" />
       <File FileName="Managly/wwwroot/css/Home/Login.css" />
-      <File FileName="Managly/wwwroot/css/site.css" />
+      <File FileName="Managly/wwwroot/css/site.css" Line="15" Column="27" />
       <File FileName="Managly/Models/Login.cs" />
       <File FileName="Managly/Views/Home/Register.cshtml" />
       <File FileName="Managly/Models/Register.cs" />
@@ -44,7 +45,7 @@
       <File FileName="Managly/Views/Admin/UserManagement.cshtml" />
       <File FileName="Managly/wwwroot/css/Account/AccessDenied.css" />
       <File FileName="Managly/Views/Account/AccountDeleted.cshtml" />
-      <File FileName="Managly/wwwroot/js/site.js" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/js/site.js" />
       <File FileName="Managly/wwwroot/js/Account/PasswordVisibility.js" />
       <File FileName="Managly/Models/UserProfile.cs" />
       <File FileName="Managly/Views/Account/Profile.cshtml" />
@@ -61,9 +62,9 @@
       <File FileName="Managly/Views/Schedule/MergedSchedule.cshtml" />
       <File FileName="Managly/wwwroot/css/Admin/UserManagement.css" />
       <File FileName="Managly/Models/RoleUpdateViewModel.cs" />
-      <File FileName="Managly/Hubs/ChatHub.cs" />
-      <File FileName="Managly/Controllers/ChatController.cs" Line="112" Column="73" />
-      <File FileName="Managly/Views/Chat/Index.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Hubs/ChatHub.cs" Line="24" Column="50" />
+      <File FileName="Managly/Controllers/ChatController.cs" />
+      <File FileName="Managly/Views/Chat/Index.cshtml" Line="216" Column="47" />
       <File FileName="Managly/wwwroot/js/Chat/chat.js" />
       <File FileName="Managly/wwwroot/css/Chat/Index.css" />
       <File FileName="Managly/Models/Notification.cs" />
@@ -73,13 +74,14 @@
       <File FileName="Managly/Migrations/20250204232807_DatabaseUpdated.cs" />
       <File FileName="Managly/Models/Tasks.cs" />
       <File FileName="Managly/Controllers/ClockInController.cs" />
-      <File FileName="Managly/Views/ClockIn/Index.cshtml" />
-      <File FileName="Managly/wwwroot/css/ClockIn/Index.css" />
-      <File FileName="Managly/Controllers/VideoConferenceController.cs" />
-      <File FileName="Managly/Views/VideoConference/Index.cshtml" Line="189" Column="78" />
+      <File FileName="Managly/Views/ClockIn/Index.cshtml" Line="19" Column="29" />
+      <File FileName="Managly/wwwroot/css/ClockIn/Index.css" Line="31" Column="18" />
+      <File FileName="Managly/Controllers/VideoConferenceController.cs" Line="28" Column="1" />
+      <File FileName="Managly/Views/VideoConference/Index.cshtml" Line="299" Column="38" />
       <File FileName="Managly/Models/VideoCallInvitation.cs" />
-      <File FileName="Managly/Hubs/VideoCallHub.cs" Line="44" Column="14" />
+      <File FileName="Managly/Hubs/VideoCallHub.cs" Line="130" Column="51" />
       <File FileName="Managly/Views/Shared/_ValidationScriptsPartial.cshtml" />
+      <File FileName="Managly/Models/VideoConference.cs" Line="16" Column="6" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -88,11 +90,11 @@
             <Node name="Managly" expanded="True">
               <Node name="Authorization" expanded="True" />
               <Node name="Controllers" expanded="True" />
-              <Node name="Data" expanded="True" />
               <Node name="Helpers" expanded="True" />
               <Node name="Hubs" expanded="True">
                 <Node name="VideoCallHub.cs" selected="True" />
               </Node>
+              <Node name="Models" expanded="True" />
               <Node name="Services" expanded="True" />
               <Node name="Views" expanded="True">
                 <Node name="Admin" expanded="True" />
@@ -126,11 +128,10 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
 </Properties>

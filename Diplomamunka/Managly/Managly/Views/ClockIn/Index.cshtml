@@ -8,15 +8,15 @@
 <div class="page-container">
     <div class="clock-container">
         <h2>Work Time Tracker</h2>
-        <h4 id="workTimer">00:00:00</h4>
+        <h4 id="workTimer" class="">00:00:00</h4>
 
         <div class="button-group">
             <button id="clockInBtn" class="btn btn-primary btn-modern">Clock In</button>
             <button id="clockOutBtn" class="btn btn-danger btn-modern d-none">Clock Out</button>
         </div>
 
-        <h4 class="mt-4">Recent Work Sessions</h4>
-        <table class="table table-dark table-modern">
+        <h3 class="mt-4">Recent Work Sessions</h3>
+        <table class="table table-modern">
             <thead>
                 <tr>
                     <th>Clock-In</th>
@@ -30,7 +30,7 @@
         </table>
 
         <div class="progress-container">
-            <h4>Weekly Work Progress</h4>
+            <h3>Weekly Work Progress</h3>
             <div class="progress">
                 <div id="workProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
             </div>
@@ -71,6 +71,7 @@
         if (data.success) {
             document.getElementById("clockOutBtn").classList.remove("d-none");
             document.getElementById("clockInBtn").classList.add("d-none");
+            document.getElementById("workTimer").style.color = "green"; 
 
             startTimer();
             loadWorkHistory();
@@ -86,6 +87,7 @@
             document.getElementById("clockOutBtn").classList.add("d-none");
             clearInterval(timerInterval);
             document.getElementById("workTimer").innerText = "00:00:00";
+            document.getElementById("workTimer").style.color = "#42a5f5";
 
             loadWorkHistory();
             loadWeeklyHours(false);
@@ -119,8 +121,6 @@
         }
     }
 
-    
-
     async function checkSessionStatus() {
         try {
             const response = await fetch("/api/attendance/current-session");
@@ -132,7 +132,7 @@
                 document.getElementById("clockInBtn").classList.add("d-none");
 
                 let elapsedSeconds = Math.round(data.elapsedMinutes * 60);
-                startTimer(elapsedSeconds); // Start timer from correct time
+                startTimer(elapsedSeconds); 
 
                 loadWeeklyHours(true);
             }
@@ -140,8 +140,6 @@
             console.error("Error checking session status:", error);
         }
     }
-
-    
 
     async function loadWeeklyHours(updateLive = false) {
         try {
@@ -152,10 +150,8 @@
             let totalHours = data.totalHours || 0;
             let totalMinutes = data.totalMinutes || 0;
 
-            // Update total hours text
             document.getElementById("weeklyHoursText").innerText = `Total Hours Worked: ${totalHours}h ${totalMinutes}m`;
 
-            // Calculate progress percentage
             let progressPercentage = ((totalHours * 60 + totalMinutes) / (40 * 60)) * 100;
             document.getElementById("workProgress").style.width = `${progressPercentage}%`;
 
@@ -170,7 +166,7 @@
             if (updateLive) {
                 if (liveUpdateInterval) clearInterval(liveUpdateInterval);
                 liveUpdateInterval = setInterval(() => {
-                    totalMinutes += 1; // ✅ Increment total minutes in real-time
+                    totalMinutes += 1; 
                     if (totalMinutes >= 60) {
                         totalMinutes = 0;
                         totalHours += 1;
@@ -178,7 +174,7 @@
                     document.getElementById("weeklyHoursText").innerText = `Total Hours Worked: ${totalHours}h ${totalMinutes}m`;
                     let progressPercentage = ((totalHours * 60 + totalMinutes) / (40 * 60)) * 100;
                     document.getElementById("workProgress").style.width = `${progressPercentage}%`;
-                }, 60000); // ✅ Update every 60 seconds
+                }, 60000); 
             }
         } catch (error) {
             console.error("Error loading weekly hours:", error);
