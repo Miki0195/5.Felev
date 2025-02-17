@@ -54,7 +54,7 @@ public class Program
         {
             options.AddPolicy("CorsPolicy",
                 builder => builder
-                    .WithOrigins("https://192.168.0.109:7221", "https://localhost:7221") // Add your actual frontend URLs
+                    .WithOrigins("https://192.168.1.105:7221", "https://localhost:7221") // Add your actual frontend URLs
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());

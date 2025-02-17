@@ -12,6 +12,14 @@ namespace Managly.Models
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; } // Nullable until call ends
 
+        public bool IsEnded { get; set; } = false;
+        [Required]
+        public CallStatus Status { get; set; } = CallStatus.Active;
+
         public TimeSpan? Duration => EndTime.HasValue ? EndTime - StartTime : null;
+    }
+    public enum CallStatus
+    {
+        Active, Ended, Missed, Pending
     }
 }

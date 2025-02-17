@@ -1,186 +1,4 @@
-﻿//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Identity;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Managly.Data;
-//using Managly.Models;
-//using Microsoft.AspNetCore.SignalR;
-//using System;
-//using Managly.Hubs;
-
-//namespace Managly.Controllers
-//{
-//    [Authorize]
-//    [Route("api/videoconference")]
-//    [ApiController]
-//    public class VideoConferenceController : Controller
-//    {
-//        private readonly ApplicationDbContext _context;
-//        private readonly UserManager<User> _userManager;
-//        private readonly IHubContext<ChatHub> _hubContext;
-
-//        public IActionResult Index()
-//        {
-//            return View();
-//        }
-
-//        public VideoConferenceController(ApplicationDbContext context, UserManager<User> userManager, IHubContext<ChatHub> hubContext)
-//        {
-//            _context = context;
-//            _userManager = userManager;
-//            _hubContext = hubContext;
-//        }
-
-//        [HttpGet("search-users")]
-//        public async Task<IActionResult> SearchUsers([FromQuery] string query)
-//        {
-//            if (string.IsNullOrWhiteSpace(query))
-//                return BadRequest(new { error = "Query cannot be empty" });
-
-//            var user = await _userManager.GetUserAsync(User);
-//            if (user == null || user.CompanyId == null)
-//                return Unauthorized(new { error = "User not authorized or missing company ID." });
-
-//            var users = await _context.Users
-//                .Where(u => u.CompanyId == user.CompanyId &&
-//                            ((u.Name + " " + u.LastName).Contains(query) ||
-//                             u.Name.Contains(query) ||
-//                             u.LastName.Contains(query)))
-//                .Select(u => new
-//                {
-//                    u.Id,
-//                    FullName = u.Name + " " + u.LastName
-//                })
-//                .ToListAsync();
-
-//            if (!users.Any())
-//                return Ok(new { message = "No users found." });
-
-//            return Ok(users);
-//        }
-
-//        [HttpPost("invite")]
-//        public async Task<IActionResult> SendVideoCallInvitation()
-//        {
-//            try
-//            {
-//                // ✅ Read raw body and log it
-//                using var reader = new StreamReader(Request.Body);
-//                var rawBody = await reader.ReadToEndAsync();
-//                Console.WriteLine($"📩 Raw Request Body: {rawBody}");
-
-//                // ✅ Deserialize JSON to check structure
-//                var model = Newtonsoft.Json.JsonConvert.DeserializeObject<VideoCallInvitation>(rawBody);
-//                if (model == null || string.IsNullOrEmpty(model.ReceiverId))
-//                {
-//                    return BadRequest(new { error = "ReceiverId is required." });
-//                }
-
-//                var sender = await _userManager.GetUserAsync(User);
-//                if (sender == null)
-//                {
-//                    return Unauthorized(new { error = "User not authenticated." });
-//                }
-
-//                var newInvitation = new VideoCallInvitation
-//                {
-//                    SenderId = sender.Id,
-//                    ReceiverId = model.ReceiverId,
-//                    Timestamp = DateTime.UtcNow,
-//                    IsAccepted = false
-//                };
-
-//                _context.VideoCallInvitations.Add(newInvitation);
-//                await _context.SaveChangesAsync();
-
-//                await _hubContext.Clients.User(model.ReceiverId).SendAsync("ReceiveNotification",
-//                        $"{sender.Name} {sender.LastName} invited you to a video call.", "/videoconference");
-
-
-//                return Ok(new { success = true });
-//            }
-//            catch (Exception ex)
-//            {
-//                return StatusCode(500, new { error = "Internal server error.", details = ex.Message });
-//            }
-//        }
-
-
-
-
-//        [HttpGet("check-invite")]
-//        public async Task<IActionResult> CheckForInvites()
-//        {
-//            var user = await _userManager.GetUserAsync(User);
-//            if (user == null)
-//            {
-//                Console.WriteLine("❌ Error: User is null or not authenticated.");
-//                return Unauthorized(new { error = "User not authenticated." });
-//            }
-
-//            // 🔥 Log user ID for debugging
-//            Console.WriteLine($"🔍 Checking invites for user: {user.Id}");
-
-//            // 🔥 Include Sender in the query to avoid NullReferenceException
-//            var invitation = await _context.VideoCallInvitations
-//                .Where(i => i.ReceiverId == user.Id && !i.IsAccepted)
-//                .Include(i => i.Sender) // ✅ Ensure sender data is loaded
-//                .OrderByDescending(i => i.Timestamp)
-//                .FirstOrDefaultAsync();
-
-//            if (invitation == null)
-//            {
-//                Console.WriteLine("✅ No pending invitations found.");
-//                return Ok(new { hasInvite = false });
-//            }
-
-//            if (invitation.Sender == null)
-//            {
-//                Console.WriteLine("❌ Error: Invitation found but Sender is NULL!");
-//                return StatusCode(500, new { error = "Invalid invitation data: Sender is missing." });
-//            }
-
-//            return Ok(new
-//            {
-//                hasInvite = true,
-//                senderName = $"{invitation.Sender.Name} {invitation.Sender.LastName}",
-//                senderId = invitation.SenderId
-//            });
-//        }
-
-
-
-//        [HttpPost("accept-invite/{senderId}")]
-//        public async Task<IActionResult> AcceptInvite(string senderId)
-//        {
-//            var user = await _userManager.GetUserAsync(User);
-//            if (user == null) return Unauthorized(new { error = "User not authenticated." });
-
-//            var invitation = await _context.VideoCallInvitations
-//                .Where(i => i.ReceiverId == user.Id && i.SenderId == senderId && !i.IsAccepted)
-//                .FirstOrDefaultAsync();
-
-//            if (invitation == null) return BadRequest(new { error = "No pending invitation found." });
-
-//            invitation.IsAccepted = true;
-//            await _context.SaveChangesAsync();
-
-//            // 🔥 Notify users to start the call
-//            await _hubContext.Clients.User(senderId).SendAsync("CallStarted", user.Id);
-//            await _hubContext.Clients.User(user.Id).SendAsync("CallStarted", senderId);
-
-//            // ✅ Return JSON instead of redirecting
-//            return Ok(new { success = true });
-//        }
-
-
-
-
-//    }
-//}
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -251,7 +69,6 @@ namespace Managly.Controllers
             {
                 using var reader = new StreamReader(Request.Body);
                 var rawBody = await reader.ReadToEndAsync();
-                Console.WriteLine($"📩 Raw Request Body: {rawBody}");
 
                 var model = Newtonsoft.Json.JsonConvert.DeserializeObject<VideoCallInvitation>(rawBody);
                 if (model == null || string.IsNullOrEmpty(model.ReceiverId))
@@ -276,10 +93,35 @@ namespace Managly.Controllers
                 _context.VideoCallInvitations.Add(newInvitation);
                 await _context.SaveChangesAsync();
 
-                await _hubContext.Clients.User(model.ReceiverId).SendAsync("ReceiveNotification",
-                        $"{sender.Name} {sender.LastName} invited you to a video call.", "/videoconference");
+                var newCall = new VideoConference
+                {
+                    CallId = Guid.NewGuid().ToString(),
+                    CallerId = sender.Id,
+                    ReceiverId = model.ReceiverId,
+                    StartTime = DateTime.UtcNow,
+                    Status = CallStatus.Pending,  
+                    IsEnded = false
+                };
 
-                return Ok(new { success = true });
+                _context.VideoConferences.Add(newCall);
+                await _context.SaveChangesAsync();
+
+                var notification = new Notification
+                {
+                    UserId = model.ReceiverId,
+                    Message = $"{sender.Name} {sender.LastName} invited you to a video call.",
+                    Link = "/videoconference",
+                    IsRead = false,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                _context.Notifications.Add(notification);
+                await _context.SaveChangesAsync();
+
+                await _hubContext.Clients.User(model.ReceiverId).SendAsync("ReceiveNotification",
+                    notification.Message, notification.Link, 1, 1, notification.Timestamp);
+
+                return Ok(new { success = true, callId = newCall.CallId });
             }
             catch (Exception ex)
             {
@@ -293,7 +135,6 @@ namespace Managly.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                Console.WriteLine("❌ Error: User is null or not authenticated.");
                 return Unauthorized(new { error = "User not authenticated." });
             }
 
@@ -305,13 +146,11 @@ namespace Managly.Controllers
 
             if (invitation == null)
             {
-                Console.WriteLine("✅ No pending invitations found.");
                 return Ok(new { hasInvite = false });
             }
 
             if (invitation.Sender == null)
             {
-                Console.WriteLine("❌ Error: Invitation found but Sender is NULL!");
                 return StatusCode(500, new { error = "Invalid invitation data: Sender is missing." });
             }
 
@@ -323,38 +162,6 @@ namespace Managly.Controllers
             });
         }
 
-        //[HttpPost("accept-invite/{senderId}")]
-        //public async Task<IActionResult> AcceptInvite(string senderId)
-        //{
-        //    var user = await _userManager.GetUserAsync(User);
-        //    if (user == null) return Unauthorized(new { error = "User not authenticated." });
-
-        //    var invitation = await _context.VideoCallInvitations
-        //        .Where(i => i.ReceiverId == user.Id && i.SenderId == senderId && !i.IsAccepted)
-        //        .FirstOrDefaultAsync();
-
-        //    if (invitation == null) return BadRequest(new { error = "No pending invitation found." });
-
-        //    invitation.IsAccepted = true;
-        //    await _context.SaveChangesAsync();
-
-        //    // ✅ Generate a Call ID
-        //    var newCall = new VideoConference
-        //    {
-        //        CallerId = senderId,
-        //        ReceiverId = user.Id,
-        //        StartTime = DateTime.UtcNow
-        //    };
-
-        //    _context.VideoConferences.Add(newCall);
-        //    await _context.SaveChangesAsync();
-
-        //    // 🔥 Notify both users to start the call
-        //    await _hubContext.Clients.User(senderId).SendAsync("CallStarted", newCall.CallId);
-        //    await _hubContext.Clients.User(user.Id).SendAsync("CallStarted", newCall.CallId);
-
-        //    return Ok(new { success = true, callId = newCall.CallId });
-        //}
         [HttpPost("accept-invite/{senderId}")]
         public async Task<IActionResult> AcceptInvite(string senderId)
         {
@@ -370,10 +177,8 @@ namespace Managly.Controllers
             invitation.IsAccepted = true;
             await _context.SaveChangesAsync();
 
-            // ✅ Instead of creating a new call, find the existing one
             var existingCall = await _context.VideoConferences
-                .Where(c => c.CallerId == senderId && c.ReceiverId == user.Id && c.EndTime == null)
-                .OrderByDescending(c => c.StartTime)
+                .Where(c => c.CallerId == senderId && c.ReceiverId == user.Id && c.Status == CallStatus.Pending)
                 .FirstOrDefaultAsync();
 
             if (existingCall == null)
@@ -381,44 +186,80 @@ namespace Managly.Controllers
                 return BadRequest(new { error = "Call session not found." });
             }
 
-            // 🔥 Notify both users to start the call with the correct Call ID
+            existingCall.Status = CallStatus.Active;
+            await _context.SaveChangesAsync();
+
             await _hubContext.Clients.User(senderId).SendAsync("CallStarted", existingCall.CallId);
             await _hubContext.Clients.User(user.Id).SendAsync("CallStarted", existingCall.CallId);
 
             return Ok(new { success = true, callId = existingCall.CallId });
         }
 
-
-        //[HttpPost("end-call/{callId}")]
-        //public async Task<IActionResult> EndCall(string callId)
-        //{
-        //    var call = await _context.VideoConferences.FindAsync(callId);
-        //    if (call == null) return NotFound(new { error = "Call not found." });
-
-        //    call.EndTime = DateTime.UtcNow;
-        //    await _context.SaveChangesAsync();
-
-        //    await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId);
-        //    await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId);
-
-        //    return Ok(new { success = true });
-        //}
         [HttpPost("end-call/{callId}")]
         public async Task<IActionResult> EndCall(string callId)
         {
             var call = await _context.VideoConferences.FindAsync(callId);
-            if (call == null) return NotFound(new { error = "Call not found." });
+            if (call == null)
+            {
+                return NotFound(new { error = "Call not found." });
+            }
 
-            call.EndTime = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            if (!call.IsEnded)
+            {
+                call.IsEnded = true;
+                call.EndTime = DateTime.UtcNow;
 
-            var callDuration = call.EndTime.Value - call.StartTime;
-            string durationText = $"{callDuration.Minutes} min {callDuration.Seconds} sec";
+                if (call.Status == CallStatus.Pending)
+                {
+                    var invitation = await _context.VideoCallInvitations
+                    .Where(i => i.ReceiverId == call.ReceiverId && i.SenderId == call.CallerId && !i.IsAccepted)
+                    .FirstOrDefaultAsync();
 
-            await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, durationText);
-            await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId, durationText);
+                    if (invitation != null)
+                    {
+                        invitation.IsAccepted = true;
+                        await _context.SaveChangesAsync();
+                    }
 
-            return Ok(new { success = true, duration = durationText });
+                    var caller = await _context.Users.FindAsync(call.CallerId);
+                    var receiver = await _context.Users.FindAsync(call.ReceiverId);
+
+                    call.Status = CallStatus.Missed;
+                    var missedCallNotification = new Notification
+                    {
+                        UserId = receiver.Id,
+                        Message = $"You have a missed call from {caller.Name} {caller.LastName}.",
+                        Link = "/videoconference",
+                        IsRead = false,
+                        Timestamp = DateTime.UtcNow
+                    };
+
+                    _context.Notifications.Add(missedCallNotification);
+                    await _context.SaveChangesAsync();
+
+                    await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
+                        missedCallNotification.Message, missedCallNotification.Link, 1, 1, missedCallNotification.Timestamp);
+                }
+                else
+                {
+                    call.Status = CallStatus.Ended;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            string message = call.Status == CallStatus.Missed ? "Missed Call" : "Call Ended";
+
+            if (call.EndTime.HasValue)
+            {
+                var callDuration = call.EndTime.Value - call.StartTime;
+                message = $"{callDuration.Minutes} min {callDuration.Seconds} sec";
+            }
+
+            await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, message);
+            await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId, message);
+
+            return Ok(new { success = true, message });
         }
 
         [HttpGet("get-call/{callId}")]
@@ -429,6 +270,29 @@ namespace Managly.Controllers
 
             return Ok(call);
         }
+        //[HttpGet("get-call/{callId}")]
+        //public async Task<IActionResult> GetCall(string callId)
+        //{
+        //    var call = await _context.VideoConferences.FirstOrDefaultAsync(c => c.CallId == callId);
+
+        //    if (call == null)
+        //    {
+        //        Console.WriteLine($"❌ No call found with ID {callId}");
+        //        return NotFound(new { error = "Call not found" });
+        //    }
+
+        //    Console.WriteLine($"📡 API Returning Call Details: ID={call.CallId}, Status={call.Status}, Caller={call.CallerId}, Receiver={call.ReceiverId}");
+
+        //    return Ok(new
+        //    {
+        //        CallId = call.CallId,
+        //        Status = call.Status,
+        //        CallerId = call.CallerId,
+        //        ReceiverId = call.ReceiverId
+        //    });
+        //}
+
+
 
         [HttpGet("get-user-calls")]
         public async Task<IActionResult> GetUserCalls()
@@ -444,6 +308,129 @@ namespace Managly.Controllers
             return Ok(calls);
         }
 
+        [HttpGet("get-active-call")]
+        public async Task<IActionResult> GetActiveCall()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized(new { error = "User not authenticated." });
 
+            var activeCall = await _context.VideoConferences
+                .Where(c => (c.CallerId == user.Id || c.ReceiverId == user.Id) && c.Status == CallStatus.Active && !c.IsEnded)
+                .OrderByDescending(c => c.StartTime)
+                .FirstOrDefaultAsync();
+
+            if (activeCall == null)
+                return Ok(new { hasActiveCall = false });
+
+            return Ok(new
+            {
+                hasActiveCall = true,
+                callId = activeCall.CallId,
+                targetUserId = activeCall.CallerId == user.Id ? activeCall.ReceiverId : activeCall.CallerId
+            });
+        }
+
+
+        [HttpPost("missed-call/{callId}")]
+        public async Task<IActionResult> MissedCall(string callId)
+        {
+            var call = await _context.VideoConferences.FindAsync(callId);
+            if (call == null) return NotFound();
+
+            if (call.Status == CallStatus.Active)
+            {
+                return Ok(new { success = false, message = "User joined before timeout." });
+            }
+
+            if (call.Status == CallStatus.Pending)
+            {
+                call.Status = CallStatus.Missed;
+                call.IsEnded = true;
+                call.EndTime = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+
+            var invitation = await _context.VideoCallInvitations
+                .Where(i => i.ReceiverId == call.ReceiverId && i.SenderId == call.CallerId && !i.IsAccepted)
+                .FirstOrDefaultAsync();
+
+            if (invitation != null)
+            {
+                invitation.IsAccepted = true;
+                await _context.SaveChangesAsync();
+            }
+
+            var caller = await _context.Users.FindAsync(call.CallerId);
+            var receiver = await _context.Users.FindAsync(call.ReceiverId);
+
+            if (receiver != null)
+            {
+                var missedCallNotification = new Notification
+                {
+                    UserId = receiver.Id,
+                    Message = $"You have a missed call from {caller.Name} {caller.LastName}.",
+                    Link = "/videoconference",
+                    IsRead = false,
+                    Timestamp = DateTime.UtcNow
+                };
+
+                _context.Notifications.Add(missedCallNotification);
+                await _context.SaveChangesAsync();
+
+                await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
+                    missedCallNotification.Message, missedCallNotification.Link, 1, 1, missedCallNotification.Timestamp);
+            }
+
+            await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, "Missed Call");
+            await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId, "Missed Call");
+
+            return Ok(new { success = true });
+        }
+
+
+        [HttpPost("mark-call-active/{callId}")]
+        public async Task<IActionResult> MarkCallActive(string callId)
+        {
+            var call = await _context.VideoConferences.FindAsync(callId);
+            if (call == null)
+            {
+                return NotFound(new { error = "Call not found." });
+            }
+
+            if (!call.IsEnded)
+            {
+                call.Status = CallStatus.Active;
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("get-recent-calls")]
+        public async Task<IActionResult> GetRecentCalls()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized(new { error = "User not authenticated." });
+
+            var recentCalls = await _context.VideoConferences
+                .Where(c => c.CallerId == user.Id || c.ReceiverId == user.Id)
+                .OrderByDescending(c => c.StartTime)
+                .Take(5)
+                .Select(c => new
+                {
+                    CallId = c.CallId,
+                    OtherUser = c.CallerId == user.Id
+                        ? _context.Users.Where(u => u.Id == c.ReceiverId).Select(u => u.Name + " " + u.LastName).FirstOrDefault()
+                        : _context.Users.Where(u => u.Id == c.CallerId).Select(u => u.Name + " " + u.LastName).FirstOrDefault(),
+                    Duration = c.IsEnded && c.Duration.HasValue
+                        ? $"{c.Duration.Value.Minutes} min {c.Duration.Value.Seconds} sec"
+                        : (c.Status == CallStatus.Missed ? "Missed Call" : "Ongoing"),
+                    Timestamp = c.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Status = c.Status.ToString() 
+                })
+                .ToListAsync();
+
+            return Ok(recentCalls);
+        }
     }
 }
