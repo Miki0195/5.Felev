@@ -110,30 +110,30 @@ namespace Managly.Hubs
             }
         }
 
-        public async Task AcceptCall(string callId)
-        {
-            var call = await _context.VideoConferences.FindAsync(callId);
-            if (call == null)
-            {
-                return;
-            }
+        //public async Task AcceptCall(string callId)
+        //{
+        //    var call = await _context.VideoConferences.FindAsync(callId);
+        //    if (call == null)
+        //    {
+        //        return;
+        //    }
 
-            if (call.Status == CallStatus.Pending)
-            {
-                call.Status = CallStatus.Active;
-                await _context.SaveChangesAsync();
-            }
+        //    if (call.Status == CallStatus.Pending)
+        //    {
+        //        call.Status = CallStatus.Active;
+        //        await _context.SaveChangesAsync();
+        //    }
 
-            if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
-            {
-                await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
-            }
+        //    if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
+        //    {
+        //        await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
+        //    }
 
-            if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
-            {
-                await Clients.Client(receiverConnectionId).SendAsync("CallStarted", call.CallId);
-            }
-        }
+        //    if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
+        //    {
+        //        await Clients.Client(receiverConnectionId).SendAsync("CallStarted", call.CallId);
+        //    }
+        //}
 
         public async Task EndCall(string callId)
         {
@@ -207,6 +207,6 @@ namespace Managly.Hubs
             {
                 await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
             }
-            }
+        }
     }
 }
