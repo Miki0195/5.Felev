@@ -297,6 +297,41 @@ h3 {
     padding: 10px;
     background: #fff;
     border-top: 1px solid #ddd;
+    position: relative;
+}
+
+.emoji-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    padding: 0 10px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.emoji-button:hover {
+    color: #0084ff;
+}
+
+.emoji-picker-container {
+    position: absolute;
+    bottom: 100%;
+    right: 70px;
+    z-index: 1000;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Custom styling for the emoji picker */
+emoji-picker {
+    --num-columns: 8;
+    --emoji-size: 1.5rem;
+    --background: #fff;
+    --border-color: #e0e0e0;
+    height: 300px;
+    width: 300px;
 }
 
 .date-separator {
