@@ -22,6 +22,9 @@ namespace Managly.Data
         public DbSet<LicenseKey> LicenseKeys { get; set; }
         public DbSet<VideoCallInvitation> VideoCallInvitations { get; set; }
         public DbSet<VideoConference> VideoConferences { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectMember> ProjectMembers { get; set; }
+        public DbSet<TaskAssignment> TaskAssignments { get; set; }
     }
 }
 

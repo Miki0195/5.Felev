@@ -420,8 +420,11 @@
                     profileImg.classList.add("recent-chat-img");
 
                     let nameDiv = document.createElement("div");
-                    nameDiv.classList.add("user-name");
-                    nameDiv.textContent = user.fullName;
+                    nameDiv.classList.add("user-name", "recent-chat-header");
+                    nameDiv.innerHTML = `
+                        <span>${user.fullName}</span>
+                        <div class="status-dot ${user.isOnline ? 'online' : 'offline'}"></div>
+                    `;
 
                     let messagePreviewDiv = document.createElement("div");
                     messagePreviewDiv.classList.add("message-preview");
@@ -477,8 +480,6 @@
             })
             .catch(err => console.error("❌ Error loading recent chats:", err));
     }
-
-
 
     function updateRecentChat(userId, newMessage, isSentByMe) {
         let recentChatsDiv = document.getElementById("recentChats");
@@ -654,20 +655,6 @@
                 .catch(err => console.error("❌ Server error deleting for me: ", err));
         }
     }
-
-
-    // ✅ Real-time listener to remove message for sender only
-    //connection.on("MessageDeletedForMe", function (messageId) {
-    //    console.error(`✅ Received MessageDeletedForMe event for message ${messageId}`);
-
-    //    let messageElement = document.querySelector(`.message-wrapper[data-message-id="${messageId}"]`);
-    //    if (messageElement) {
-    //        console.error(`⛔ Removing message ${messageId} from UI`);
-    //        messageElement.remove();
-    //    } else {
-    //        console.error(`⚠ Warning: Message ${messageId} not found in DOM`);
-    //    }
-    //});
 
     function deleteMessageForEveryone(messageId) {
         if (!messageId) {

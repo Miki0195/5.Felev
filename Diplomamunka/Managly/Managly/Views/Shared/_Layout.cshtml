@@ -50,9 +50,13 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Admin" asp-action="UserManagement">User Management</a>
                             </li>
+
                         }
                         @if (User.Identity.IsAuthenticated)
                         {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Projects" asp-action="Index">Projects</a>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a id="notificationBell" class="nav-link position-relative" href="#" onclick="toggleNotifications()">
                                     <i class="bi bi-bell"></i>

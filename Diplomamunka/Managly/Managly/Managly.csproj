@@ -37,6 +37,7 @@
     <None Remove="Views\Chat\" />
     <None Remove="Views\ClockIn\" />
     <None Remove="Views\VideoConference\" />
+    <None Remove="Controllers\Api\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -61,6 +62,7 @@
     <Folder Include="Views\ClockIn\" />
     <Folder Include="wwwroot\css\ClockIn\" />
     <Folder Include="Views\VideoConference\" />
+    <Folder Include="Controllers\Api\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />

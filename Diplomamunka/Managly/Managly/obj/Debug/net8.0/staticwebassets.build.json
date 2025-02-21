@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Vc4N70Uenx+6tG2Dn+7sLaLdoqoi5LM8/NTWAbiJkGI=",
+  "Hash": "rvcuovNmCh2NykjyAH8asWJzmeBxSwdbTMcyLgTtIi4=",
   "Source": "Managly",
   "BasePath": "_content/Managly",
   "Mode": "Default",
@@ -205,6 +205,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/css/Home/Register.css"
+    },
+    {
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Projects/Index.css",
+      "SourceId": "Managly",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "BasePath": "_content/Managly",
+      "RelativePath": "css/Projects/Index.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/Projects/Index.css"
     },
     {
       "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Schedule/Manage.css",

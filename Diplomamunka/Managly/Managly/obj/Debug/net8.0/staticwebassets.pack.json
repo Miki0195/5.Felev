@@ -37,6 +37,10 @@
       "PackagePath": "staticwebassets/css/Home/Register.css"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Projects/Index.css",
+      "PackagePath": "staticwebassets/css/Projects/Index.css"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Schedule/Manage.css",
       "PackagePath": "staticwebassets/css/Schedule/Manage.css"
     },

@@ -4,6 +4,7 @@ using Managly.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Managly.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250221211656_ProjectTable")]
+    partial class ProjectTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -336,33 +339,6 @@ namespace Managly.Migrations
                     b.ToTable("Schedules");
                 });
 
-            modelBuilder.Entity("Managly.Models.TaskAssignment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TaskId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TaskAssignments");
-                });
-
             modelBuilder.Entity("Managly.Models.Tasks", b =>
                 {
                     b.Property<int>("Id")
@@ -374,7 +350,7 @@ namespace Managly.Migrations
                     b.Property<DateTime>("AssignedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("CreatedById")
+                    b.Property<string>("AssignedToId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
@@ -384,13 +360,6 @@ namespace Managly.Migrations
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -403,11 +372,12 @@ namespace Managly.Migrations
                     b.Property<float>("TimeSpent")
                         .HasColumnType("float");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("AssignedToId");
 
                     b.ToTable("Tasks");
                 });
@@ -818,42 +788,15 @@ namespace Managly.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Managly.Models.TaskAssignment", b =>
-                {
-                    b.HasOne("Managly.Models.Tasks", "Task")
-                        .WithMany("Assignments")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Managly.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Managly.Models.Tasks", b =>
                 {
-                    b.HasOne("Managly.Models.User", "CreatedBy")
+                    b.HasOne("Managly.Models.User", "AssignedTo")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
+                        .HasForeignKey("AssignedToId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Managly.Models.Project", "Project")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Project");
+                    b.Navigation("AssignedTo");
                 });
 
             modelBuilder.Entity("Managly.Models.User", b =>
@@ -943,13 +886,6 @@ namespace Managly.Migrations
             modelBuilder.Entity("Managly.Models.Project", b =>
                 {
                     b.Navigation("ProjectMembers");
-
-                    b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("Managly.Models.Tasks", b =>
-                {
-                    b.Navigation("Assignments");
                 });
 #pragma warning restore 612, 618
         }
