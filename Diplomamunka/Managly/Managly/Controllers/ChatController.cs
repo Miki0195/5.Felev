@@ -20,13 +20,19 @@ namespace Managly.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly IHubContext<ChatHub> _hubContext; 
+        private readonly IHubContext<ChatHub> _hubContext;
+        private readonly ChatHub _chatHub;
 
-        public ChatController(ApplicationDbContext context, UserManager<User> userManager,IHubContext<ChatHub> hubContext)
+        public ChatController(
+            ApplicationDbContext context, 
+            UserManager<User> userManager,
+            IHubContext<ChatHub> hubContext,
+            ChatHub chatHub)
         {
             _context = context;
             _userManager = userManager;
             _hubContext = hubContext;
+            _chatHub = chatHub;
         }
 
         [Authorize]
@@ -153,7 +159,7 @@ namespace Managly.Controllers
 
             var chatUserIds = await _context.Messages
                 .Where(m => m.SenderId == userId || m.ReceiverId == userId)
-                .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId) 
+                .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Distinct()
                 .ToListAsync();
 
@@ -164,6 +170,7 @@ namespace Managly.Controllers
                     u.Id,
                     FullName = u.Name + " " + u.LastName,
                     ProfilePicturePath = u.ProfilePicturePath ?? "",
+                    IsOnline = _chatHub.IsUserOnline(u.Id),
                     LastMessage = _context.Messages
                         .Where(m => (m.SenderId == userId && m.ReceiverId == u.Id) ||
                                     (m.SenderId == u.Id && m.ReceiverId == userId))
@@ -177,17 +184,11 @@ namespace Managly.Controllers
                             Timestamp = m.Timestamp
                         })
                         .FirstOrDefault(),
-
                     UnreadCount = _context.Messages
-                        .Where(m => m.SenderId == u.Id && m.ReceiverId == userId && !m.IsRead) // ✅ Ensure unread messages are properly counted
-                        .Count()
+                        .Count(m => m.SenderId == u.Id && m.ReceiverId == userId && !m.IsRead)
                 })
-                .OrderByDescending(u => u.LastMessage != null ? u.LastMessage.Content : "")
+                .OrderByDescending(u => u.LastMessage != null ? u.LastMessage.Timestamp : DateTime.MinValue)
                 .ToListAsync();
-
-            usersWithLastMessage = usersWithLastMessage
-                .OrderByDescending(u => u.LastMessage?.Timestamp)
-                .ToList();
 
             return Ok(usersWithLastMessage);
         }
@@ -220,7 +221,12 @@ namespace Managly.Controllers
         {
             var user = await _context.Users
                 .Where(u => u.Id == userId)
-                .Select(u => new { u.Id, FullName = u.Name + " " + u.LastName, u.ProfilePicturePath }) 
+                .Select(u => new { 
+                    u.Id, 
+                    FullName = u.Name + " " + u.LastName, 
+                    u.ProfilePicturePath,
+                    IsOnline = _chatHub.IsUserOnline(userId)
+                })
                 .FirstOrDefaultAsync();
 
             if (user == null)

@@ -121,9 +121,15 @@
                     .then(response => response.json())
                     .then(user => {
                         document.getElementById("chatHeader").innerHTML = `
-                    <img src="${user.profilePicturePath}" class="chat-header-img" alt="Profile">
-                    <span>${user.fullName}</span>
-                    `;
+                            <img src="${user.profilePicturePath}" class="chat-header-img" alt="Profile">
+                            <div class="user-info-container">
+                                <span>${user.fullName}</span>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="user-status-text">${user.isOnline ? 'Online' : 'Offline'}</span>
+                                    <div class="online-status ${user.isOnline ? 'online' : 'offline'}"></div>
+                                </div>
+                            </div>
+                        `;
                     })
                     .catch(err => console.error("Error fetching user details: ", err));
 
@@ -177,7 +183,7 @@
                     profileImg.src = msg.senderProfilePicture;
                     profileImg.classList.add("message-profile-img");
 
-                    if (isSentByMe) {
+                    if (isSentByMe && !msg.isDeleted) {  // Only add click handler if message is not deleted
                         messageDiv.onclick = function () {
                             openMessageOptionsModal(msg.id, msg.content);
                         };
@@ -660,4 +666,31 @@
             }
         }
     }
+
+    connection.on("UserOnlineStatusChanged", function(userId, isOnline) {
+        if (selectedUserId === userId) {
+            // Update status indicator
+            const statusIndicator = document.querySelector('.online-status');
+            if (statusIndicator) {
+                statusIndicator.className = `online-status ${isOnline ? 'online' : 'offline'}`;
+            }
+            
+            // Update status text
+            const statusText = document.querySelector('.user-status-text');
+            if (statusText) {
+                statusText.textContent = isOnline ? 'Online' : 'Offline';
+            }
+        }
+        
+        // Update status in recent chats if exists
+        const recentChat = document.querySelector(`.user-recent-chat[data-user-id="${userId}"]`);
+        if (recentChat) {
+            const statusDot = recentChat.querySelector('.status-dot') || 
+                document.createElement('div');
+            statusDot.className = `status-dot ${isOnline ? 'online' : 'offline'}`;
+            if (!recentChat.querySelector('.status-dot')) {
+                recentChat.appendChild(statusDot);
+            }
+        }
+    });
     </script>   

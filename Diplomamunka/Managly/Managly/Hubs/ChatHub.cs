@@ -7,56 +7,79 @@ using Managly.Models;
 using Managly.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Concurrent;
 
 namespace Managly.Hubs
 {
     [Authorize]
     public class ChatHub : Hub
     {
-        private static Dictionary<string, string> _connections = new Dictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, HashSet<string>> _userConnections = 
+            new ConcurrentDictionary<string, HashSet<string>>();
 
         private readonly ApplicationDbContext _context;
 
         public ChatHub(ApplicationDbContext context)
         {
-            _context = context; 
+            _context = context;
         }
-        //public override Task OnConnectedAsync()
-        //{
-        //    string userId = Context.UserIdentifier;
-        //    if (userId != null && !_connections.ContainsKey(userId))
-        //    {
-        //        _connections[userId] = Context.ConnectionId;
-        //    }
-        //    return base.OnConnectedAsync();
-        //}
-        public override Task OnConnectedAsync()
+
+        public override async Task OnConnectedAsync()
         {
             string userId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(userId))
             {
-                _connections[userId] = Context.ConnectionId;
+                // Add connection to user's connection set
+                _userConnections.AddOrUpdate(
+                    userId,
+                    new HashSet<string> { Context.ConnectionId },
+                    (key, oldSet) =>
+                    {
+                        oldSet.Add(Context.ConnectionId);
+                        return oldSet;
+                    });
+
                 Console.WriteLine($"✅ [SignalR] User {userId} connected with connection ID: {Context.ConnectionId}");
+                Console.WriteLine($"✅ [SignalR] Active connections for user {userId}: {_userConnections[userId].Count}");
+
+                // Broadcast user's online status to all clients
+                await Clients.All.SendAsync("UserOnlineStatusChanged", userId, true);
             }
             else
             {
                 Console.WriteLine("❌ [SignalR] Error: UserIdentifier is null in OnConnectedAsync");
             }
 
-
-            return base.OnConnectedAsync();
+            await base.OnConnectedAsync();
         }
 
-
-
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
             string userId = Context.UserIdentifier;
-            if (userId != null && _connections.ContainsKey(userId))
+            if (!string.IsNullOrEmpty(userId))
             {
-                _connections.Remove(userId);
+                // Remove this connection from user's connection set
+                if (_userConnections.TryGetValue(userId, out var connections))
+                {
+                    connections.Remove(Context.ConnectionId);
+                    
+                    // If user has no more connections, remove them from dictionary
+                    if (connections.Count == 0)
+                    {
+                        _userConnections.TryRemove(userId, out _);
+                        
+                        // Only broadcast offline status if user has no more active connections
+                        Console.WriteLine($"✅ [SignalR] User {userId} is now offline (no active connections)");
+                        await Clients.All.SendAsync("UserOnlineStatusChanged", userId, false);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"✅ [SignalR] User {userId} still has {connections.Count} active connections");
+                    }
+                }
             }
-            return base.OnDisconnectedAsync(exception);
+
+            await base.OnDisconnectedAsync(exception);
         }
 
         public async Task SendMessage(string senderId, string receiverId, string message)
@@ -157,6 +180,11 @@ namespace Managly.Hubs
             }
         }
 
-
+        public bool IsUserOnline(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return false;
+            
+            return _userConnections.TryGetValue(userId, out var connections) && connections.Count > 0;
+        }
     }
 }

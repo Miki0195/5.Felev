@@ -15,8 +15,8 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
     height: 100%;
+    min-width: 300px;
 }
 
 #searchInput {
@@ -63,11 +63,28 @@ h3 {
     flex-direction: column;
     gap: 10px;
     padding-top: 10px;
+    max-height: calc(85vh - 150px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+#recentChats::-webkit-scrollbar {
+    width: 6px;
+}
+
+#recentChats::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#recentChats::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
 }
 
 .user-recent-chat {
-    display: flex;
-    align-items: center;
+    min-height: 100px;
+    width: 100%;
     padding: 12px;
     border-radius: 10px;
     background: #ffffff;
@@ -75,12 +92,14 @@ h3 {
     cursor: pointer;
     transition: 0.3s;
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
     font-size: 16px;
     color: #333;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
     .user-recent-chat:hover {
@@ -90,6 +109,7 @@ h3 {
 .recent-chat-img {
     width: 45px;
     height: 45px;
+    min-width: 45px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -97,22 +117,26 @@ h3 {
 .recent-chat-text {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
 }
 
 .user-name {
-    margin: auto;
+    margin: 0;
     font-weight: bold;
     color: #333;
     font-size: 16px;
 }
 
 .message-preview {
-    margin: auto;
+    margin: 0;
     font-size: 14px;
     color: #666;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .chat-area {
@@ -136,6 +160,12 @@ h3 {
     font-weight: bold;
     border-radius: 8px 8px 0 0;
     margin-bottom: 10px;
+}
+
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .chat-header-img {
@@ -329,4 +359,30 @@ h3 {
     border-radius: 15px;
     display: inline-block;
     max-width: 70%;
+    pointer-events: none;
+    cursor: default;
+}
+
+.online-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 5px;
+    border: 1px solid #fff;
+}
+
+.online-status.online {
+    background-color: #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+.online-status.offline {
+    background-color: #95a5a6;
+    box-shadow: 0 0 10px rgba(149, 165, 166, 0.5);
+}
+
+.user-status-text {
+    font-size: 12px;
+    font-weight: normal;
+    opacity: 0.8;
 }
