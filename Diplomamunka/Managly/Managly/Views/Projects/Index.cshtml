@@ -255,46 +255,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Member</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${project.projectMembers.map(member => `
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <img src="${member.user.profilePicturePath}" alt="Avatar" class="user-avatar">
-                                            <span>${member.user.name} ${member.user.lastName}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <select class="form-select" 
-                                                onchange="updateMemberRole(${project.id}, '${member.user.id}', this.value)"
-                                                ${member.role === 'Project Lead' ? 'disabled' : ''}>
-                                            <option value="Member" ${member.role === 'Member' ? 'selected' : ''}>Member</option>
-                                            <option value="Manager" ${member.role === 'Manager' ? 'selected' : ''}>Manager</option>
-                                            <option value="Project Lead" ${member.role === 'Project Lead' ? 'selected' : ''}>Project Lead</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        ${member.role !== 'Project Lead' ? `
-                                            <button class="btn btn-danger btn-sm" 
-                                                    onclick="removeMember(${project.id}, '${member.user.id}')">
-                                                Remove
-                                            </button>
-                                        ` : ''}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Content will be dynamically inserted here -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -878,14 +839,12 @@
 
         async function updateProject(projectId) {
             try {
-                // First, get the current project data
                 const projectResponse = await fetch(`/api/projectsapi/${projectId}`);
                 if (!projectResponse.ok) {
                     throw new Error('Failed to load project details');
                 }
                 const currentProject = await projectResponse.json();
 
-                // Prepare update data with only the necessary fields
                 const projectData = {
                     id: projectId,
                     name: document.getElementById('editProjectName').value,
@@ -895,37 +854,49 @@
                     priority: document.getElementById('editPriority').value,
                     status: document.getElementById('editStatus').value,
                     companyId: currentProject.companyId,
+                    company: currentProject.company,
                     createdById: currentProject.createdById,
-                    totalTasks: currentProject.totalTasks,
-                    completedTasks: currentProject.completedTasks
+                    createdBy: currentProject.createdBy,
+                    projectMembers: currentProject.projectMembers,
+                    totalTasks: currentProject.totalTasks || 0,
+                    completedTasks: currentProject.completedTasks || 0
                 };
 
-                console.log('Updating project with data:', projectData);
+                console.log("Updating project with data:", JSON.stringify(projectData));
 
-                const response = await fetch(`/api/projectsapi/${projectId}`, {
+                const response = await fetch(`/api/projectsapi/${projectId}/update`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify(projectData)
+                    body: JSON.stringify({
+                        name: projectData.name,
+                        description: projectData.description,
+                        startDate: projectData.startDate,
+                        deadline: projectData.deadline,
+                        status: projectData.status,
+                        priority: projectData.priority
+                    })
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('Server response:', errorData);
-                    throw new Error(errorData.error || 'Failed to update project');
+                    console.error("Server response:", errorData);
+                    throw new Error(errorData.title || 'Failed to update project');
                 }
 
                 // Hide the modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editProjectModal'));
-                modal.hide();
+                if (modal) {
+                    modal.hide();
+                }
 
-                // Show success message
                 showToast('Project updated successfully', 'success');
-
-                // Reload project details
+                
+                // Refresh the view
                 await loadProject(projectId);
-                await loadProjects(); // Refresh sidebar list
+                await loadProjects();
             } catch (error) {
                 console.error('Error updating project:', error);
                 showToast(error.message, 'error');
