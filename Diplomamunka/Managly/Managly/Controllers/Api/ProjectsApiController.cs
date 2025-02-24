@@ -884,17 +884,21 @@ namespace Managly.Controllers.Api
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                    return Unauthorized(new { error = "User not found" });
+
                 var task = await _context.Tasks
                     .Include(t => t.Project)
+                        .ThenInclude(p => p.ProjectMembers)
                     .Include(t => t.Assignments)
                     .FirstOrDefaultAsync(t => t.Id == id && t.Project.CompanyId == currentUser.CompanyId);
 
                 if (task == null)
-                    return NotFound();
+                    return NotFound(new { error = "Task not found or does not belong to your company" });
 
                 // Check if the current user is assigned to this task
                 if (!task.Assignments.Any(a => a.UserId == currentUser.Id))
-                    return Forbid();
+                    return Forbid(new { error = "You are not assigned to this task" });
 
                 var oldStatus = task.Status;
                 task.Status = statusDto.Status;
@@ -924,12 +928,45 @@ namespace Managly.Controllers.Api
                             Link = $"/projects?projectId={task.ProjectId}&taskId={task.Id}",
                             IsRead = false
                         };
+
                         _context.Notifications.Add(notification);
                     }
                 }
 
                 await _context.SaveChangesAsync();
-                return Ok();
+                return Ok(new { message = "Task status updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error updating task status: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
+        }
+
+        private IActionResult Forbid(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("team-members")]
+        [Authorize]
+        public async Task<IActionResult> GetTeamMembers()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var teamMembers = await _context.Users
+                    .Where(u => u.CompanyId == currentUser.CompanyId)
+                    .Select(u => new 
+                    {
+                        id = u.Id,
+                        name = u.Name,
+                        lastName = u.LastName,
+                        profilePicturePath = u.ProfilePicturePath
+                    })
+                    .ToListAsync();
+
+                return Ok(teamMembers);
             }
             catch (Exception ex)
             {

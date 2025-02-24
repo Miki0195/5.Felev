@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ namespace Managly.Models
         [Required]
         public string Name { get; set; }
 
+        [Required]
         public string LastName { get; set; }
 
         public string Country { get; set; }
@@ -31,6 +33,9 @@ namespace Managly.Models
         public string Gender { get; set; } = "Other";
 
         public string ProfilePicturePath { get; set; } = "/images/default/default-profile.png";
+
+        public virtual ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
+        public virtual ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     }
 }
 

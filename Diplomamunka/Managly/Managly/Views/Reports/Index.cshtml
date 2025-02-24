@@ -1,0 +1,152 @@
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<div class="reports-container">
+    <!-- Filters Section -->
+    <div class="filters-section bg-white p-4 rounded-lg shadow-sm mb-4">
+        <h4 class="mb-3">Report Filters</h4>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Date Range</label>
+                <select class="form-select" id="dateRangeFilter">
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Project Status</label>
+                <select class="form-select" id="statusFilter" multiple>
+                    <option value="Active">Active</option>
+                    <option value="Completed">Completed</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Priority</label>
+                <select class="form-select" id="priorityFilter" multiple>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Team Members</label>
+                <select class="form-select" id="teamFilter" multiple>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Project</label>
+                <select class="form-select" id="projectFilter">
+                    <option value="">All Projects</option>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <h6 class="text-muted mb-2">Total Projects</h6>
+                <h3 class="mb-0" id="totalProjects">0</h3>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-primary" style="width: 70%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <h6 class="text-muted mb-2">Active Tasks</h6>
+                <h3 class="mb-0" id="activeTasks">0</h3>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-success" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <h6 class="text-muted mb-2">Team Productivity</h6>
+                <h3 class="mb-0" id="teamProductivity">0%</h3>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-info" style="width: 80%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <h6 class="text-muted mb-2">Overdue Tasks</h6>
+                <h3 class="mb-0" id="overdueTasks">0</h3>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-danger" style="width: 30%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="chart-card bg-white p-4 rounded-lg shadow-sm">
+                <h5 class="mb-4">Project Progress Overview</h5>
+                <canvas id="projectProgressChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-card bg-white p-4 rounded-lg shadow-sm">
+                <h5 class="mb-4">Task Distribution</h5>
+                <canvas id="taskDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Performance -->
+    <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">Team Performance</h5>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportTeamData('csv')">
+                    Export CSV
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportTeamData('pdf')">
+                    Export PDF
+                </button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="teamPerformanceTable">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Tasks Completed</th>
+                        <th>Working Hours</th>
+                        <th style="width: 25%">Productivity Score</th>
+                        <th>Task Distribution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/Reports/Index.css" />
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="~/js/Reports/Index.js"></script>
+} 

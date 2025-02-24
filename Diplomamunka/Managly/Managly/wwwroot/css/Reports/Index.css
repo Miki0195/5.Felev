@@ -1,0 +1,105 @@
+* {
+    color: black;
+}
+
+.reports-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 60px);
+}
+
+.filters-section {
+    border-left: 4px solid #007bff;
+}
+
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.chart-card {
+    height: 400px;
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.progress {
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.productivity-bar {
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.productivity-bar-fill {
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Task distribution pills */
+.task-distribution-pill {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    display: inline-block;
+    margin: 0 0.25rem;
+}
+
+.task-pill-completed {
+    background-color: #28a745;
+    color: white;
+}
+
+.task-pill-pending {
+    background-color: #ffc107;
+    color: black;
+}
+
+.task-pill-overdue {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+#teamPerformanceTable th, 
+#teamPerformanceTable td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,.03);
+} 
