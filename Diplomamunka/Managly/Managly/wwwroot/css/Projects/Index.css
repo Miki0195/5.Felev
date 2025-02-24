@@ -352,6 +352,20 @@ select[multiple] option:hover {
     border-left-color: #dc3545;
 }
 
+.task-card.completed {
+    opacity: 0.7;
+    background-color: #f8f9fa;
+    border-left-color: #28a745 !important;
+}
+
+.task-card.completed .task-title {
+    text-decoration: line-through;
+}
+
+.task-card.completed .task-description {
+    color: #868e96;
+}
+
 .task-header {
     display: flex;
     justify-content: space-between;
@@ -486,4 +500,33 @@ select[multiple] option:hover {
 
 .task-card:not([onclick]) {
     cursor: default;
+}
+
+.form-check-input {
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.tasks-filters .btn-group {
+    width: auto;
+    display: inline-flex;
+}
+
+.tasks-filters .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.tasks-filters .btn.active {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.tasks-filters .btn:hover:not(.active) {
+    background-color: #e9ecef;
 }

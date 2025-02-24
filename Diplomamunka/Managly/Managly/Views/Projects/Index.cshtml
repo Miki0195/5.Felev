@@ -650,15 +650,14 @@
             try {
                 const response = await fetch(`/api/projectsapi/${projectId}`);
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to load project');
+                    throw new Error('Failed to load project details');
                 }
-                
                 const project = await response.json();
-                const currentUserId = project.currentUserId; // Get currentUserId from response
                 
-                const contentArea = document.getElementById('projectsContent');
-                contentArea.innerHTML = `
+                const projectContent = document.querySelector('.projects-content');
+                const currentUserId = project.currentUserId;
+
+                projectContent.innerHTML = `
                     <div class="project-details">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="d-flex align-items-center gap-3">
@@ -729,37 +728,15 @@
                                 </div>
                                 <div class="tasks-container">
                                     <div class="tasks-filters mb-3">
-                                        <div class="btn-group">
-                                            <button class="btn btn-outline-secondary active" onclick="filterTasks('all')">All</button>
-                                            <button class="btn btn-outline-secondary" onclick="filterTasks('my')">My Tasks</button>
+                                        <div class="btn-group" role="group" aria-label="Task filters">
+                                            <button class="btn btn-outline-secondary active" onclick="filterTasks(${project.id}, 'all')">All</button>
+                                            <button class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'my')">My Tasks</button>
+                                            <button class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'active')">Active</button>
+                                            <button class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'completed')">Completed</button>
                                         </div>
                                     </div>
                                     <div class="tasks-list">
-                                        ${project.tasks ? project.tasks.map(task => `
-                                            <div class="task-card ${task.priority.toLowerCase()} ${task.assignedUsers.some(u => u.id === currentUserId) ? 'my-task' : ''}" 
-                                                 onclick="${project.isProjectLead || project.projectMembers.some(m => m.role === 'Manager' && m.user.id === currentUserId) ? `showTaskDetails(${task.id})` : ''}">
-                                                <div class="task-header">
-                                                    <h5 class="task-title">${task.taskTitle}</h5>
-                                                    <span class="task-priority badge ${task.priority.toLowerCase()}">${task.priority}</span>
-                                                </div>
-                                                <div class="task-info">
-                                                    <p class="task-description">${task.description || 'No description'}</p>
-                                                    <div class="task-meta">
-                                                        <span class="due-date">Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
-                                                        <div class="assigned-users-list">
-                                                            <div class="assigned-users">
-                                                                ${task.assignedUsers.map(user => `
-                                                                    <div class="assigned-user" title="${user.name} ${user.lastName}">
-                                                                        <img src="${user.profilePicturePath}" alt="Avatar" class="user-avatar">
-                                                                        <span class="user-name">${user.name} ${user.lastName}</span>
-                                                                    </div>
-                                                                `).join('')}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `).join('') : '<p>No tasks yet</p>'}
+                                        ${project.tasks ? project.tasks.map(task => createTaskCard(task, currentUserId, project.id)).join('') : '<p>No tasks yet</p>'}
                                     </div>
                                 </div>
                             </div>
@@ -770,6 +747,46 @@
                 console.error('Error loading project:', error);
                 showToast(error.message, 'error');
             }
+        }
+
+        function createTaskCard(task, currentUserId, projectId) {
+            const isAssignedToMe = task.assignedUsers.some(u => u.id === currentUserId);
+            const isDone = task.status === 'Completed';
+            
+            return `
+                <div class="task-card ${task.priority.toLowerCase()} ${isDone ? 'completed' : ''}" 
+                     onclick="showTaskDetails(${task.id})">
+                    <div class="task-header">
+                        <h5 class="task-title">${task.taskTitle}</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge task-priority ${task.priority.toLowerCase()}">${task.priority}</span>
+                            ${isAssignedToMe ? `
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" 
+                                           ${isDone ? 'checked' : ''}
+                                           onclick="updateTaskStatus(${task.id}, ${projectId}, '${isDone ? 'Pending' : 'Completed'}', event)"
+                                           ${!isAssignedToMe ? 'disabled' : ''}>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <p class="task-description">${task.description || 'No description'}</p>
+                    <div class="task-meta">
+                        <div class="assigned-users">
+                            <span class="assigned-label">Assigned to:</span>
+                            <div class="assigned-users-list">
+                                ${task.assignedUsers.map(user => `
+                                    <div class="assigned-user">
+                                        <img src="${user.profilePicturePath}" alt="${user.name}" class="user-avatar">
+                                        <span class="user-name">${user.name} ${user.lastName}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `;
         }
 
         function showDeleteConfirmation(projectId) {
@@ -1214,27 +1231,65 @@
             }
         }
 
-        function filterTasks(filter) {
-            const tasksList = document.querySelector('.tasks-list');
-            const filterButtons = document.querySelectorAll('.tasks-filters .btn');
-            
-            // Update active button
-            filterButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.toLowerCase().includes(filter)) {
-                    btn.classList.add('active');
+        // Add this function to handle task filtering
+        async function filterTasks(projectId, filter) {
+            try {
+                const response = await fetch(`/api/projectsapi/${projectId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load project details');
                 }
-            });
+                const project = await response.json();
+                
+                const tasksList = document.querySelector('.tasks-list');
+                const currentUserId = project.currentUserId;
 
-            // Filter tasks
-            const tasks = tasksList.querySelectorAll('.task-card');
-            tasks.forEach(task => {
-                if (filter === 'all' || (filter === 'my' && task.classList.contains('my-task'))) {
-                    task.style.display = '';
-                } else {
-                    task.style.display = 'none';
+                // Update button states
+                const buttons = document.querySelectorAll('.tasks-filters .btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                const activeButton = document.querySelector(`.tasks-filters .btn:nth-child(${getButtonIndex(filter)})`);
+                activeButton.classList.add('active');
+
+                // Filter tasks
+                let filteredTasks = project.tasks;
+                
+                switch(filter) {
+                    case 'my':
+                        filteredTasks = project.tasks.filter(task => 
+                            task.assignedUsers.some(u => u.id === currentUserId)
+                        );
+                        break;
+                    case 'active':
+                        filteredTasks = project.tasks.filter(task => 
+                            task.status !== 'Completed'
+                        );
+                        break;
+                    case 'completed':
+                        filteredTasks = project.tasks.filter(task => 
+                            task.status === 'Completed'
+                        );
+                        break;
+                    // 'all' case will use all tasks by default
                 }
-            });
+
+                // Update tasks list
+                tasksList.innerHTML = filteredTasks.length > 0 
+                    ? filteredTasks.map(task => createTaskCard(task, currentUserId, project.id)).join('')
+                    : '<p>No tasks found</p>';
+            } catch (error) {
+                console.error('Error filtering tasks:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Helper function to get the correct button index
+        function getButtonIndex(filter) {
+            switch(filter) {
+                case 'all': return 1;
+                case 'my': return 2;
+                case 'active': return 3;
+                case 'completed': return 4;
+                default: return 1;
+            }
         }
 
         async function showTaskDetails(taskId) {
@@ -1359,6 +1414,31 @@
                 await loadProject(projectId);
             } catch (error) {
                 console.error('Error updating task:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        async function updateTaskStatus(taskId, projectId, newStatus, event) {
+            // Stop the click event from bubbling up to the task card
+            event.stopPropagation();
+            
+            try {
+                const response = await fetch(`/api/projectsapi/tasks/${taskId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update task status');
+                }
+
+                showToast('Task status updated successfully', 'success');
+                await loadProject(projectId); // Refresh project view
+            } catch (error) {
+                console.error('Error updating task status:', error);
                 showToast(error.message, 'error');
             }
         }

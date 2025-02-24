@@ -95,6 +95,37 @@ namespace Managly.Controllers
             return Ok(new { success = true });
         }
 
+        [HttpPost("mark-as-read/project_{projectId}")]
+        public async Task<IActionResult> MarkProjectNotificationsAsRead(int projectId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+
+                var notifications = await _context.Notifications
+                    .Where(n => n.UserId == userId && 
+                               n.Link.Contains($"projectId={projectId}") && 
+                               !n.IsRead)
+                    .ToListAsync();
+
+                if (!notifications.Any())
+                    return Ok(new { success = false, message = "No unread notifications found" });
+
+                foreach (var notification in notifications)
+                {
+                    notification.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         //[HttpPost("video-call")]
         //public async Task<IActionResult> SendVideoCallInvitation([FromBody] Notification model)
         //{

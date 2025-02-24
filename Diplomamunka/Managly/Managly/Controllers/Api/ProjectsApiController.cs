@@ -218,6 +218,16 @@ namespace Managly.Controllers.Api
                             JoinedAt = DateTime.UtcNow
                         };
                         _context.ProjectMembers.Add(member);
+
+                        // Send notifications to team members
+                        var notification = new Notification
+                        {
+                            UserId = memberId,
+                            Message = $"You have been added to project: {project.Name}",
+                            Link = $"/projects?projectId={project.Id}",
+                            IsRead = false
+                        };
+                        _context.Notifications.Add(notification);
                     }
                 }
 
@@ -545,7 +555,7 @@ namespace Managly.Controllers.Api
 
         // Add these endpoints to the controller
         [HttpPost("{id}/tasks")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> CreateTask(int id, [FromBody] TaskCreateDto taskDto)
         {
             try
@@ -597,6 +607,17 @@ namespace Managly.Controllers.Api
                 _context.TaskAssignments.Add(assignment);
 
                 project.TotalTasks++;
+
+                // Send notification to assigned user
+                var notification = new Notification
+                {
+                    UserId = taskDto.AssignedToId,
+                    Message = $"You have been assigned a new task: {task.TaskTitle}",
+                    Link = $"/projects?projectId={id}&taskId={task.Id}",
+                    IsRead = false
+                };
+                _context.Notifications.Add(notification);
+
                 await _context.SaveChangesAsync();
 
                 // Get assigned user details
@@ -751,6 +772,9 @@ namespace Managly.Controllers.Api
                 if (userRole != "Project Lead" && userRole != "Manager")
                     return Forbid();
 
+                // Get existing assignments before update
+                var existingAssignments = task.Assignments.Select(a => a.UserId).ToList();
+                
                 // Update task details
                 task.TaskTitle = taskDto.TaskTitle;
                 task.Description = taskDto.Description;
@@ -767,6 +791,19 @@ namespace Managly.Controllers.Api
                         TaskId = task.Id,
                         UserId = userId
                     });
+
+                    // Send notification only to newly assigned users
+                    if (!existingAssignments.Contains(userId))
+                    {
+                        var notification = new Notification
+                        {
+                            UserId = userId,
+                            Message = $"You have been assigned to task: {task.TaskTitle}",
+                            Link = $"/projects?projectId={task.ProjectId}&taskId={task.Id}",
+                            IsRead = false
+                        };
+                        _context.Notifications.Add(notification);
+                    }
                 }
 
                 await _context.SaveChangesAsync();
@@ -832,6 +869,72 @@ namespace Managly.Controllers.Api
             
             [Required]
             public List<string> AssignedUserIds { get; set; }
+        }
+
+        public class TaskStatusUpdateDto
+        {
+            [Required]
+            public string Status { get; set; }
+        }
+
+        [HttpPut("tasks/{id}/status")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTaskStatus(int id, [FromBody] TaskStatusUpdateDto statusDto)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var task = await _context.Tasks
+                    .Include(t => t.Project)
+                    .Include(t => t.Assignments)
+                    .FirstOrDefaultAsync(t => t.Id == id && t.Project.CompanyId == currentUser.CompanyId);
+
+                if (task == null)
+                    return NotFound();
+
+                // Check if the current user is assigned to this task
+                if (!task.Assignments.Any(a => a.UserId == currentUser.Id))
+                    return Forbid();
+
+                var oldStatus = task.Status;
+                task.Status = statusDto.Status;
+
+                // Update project progress
+                if (oldStatus != "Completed" && statusDto.Status == "Completed")
+                {
+                    task.Project.CompletedTasks++;
+                }
+                else if (oldStatus == "Completed" && statusDto.Status != "Completed")
+                {
+                    task.Project.CompletedTasks--;
+                }
+
+                // If task is completed, notify project lead
+                if (statusDto.Status == "Completed")
+                {
+                    var projectLead = task.Project.ProjectMembers
+                        .FirstOrDefault(m => m.Role == "Project Lead");
+
+                    if (projectLead != null)
+                    {
+                        var notification = new Notification
+                        {
+                            UserId = projectLead.UserId,
+                            Message = $"Task '{task.TaskTitle}' has been marked as completed",
+                            Link = $"/projects?projectId={task.ProjectId}&taskId={task.Id}",
+                            IsRead = false
+                        };
+                        _context.Notifications.Add(notification);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
     }
 }

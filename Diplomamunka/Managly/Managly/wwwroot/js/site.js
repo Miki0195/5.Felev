@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(loadNotifications, 2000); // Fetch every 2 seconds
 
     let isMessagesPage = window.location.pathname.startsWith("/chat");
+    let isProjectsPage = window.location.pathname.startsWith("/projects");
 
     if (isMessagesPage) {
         let userId = new URLSearchParams(window.location.search).get("userId");
@@ -134,50 +135,57 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch(err => console.error("❌ Error auto-marking messages as read: ", err));
         }
     }
+
+    if (isProjectsPage) {
+        let projectId = new URLSearchParams(window.location.search).get("projectId");
+        if (projectId) {
+            fetch(`/api/notifications/mark-as-read/project_${projectId}`, { method: "POST" })
+                .then(() => console.log("✅ Automatically marked project notifications as read"))
+                .catch(err => console.error("❌ Error auto-marking project notifications as read: ", err));
+        }
+    }
 });
 
 // There should be way to combine these two!!!
 function markNotificationsAsRead(senderId, link) {
-    fetch(`/api/notifications/mark-as-read/${senderId}`, { method: "POST" })
-        .then(() => {
-            document.querySelectorAll(`.notification-item[data-sender-id="${senderId}"]`).forEach(item => {
-                item.dataset.updated = "false";
-                item.remove();
-            });
+    // First, check if this is a project notification
+    if (link.includes('/projects')) {
+        fetch(`/api/notifications/mark-as-read/${senderId}`, { method: "POST" })
+            .then(() => {
+                document.querySelectorAll(`.notification-item[data-sender-id="${senderId}"]`).forEach(item => {
+                    item.dataset.updated = "false";
+                    item.remove();
+                });
 
-            let notificationCount = document.getElementById("notificationCount");
-            let currentCount = parseInt(notificationCount.textContent, 10) || 0;
-            let newCount = Math.max(0, currentCount - 1);
-            notificationCount.textContent = newCount;
-            notificationCount.classList.toggle("d-none", newCount === 0);
+                let notificationCount = document.getElementById("notificationCount");
+                let currentCount = parseInt(notificationCount.textContent, 10) || 0;
+                let newCount = Math.max(0, currentCount - 1);
+                notificationCount.textContent = newCount;
+                notificationCount.classList.toggle("d-none", newCount === 0);
 
-            window.location.href = link;
-        })
-        .catch(err => console.error("❌ Error marking notifications as read: ", err));
-    fetch(`/chat/mark-as-read/${senderId}`, { method: "POST" }) // ✅ Mark messages as read in DB
-        .then(() => {
-            document.querySelectorAll(`.notification-item[data-sender-id="${senderId}"]`).forEach(item => {
-                item.dataset.updated = "false";
-                item.remove();
-            });
+                // Navigate to the project page
+                window.location.href = link;
+            })
+            .catch(err => console.error("❌ Error marking project notifications as read: ", err));
+    } else {
+        // Handle other types of notifications (chat, etc.)
+        fetch(`/api/notifications/mark-as-read/${senderId}`, { method: "POST" })
+            .then(() => {
+                document.querySelectorAll(`.notification-item[data-sender-id="${senderId}"]`).forEach(item => {
+                    item.dataset.updated = "false";
+                    item.remove();
+                });
 
-            let notificationCount = document.getElementById("notificationCount");
-            let currentCount = parseInt(notificationCount.textContent, 10) || 0;
-            let newCount = Math.max(0, currentCount - 1);
-            notificationCount.textContent = newCount;
-            notificationCount.classList.toggle("d-none", newCount === 0);
+                let notificationCount = document.getElementById("notificationCount");
+                let currentCount = parseInt(notificationCount.textContent, 10) || 0;
+                let newCount = Math.max(0, currentCount - 1);
+                notificationCount.textContent = newCount;
+                notificationCount.classList.toggle("d-none", newCount === 0);
 
-            // ✅ Ensure recent chat is permanently marked as read
-            let recentChat = document.querySelector(`.user-recent-chat[data-user-id="${senderId}"]`);
-            if (recentChat) {
-                recentChat.classList.remove("unread-message");
-                let badge = recentChat.querySelector(".unread-badge");
-                if (badge) badge.remove();
-            }
-
-            window.location.href = link;
-        })
-        .catch(err => console.error("❌ Error marking notifications as read: ", err));
+                window.location.href = link;
+            })
+            .catch(err => console.error("❌ Error marking notifications as read: ", err));
+    }
 }
 
 if (typeof connection !== "undefined") {
