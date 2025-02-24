@@ -37,24 +37,49 @@ namespace Managly.Controllers
 
         [HttpGet("api/reports/project-metrics")]
         public async Task<IActionResult> GetProjectMetrics(
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] int? projectId)
+    [FromQuery] DateTime? startDate,
+    [FromQuery] DateTime? endDate,
+    [FromQuery] int? projectId,
+    [FromQuery] string? status,
+    [FromQuery] string? priority,
+    [FromQuery] string? teamMemberId
+)
         {
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    Console.WriteLine("❌ ERROR: Current user not found");
+                    return StatusCode(500, new { error = "Current user not found" });
+                }
+
                 var query = _context.Projects
                     .Include(p => p.Tasks)
                     .Include(p => p.ProjectMembers)
                     .Where(p => p.CompanyId == currentUser.CompanyId);
 
+                // Apply date filters
                 if (startDate.HasValue)
                     query = query.Where(p => p.CreatedAt >= startDate);
                 if (endDate.HasValue)
                     query = query.Where(p => p.CreatedAt <= endDate);
+
+                // Apply project ID filter
                 if (projectId.HasValue)
                     query = query.Where(p => p.Id == projectId);
+
+                // ✅ Apply single Status filter (Ensure it does not break if empty)
+                if (!string.IsNullOrEmpty(status) && status != "all" && status != "none")
+                    query = query.Where(p => p.Status == status);
+
+                // ✅ Apply single Priority filter (Ensure it does not break if empty)
+                if (!string.IsNullOrEmpty(priority) && priority != "all" && priority != "none")
+                    query = query.Where(p => p.Priority == priority);
+
+                // ✅ Apply single Team Member filter (Ensure it does not break if empty)
+                if (!string.IsNullOrEmpty(teamMemberId) && teamMemberId != "all" && teamMemberId != "none")
+                    query = query.Where(p => p.ProjectMembers.Any(m => m.UserId == teamMemberId));
 
                 var metrics = await query
                     .Select(p => new
@@ -66,7 +91,7 @@ namespace Managly.Controllers
                         Progress = p.TotalTasks == 0 ? 0 : (p.CompletedTasks * 100 / p.TotalTasks),
                         TasksCount = p.TotalTasks,
                         CompletedTasks = p.CompletedTasks,
-                        OverdueTasks = p.Tasks.Count(t => t.DueDate < DateTime.Now && t.Status != "Completed"),
+                        OverdueTasks = p.Tasks.Count(t => t.DueDate != null && t.DueDate < DateTime.UtcNow && t.Status != "Completed"),
                         TeamSize = p.ProjectMembers.Count
                     })
                     .ToListAsync();
@@ -75,9 +100,21 @@ namespace Managly.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+                Console.WriteLine($"❌ ERROR in GetProjectMetrics: {ex.Message}\n{ex.StackTrace}");
+                return StatusCode(500, new
+                {
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace,
+                    innerException = ex.InnerException?.Message,
+                    innerStackTrace = ex.InnerException?.StackTrace
+                });
             }
         }
+
+
+
+
+
 
         [HttpGet("api/reports/user-productivity")]
         public async Task<IActionResult> GetUserProductivity(

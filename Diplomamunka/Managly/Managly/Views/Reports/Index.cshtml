@@ -20,7 +20,8 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Project Status</label>
-                <select class="form-select" id="statusFilter" multiple>
+                <select class="form-select" id="statusFilter">
+                    <option value="none" selected>-- Select Status --</option>
                     <option value="Active">Active</option>
                     <option value="Completed">Completed</option>
                     <option value="On Hold">On Hold</option>
@@ -29,7 +30,8 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Priority</label>
-                <select class="form-select" id="priorityFilter" multiple>
+                <select class="form-select" id="priorityFilter">
+                    <option value="none" selected>-- Select Prioirty --</option>
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="High">High</option>
@@ -38,7 +40,8 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Team Members</label>
-                <select class="form-select" id="teamFilter" multiple>
+                <select class="form-select" id="teamFilter">
+                    <option value="none" selected>-- Select Team Member --</option>
                     <!-- Will be populated dynamically -->
                 </select>
             </div>

@@ -6,6 +6,12 @@ let currentCharts = {
 document.addEventListener('DOMContentLoaded', function() {
     initializeFilters();
     loadReportData();
+    document.getElementById("projectFilter").addEventListener("change", loadReportData);
+    document.getElementById("statusFilter").addEventListener("change", loadReportData);
+    document.getElementById("priorityFilter").addEventListener("change", loadReportData);
+    document.getElementById("teamFilter").addEventListener("change", loadReportData);
+    document.getElementById("dateRangeFilter").addEventListener("change", loadReportData);
+
 });
 
 async function initializeFilters() {
@@ -62,7 +68,10 @@ async function loadReportData() {
     try {
         const projectId = document.getElementById('projectFilter').value;
         const dateRange = document.getElementById('dateRangeFilter').value;
-        
+        const status = document.getElementById('statusFilter').value || "none"; 
+        const priority = document.getElementById('priorityFilter').value || "none"; 
+        const teamMember = document.getElementById('teamFilter').value || "none";
+
         // Show loading state
         document.getElementById('teamPerformanceTable').querySelector('tbody').innerHTML = `
             <tr>
@@ -73,7 +82,7 @@ async function loadReportData() {
                 </td>
             </tr>
         `;
-        
+
         let startDate, endDate;
         if (dateRange !== 'custom') {
             const days = parseInt(dateRange);
@@ -82,10 +91,16 @@ async function loadReportData() {
             startDate.setDate(startDate.getDate() - days);
         }
 
-        const queryParams = new URLSearchParams();
+        let queryParams = new URLSearchParams();
         if (startDate) queryParams.append('startDate', startDate.toISOString());
         if (endDate) queryParams.append('endDate', endDate.toISOString());
-        if (projectId) queryParams.append('projectId', projectId);
+        if (projectId && projectId !== "all") queryParams.append('projectId', projectId);
+
+        if (status !== "none") queryParams.append('status', status);
+        if (priority !== "none") queryParams.append('priority', priority);
+        if (teamMember !== "none") queryParams.append('teamMemberId', teamMember);
+
+        console.log(`Fetching data: /api/reports/project-metrics?${queryParams.toString()}`);
 
         const [projectMetrics, userProductivity, taskDistribution] = await Promise.all([
             fetch(`/api/reports/project-metrics?${queryParams}`).then(r => {
@@ -102,17 +117,19 @@ async function loadReportData() {
             })
         ]);
 
+        // ✅ Ensure taskDistribution is an array before using it
+        if (!Array.isArray(taskDistribution)) {
+            console.error("❌ taskDistribution is not an array!", taskDistribution);
+            throw new Error("taskDistribution is invalid");
+        }
+
         updateQuickStats(projectMetrics, taskDistribution);
         updateCharts(projectMetrics, taskDistribution);
         updateTeamPerformance(userProductivity);
     } catch (error) {
         console.error('Error loading report data:', error);
-        const toastContainer = document.getElementById('toastContainer');
-        if (toastContainer) {
-            showToast('Error loading report data: ' + error.message, 'error');
-        }
-        
-        // Show error state in table
+        showToast('Error loading report data: ' + error.message, 'error');
+
         document.getElementById('teamPerformanceTable').querySelector('tbody').innerHTML = `
             <tr>
                 <td colspan="5" class="text-center text-danger">
@@ -122,6 +139,9 @@ async function loadReportData() {
         `;
     }
 }
+
+
+
 
 function updateQuickStats(projectMetrics, taskDistribution) {
     document.getElementById('totalProjects').textContent = projectMetrics.length;
