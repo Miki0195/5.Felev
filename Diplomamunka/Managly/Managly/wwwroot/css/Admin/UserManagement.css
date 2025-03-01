@@ -1,60 +1,186 @@
 ﻿/* ====== Modern User Management Table ====== */
 .user-management-container {
-    max-width: 1000px;
-    margin: auto;
-    padding: 20px;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
 }
 
-.user-table {
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h2 {
+    margin-bottom: 0.5rem;
+    color: #2d3748;
+}
+
+/* Search and Filter Section */
+.filters-section {
     background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.search-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.search-container {
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 0;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #718096;
+    z-index: 2;
+}
+
+.search-input {
+    padding-left: 2.75rem;
+    height: 45px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.search-input:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.filter-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.role-filter {
+    min-width: 200px;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.form-select {
+    height: 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-select:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+#clearFilters {
+    height: 45px;
+    padding: 0 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+#clearFilters:hover {
+    background-color: #e53e3e;
+    color: white;
+    border-color: #e53e3e;
+}
+
+/* Table Styles */
+.user-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .table th {
-    background: #343a40;
-    color: white;
+    background: #f8fafc;
+    color: #4a5568;
+    font-weight: 600;
     text-transform: uppercase;
-    font-weight: bold;
-    padding: 12px;
-    text-align: left;
+    font-size: 0.875rem;
+    padding: 1rem;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.table tbody tr {
-    transition: background 0.3s ease;
+.sort-icon {
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
-    .table tbody tr:hover {
-        background: #f8f9fa;
-    }
+.sort-icon:hover {
+    color: #2b6cb0;
+}
 
 .table td {
-    padding: 12px;
-    border-bottom: 1px solid #e9ecef;
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-/* ====== Action Buttons ====== */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: #4299e1;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Role Select Styles */
+.role-select {
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    min-width: 140px;
+}
+
+/* Action Buttons */
 .action-buttons {
     display: flex;
-    gap: 10px;
+    gap: 0.5rem;
 }
 
-.btn-danger, .btn-primary {
-    border-radius: 5px;
-    font-size: 14px;
-    transition: all 0.3s ease;
+.btn-danger {
+    background: #fff;
+    color: #e53e3e;
+    border: 1px solid #e53e3e;
+    transition: all 0.2s;
 }
 
-    .btn-danger:hover {
-        background: #e60000;
-        transform: scale(1.05);
-    }
-
-    .btn-primary:hover {
-        background: #007bff;
-        transform: scale(1.05);
-    }
+.btn-danger:hover {
+    background: #e53e3e;
+    color: #fff;
+}
 
 /* ====== Modal Customization ====== */
 .modal-content {
@@ -77,11 +203,47 @@
 
 /* ====== Responsive Design ====== */
 @media (max-width: 768px) {
-    .user-table {
-        font-size: 14px;
-    }
-
-    .action-buttons {
+    .search-wrapper {
         flex-direction: column;
     }
+
+    .filter-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .role-filter {
+        width: 100%;
+    }
+
+    #clearFilters {
+        width: 100%;
+    }
+
+    .user-table {
+        font-size: 0.875rem;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Add these to your existing CSS */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.sort-icon {
+    color: #718096;
+    transition: all 0.2s;
+}
+
+th div[data-sort]:hover .sort-icon {
+    color: #2d3748;
+}
+
+.gap-2 {
+    gap: 0.5rem;
 }

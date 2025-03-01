@@ -13,12 +13,18 @@ namespace Managly.Controllers
     public class AdminController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly EmailService _emailService;
         private readonly ApplicationDbContext _context;
 
-        public AdminController(UserManager<User> userManager, EmailService emailService, ApplicationDbContext context)
+        public AdminController(
+            UserManager<User> userManager, 
+            RoleManager<IdentityRole> roleManager,
+            EmailService emailService, 
+            ApplicationDbContext context)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _emailService = emailService;
             _context = context;
         }
@@ -132,6 +138,7 @@ namespace Managly.Controllers
                 .ToListAsync();
 
             var userRoles = new List<UserManagement>();
+            var availableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
 
             foreach (var user in usersInCompany)
             {
@@ -146,6 +153,7 @@ namespace Managly.Controllers
                 });
             }
 
+            ViewData["AvailableRoles"] = availableRoles;
             return View(userRoles);
         }
 
@@ -157,79 +165,69 @@ namespace Managly.Controllers
 
             if (adminUser == null || adminUser.CompanyId == null)
             {
-                return RedirectToAction("Login", "Home");
+                return Json(new { success = false, message = "Unauthorized access." });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null || user.CompanyId != adminUser.CompanyId)
             {
-                TempData["ErrorMessage"] = "You cannot delete users outside your company.";
-                return RedirectToAction("UserManagement");
+                return Json(new { success = false, message = "You cannot delete users outside your company." });
             }
 
-            // Delete the user
             var result = await _userManager.DeleteAsync(user);
 
             if (result.Succeeded)
             {
-                TempData["SuccessMessage"] = "User successfully deleted.";
+                return Json(new { success = true, message = $"User {user.Name} has been successfully deleted." });
             }
             else
             {
-                TempData["ErrorMessage"] = "Failed to delete the user.";
+                return Json(new { success = false, message = "Failed to delete the user." });
             }
-
-            return RedirectToAction("UserManagement");
         }
 
         /// <summary>
         /// Updates a user's role dynamically
         /// </summary>
-        [HttpPut]
-        [Route("Admin/updateRole/{userId}")]
-        public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] RoleUpdateViewModel request)
+        [HttpPost]
+        public async Task<IActionResult> UpdateUserRole(string userId, string role)
         {
-            if (string.IsNullOrEmpty(userId) || request == null || string.IsNullOrEmpty(request.Role))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
             {
-                return BadRequest(new { success = false, message = "Invalid request data." });
+                return Json(new { success = false, message = "Invalid request data." });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound(new { success = false, message = $"User not found with ID {userId}." });
+                return Json(new { success = false, message = "User not found." });
             }
 
-            var validRoles = new List<string> { "Admin", "Manager", "Employee" };
-            if (!validRoles.Contains(request.Role))
+            // Check if role exists
+            if (!await _roleManager.RoleExistsAsync(role))
             {
-                return BadRequest(new { success = false, message = "Invalid role specified." });
+                return Json(new { success = false, message = "Invalid role specified." });
             }
 
             var currentRoles = await _userManager.GetRolesAsync(user);
-            var rolesToRemove = currentRoles.Intersect(validRoles).ToList();
+            var availableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            var rolesToRemove = currentRoles.Intersect(availableRoles).ToList();
 
-            // 🚀 Ensure roles are removed before adding new role
             if (rolesToRemove.Any())
             {
-                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
-                if (!removeResult.Succeeded)
-                {
-                    return BadRequest(new { success = false, message = "Failed to remove old roles." });
-                }
+                await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
             }
 
-            // 🚀 Add new role and verify it succeeds
-            var addResult = await _userManager.AddToRoleAsync(user, request.Role);
-            if (!addResult.Succeeded)
+            var result = await _userManager.AddToRoleAsync(user, role);
+
+            if (result.Succeeded)
             {
-                return BadRequest(new { success = false, message = "Failed to assign new role." });
+                return Json(new { success = true, message = $"Role for {user.Name} has been updated to {role}." });
             }
-
-            // 🚀 Save changes in the database to persist the new role
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, message = "Role updated successfully!" });
+            else
+            {
+                return Json(new { success = false, message = "Failed to update role." });
+            }
         }
     }
 }

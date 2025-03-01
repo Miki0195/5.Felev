@@ -1,101 +1,123 @@
 ﻿@model IEnumerable<Managly.Models.UserManagement>
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
 @{
     ViewData["Title"] = "User Management";
+    var availableRoles = (IEnumerable<string>)ViewData["AvailableRoles"];
 }
 
 <!-- Include Custom CSS -->
 <link rel="stylesheet" href="~/css/Admin/UserManagement.css">
 
-
+<!-- Include Bootstrap Icons for UI Enhancements -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="user-management-container">
-    <h2 class="text-center mb-4">User Management</h2>
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
-    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <div class="page-header">
+        <h2 class="text-3xl font-bold">User Management</h2>
+        <p class="text-gray-600">Manage your company's team members</p>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Enhanced Search and Filter Section -->
+    <div class="filters-section">
+        <div class="search-wrapper">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="userSearch" 
+                           class="form-control search-input" 
+                           placeholder="Search by name..."
+                           autocomplete="off">
+                </div>
+            </div>
+            <div class="filter-container">
+                <div class="role-filter">
+                    <select id="roleFilter" class="form-select">
+                        <option value="">All Roles</option>
+                        @foreach (var role in availableRoles)
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    </select>
+                </div>
+                <button id="clearFilters" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
         </div>
-    }
-
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    </div>
 
     <!-- Modern Table -->
     <div class="table-responsive user-table">
         <table class="table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Roles</th>
+                    <th>
+                        <div class="d-flex align-items-center gap-2 cursor-pointer" data-sort="name">
+                            Name
+                            <i class="fas fa-sort sort-icon"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="d-flex align-items-center gap-2 cursor-pointer" data-sort="email">
+                            Email
+                            <i class="fas fa-sort sort-icon"></i>
+                        </div>
+                    </th>
+                    <th>Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="userTableBody">
                 @foreach (var user in Model)
                 {
-                    <tr>
-                        <td>@user.Name</td>
+                    <tr data-user-name="@user.Name.ToLower()" data-user-email="@user.Email.ToLower()" data-user-role="@user.Roles">
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">@user.Name[0].ToString().ToUpper()</div>
+                                <span>@user.Name</span>
+                            </div>
+                        </td>
                         <td>@user.Email</td>
                         <td>
-                            <select class="form-select role-select" data-user-id="@user.UserId">
-                                <option value="Employee" selected="@(user.Roles.Contains("Employee") ? "selected" : null)">Employee</option>
-                                <option value="Manager" selected="@(user.Roles.Contains("Manager") ? "selected" : null)">Manager</option>
-                                <option value="Admin" selected="@(user.Roles.Contains("Admin") ? "selected" : null)">Admin</option>
-                            </select>
+                            <form asp-action="UpdateUserRole" asp-controller="Admin" method="post" class="role-form">
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <select name="role" class="form-select role-select" data-user-name="@user.Name">
+                                    @foreach (var role in availableRoles)
+                                    {
+                                        <option value="@role" selected="@(user.Roles.Equals(role))">@role</option>
+                                    }
+                                </select>
+                            </form>
                         </td>
-                        <td class="action-buttons">
-                            <!-- Delete Button -->
+                        <td>
                             <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.UserId">
-                                <i class="fas fa-trash-alt"></i> Delete
+                                <i class="fas fa-trash-alt"></i>
                             </button>
 
                             <!-- Delete Modal -->
-                            <div class="modal fade" id="deleteModal-@user.UserId" tabindex="-1" aria-labelledby="deleteModalLabel-@user.UserId" aria-hidden="true">
+                            <div class="modal fade" id="deleteModal-@user.UserId" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel-@user.UserId">Confirm Delete</h5>
+                                            <h5 class="modal-title">Confirm Delete</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <p>Are you sure you want to delete <strong>@user.Name</strong> (<strong>@user.Email</strong>)?</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <form asp-action="DeleteUser" asp-controller="Admin" method="post">
-                                                <input type="hidden" name="userId" value="@user.UserId" />
-                                                <button type="submit" class="btn btn-danger">Confirm</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> <!-- End Modal -->
-                            <!-- Confirmation Modal -->
-                            <div class="modal fade" id="confirmRoleChangeModal" tabindex="-1" aria-labelledby="confirmRoleChangeLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="confirmRoleChangeLabel">Confirm Role Change</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to change the role of <strong id="roleUserName"></strong> to <strong id="newRole"></strong>?
+                                            <p>Are you sure you want to delete <strong>@user.Name</strong>?</p>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-success" id="confirmRoleChangeBtn">Confirm</button>
+                                            <button type="button" class="btn btn-danger delete-confirm" 
+                                                    data-user-id="@user.UserId" 
+                                                    data-bs-dismiss="modal">Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -108,115 +130,239 @@
     </div>
 </div>
 
-<!-- Include Bootstrap Icons for UI Enhancements -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Add this modal to the bottom of your page -->
+<div class="modal fade" id="confirmRoleChangeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Role Change</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to change the role of <strong id="roleUserName"></strong> to <strong id="newRole"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmRoleChange">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('userSearch');
+    const searchResults = document.getElementById('searchResults');
+    const roleFilter = document.getElementById('roleFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const rows = document.querySelectorAll('#userTableBody tr');
 
+    // Enhanced search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-user-name');
+            const email = row.getAttribute('data-user-email');
+            const role = row.getAttribute('data-user-role');
+            const roleFilterValue = roleFilter.value.toLowerCase();
+            
+            const matchesSearch = searchTerm === '' || 
+                                name.includes(searchTerm) || 
+                                email.includes(searchTerm);
+            
+            const matchesRole = roleFilterValue === '' || 
+                              role.toLowerCase() === roleFilterValue;
 
-<script>document.addEventListener("DOMContentLoaded", function () {
-        loadNotifications();
-
-        let selectedUserId = null;
-        let selectedRole = null;
-        let originalRole = null;
-        let selectedUserName = null;
-
-        document.querySelectorAll(".role-select").forEach(select => {
-            select.setAttribute("data-original-role", select.value); // Save initial role
-        });
-
-        document.querySelectorAll(".role-select").forEach(select => {
-            select.addEventListener("change", function () {
-                selectedUserId = this.getAttribute("data-user-id");
-                selectedRole = this.value;
-                originalRole = this.getAttribute("data-original-role");
-                selectedUserName = this.closest("tr").querySelector("td:first-child").textContent; // Get user name
-
-                document.getElementById("roleUserName").textContent = selectedUserName;
-                document.getElementById("newRole").textContent = selectedRole;
-
-                // Show the confirmation modal
-                let modal = new bootstrap.Modal(document.getElementById("confirmRoleChangeModal"));
-                modal.show();
-            });
-        });
-
-        document.getElementById("confirmRoleChangeBtn").addEventListener("click", function () {
-            if (!selectedUserId || !selectedRole) return;
-
-            fetch(`/Admin/updateRole/${selectedUserId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ role: selectedRole })
-            })
-                .then(async response => {
-                    let data = await response.json();
-                    if (!response.ok) {
-                        console.error("Error Response:", data);
-                        throw new Error(data.message || "Failed to update role.");
-                    }
-                    return data;
-                })
-                .then(data => {
-                    showToast(`Role changed to <strong>${selectedRole}</strong> for <strong>${selectedUserName}</strong>`, "success");
-
-                    // 🚀 Update the dropdown UI without a page refresh
-                    let selectElement = document.querySelector(`.role-select[data-user-id="${selectedUserId}"]`);
-                    if (selectElement) {
-                        let selectedOption = selectElement.querySelector(`option[value="${selectedRole}"]`);
-                        if (selectedOption) {
-                            selectedOption.selected = true;
-                        }
-                    }
-
-                    let modalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmRoleChangeModal"));
-                    if (modalInstance) modalInstance.hide(); // Close modal after successful update
-                })
-                .catch(error => {
-                    console.error("Error updating role:", error);
-                    showToast(`Error: ${error.message}`, "error");
-
-                    let modalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmRoleChangeModal"));
-                    if (modalInstance) modalInstance.hide();
-                });
-        });
-
-        document.querySelector("#confirmRoleChangeModal .btn-secondary").addEventListener("click", function () {
-            if (selectedUserId && originalRole) {
-                let selectElement = document.querySelector(`.role-select[data-user-id="${selectedUserId}"]`);
-                if (selectElement) {
-                    selectElement.value = originalRole; // Reset selection to original role
-                }
-            }
+            row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
         });
     });
-    //function showToast(message, type = "success") {
-    //    let toastContainer = document.getElementById("toastContainer");
 
-    //    let bgColor = type === "success" ? "bg-success" : "bg-danger";
+    // Role filter functionality
+    roleFilter.addEventListener('change', function() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const roleValue = this.value.toLowerCase();
 
-    //    let toastElement = document.createElement("div");
-    //    toastElement.classList.add("toast", "align-items-center", "text-white", bgColor, "border-0");
-    //    toastElement.setAttribute("role", "alert");
-    //    toastElement.setAttribute("aria-live", "assertive");
-    //    toastElement.setAttribute("aria-atomic", "true");
+        rows.forEach(row => {
+            const name = row.getAttribute('data-user-name');
+            const email = row.getAttribute('data-user-email');
+            const role = row.getAttribute('data-user-role');
 
-    //    toastElement.innerHTML = `
-    //        <div class="d-flex">
-    //            <div class="toast-body">${message}</div>
-    //            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    //        </div>
-    //    `;
+            const matchesSearch = searchTerm === '' || 
+                                name.includes(searchTerm) || 
+                                email.includes(searchTerm);
+            
+            const matchesRole = roleValue === '' || 
+                              role.toLowerCase() === roleValue;
 
-    //    toastContainer.appendChild(toastElement);
+            row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
+        });
+    });
 
-    //    let toast = new bootstrap.Toast(toastElement);
-    //    toast.show();
+    // Clear filters
+    clearFiltersBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        roleFilter.value = '';
+        rows.forEach(row => row.style.display = '');
+        showToast('Filters cleared', 'success');
+    });
 
-    //    toastElement.addEventListener("hidden.bs.toast", () => {
-    //        toastElement.remove();
-    //    });
-    //}
+    // Role change handling
+    let activeForm = null;
+    let originalValue = null;
 
+    document.querySelectorAll('.role-select').forEach(select => {
+        // Store original value
+        select.dataset.originalValue = select.value;
 
-    </script>
+        select.addEventListener('change', function(e) {
+            e.preventDefault();
+            const userName = this.getAttribute('data-user-name');
+            const newRole = this.value;
+            activeForm = this.closest('form');
+            originalValue = this.dataset.originalValue;
+
+            // Update modal content
+            document.getElementById('roleUserName').textContent = userName;
+            document.getElementById('newRole').textContent = newRole;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmRoleChangeModal'));
+            modal.show();
+        });
+    });
+
+    // Handle confirmation
+    document.getElementById('confirmRoleChange').addEventListener('click', function() {
+        if (activeForm) {
+            const formData = new FormData(activeForm);
+            
+            fetch(activeForm.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRoleChangeModal'));
+                modal.hide();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    // Update the data attribute for filtering
+                    const row = activeForm.closest('tr');
+                    if (row) {
+                        row.setAttribute('data-user-role', formData.get('role'));
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                    // Revert the select to original value
+                    activeForm.querySelector('select').value = originalValue;
+                }
+            })
+            .catch(error => {
+                showToast('An error occurred while updating the role.', 'error');
+                // Revert the select to original value
+                activeForm.querySelector('select').value = originalValue;
+                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRoleChangeModal'));
+                modal.hide();
+            });
+        }
+    });
+
+    // Handle modal dismissal
+    document.getElementById('confirmRoleChangeModal').addEventListener('hidden.bs.modal', function() {
+        if (activeForm && originalValue) {
+            activeForm.querySelector('select').value = originalValue;
+        }
+        activeForm = null;
+        originalValue = null;
+    });
+
+    // Delete user handling
+    document.querySelectorAll('.delete-confirm').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            
+            fetch('/Admin/DeleteUser', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': '@token'
+                },
+                body: new URLSearchParams({ userId: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = this.closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('An error occurred while deleting the user.', 'error');
+            });
+        });
+    });
+});
+
+// Add sorting functionality
+let currentSort = {
+    column: '',
+    direction: 'asc'
+};
+
+document.querySelectorAll('th div[data-sort]').forEach(header => {
+    header.addEventListener('click', function() {
+        const sortColumn = this.getAttribute('data-sort');
+        const icon = this.querySelector('.sort-icon');
+        
+        // Reset other icons
+        document.querySelectorAll('.sort-icon').forEach(i => {
+            if (i !== icon) {
+                i.className = 'fas fa-sort sort-icon';
+            }
+        });
+
+        // Update sort direction
+        if (currentSort.column === sortColumn) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = sortColumn;
+            currentSort.direction = 'asc';
+        }
+
+        // Update icon
+        icon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'} sort-icon`;
+
+        // Get all rows and convert to array for sorting
+        const tbody = document.querySelector('#userTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Sort rows
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            if (sortColumn === 'name') {
+                aValue = a.querySelector('.user-info span').textContent.trim().toLowerCase();
+                bValue = b.querySelector('.user-info span').textContent.trim().toLowerCase();
+            } else if (sortColumn === 'email') {
+                aValue = a.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
+                bValue = b.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
+            }
+
+            if (currentSort.direction === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+
+        // Reorder rows in the DOM
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
+</script>

@@ -146,7 +146,7 @@ async function loadReportData() {
 function updateQuickStats(projectMetrics, taskDistribution) {
     document.getElementById('totalProjects').textContent = projectMetrics.length;
     document.getElementById('activeTasks').textContent = 
-        taskDistribution.find(t => t.status === 'Active')?.count || 0;
+        taskDistribution.find(t => t.status === 'In Progress')?.count || 0;
     
     const totalTasks = taskDistribution.reduce((sum, t) => sum + t.count, 0);
     const completedTasks = taskDistribution.find(t => t.status === 'Completed')?.count || 0;
