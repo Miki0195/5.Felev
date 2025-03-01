@@ -5,25 +5,40 @@
 
 <link rel="stylesheet" href="~/css/Schedule/Manage.css">
 
-<h2 class="text-center mb-4">Manage Worker Schedules</h2>
-
-<!-- Step 1: Select Worker -->
 <div class="container">
-    <div class="card p-4 shadow">
-        <h5>Select a Worker</h5>
-        <select id="workerSelect" class="form-select">
-            <option value="">-- Select a Worker --</option>
-            @foreach (var worker in Model)
-            {
-                <option value="@worker.Id">@worker.Name @worker.LastName</option>
-            }
-        </select>
+    <div class="page-header">
+        <h1 class="page-title">Manage Worker Schedules</h1>
+        <p class="page-subtitle">Schedule and manage shifts for your team members</p>
     </div>
 
-    <!-- Step 2: Show Schedule after Worker is Selected -->
+    <!-- Search Section -->
+    <div class="search-card p-4">
+        <h5 class="mb-4">Search for a Worker</h5>
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   id="workerSearch" 
+                   class="form-control search-input" 
+                   placeholder="Type a name to search..."
+                   autocomplete="off">
+            <div id="searchResults" class="search-results-container d-none">
+                <!-- Search results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Section -->
     <div id="scheduleContainer" class="mt-4 d-none">
-        <h5 class="mb-3">Schedule for <span id="workerName"></span></h5>
-        <div id="calendar"></div>
+        <div class="calendar-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">Schedule for <span id="workerName" class="text-primary"></span></h5>
+                <button class="add-recurring-btn" data-bs-toggle="modal" data-bs-target="#recurringShiftModal">
+                    <i class="fas fa-repeat"></i>
+                    Add Recurring Shift
+                </button>
+            </div>
+            <div id="calendar"></div>
+        </div>
     </div>
 </div>
 
@@ -177,27 +192,152 @@
     </div>
 </div>
 
+<!-- Add this new modal for recurring shifts -->
+<div class="modal fade" 
+     id="recurringShiftModal" 
+     tabindex="-1" 
+     aria-labelledby="recurringShiftModalLabel" 
+     aria-hidden="true"
+     data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Recurring Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Shift Time</label>
+                        <div class="d-flex gap-2">
+                            <input type="time" class="form-control" id="recurringStartTime">
+                            <span class="align-self-center">to</span>
+                            <input type="time" class="form-control" id="recurringEndTime">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date Range</label>
+                        <div class="d-flex gap-2">
+                            <input type="date" class="form-control" id="rangeStart">
+                            <span class="align-self-center">to</span>
+                            <input type="date" class="form-control" id="rangeEnd">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label class="form-label">Repeat on</label>
+                        <div class="weekday-selector">
+                            <div class="btn-group" role="group">
+                                <input type="checkbox" class="btn-check" id="monday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="monday">Mon</label>
+
+                                <input type="checkbox" class="btn-check" id="tuesday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="tuesday">Tue</label>
+
+                                <input type="checkbox" class="btn-check" id="wednesday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="wednesday">Wed</label>
+
+                                <input type="checkbox" class="btn-check" id="thursday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="thursday">Thu</label>
+
+                                <input type="checkbox" class="btn-check" id="friday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="friday">Fri</label>
+
+                                <input type="checkbox" class="btn-check" id="saturday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="saturday">Sat</label>
+
+                                <input type="checkbox" class="btn-check" id="sunday" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="sunday">Sun</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comment (optional)</label>
+                    <textarea class="form-control" id="recurringComment" rows="2" placeholder="Add any comments for these shifts..."></textarea>
+                </div>
+
+                <div class="shift-preview mt-4">
+                    <h6>Preview</h6>
+                    <div id="previewDates" class="preview-dates">
+                        <!-- Preview dates will be shown here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveRecurringShifts">Save All Shifts</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
 <script>document.addEventListener("DOMContentLoaded", function () {
         loadNotifications();
-        const workerSelect = document.getElementById("workerSelect");
+        const workerSearch = document.getElementById("workerSearch");
+        const searchResults = document.getElementById("searchResults");
         const scheduleContainer = document.getElementById("scheduleContainer");
         const workerName = document.getElementById("workerName");
         let selectedDate = null;
         let selectedWorkerId = null;
         let existingShiftId = null;
         let calendar = null;
+        let debounceTimeout;
 
-        workerSelect.addEventListener("change", function () {
-            selectedWorkerId = this.value;
-            if (selectedWorkerId) {
-                scheduleContainer.classList.remove("d-none");
-                workerName.textContent = this.options[this.selectedIndex].text;
-                loadSchedule(selectedWorkerId);
-            } else {
-                scheduleContainer.classList.add("d-none");
+        // Handle search input
+        workerSearch.addEventListener("input", function() {
+            clearTimeout(debounceTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.classList.add("d-none");
+                return;
+            }
+
+            debounceTimeout = setTimeout(() => {
+                fetch(`/api/schedule/search-workers?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(workers => {
+                        searchResults.innerHTML = "";
+                        searchResults.classList.remove("d-none");
+
+                        if (workers.length === 0) {
+                            searchResults.innerHTML = `
+                                <div class="no-results">
+                                    No workers found
+                                </div>`;
+                            return;
+                        }
+
+                        workers.forEach(worker => {
+                            const div = document.createElement("div");
+                            div.className = "search-result-item";
+                            div.textContent = `${worker.name} ${worker.lastName}`;
+                            div.addEventListener("click", () => {
+                                selectedWorkerId = worker.id;
+                                workerName.textContent = `${worker.name} ${worker.lastName}`;
+                                workerSearch.value = `${worker.name} ${worker.lastName}`;
+                                searchResults.classList.add("d-none");
+                                scheduleContainer.classList.remove("d-none");
+                                loadSchedule(selectedWorkerId);
+                            });
+                            searchResults.appendChild(div);
+                        });
+                    })
+                    .catch(error => console.error("Error searching workers:", error));
+            }, 300); // Debounce delay
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener("click", function(e) {
+            if (!workerSearch.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add("d-none");
             }
         });
 
@@ -609,16 +749,6 @@
             })
                 .then(response => response.json())
                 .then(() => {
-                    //if (data.success) {
-                    //    //showToast("Shift updated successfully!", "success");
-
-                    //    calendar.refetchEvents();
-
-                    //    let modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
-                    //    modal.hide();
-                    //} else {
-                    //    showToast("Failed to update shift.", "error");
-                    //}
                     calendar.refetchEvents();
                     var modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
                     modal.hide();
@@ -683,33 +813,191 @@
             updateLeaveStatus(selectedVacationId, "Rejected");
         });
 
-        //function showToast(message, type = "success") {
-        //    let toastContainer = document.getElementById("toastContainer");
+        // Set default date range
+        const today = new Date();
+        const nextMonth = new Date(today);
+        nextMonth.setMonth(today.getMonth() + 1);
+        
+        document.getElementById('rangeStart').valueAsDate = today;
+        document.getElementById('rangeEnd').valueAsDate = nextMonth;
 
-        //    let bgColor = type === "success" ? "bg-success" : "bg-danger";
+        // Update the preview function
+        function updatePreview() {
+            const startDate = new Date(document.getElementById('rangeStart').value);
+            const endDate = new Date(document.getElementById('rangeEnd').value);
+            const startTime = document.getElementById('recurringStartTime').value;
+            const endTime = document.getElementById('recurringEndTime').value;
+            const selectedDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                .filter(day => document.getElementById(day).checked);
 
-        //    let toastElement = document.createElement("div");
-        //    toastElement.classList.add("toast", "align-items-center", "text-white", bgColor, "border-0");
-        //    toastElement.setAttribute("role", "alert");
-        //    toastElement.setAttribute("aria-live", "assertive");
-        //    toastElement.setAttribute("aria-atomic", "true");
+            const previewDates = document.getElementById('previewDates');
+            previewDates.innerHTML = '';
 
-        //    toastElement.innerHTML = `
-        //    <div class="d-flex">
-        //        <div class="toast-body">${message}</div>
-        //        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        //    </div>
-        //`;
+            if (!startTime || !endTime || selectedDays.length === 0) {
+                previewDates.innerHTML = '<div class="text-muted">Select time and days to see preview</div>';
+                return;
+            }
 
-        //    toastContainer.appendChild(toastElement);
+            let currentDate = new Date(startDate);
+            let shiftsCount = 0;
 
-        //    let toast = new bootstrap.Toast(toastElement);
-        //    toast.show();
+            while (currentDate <= endDate && shiftsCount < 50) {
+                // Get day name in correct format
+                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                if (selectedDays.includes(dayName)) {
+                    const dateString = currentDate.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+                    previewDates.innerHTML += `
+                        <div class="preview-date-item">
+                            ${dateString} (${startTime} - ${endTime})
+                        </div>`;
+                    shiftsCount++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
 
-        //    toastElement.addEventListener("hidden.bs.toast", () => {
-        //        toastElement.remove();
-        //    });
-        //}
+            if (shiftsCount === 0) {
+                previewDates.innerHTML = '<div class="text-muted">No shifts in selected range</div>';
+            }
+        }
 
+        // Update the save recurring shifts handler
+        document.getElementById('saveRecurringShifts').addEventListener('click', async function() {
+            const startDate = new Date(document.getElementById('rangeStart').value);
+            const endDate = new Date(document.getElementById('rangeEnd').value);
+            const startTime = document.getElementById('recurringStartTime').value;
+            const endTime = document.getElementById('recurringEndTime').value;
+            const comment = document.getElementById('recurringComment').value;
+            const selectedDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                .filter(day => document.getElementById(day).checked);
 
+            if (!startTime || !endTime || selectedDays.length === 0) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const shifts = [];
+            let currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                // Get day name in correct format
+                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                if (selectedDays.includes(dayName)) {
+                    shifts.push({
+                        userId: selectedWorkerId,
+                        shiftDate: currentDate.toISOString().split('T')[0],
+                        startTime: startTime,
+                        endTime: endTime,
+                        comment: comment
+                    });
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            try {
+                const response = await fetch('/api/schedule/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(shifts)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Get and close the modal properly
+                    const modal = document.getElementById('recurringShiftModal');
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    bsModal.hide();
+                    
+                    // Remove all modal backdrops
+                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    
+                    // Reset body
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                    
+                    // Refresh calendar and show success message
+                    calendar.refetchEvents();
+                    showToast('Recurring shifts added successfully!', 'success');
+                } else {
+                    showToast('Failed to add recurring shifts', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred while adding shifts', 'error');
+            }
+        });
+
+        // Add event listeners for preview updates
+        ['rangeStart', 'rangeEnd', 'recurringStartTime', 'recurringEndTime'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updatePreview);
+        });
+
+        ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(day => {
+            document.getElementById(day).addEventListener('change', async function() {
+                // Check for existing shifts/vacations before updating preview
+                const startDate = new Date(document.getElementById('rangeStart').value);
+                const endDate = new Date(document.getElementById('rangeEnd').value);
+                const selectedDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                    .filter(day => document.getElementById(day).checked);
+
+                try {
+                    const response = await fetch(`/api/schedule/${selectedWorkerId}/check-availability`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            startDate: startDate.toISOString().split('T')[0],
+                            endDate: endDate.toISOString().split('T')[0],
+                            selectedDays: selectedDays
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (!result.available) {
+                        this.checked = false;
+                        showToast('Cannot add shifts on some selected days due to existing shifts or vacation requests', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error checking availability:', error);
+                }
+
+                updatePreview();
+            });
+        });
+
+        // Add this function after your existing code
+        function resetRecurringShiftModal() {
+            // Reset time inputs
+            document.getElementById('recurringStartTime').value = '';
+            document.getElementById('recurringEndTime').value = '';
+            
+            // Reset date range to default (today to next month)
+            const today = new Date();
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(today.getMonth() + 1);
+            
+            document.getElementById('rangeStart').valueAsDate = today;
+            document.getElementById('rangeEnd').valueAsDate = nextMonth;
+            
+            // Uncheck all weekday checkboxes
+            ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(day => {
+                document.getElementById(day).checked = false;
+            });
+            
+            // Clear comment
+            document.getElementById('recurringComment').value = '';
+            
+            // Reset preview
+            document.getElementById('previewDates').innerHTML = '<div class="text-muted">Select time and days to see preview</div>';
+        }
+
+        // Add event listener for modal open
+        document.getElementById('recurringShiftModal').addEventListener('show.bs.modal', function () {
+            resetRecurringShiftModal();
+        });
     });</script>

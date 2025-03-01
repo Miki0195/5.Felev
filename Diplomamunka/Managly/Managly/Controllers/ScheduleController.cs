@@ -366,6 +366,102 @@ namespace Managly.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("api/schedule/search-workers")]
+        public async Task<IActionResult> SearchWorkers(string query)
+        {
+            var adminUser = await _userManager.GetUserAsync(User);
+            if (adminUser == null || adminUser.CompanyId == null) 
+                return Unauthorized();
+
+            var workers = await _userManager.Users
+                .Where(u => u.CompanyId == adminUser.CompanyId &&
+                           (u.Name.Contains(query) || 
+                            u.LastName.Contains(query) || 
+                            (u.Name + " " + u.LastName).Contains(query)))
+                .Select(u => new { 
+                    id = u.Id, 
+                    name = u.Name, 
+                    lastName = u.LastName 
+                })
+                .ToListAsync();
+
+            return Ok(workers);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("api/schedule/bulk")]
+        public async Task<IActionResult> SaveBulkSchedule([FromBody] List<ScheduleDTO> shifts)
+        {
+            if (!shifts.Any())
+                return BadRequest(new { success = false, message = "No shifts provided." });
+
+            try
+            {
+                var newSchedules = shifts.Select(shift => new Schedule
+                {
+                    UserId = shift.UserId,
+                    ShiftDate = shift.ShiftDate,
+                    StartTime = TimeSpan.Parse(shift.StartTime),
+                    EndTime = TimeSpan.Parse(shift.EndTime),
+                    Comment = shift.Comment
+                }).ToList();
+
+                await _context.Schedules.AddRangeAsync(newSchedules);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("api/schedule/{userId}/check-availability")]
+        public async Task<IActionResult> CheckAvailability(string userId, [FromBody] AvailabilityCheckDTO data)
+        {
+            var startDate = DateTime.Parse(data.StartDate);
+            var endDate = DateTime.Parse(data.EndDate);
+            var selectedDays = data.SelectedDays;
+
+            // Check for existing shifts
+            var existingShifts = await _context.Schedules
+                .Where(s => s.UserId == userId && 
+                            s.ShiftDate >= startDate && 
+                            s.ShiftDate <= endDate)
+                .ToListAsync();
+
+            // Check for existing leaves (vacations)
+            var existingLeaves = await _context.Leaves
+                .Where(l => l.UserId == userId && 
+                            l.LeaveDate >= startDate && 
+                            l.LeaveDate <= endDate &&
+                            (l.Status == "Pending" || l.Status == "Approved"))
+                .ToListAsync();
+
+            // Check each day in the range
+            var currentDate = startDate;
+            while (currentDate <= endDate)
+            {
+                var dayName = currentDate.ToString("dddd").ToLower();
+                if (selectedDays.Contains(dayName))
+                {
+                    if (existingShifts.Any(s => s.ShiftDate.Date == currentDate.Date) ||
+                        existingLeaves.Any(l => l.LeaveDate.Date == currentDate.Date))
+                    {
+                        return Ok(new { available = false });
+                    }
+                }
+                currentDate = currentDate.AddDays(1);
+            }
+
+            return Ok(new { available = true });
+        }
 
         private static string GetUserColor(string userId)
         {
@@ -374,6 +470,32 @@ namespace Managly.Controllers
             return colors[index];
         }
 
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserSchedule(string userId)
+        {
+            try
+            {
+                var shifts = await _context.Schedules
+                    .Where(s => s.UserId == userId)
+                    .Select(s => new
+                    {
+                        id = s.Id,
+                        title = $"{s.StartTime} - {s.EndTime}",
+                        start = s.ShiftDate.ToString("yyyy-MM-dd"),
+                        startTime = s.StartTime,
+                        endTime = s.EndTime,
+                        comment = s.Comment,
+                        allDay = true
+                    })
+                    .ToListAsync();
+
+                return Ok(shifts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
 
     }
 }

@@ -71,6 +71,7 @@
                             <i class="fas fa-sort sort-icon"></i>
                         </div>
                     </th>
+                    <th>Projects</th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
@@ -80,12 +81,31 @@
                 {
                     <tr data-user-name="@user.Name.ToLower()" data-user-email="@user.Email.ToLower()" data-user-role="@user.Roles">
                         <td>
-                            <div class="user-info">
+                            <div class="user-info cursor-pointer" data-bs-toggle="modal" data-bs-target="#userModal-@user.UserId">
                                 <div class="user-avatar">@user.Name[0].ToString().ToUpper()</div>
                                 <span>@user.Name</span>
                             </div>
                         </td>
                         <td>@user.Email</td>
+                        <td>
+                            @if (user.AssignedProjects.Any())
+                            {
+                                <div class="project-badges">
+                                    @foreach (var project in user.AssignedProjects)
+                                    {
+                                        <span href="/Projects/Details?projectId=@project.ProjectId" 
+                                           class="project-badge" 
+                                           title="@project.ProjectName (@project.Role)">
+                                            @project.ProjectName
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No projects assigned</span>
+                            }
+                        </td>
                         <td>
                             <form asp-action="UpdateUserRole" asp-controller="Admin" method="post" class="role-form">
                                 <input type="hidden" name="userId" value="@user.UserId" />
@@ -124,6 +144,102 @@
                             </div>
                         </td>
                     </tr>
+
+                    <!-- User Details Modal - Move it here, inside the foreach loop -->
+                    <div class="modal fade" id="userModal-@user.UserId" tabindex="-1" aria-labelledby="userModalLabel-@user.UserId" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="userModalLabel-@user.UserId">User Profile</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="user-profile-container">
+                                        <div class="profile-header">
+                                            <div class="profile-image">
+                                                @if (!string.IsNullOrEmpty(user.ProfilePicturePath))
+                                                {
+                                                    <img src="@user.ProfilePicturePath" alt="@user.Name's profile picture" class="rounded-circle">
+                                                }
+                                                else
+                                                {
+                                                    <div class="profile-initial">@user.Name[0].ToString().ToUpper()</div>
+                                                }
+                                            </div>
+                                            <div class="profile-basic-info">
+                                                <h3>@user.Name @user.LastName</h3>
+                                                <p class="text-muted">@user.Roles</p>
+                                                <a href="/chat?userId=@user.UserId" class="btn btn-primary mt-2">
+                                                    <i class="fas fa-comment-alt"></i> Message
+                                                </a>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="profile-details mt-4">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="detail-heading">Contact Information</h6>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-envelope"></i>
+                                                        <span>@user.Email</span>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                                    {
+                                                        <div class="detail-item">
+                                                            <i class="fas fa-phone"></i>
+                                                            <span>@user.PhoneNumber</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="detail-heading">Personal Information</h6>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-birthday-cake"></i>
+                                                        <span>@(user.DateOfBirth?.ToString("MMMM d, yyyy") ?? "Not specified")</span>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-venus-mars"></i>
+                                                        <span>@user.Gender</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <h6 class="detail-heading">Location</h6>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                        <span>
+                                                            @(!string.IsNullOrEmpty(user.Address) ? user.Address + ", " : "")
+                                                            @(!string.IsNullOrEmpty(user.City) ? user.City + ", " : "")
+                                                            @(user.Country ?? "Not specified")
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @if (user.AssignedProjects.Any())
+                                            {
+                                                <div class="row mt-4">
+                                                    <div class="col-12">
+                                                        <h6 class="detail-heading">Assigned Projects</h6>
+                                                        <div class="project-badges mt-2">
+                                                            @foreach (var project in user.AssignedProjects)
+                                                            {
+                                                                <span class="project-badge" title="Role: @project.Role">
+                                                                    @project.ProjectName
+                                                                </span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
             </tbody>
         </table>
@@ -232,10 +348,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle confirmation
+    // Update the role change confirmation handler
     document.getElementById('confirmRoleChange').addEventListener('click', function() {
         if (activeForm) {
             const formData = new FormData(activeForm);
+            const userId = formData.get('userId');
+            const newRole = formData.get('role');
             
             fetch(activeForm.action, {
                 method: 'POST',
@@ -247,12 +365,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.hide();
                 
                 if (data.success) {
-                    showToast(data.message, 'success');
-                    // Update the data attribute for filtering
+                    // Update the UI immediately
                     const row = activeForm.closest('tr');
                     if (row) {
-                        row.setAttribute('data-user-role', formData.get('role'));
+                        // Update the data attribute
+                        row.setAttribute('data-user-role', newRole);
+                        
+                        // Update the select element in the table
+                        const roleSelect = row.querySelector('.role-select');
+                        if (roleSelect) {
+                            roleSelect.value = newRole;
+                            roleSelect.dataset.originalValue = newRole; // Update the original value
+                        }
+                        
+                        // Update the role in the user details modal if it exists
+                        const userModal = document.querySelector(`#userModal-${userId}`);
+                        if (userModal) {
+                            const roleText = userModal.querySelector('.profile-basic-info p.text-muted');
+                            if (roleText) {
+                                roleText.textContent = newRole;
+                            }
+                        }
                     }
+                    
+                    showToast(data.message, 'success');
                 } else {
                     showToast(data.message, 'error');
                     // Revert the select to original value

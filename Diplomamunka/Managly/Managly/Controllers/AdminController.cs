@@ -144,12 +144,33 @@ namespace Managly.Controllers
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 string role = roles.FirstOrDefault() ?? "Employee";
+
+                var projects = await _context.ProjectMembers
+                    .Where(pm => pm.UserId == user.Id)
+                    .Include(pm => pm.Project)
+                    .Select(pm => new ProjectInfo
+                    {
+                        ProjectId = pm.ProjectId,
+                        ProjectName = pm.Project.Name,
+                        Role = pm.Role
+                    })
+                    .ToListAsync();
+
                 userRoles.Add(new UserManagement
                 {
                     UserId = user.Id,
                     Name = user.Name,
+                    LastName = user.LastName,
                     Email = user.Email,
-                    Roles = role
+                    Roles = role,
+                    AssignedProjects = projects,
+                    PhoneNumber = user.PhoneNumber,
+                    Country = user.Country,
+                    City = user.City,
+                    Address = user.Address,
+                    DateOfBirth = user.DateOfBirth,
+                    Gender = user.Gender,
+                    ProfilePicturePath = user.ProfilePicturePath
                 });
             }
 
