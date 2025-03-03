@@ -92,7 +92,7 @@ namespace Managly.Controllers.Api
                     .Include(p => p.Tasks)
                         .ThenInclude(t => t.Assignments)
                             .ThenInclude(a => a.User)
-                    .FirstOrDefaultAsync(p => p.Id == id && 
+                    .FirstOrDefaultAsync(p => p.Id == id &&
                         (p.CompanyId == currentUser.CompanyId));
 
                 if (project == null)
@@ -108,7 +108,7 @@ namespace Managly.Controllers.Api
                     project.Name,
                     project.Description,
                     StartDate = project.StartDate.ToString("yyyy-MM-dd"),
-                    Deadline = project.Deadline.ToString("yyyy-MM-dd"),
+                    Deadline = project.Deadline?.ToString("yyyy-MM-dd"),
                     project.Status,
                     project.Priority,
                     project.TotalTasks,
@@ -159,7 +159,7 @@ namespace Managly.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProject([FromBody] ProjectCreateDto projectDto)
         {
-            try 
+            try
             {
                 if (!ModelState.IsValid)
                 {
@@ -191,7 +191,7 @@ namespace Managly.Controllers.Api
                     CompanyId = currentUser.CompanyId.Value,
                     CreatedAt = DateTime.UtcNow
                 };
-                
+
                 _context.Projects.Add(project);
                 await _context.SaveChangesAsync();
 
@@ -232,7 +232,7 @@ namespace Managly.Controllers.Api
                 }
 
                 await _context.SaveChangesAsync();
-                
+
                 return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
             }
             catch (Exception ex)
@@ -288,10 +288,10 @@ namespace Managly.Controllers.Api
 
                 // Delete project members first
                 _context.ProjectMembers.RemoveRange(project.ProjectMembers);
-                
+
                 // Delete the project
                 _context.Projects.Remove(project);
-                
+
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
@@ -306,7 +306,7 @@ namespace Managly.Controllers.Api
         public async Task<IActionResult> GetCompanyUsers()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            
+
             var users = await _context.Users
                 .Where(u => u.CompanyId == currentUser.CompanyId && u.Id != currentUser.Id)
                 .Select(u => new
@@ -416,8 +416,8 @@ namespace Managly.Controllers.Api
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 var projectMember = await _context.ProjectMembers
-                    .FirstOrDefaultAsync(pm => pm.ProjectId == id && 
-                                             pm.UserId == userId && 
+                    .FirstOrDefaultAsync(pm => pm.ProjectId == id &&
+                                             pm.UserId == userId &&
                                              pm.Project.CompanyId == currentUser.CompanyId);
 
                 if (projectMember == null)
@@ -425,8 +425,8 @@ namespace Managly.Controllers.Api
 
                 // Check if current user is project lead
                 var isProjectLead = await _context.ProjectMembers
-                    .AnyAsync(m => m.ProjectId == id && 
-                                  m.UserId == currentUser.Id && 
+                    .AnyAsync(m => m.ProjectId == id &&
+                                  m.UserId == currentUser.Id &&
                                   m.Role == "Project Lead");
 
                 if (!isProjectLead)
@@ -438,7 +438,7 @@ namespace Managly.Controllers.Api
 
                 projectMember.Role = roleDto.Role;
                 await _context.SaveChangesAsync();
-                
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -455,8 +455,8 @@ namespace Managly.Controllers.Api
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 var projectMember = await _context.ProjectMembers
-                    .FirstOrDefaultAsync(pm => pm.ProjectId == id && 
-                                             pm.UserId == userId && 
+                    .FirstOrDefaultAsync(pm => pm.ProjectId == id &&
+                                             pm.UserId == userId &&
                                              pm.Project.CompanyId == currentUser.CompanyId);
 
                 if (projectMember == null)
@@ -464,8 +464,8 @@ namespace Managly.Controllers.Api
 
                 // Check if current user is project lead
                 var isProjectLead = await _context.ProjectMembers
-                    .AnyAsync(m => m.ProjectId == id && 
-                                  m.UserId == currentUser.Id && 
+                    .AnyAsync(m => m.ProjectId == id &&
+                                  m.UserId == currentUser.Id &&
                                   m.Role == "Project Lead");
 
                 if (!isProjectLead)
@@ -477,7 +477,7 @@ namespace Managly.Controllers.Api
 
                 _context.ProjectMembers.Remove(projectMember);
                 await _context.SaveChangesAsync();
-                
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -490,21 +490,21 @@ namespace Managly.Controllers.Api
         {
             [Required]
             public string Name { get; set; }
-            
+
             public string Description { get; set; }
-            
+
             [Required]
             public string StartDate { get; set; }
-            
+
             [Required]
             public string Deadline { get; set; }
-            
+
             [Required]
             public string Status { get; set; }
-            
+
             [Required]
             public string Priority { get; set; }
-            
+
             public List<string> TeamMemberIds { get; set; } = new List<string>();
         }
 
@@ -540,15 +540,15 @@ namespace Managly.Controllers.Api
         {
             [Required]
             public string TaskTitle { get; set; }
-            
+
             public string Description { get; set; }
-            
+
             [Required]
             public string DueDate { get; set; }
-            
+
             [Required]
             public string Priority { get; set; }
-            
+
             [Required]
             public string AssignedToId { get; set; }
         }
@@ -571,7 +571,7 @@ namespace Managly.Controllers.Api
                 // Check if user is project lead or manager
                 var userRole = project.ProjectMembers
                     .FirstOrDefault(m => m.UserId == currentUser.Id)?.Role;
-                    
+
                 if (userRole != "Project Lead" && userRole != "Manager")
                     return Forbid();
 
@@ -768,13 +768,13 @@ namespace Managly.Controllers.Api
                 // Check if user is project lead or manager
                 var userRole = task.Project.ProjectMembers
                     .FirstOrDefault(m => m.UserId == currentUser.Id)?.Role;
-                    
+
                 if (userRole != "Project Lead" && userRole != "Manager")
                     return Forbid();
 
                 // Get existing assignments before update
                 var existingAssignments = task.Assignments.Select(a => a.UserId).ToList();
-                
+
                 // Update task details
                 task.TaskTitle = taskDto.TaskTitle;
                 task.Description = taskDto.Description;
@@ -833,7 +833,7 @@ namespace Managly.Controllers.Api
                 // Check if user is project lead or manager
                 var userRole = task.Project.ProjectMembers
                     .FirstOrDefault(m => m.UserId == currentUser.Id)?.Role;
-                    
+
                 if (userRole != "Project Lead" && userRole != "Manager")
                     return Forbid();
 
@@ -855,18 +855,18 @@ namespace Managly.Controllers.Api
         {
             [Required]
             public string TaskTitle { get; set; }
-            
+
             public string Description { get; set; }
-            
+
             [Required]
             public string DueDate { get; set; }
-            
+
             [Required]
             public string Priority { get; set; }
-            
+
             [Required]
             public string Status { get; set; }
-            
+
             [Required]
             public List<string> AssignedUserIds { get; set; }
         }
@@ -957,7 +957,7 @@ namespace Managly.Controllers.Api
                 var currentUser = await _userManager.GetUserAsync(User);
                 var teamMembers = await _context.Users
                     .Where(u => u.CompanyId == currentUser.CompanyId)
-                    .Select(u => new 
+                    .Select(u => new
                     {
                         id = u.Id,
                         name = u.Name,

@@ -27,6 +27,11 @@ namespace Managly.Models
 
         public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
 
+        public int? ProjectId { get; set; }
+
+        [ForeignKey("ProjectId")]
+        public Project Project { get; set; }
+
         [ForeignKey("UserId")]
         public User User { get; set; }
     }

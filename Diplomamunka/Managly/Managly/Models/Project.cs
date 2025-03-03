@@ -18,8 +18,15 @@ namespace Managly.Models
         [Required]
         public DateTime StartDate { get; set; }
 
+        public DateTime? Deadline { get; set; }
+
         [Required]
-        public DateTime Deadline { get; set; }
+        public int CompanyId { get; set; }
+
+        [ForeignKey("CompanyId")]
+        public Company Company { get; set; }
+
+        public bool IsActive => !Deadline.HasValue || Deadline.Value >= DateTime.Today;
 
         public string Status { get; set; } = "Active"; // Active, Completed, On Hold, Cancelled
 
@@ -30,12 +37,6 @@ namespace Managly.Models
         
         [ForeignKey("CreatedById")]
         public User CreatedBy { get; set; }
-
-        [Required]
-        public int CompanyId { get; set; }
-
-        [ForeignKey("CompanyId")]
-        public Company Company { get; set; }
 
         public virtual ICollection<ProjectMember> ProjectMembers { get; set; }
         

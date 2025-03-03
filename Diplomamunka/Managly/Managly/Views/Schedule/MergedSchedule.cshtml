@@ -2,70 +2,427 @@
     ViewData["Title"] = "Merged Schedule";
 }
 
-<h2 class="text-center mb-4">Merged Worker Schedule</h2>
+<link rel="stylesheet" href="~/css/Schedule/Manage.css">
+
+<!-- jQuery first -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- FullCalendar CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
 <div class="container">
-    <div class="card p-4 shadow">
-        <h5 class="mb-3">All Worker Schedules</h5>
+    <div class="page-header">
+        <h1 class="page-title">Merged Worker Schedules</h1>
+        <p class="page-subtitle">View and manage all worker schedules in one place</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-card p-4 mb-4">
+        <div class="row g-4">
+            <!-- Worker Search -->
+            <div class="col-md-6">
+                <h6 class="mb-3">Filter by Workers</h6>
+                <div class="search-container position-relative">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="workerSearch" 
+                           class="form-control search-input" 
+                           placeholder="Search workers..."
+                           autocomplete="off">
+                    <div id="searchResults" class="search-results-container d-none">
+                        <!-- Search results will be populated here -->
+                    </div>
+                </div>
+                <!-- Selected Workers Container -->
+                <div id="selectedWorkers" class="selected-users-container mt-3">
+                    <!-- Selected worker chips will be added here -->
+                </div>
+            </div>
+
+            <!-- Project Filter -->
+            <div class="col-md-6">
+                <h6 class="mb-3">Filter by Active Projects</h6>
+                <div class="project-filter-container">
+                    <select id="projectFilter" class="form-select" multiple size="4">
+                        <!-- Projects will be populated here -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Filters Display -->
+            <div class="col-12">
+                <div class="active-filters-container d-flex align-items-center gap-2">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted me-2">No active filters</span>
+                            <div id="activeFilters" class="d-flex flex-wrap gap-2">
+                                <!-- Active filter chips will be added here -->
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary" onclick="clearAllFilters()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Section -->
+    <div class="calendar-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">Filtered Schedules</h5>
+            <div class="legend d-flex gap-3 align-items-center">
+                <span class="d-flex align-items-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    <small class="text-muted">Each worker's schedule is color-coded</small>
+                </span>
+            </div>
+        </div>
         <div id="mergedCalendar"></div>
     </div>
 </div>
 
-<!-- Include FullCalendar -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+// Define these functions in the global scope
+let selectedWorkers = new Set();
+let selectedProjects = new Set();
+let calendar = null;
 
-<script>document.addEventListener("DOMContentLoaded", function () {
-    loadNotifications();
-    var calendarEl = document.getElementById("mergedCalendar");
-    var mergedCalendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: "dayGridMonth",
-        editable: false,
-        selectable: false,
-        //events: async function (fetchInfo, successCallback, failureCallback) {
-        //    try {
-        //        let response = await fetch("/api/schedule/all");
-        //        let schedules = await response.json();
+function removeWorker(workerId) {
+    selectedWorkers.delete(workerId);
+    const chip = document.querySelector(`.user-chip[data-worker-id="${workerId}"]`);
+    if (chip) chip.remove();
 
-        //        if (!Array.isArray(schedules)) throw new Error("Invalid API response format");
-
-        //        successCallback(schedules);
-        //    } catch (error) {
-        //        console.error("Error fetching merged schedule:", error);
-        //        failureCallback(error);
-        //    }
-        //},
-        events: async function (fetchInfo, successCallback, failureCallback) {
-            try {
-                let response = await fetch("/api/schedule/all");
-                let schedules = await response.json();
-
-                if (!Array.isArray(schedules)) throw new Error("Invalid API response format");
-
-                console.log("Fetched schedules:", schedules); // Debugging
-
-                successCallback(schedules);
-            } catch (error) {
-                console.error("Error fetching merged schedule:", error);
-                failureCallback(error);
-            }
-        },
-        eventDidMount: function (info) {
-            let eventTitle = info.event.title;
-            let parts = eventTitle.split("\n");
-            let timeText = parts[0] || "";
-            let commentText = parts.length > 1 ? parts[1] : "";
-            let workerName = info.event.extendedProps.workerName;
-
-            if (info.el.querySelector(".event-content")) return;
-
-            info.el.innerHTML = `
-                <div class="event-content" style="color: white; font-weight: bold;">${workerName}</div>
-                <div class="event-content" style="color: white;"><strong>${timeText}</strong></div>
-                ${commentText ? `<div class="event-content" style="font-size: 0.8rem; color: black">${commentText}</div>` : ""}
-            `;
+    if (!shouldShowCalendar()) {
+        if (calendar) {
+            calendar.destroy();
+            calendar = null;
         }
+    } else {
+        updateCalendarEvents();
+    }
+    updateActiveFilters();
+}
+
+function removeProject(projectId) {
+    const projectSelect = document.getElementById('projectFilter');
+    const option = Array.from(projectSelect.options).find(opt => opt.value === projectId);
+    if (option) {
+        option.selected = false;
+    }
+    projectSelect.dispatchEvent(new Event('change'));
+}
+
+function clearAllFilters() {
+    // Clear workers
+    selectedWorkers.forEach(workerId => {
+        removeWorker(workerId);
     });
 
-    mergedCalendar.render();
-});</script>
+    // Clear projects
+    const projectSelect = document.getElementById('projectFilter');
+    Array.from(projectSelect.selectedOptions).forEach(option => {
+        option.selected = false;
+    });
+    projectSelect.dispatchEvent(new Event('change'));
+
+    // Update display
+    updateActiveFilters();
+}
+
+// Your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function () {
+    loadNotifications();
+    
+    // Define colors at the top level so they're accessible everywhere
+    const colors = {
+        '#3498db': '#2980b9',  // blue
+        '#e74c3c': '#c0392b',  // red
+        '#2ecc71': '#27ae60',  // green
+        '#f39c12': '#d35400',  // orange
+        '#9b59b6': '#8e44ad',  // purple
+        '#1abc9c': '#16a085'   // turquoise
+    };
+
+    // Move these functions to global scope
+    window.updateCalendarEvents = function() {
+        if (!calendar) {
+            initializeCalendar();
+        } else {
+            calendar.refetchEvents();
+        }
+    }
+
+    window.shouldShowCalendar = function() {
+        return selectedWorkers.size > 0 || selectedProjects.size > 0;
+    }
+
+    window.updateActiveFilters = function() {
+        const activeFiltersContainer = document.getElementById('activeFilters');
+        activeFiltersContainer.innerHTML = '';
+
+        // Add worker filters
+        selectedWorkers.forEach(workerId => {
+            const workerChip = document.querySelector(`.user-chip[data-worker-id="${workerId}"]`);
+            if (workerChip) {
+                const filterChip = document.createElement('div');
+                filterChip.className = 'filter-chip';
+                filterChip.style.backgroundColor = workerChip.style.backgroundColor;
+                filterChip.innerHTML = `
+                    Worker: ${workerChip.textContent.replace('×', '')}
+                    <span class="remove-filter" onclick="removeWorker('${workerId}')">×</span>
+                `;
+                activeFiltersContainer.appendChild(filterChip);
+            }
+        });
+
+        // Add project filters
+        const projectSelect = document.getElementById('projectFilter');
+        Array.from(projectSelect.selectedOptions).forEach(option => {
+            const filterChip = document.createElement('div');
+            filterChip.className = 'filter-chip';
+            filterChip.style.backgroundColor = '#4299e1';
+            filterChip.innerHTML = `
+                Project: ${option.text}
+                <span class="remove-filter" onclick="removeProject('${option.value}')">×</span>
+            `;
+            activeFiltersContainer.appendChild(filterChip);
+        });
+
+        // Show/hide "Active Filters" text
+        const activeFiltersText = document.querySelector('.active-filters-container .text-muted');
+        if (selectedWorkers.size === 0 && projectSelect.selectedOptions.length === 0) {
+            activeFiltersText.textContent = 'No active filters';
+        } else {
+            activeFiltersText.textContent = 'Active Filters:';
+        }
+    }
+
+    // Load active projects
+    loadActiveProjects();
+
+    // Initialize worker search
+    initializeWorkerSearch();
+
+    function getWorkerColor(workerId) {
+        const colorKeys = Object.keys(colors);
+        const colorIndex = Math.abs(hashString(workerId)) % colorKeys.length;
+        return colorKeys[colorIndex];
+    }
+
+    function hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash;
+    }
+
+    function loadActiveProjects() {
+        fetch('/api/Projects/active')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(projects => {
+                console.log('Loaded projects:', projects);
+                const select = document.getElementById('projectFilter');
+                select.innerHTML = '';
+                
+                if (!projects || projects.length === 0) {
+                    const option = new Option('No active projects', '');
+                    option.disabled = true;
+                    select.add(option);
+                } else {
+                    projects.forEach(project => {
+                        const option = new Option(project.name, project.id.toString());
+                        select.add(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading projects:', error);
+                const select = document.getElementById('projectFilter');
+                select.innerHTML = '<option disabled>Error loading projects</option>';
+            });
+    }
+
+    function addWorker(worker) {
+        if (selectedWorkers.has(worker.id)) return;
+
+        // Clear project filters first
+        const projectSelect = document.getElementById('projectFilter');
+        Array.from(projectSelect.selectedOptions).forEach(option => {
+            option.selected = false;
+        });
+        selectedProjects.clear();
+
+        // Add the worker
+        const workerColor = getWorkerColor(worker.id);
+        selectedWorkers.add(worker.id);
+        const selectedWorkersContainer = document.getElementById('selectedWorkers');
+        
+        const chip = document.createElement('div');
+        chip.className = 'user-chip';
+        chip.dataset.workerId = worker.id;
+        chip.style.backgroundColor = workerColor;
+        chip.style.borderColor = colors[workerColor];
+        chip.innerHTML = `
+            ${worker.name} ${worker.lastName}
+            <span class="remove-user">×</span>
+        `;
+        
+        chip.querySelector('.remove-user').addEventListener('click', () => {
+            removeWorker(worker.id);
+        });
+        
+        selectedWorkersContainer.appendChild(chip);
+        document.getElementById('workerSearch').value = '';
+        document.getElementById('searchResults').classList.add('d-none');
+        
+        if (shouldShowCalendar()) {
+            updateCalendarEvents();
+        }
+        updateActiveFilters();
+    }
+
+    // Update project filter event listener
+    document.getElementById('projectFilter').addEventListener('change', function() {
+        const selectedOptions = Array.from(this.selectedOptions);
+        if (selectedOptions.length > 0) {
+            // Clear worker filters first
+            selectedWorkers.forEach(workerId => {
+                const chip = document.querySelector(`.user-chip[data-worker-id="${workerId}"]`);
+                if (chip) chip.remove();
+            });
+            selectedWorkers.clear();
+            
+            // Update project filters
+            selectedProjects = new Set(selectedOptions.map(option => option.value));
+        } else {
+            selectedProjects.clear();
+        }
+        
+        if (shouldShowCalendar()) {
+            updateCalendarEvents();
+        } else if (calendar) {
+            calendar.destroy();
+            calendar = null;
+        }
+        updateActiveFilters();
+    });
+
+    function initializeCalendar() {
+        const calendarEl = document.getElementById("mergedCalendar");
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth",
+            editable: false,
+            selectable: false,
+            headerToolbar: {
+                left: "prev,next today",
+                center: "title",
+                right: ""
+            },
+            events: async function(fetchInfo, successCallback, failureCallback) {
+                try {
+                    const params = new URLSearchParams();
+                    if (selectedWorkers.size > 0) {
+                        params.append('workers', Array.from(selectedWorkers).join(','));
+                    }
+                    if (selectedProjects.size > 0) {
+                        params.append('projects', Array.from(selectedProjects).join(','));
+                    }
+
+                    const response = await fetch(`/api/schedule/filtered?${params}`);
+                    const schedules = await response.json();
+                    successCallback(schedules);
+                } catch (error) {
+                    console.error("Error fetching filtered schedules:", error);
+                    failureCallback(error);
+                }
+            },
+            eventDidMount: function(info) {
+                let eventTitle = info.event.title;
+                let parts = eventTitle.split("\n");
+                let timeText = parts[0] || "";
+                let commentText = parts.length > 1 ? parts[1] : "";
+                let workerName = info.event.extendedProps.workerName;
+                let workerId = info.event.extendedProps.workerId; // Make sure this is passed from the backend
+
+                const workerColor = getWorkerColor(workerId);
+                info.el.style.backgroundColor = workerColor;
+                info.el.style.borderColor = colors[workerColor];
+
+                if (info.el.querySelector(".event-content")) return;
+
+                info.el.innerHTML = `
+                    <div class="event-content">
+                        <div style="color: white; font-weight: bold;">${workerName}</div>
+                        <div style="color: white;"><strong>${timeText}</strong></div>
+                        ${commentText ? `<div style="font-size: 0.8rem; color: white; opacity: 0.9">${commentText}</div>` : ""}
+                    </div>
+                `;
+
+                // Add hover effect
+                info.el.style.transition = 'transform 0.2s ease';
+                info.el.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.zIndex = '1';
+                });
+                info.el.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.zIndex = '';
+                });
+            }
+        });
+
+        calendar.render();
+    }
+
+    function initializeWorkerSearch() {
+        const workerSearch = document.getElementById('workerSearch');
+        const searchResults = document.getElementById('searchResults');
+        let debounceTimeout;
+
+        workerSearch.addEventListener('input', function() {
+            clearTimeout(debounceTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.classList.add('d-none');
+                return;
+            }
+
+            debounceTimeout = setTimeout(() => {
+                fetch(`/api/schedule/search-workers?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(workers => {
+                        searchResults.innerHTML = '';
+                        searchResults.classList.remove('d-none');
+
+                        if (workers.length === 0) {
+                            searchResults.innerHTML = '<div class="no-results">No workers found</div>';
+                            return;
+                        }
+
+                        workers.forEach(worker => {
+                            if (!selectedWorkers.has(worker.id)) {
+                                const div = document.createElement('div');
+                                div.className = 'search-result-item';
+                                div.textContent = `${worker.name} ${worker.lastName}`;
+                                div.addEventListener('click', () => addWorker(worker));
+                                searchResults.appendChild(div);
+                            }
+                        });
+                    });
+            }, 300);
+        });
+    }
+});
+</script>

@@ -497,5 +497,55 @@ namespace Managly.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("api/schedule/filtered")]
+        public async Task<IActionResult> GetFilteredSchedules([FromQuery] string workers, [FromQuery] string projects)
+        {
+            var workerIds = !string.IsNullOrEmpty(workers) 
+                ? workers.Split(',').ToList() 
+                : null;
+            
+            var projectIds = !string.IsNullOrEmpty(projects) 
+                ? projects.Split(',').Select(int.Parse).ToList() 
+                : null;
+
+            var query = _context.Schedules.AsQueryable();
+
+            if (workerIds != null && workerIds.Any())
+            {
+                query = query.Where(s => workerIds.Contains(s.UserId));
+            }
+
+            if (projectIds != null && projectIds.Any())
+            {
+                // Get all users who are members of the selected projects
+                var projectMemberIds = await _context.ProjectMembers
+                    .Where(pm => projectIds.Contains(pm.ProjectId))
+                    .Select(pm => pm.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Filter schedules to only show those from project members
+                query = query.Where(s => projectMemberIds.Contains(s.UserId));
+            }
+
+            var schedules = await query
+                .Include(s => s.User)
+                .Select(s => new
+                {
+                    id = s.Id,
+                    title = $"{s.StartTime.ToString(@"hh\:mm")} - {s.EndTime.ToString(@"hh\:mm")}" +
+                            (!string.IsNullOrEmpty(s.Comment) ? $"\n{s.Comment}" : ""),
+                    start = s.ShiftDate.ToString("yyyy-MM-dd"),
+                    allDay = true,
+                    workerName = s.User.Name + " " + s.User.LastName,
+                    workerId = s.UserId,
+                    color = GetUserColor(s.UserId)
+                })
+                .ToListAsync();
+
+            return Ok(schedules);
+        }
+
     }
 }
