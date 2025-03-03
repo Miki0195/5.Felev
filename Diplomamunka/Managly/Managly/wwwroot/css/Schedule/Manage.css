@@ -524,3 +524,53 @@ h5 {
 .btn-outline-secondary i {
     font-size: 0.75rem;
 }
+
+.schedule-details label {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.schedule-details p {
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.event-content {
+    padding: 4px 6px;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.fw-medium {
+    font-weight: 500;
+}
+
+.text-wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Event colors */
+.fc-event-success {
+    background-color: #22c55e !important;
+    border-color: #16a34a !important;
+}
+
+.fc-event-warning {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+}
+
+.fc-event-primary {
+    background-color: #4299e1 !important;
+    border-color: #2b6cb0 !important;
+}
+
+/* Ensure event text is always white */
+.fc-event-success .event-content,
+.fc-event-warning .event-content,
+.fc-event-primary .event-content {
+    color: white !important;
+}
