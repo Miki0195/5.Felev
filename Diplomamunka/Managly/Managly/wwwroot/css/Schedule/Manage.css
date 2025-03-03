@@ -574,3 +574,81 @@ h5 {
 .fc-event-primary .event-content {
     color: white !important;
 }
+
+/* Vacation Selection Styling */
+.vacation-selection-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 1000;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+.vacation-selection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.fc-day.selectable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fc-day.selectable:hover {
+    background-color: rgba(246, 173, 85, 0.1);
+    cursor: pointer;
+}
+
+.fc-day.selected {
+    background-color: rgba(246, 173, 85, 0.2) !important;
+}
+
+/* Tooltip styling */
+.vacation-tooltip {
+    position: fixed;
+    background: #2d3748;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    pointer-events: none;
+    z-index: 1100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    margin-top: -8px;
+}
+
+/* Animation for checkmark */
+.vacation-checkmark {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.selection-counter {
+    background: #2d3748;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.selection-counter i {
+    color: #f6ad55;
+}
