@@ -140,322 +140,324 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    loadNotifications();
-    let editMode = false;
-    let selectedDates = [];
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-        },
-        events: async function(fetchInfo, successCallback, failureCallback) {
-            try {
-                let scheduleResponse = await fetch("/api/schedule/myschedule");
-                let leaveResponse = await fetch("/api/leave/myleaves");
+<script>document.addEventListener('DOMContentLoaded', function () {
+        loadNotifications();
+        let editMode = false;
+        let selectedDates = [];
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            events: async function (fetchInfo, successCallback, failureCallback) {
+                try {
+                    let scheduleResponse = await fetch("/api/schedule/myschedule");
+                    let leaveResponse = await fetch("/api/leave/myleaves");
 
-                let scheduleEvents = await scheduleResponse.json();
-                let leaveEvents = await leaveResponse.json();
+                    let scheduleEvents = await scheduleResponse.json();
+                    let leaveEvents = await leaveResponse.json();
 
-                console.log('Schedule Events:', scheduleEvents);
-                console.log('Leave Events:', leaveEvents);
+                    console.log('Schedule Events:', scheduleEvents);
+                    console.log('Leave Events:', leaveEvents);
 
-                if (!Array.isArray(scheduleEvents) || !Array.isArray(leaveEvents)) {
-                    throw new Error("Invalid API response format");
+                    if (!Array.isArray(scheduleEvents) || !Array.isArray(leaveEvents)) {
+                        throw new Error("Invalid API response format");
+                    }
+
+                    successCallback([...scheduleEvents, ...leaveEvents]);
+                } catch (error) {
+                    console.error("Error fetching events:", error);
+                    failureCallback(error);
                 }
+            },
+            eventDidMount: function (info) {
+                let eventTitle = info.event.title;
+                let parts = eventTitle.split("\n");
 
-                successCallback([...scheduleEvents, ...leaveEvents]);
-            } catch (error) {
-                console.error("Error fetching events:", error);
-                failureCallback(error);
-            }
-        },
-        eventDidMount: function(info) {
-            let eventTitle = info.event.title;
-            let parts = eventTitle.split("\n");
-            
-            let timeText = parts[0] || "";
-            let commentText = parts.length > 1 ? parts[1] : "";
+                let timeText = parts[0] || "";
+                let commentText = parts.length > 1 ? parts[1] : "";
 
-            if (info.el.querySelector(".event-content")) return;
+                if (info.el.querySelector(".event-content")) return;
 
-            if (eventTitle.includes("Vacation")) {
-                // Extract the status from the vacation title
-                const statusMatch = eventTitle.match(/\((.*?)\)/);
-                const status = statusMatch ? statusMatch[1].trim() : "";
-                
-                // Remove the status from the title for display
-                timeText = timeText.replace(/\s*\(.*?\)/, "");
+                if (eventTitle.includes("Vacation")) {
+                    // Extract the status from the vacation title
+                    const statusMatch = eventTitle.match(/\((.*?)\)/);
+                    const status = statusMatch ? statusMatch[1].trim() : "";
 
-                // Use the color from the backend
-                const color = info.event.backgroundColor || (status === "" ? "green" : "orange");
-                info.el.style.backgroundColor = color;
-                info.el.style.borderColor = color;
+                    // Remove the status from the title for display
+                    timeText = timeText.replace(/\s*\(.*?\)/, "");
 
-                info.el.innerHTML = `
+                    // Use the color from the backend
+                    const color = info.event.backgroundColor || (status === "" ? "green" : "orange");
+                    info.el.style.backgroundColor = color;
+                    info.el.style.borderColor = color;
+
+                    info.el.innerHTML = `
                     <div class="event-content">
                         <div style="color: white; margin-bottom: 4px;"><strong>${timeText}</strong></div>
                         <div style="font-size: 0.8rem; color: white; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 4px;">${status || 'Approved'}</div>
                     </div>
                 `;
-            } else {
-                info.el.style.backgroundColor = '#4299e1';
-                info.el.style.borderColor = '#2b6cb0';
-                info.el.innerHTML = `
+                } else {
+                    info.el.style.backgroundColor = '#4299e1';
+                    info.el.style.borderColor = '#2b6cb0';
+                    info.el.innerHTML = `
                     <div class="event-content">
                         <div style="color: white; margin-bottom: 4px;"><strong>${timeText}</strong></div>
                         ${commentText ? `<div style="font-size: 0.8rem; color: white; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 4px;">${commentText}</div>` : ""}
                     </div>
                 `;
-            }
-
-            // Add hover effect
-            info.el.style.transition = 'all 0.2s ease';
-            info.el.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.02)';
-                this.style.zIndex = '1';
-            });
-            info.el.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-                this.style.zIndex = '';
-            });
-        },
-        eventClick: function(info) {
-            const event = info.event;
-            const modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
-            
-            const date = new Date(event.start);
-            const formattedDate = date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-
-            let eventTitle = info.event.title;
-            let timeText = eventTitle;
-            let statusText = "";
-
-            if (eventTitle.includes("Vacation")) {
-                // Extract status for vacation events
-                const statusMatch = eventTitle.match(/\((.*?)\)/);
-                if (statusMatch) {
-                    statusText = statusMatch[1];
-                    timeText = eventTitle.replace(/\s*\(.*?\)/, "");
-                } else {
-                    // If there's no status in parentheses, it's approved
-                    statusText = "Approved";
-                    timeText = "Vacation";
                 }
+
+                // Add hover effect
+                info.el.style.transition = 'all 0.2s ease';
+                info.el.addEventListener('mouseenter', function () {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.zIndex = '1';
+                });
+                info.el.addEventListener('mouseleave', function () {
+                    this.style.transform = 'scale(1)';
+                    this.style.zIndex = '';
+                });
+            },
+            eventClick: function (info) {
+                const event = info.event;
+                const modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+
+                const date = new Date(event.start);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                let eventTitle = info.event.title;
+                let timeTextVacation = eventTitle;
+                let statusTextVacation = "";
+                let parts = eventTitle.split("\n");
+
+                let timeText = parts[0] || "";
+                let commentText = parts.length > 1 ? parts[1] : "";
+
+                if (eventTitle.includes("Vacation")) {
+                    // Extract status for vacation events
+                    const statusMatch = eventTitle.match(/\((.*?)\)/);
+                    if (statusMatch) {
+                        statusTextVacation = statusMatch[1];
+                        timeTextVacation = eventTitle.replace(/\s*\(.*?\)/, "");
+                    } else {
+                        // If there's no status in parentheses, it's approved
+                        statusTextVacation = "Approved";
+                        timeTextVacation = "Vacation";
+                    }
+                }
+
+                document.getElementById('scheduleDate').textContent = formattedDate;
+                document.getElementById('scheduleTime').textContent = timeText;
+                document.getElementById('scheduleComment').textContent = statusTextVacation || commentText || 'No comment';
+
+                modal.show();
+            },
+            selectable: true,
+            selectMirror: true,
+            unselectAuto: false,
+            select: function (info) {
+                if (!editMode) return;
+
+                const clickedDate = info.startStr; // This will give us the exact clicked date
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (new Date(clickedDate) < today) {
+                    showCannotAddPastVacationModal();
+                    calendar.unselect();
+                    return;
+                }
+
+                // Check for existing events
+                const events = calendar.getEvents();
+                const existingEvent = events.find(event => event.startStr === clickedDate);
+
+                if (existingEvent) {
+                    if (existingEvent.title.includes("Vacation")) {
+                        showVacationExistsModal();
+                    } else {
+                        showShiftExistsModal();
+                    }
+                    calendar.unselect();
+                    return;
+                }
+
+                // Toggle selection
+                const dayEl = document.querySelector(`.fc-day[data-date="${clickedDate}"]`);
+                const existingIndex = selectedDates.indexOf(clickedDate);
+
+                if (existingIndex === -1) {
+                    // Add selection
+                    selectedDates.push(clickedDate);
+                    if (dayEl) {
+                        dayEl.style.backgroundColor = 'rgba(246, 173, 85, 0.2)';
+                        dayEl.style.position = 'relative';
+
+                        const checkmark = document.createElement('div');
+                        checkmark.innerHTML = '✓';
+                        checkmark.style.position = 'absolute';
+                        checkmark.style.top = '50%';
+                        checkmark.style.left = '50%';
+                        checkmark.style.transform = 'translate(-50%, -50%)';
+                        checkmark.style.color = '#dd6b20';
+                        checkmark.style.fontSize = '1.2rem';
+                        checkmark.classList.add('vacation-checkmark');
+                        dayEl.appendChild(checkmark);
+                    }
+                } else {
+                    // Remove selection
+                    selectedDates.splice(existingIndex, 1);
+                    if (dayEl) {
+                        dayEl.style.backgroundColor = '';
+                        const checkmark = dayEl.querySelector('.vacation-checkmark');
+                        if (checkmark) checkmark.remove();
+                    }
+                }
+
+                updateSelectionCount();
+                calendar.unselect();
             }
-            
-            document.getElementById('scheduleDate').textContent = formattedDate;
-            document.getElementById('scheduleTime').textContent = timeText;
-            document.getElementById('scheduleComment').textContent = statusText || 'No comment';
-            
+        });
+
+        calendar.render();
+
+        document.getElementById("editScheduleBtn").addEventListener("click", function () {
+            // Clear any previous selections
+            selectedDates = [];
+
+            editMode = true;
+            this.classList.add("d-none");
+            document.getElementById("doneEditingBtn").classList.remove("d-none");
+
+            // Update info text
+            document.querySelector('.legend small').textContent = 'Click to select vacation dates';
+
+            // Add visual cues for selectable dates
+            const days = document.querySelectorAll('.fc-day:not(.fc-day-past)');
+            days.forEach(day => {
+                day.style.cursor = 'pointer';
+                day.classList.add('selectable');
+                // Clear any previous styling
+                day.style.backgroundColor = '';
+                const checkmark = day.querySelector('.vacation-checkmark');
+                if (checkmark) checkmark.remove();
+            });
+        });
+
+        document.getElementById("doneEditingBtn").addEventListener("click", function () {
+            if (selectedDates.length === 0) {
+                alert("Please select at least one day for your vacation request.");
+                return;
+            }
+
+            editMode = false;
+            this.classList.add("d-none");
+            document.getElementById("editScheduleBtn").classList.remove("d-none");
+            document.getElementById('selectionCounter').classList.add('d-none');
+
+            // Reset info text
+            document.querySelector('.legend small').textContent = 'Click on a day to view details';
+
+            // Remove visual cues
+            document.querySelectorAll('.fc-day').forEach(day => {
+                day.style.cursor = '';
+                day.classList.remove('selectable');
+                day.style.backgroundColor = '';
+                const checkmark = day.querySelector('.vacation-checkmark');
+                if (checkmark) checkmark.remove();
+            });
+
+            submitLeaveRequest(selectedDates);
+        });
+
+        document.getElementById("cancelSelection").addEventListener("click", function () {
+            const tooltip = document.querySelector('.vacation-tooltip');
+            if (tooltip) tooltip.remove();
+
+            editMode = false;
+            selectedDates = [];
+            document.getElementById("doneEditingBtn").classList.add("d-none");
+            document.getElementById("editScheduleBtn").classList.remove("d-none");
+            document.querySelector('.vacation-selection-overlay').classList.add('d-none');
+
+            // Remove visual cues and selections
+            document.querySelectorAll('.fc-day').forEach(day => {
+                day.classList.remove('selectable', 'selected', 'selection-start', 'selection-end');
+                day.style.backgroundColor = "";
+            });
+        });
+
+        function submitLeaveRequest(selectedDates) {
+            fetch("/api/leave/request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(selectedDates.map(date => ({
+                    LeaveDate: new Date(date).toISOString().split("T")[0],
+                    Reason: "Vacation",
+                    MedicalProof: ""
+                })))
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Clear the orange background from selected dates
+                        selectedDates.forEach(date => {
+                            const dayEl = document.querySelector(`.fc-day[data-date="${date}"]`);
+                            if (dayEl) {
+                                dayEl.style.backgroundColor = "";
+                                const checkmark = dayEl.querySelector('.vacation-checkmark');
+                                if (checkmark) checkmark.remove();
+                            }
+                        });
+
+                        // Clear the selection array
+                        selectedDates = [];
+                        // Hide the counter
+                        document.getElementById('selectionCounter').classList.add('d-none');
+
+                        calendar.refetchEvents();
+                    } else {
+                        alert("Failed to submit leave request.");
+                    }
+                }).catch(error => console.error("Error:", error));
+        }
+
+        function showVacationExistsModal() {
+            let modal = new bootstrap.Modal(document.getElementById("vacationExistsModal"));
             modal.show();
-        },
-        selectable: true,
-        selectMirror: true,
-        unselectAuto: false,
-        select: function(info) {
-            if (!editMode) return;
-
-            const clickedDate = info.startStr; // This will give us the exact clicked date
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (new Date(clickedDate) < today) {
-                showCannotAddPastVacationModal();
-                calendar.unselect();
-                return;
-            }
-
-            // Check for existing events
-            const events = calendar.getEvents();
-            const existingEvent = events.find(event => event.startStr === clickedDate);
-            
-            if (existingEvent) {
-                if (existingEvent.title.includes("Vacation")) {
-                    showVacationExistsModal();
-                } else {
-                    showShiftExistsModal();
-                }
-                calendar.unselect();
-                return;
-            }
-
-            // Toggle selection
-            const dayEl = document.querySelector(`.fc-day[data-date="${clickedDate}"]`);
-            const existingIndex = selectedDates.indexOf(clickedDate);
-            
-            if (existingIndex === -1) {
-                // Add selection
-                selectedDates.push(clickedDate);
-                if (dayEl) {
-                    dayEl.style.backgroundColor = 'rgba(246, 173, 85, 0.2)';
-                    dayEl.style.position = 'relative';
-                    
-                    const checkmark = document.createElement('div');
-                    checkmark.innerHTML = '✓';
-                    checkmark.style.position = 'absolute';
-                    checkmark.style.top = '50%';
-                    checkmark.style.left = '50%';
-                    checkmark.style.transform = 'translate(-50%, -50%)';
-                    checkmark.style.color = '#dd6b20';
-                    checkmark.style.fontSize = '1.2rem';
-                    checkmark.classList.add('vacation-checkmark');
-                    dayEl.appendChild(checkmark);
-                }
-            } else {
-                // Remove selection
-                selectedDates.splice(existingIndex, 1);
-                if (dayEl) {
-                    dayEl.style.backgroundColor = '';
-                    const checkmark = dayEl.querySelector('.vacation-checkmark');
-                    if (checkmark) checkmark.remove();
-                }
-            }
-
-            updateSelectionCount();
-            calendar.unselect();
-        }
-    });
-
-    calendar.render();
-
-    document.getElementById("editScheduleBtn").addEventListener("click", function() {
-        // Clear any previous selections
-        selectedDates = [];
-        
-        editMode = true;
-        this.classList.add("d-none");
-        document.getElementById("doneEditingBtn").classList.remove("d-none");
-        
-        // Update info text
-        document.querySelector('.legend small').textContent = 'Click to select vacation dates';
-        
-        // Add visual cues for selectable dates
-        const days = document.querySelectorAll('.fc-day:not(.fc-day-past)');
-        days.forEach(day => {
-            day.style.cursor = 'pointer';
-            day.classList.add('selectable');
-            // Clear any previous styling
-            day.style.backgroundColor = '';
-            const checkmark = day.querySelector('.vacation-checkmark');
-            if (checkmark) checkmark.remove();
-        });
-    });
-
-    document.getElementById("doneEditingBtn").addEventListener("click", function() {
-        if (selectedDates.length === 0) {
-            alert("Please select at least one day for your vacation request.");
-            return;
         }
 
-        editMode = false;
-        this.classList.add("d-none");
-        document.getElementById("editScheduleBtn").classList.remove("d-none");
-        document.getElementById('selectionCounter').classList.add('d-none');
-        
-        // Reset info text
-        document.querySelector('.legend small').textContent = 'Click on a day to view details';
-        
-        // Remove visual cues
-        document.querySelectorAll('.fc-day').forEach(day => {
-            day.style.cursor = '';
-            day.classList.remove('selectable');
-            day.style.backgroundColor = '';
-            const checkmark = day.querySelector('.vacation-checkmark');
-            if (checkmark) checkmark.remove();
-        });
+        function showShiftExistsModal() {
+            let modal = new bootstrap.Modal(document.getElementById("shiftExistsModal"));
+            modal.show();
+        }
 
-        submitLeaveRequest(selectedDates);
-    });
+        function showCannotAddPastVacationModal() {
+            let modal = new bootstrap.Modal(document.getElementById("cannotAddPastVacationModal"));
+            modal.show();
+        }
 
-    document.getElementById("cancelSelection").addEventListener("click", function() {
-        const tooltip = document.querySelector('.vacation-tooltip');
-        if (tooltip) tooltip.remove();
+        function updateSelectionCount() {
+            const counter = document.getElementById('selectionCounter');
+            const count = selectedDates.length;
 
-        editMode = false;
-        selectedDates = [];
-        document.getElementById("doneEditingBtn").classList.add("d-none");
-        document.getElementById("editScheduleBtn").classList.remove("d-none");
-        document.querySelector('.vacation-selection-overlay').classList.add('d-none');
-        
-        // Remove visual cues and selections
-        document.querySelectorAll('.fc-day').forEach(day => {
-            day.classList.remove('selectable', 'selected', 'selection-start', 'selection-end');
-            day.style.backgroundColor = "";
-        });
-    });
-
-    function submitLeaveRequest(selectedDates) {
-        fetch("/api/leave/request", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(selectedDates.map(date => ({
-                LeaveDate: new Date(date).toISOString().split("T")[0],
-                Reason: "Vacation",
-                MedicalProof: ""
-            })))
-        }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Clear the orange background from selected dates
-                    selectedDates.forEach(date => {
-                        const dayEl = document.querySelector(`.fc-day[data-date="${date}"]`);
-                        if (dayEl) {
-                            dayEl.style.backgroundColor = "";
-                            const checkmark = dayEl.querySelector('.vacation-checkmark');
-                            if (checkmark) checkmark.remove();
-                        }
-                    });
-                    
-                    // Clear the selection array
-                    selectedDates = [];
-                    // Hide the counter
-                    document.getElementById('selectionCounter').classList.add('d-none');
-                    
-                    calendar.refetchEvents();
-                } else {
-                    alert("Failed to submit leave request.");
-                }
-            }).catch(error => console.error("Error:", error));
-    }
-
-    function showVacationExistsModal() {
-        let modal = new bootstrap.Modal(document.getElementById("vacationExistsModal"));
-        modal.show();
-    }
-
-    function showShiftExistsModal() {
-        let modal = new bootstrap.Modal(document.getElementById("shiftExistsModal"));
-        modal.show();
-    }
-
-    function showCannotAddPastVacationModal() {
-        let modal = new bootstrap.Modal(document.getElementById("cannotAddPastVacationModal"));
-        modal.show();
-    }
-
-    function updateSelectionCount() {
-        const counter = document.getElementById('selectionCounter');
-        const count = selectedDates.length;
-        
-        if (count > 0) {
-            counter.innerHTML = `
+            if (count > 0) {
+                counter.innerHTML = `
                 <i class="fas fa-calendar-check"></i>
                 ${count} day${count !== 1 ? 's' : ''} selected
             `;
-            counter.classList.remove('d-none');
-        } else {
-            counter.classList.add('d-none');
+                counter.classList.remove('d-none');
+            } else {
+                counter.classList.add('d-none');
+            }
         }
-    }
-});
-</script>
+    });</script>

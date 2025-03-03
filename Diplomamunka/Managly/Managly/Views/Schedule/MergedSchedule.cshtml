@@ -112,11 +112,17 @@ function removeWorker(workerId) {
         if (calendar) {
             calendar.destroy();
             calendar = null;
+
+            const exportButtons = document.getElementById('exportButtons');
+            exportButtons.classList.add('d-none');
+            exportButtons.style.display = 'none !important';
         }
     } else {
         updateCalendarEvents();
     }
     updateActiveFilters();
+
+
 }
 
 function removeProject(projectId) {
@@ -143,6 +149,11 @@ function clearAllFilters() {
 
     // Update display
     updateActiveFilters();
+    
+    // Hide export buttons when clearing all filters
+    const exportButtons = document.getElementById('exportButtons');
+    exportButtons.classList.add('d-none');
+    exportButtons.style.display = 'none !important';
 }
 
 // Your existing DOMContentLoaded event listener
@@ -403,9 +414,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show export buttons only when calendar is loaded with data
         const exportButtons = document.getElementById('exportButtons');
         if (shouldShowCalendar()) {
+            exportButtons.classList.remove('d-none');
             exportButtons.style.display = 'flex';
         } else {
-            exportButtons.style.display = 'none';
+            exportButtons.classList.add('d-none');
+            exportButtons.style.display = 'none !important';
         }
     }
 
