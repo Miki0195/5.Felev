@@ -11,6 +11,11 @@
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
+<!-- Add these script references in your head section -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <div class="container">
     <div class="page-header">
         <h1 class="page-title">Merged Worker Schedules</h1>
@@ -81,6 +86,14 @@
             </div>
         </div>
         <div id="mergedCalendar"></div>
+        <div id="exportButtons" class="d-flex gap-2 mt-3" style="display: none !important;">
+            <button id="exportPdfBtn" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Export to PDF
+            </button>
+            <button id="exportExcelBtn" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        </div>
     </div>
 </div>
 
@@ -153,6 +166,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             calendar.refetchEvents();
         }
+        // Update export buttons visibility
+        const exportButtons = document.getElementById('exportButtons');
+        exportButtons.style.display = shouldShowCalendar() ? 'flex' : 'none';
     }
 
     window.shouldShowCalendar = function() {
@@ -383,6 +399,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         calendar.render();
+
+        // Show export buttons only when calendar is loaded with data
+        const exportButtons = document.getElementById('exportButtons');
+        if (shouldShowCalendar()) {
+            exportButtons.style.display = 'flex';
+        } else {
+            exportButtons.style.display = 'none';
+        }
     }
 
     function initializeWorkerSearch() {
@@ -423,6 +447,206 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             }, 300);
         });
+    }
+
+    // Add this JavaScript code
+    document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+
+    function getExportFileName(monthYear) {
+        const selectedWorkerNames = Array.from(document.querySelectorAll('.user-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim());
+        
+        const selectedProjectNames = Array.from(document.getElementById('projectFilter').selectedOptions)
+            .map(option => option.text);
+        
+        let fileName = `schedule-${monthYear.toLowerCase().replace(' ', '-')}`;
+        
+        if (selectedWorkerNames.length > 0) {
+            fileName += `-${selectedWorkerNames.join('-')}`;
+        }
+        
+        if (selectedProjectNames.length > 0) {
+            fileName += `-${selectedProjectNames.join('-')}`;
+        }
+        
+        // Clean the filename from special characters
+        return fileName.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+    }
+
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        
+        const currentDate = calendar.getDate();
+        const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        
+        // Add title and date
+        doc.setFontSize(18);
+        doc.setTextColor(44, 62, 80);
+        doc.text(`Schedule - ${monthYear}`, 15, 15);
+        
+        // Add filter information
+        doc.setFontSize(10);
+        doc.setTextColor(108, 117, 125);
+        const selectedWorkerNames = Array.from(document.querySelectorAll('.user-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim())
+            .join(', ');
+        const selectedProjectNames = Array.from(document.getElementById('projectFilter').selectedOptions)
+            .map(option => option.text)
+            .join(', ');
+        
+        let filterText = '';
+        if (selectedWorkerNames) filterText += `Workers: ${selectedWorkerNames}`;
+        if (selectedProjectNames) {
+            if (filterText) filterText += ' | ';
+            filterText += `Projects: ${selectedProjectNames}`;
+        }
+        doc.text(`Filters: ${filterText || 'None'}`, 15, 25);
+
+        let yPosition = 35;
+        
+        // Get and sort events
+        const events = calendar.getEvents()
+            .filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate.getMonth() === currentDate.getMonth() &&
+                       eventDate.getFullYear() === currentDate.getFullYear();
+            });
+
+        // Group events by worker
+        const workerEvents = {};
+        events.forEach(event => {
+            const workerName = event.extendedProps.workerName;
+            if (!workerEvents[workerName]) {
+                workerEvents[workerName] = [];
+            }
+            workerEvents[workerName].push(event);
+        });
+
+        // Process each worker's events
+        Object.entries(workerEvents).forEach(([workerName, workerEventList], index) => {
+            // Add page break if not first worker and not enough space
+            if (index > 0) {
+                doc.addPage();
+                yPosition = 15;
+            }
+
+            // Add worker section header
+            doc.setFillColor(236, 240, 241);
+            doc.rect(15, yPosition, doc.internal.pageSize.width - 30, 10, 'F');
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text(`Employee: ${workerName}`, 20, yPosition + 7);
+            yPosition += 15;
+
+            // Update table columns (remove Status column)
+            const tableData = workerEventList
+                .sort((a, b) => new Date(a.start) - new Date(b.start))
+                .map(event => {
+                    const date = event.start.toLocaleDateString();
+                    const title = event.title.split('\n')[0];
+                    const comment = event.title.split('\n')[1] || '';
+                    const type = event.title.includes('Vacation') ? 'Vacation' : 'Shift';
+                    
+                    // Combine type and title for better readability
+                    const activity = type === 'Vacation' ? 'Vacation' : title;
+                    
+                    return [date, activity, comment];
+                });
+
+            // Update table headers
+            doc.autoTable({
+                head: [['Date', 'Activity', 'Comment']],
+                body: tableData,
+                startY: yPosition,
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [66, 153, 225],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 247, 250]
+                },
+                margin: { top: 15 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 20;
+        });
+        
+        // Save with new filename
+        doc.save(`${getExportFileName(monthYear)}.pdf`);
+    }
+
+    function exportToExcel() {
+        const currentDate = calendar.getDate();
+        const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+        
+        // Get events for current month only
+        const events = calendar.getEvents()
+            .filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate.getMonth() === currentDate.getMonth() &&
+                       eventDate.getFullYear() === currentDate.getFullYear();
+            });
+        
+        // Group events by worker
+        const workerEvents = {};
+        events.forEach(event => {
+            const workerName = event.extendedProps.workerName;
+            if (!workerEvents[workerName]) {
+                workerEvents[workerName] = [];
+            }
+            workerEvents[workerName].push(event);
+        });
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Add summary sheet with more details
+        const summaryData = [
+            ['Schedule Summary'],
+            [`Month: ${monthYear}`],
+            [''],
+            ['Filtered Workers:'],
+            ...Array.from(document.querySelectorAll('.user-chip'))
+                .map(chip => [chip.textContent.replace('×', '').trim()]),
+            [''],
+            ['Filtered Projects:'],
+            ...Array.from(document.getElementById('projectFilter').selectedOptions)
+                .map(option => [option.text])
+        ];
+        
+        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+        
+        // Update worksheet data structure
+        Object.entries(workerEvents).forEach(([workerName, workerEventList]) => {
+            const excelData = workerEventList
+                .sort((a, b) => new Date(a.start) - new Date(b.start))
+                .map(event => {
+                    const date = event.start.toLocaleDateString();
+                    const title = event.title.split('\n')[0];
+                    const comment = event.title.split('\n')[1] || '';
+                    const type = event.title.includes('Vacation') ? 'Vacation' : 'Shift';
+                    
+                    return {
+                        'Date': date,
+                        'Activity': type === 'Vacation' ? 'Vacation' : title,
+                        'Comment': comment
+                    };
+                });
+            
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            XLSX.utils.book_append_sheet(wb, ws, workerName.substring(0, 31));
+        });
+        
+        // Save with new filename
+        XLSX.writeFile(wb, `${getExportFileName(monthYear)}.xlsx`);
     }
 });
 </script>
