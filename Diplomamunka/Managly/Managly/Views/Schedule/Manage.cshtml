@@ -519,7 +519,7 @@
                         contentHtml = `<div class="event-content" style="color: white; font-weight: bold;">Vacation</div>`;
                     } else {
                         contentHtml = `<div class="event-content" style="color: white;"><strong>${timeText}</strong></div>
-                                         <div class="event-content" style="font-size: 0.8rem; color: black">${commentText}</div>`;
+                                         <div class="event-content" style="font-size: 0.8rem; color: white; border-top: 1px solid rgba(255,255,255,0.2);">${commentText}</div>`;
                     }
 
                     info.el.innerHTML = contentHtml;
@@ -534,10 +534,12 @@
                     ])
                         .then(([scheduleEvents, leaveEvents]) => {
                             let shiftExists = scheduleEvents.find(event => event.start === selectedDate);
-                            let approvedVacationExists = leaveEvents.find(event => event.start === selectedDate && event.color === "green");
+                            let vacationExists = leaveEvents.find(event => event.start === selectedDate);
 
-                            if (approvedVacationExists) {
-                                showCannotAddShiftModal();
+                            // Check for any vacation (both approved and pending)
+                            if (vacationExists) {
+                                const status = vacationExists.title.includes("(Pending)") ? "pending" : "approved";
+                                showCannotAddShiftModal(status);
                                 return;
                             }
 
@@ -669,7 +671,10 @@
             modal.show();
         }
 
-        function showCannotAddShiftModal() {
+        function showCannotAddShiftModal(vacationStatus = 'approved') {
+            const modalBody = document.querySelector('#cannotAddShiftModal .modal-body p');
+            modalBody.innerHTML = `You cannot add a shift on this date because the user has a <strong>${vacationStatus} vacation</strong> request.`;
+            
             let modal = new bootstrap.Modal(document.getElementById("cannotAddShiftModal"));
             modal.show();
         }

@@ -404,26 +404,56 @@ h6, .preview-dates, .align-self-center, p {
 }
 
 /* Calendar Event Styling */
+.fc-daygrid-event-harness {
+    margin: 4px 6px !important;
+}
+
+.fc-event {
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 .event-content {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: 2px;
+    padding: 6px 8px;
+    border-radius: 8px;
+}
+
+/* Hover effect for events */
+.fc-event {
+    transition: all 0.2s ease !important;
 }
 
 .fc-event:hover {
+    transform: scale(1.02);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Adjust event spacing */
-.fc-daygrid-event-harness {
-    margin: 2px 0 !important;
+    z-index: 1;
 }
 
 /* Make sure events don't get cut off */
 .fc-daygrid-day-events {
     min-height: 0;
     padding: 2px 0;
+}
+
+/* Ensure consistent text styling */
+.fc-event .event-content div {
+    line-height: 1.2;
+}
+
+.fc-event .event-content div:first-child {
+    font-weight: 500;
+}
+
+.fc-event .event-content div:last-child {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    padding-top: 4px;
+/*    border-top: 1px solid rgba(255, 255, 255, 0.2);*/
 }
 
 .calendar-card {
@@ -535,14 +565,6 @@ h5 {
     font-size: 1rem;
 }
 
-.event-content {
-    padding: 4px 6px;
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
 .fw-medium {
     font-weight: 500;
 }
@@ -651,4 +673,54 @@ h5 {
 
 .selection-counter i {
     color: #f6ad55;
+}
+
+/* Animation for checkmark */
+.shift-checkmark {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Selection styling */
+.fc-day.selectable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fc-day.selectable:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+    cursor: pointer;
+}
+
+/* Event content styling */
+.event-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 6px;
+}
+
+.fc-event:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Selection counter */
+.selection-counter {
+    background: #2d3748;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.selection-counter i {
+    color: #4299e1;
 }
