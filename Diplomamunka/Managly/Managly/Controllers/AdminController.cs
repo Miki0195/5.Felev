@@ -66,11 +66,11 @@ namespace Managly.Controllers
             var newUser = new User
             {
                 Name = model.Name,
+                LastName = model.LastName,
                 Email = model.Email,
                 UserName = model.Email,
                 CompanyId = adminUser.CompanyId,
                 IsUsingPreGeneratedPassword = true,
-                LastName = "",
                 Country = "",
                 City = "",
                 Address = "",

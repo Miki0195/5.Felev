@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/Managly.csproj": {}
+    "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Managly.csproj": {}
   },
   "projects": {
-    "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/Managly.csproj": {
+    "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Managly.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/Managly.csproj",
+        "projectUniqueName": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Managly.csproj",
         "projectName": "Managly",
-        "projectPath": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/Managly.csproj",
+        "projectPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Managly.csproj",
         "packagesPath": "/Users/buchsbaummiklos/.nuget/packages/",
-        "outputPath": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/",
+        "outputPath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/buchsbaummiklos/.nuget/NuGet/NuGet.Config"

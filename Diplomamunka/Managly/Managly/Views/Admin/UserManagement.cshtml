@@ -19,9 +19,12 @@
 <div class="user-management-container">
     <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
-    <div class="page-header">
-        <h2 class="text-3xl font-bold">User Management</h2>
-        <p class="text-gray-600">Manage your company's team members</p>
+    <div class="form-header text-center">
+        <div class="header-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h1>User Management</h1>
+        <p>Manage your company's team members</p>
     </div>
 
     <!-- Enhanced Search and Filter Section -->
@@ -30,9 +33,9 @@
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" 
-                           id="userSearch" 
-                           class="form-control search-input" 
+                    <input type="text"
+                           id="userSearch"
+                           class="form-control search-input"
                            placeholder="Search by name..."
                            autocomplete="off">
                 </div>
@@ -93,9 +96,9 @@
                                 <div class="project-badges">
                                     @foreach (var project in user.AssignedProjects)
                                     {
-                                        <span href="/Projects/Details?projectId=@project.ProjectId" 
-                                           class="project-badge" 
-                                           title="@project.ProjectName (@project.Role)">
+                                        <span href="/Projects/Details?projectId=@project.ProjectId"
+                                              class="project-badge"
+                                              title="@project.ProjectName (@project.Role)">
                                             @project.ProjectName
                                         </span>
                                     }
@@ -135,9 +138,11 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-danger delete-confirm" 
-                                                    data-user-id="@user.UserId" 
-                                                    data-bs-dismiss="modal">Delete</button>
+                                            <button type="button" class="btn btn-danger delete-confirm"
+                                                    data-user-id="@user.UserId"
+                                                    data-bs-dismiss="modal">
+                                                Delete
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -174,7 +179,7 @@
                                                 </a>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="profile-details mt-4">
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -203,7 +208,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="row mt-4">
                                                 <div class="col-12">
                                                     <h6 class="detail-heading">Location</h6>
@@ -276,18 +281,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Enhanced search functionality
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase().trim();
-        
+
         rows.forEach(row => {
             const name = row.getAttribute('data-user-name');
             const email = row.getAttribute('data-user-email');
             const role = row.getAttribute('data-user-role');
             const roleFilterValue = roleFilter.value.toLowerCase();
-            
-            const matchesSearch = searchTerm === '' || 
-                                name.includes(searchTerm) || 
+
+            const matchesSearch = searchTerm === '' ||
+                                name.includes(searchTerm) ||
                                 email.includes(searchTerm);
-            
-            const matchesRole = roleFilterValue === '' || 
+
+            const matchesRole = roleFilterValue === '' ||
                               role.toLowerCase() === roleFilterValue;
 
             row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
@@ -304,11 +309,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = row.getAttribute('data-user-email');
             const role = row.getAttribute('data-user-role');
 
-            const matchesSearch = searchTerm === '' || 
-                                name.includes(searchTerm) || 
+            const matchesSearch = searchTerm === '' ||
+                                name.includes(searchTerm) ||
                                 email.includes(searchTerm);
-            
-            const matchesRole = roleValue === '' || 
+
+            const matchesRole = roleValue === '' ||
                               role.toLowerCase() === roleValue;
 
             row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
@@ -354,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(activeForm);
             const userId = formData.get('userId');
             const newRole = formData.get('role');
-            
+
             fetch(activeForm.action, {
                 method: 'POST',
                 body: formData
@@ -363,21 +368,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRoleChangeModal'));
                 modal.hide();
-                
+
                 if (data.success) {
                     // Update the UI immediately
                     const row = activeForm.closest('tr');
                     if (row) {
                         // Update the data attribute
                         row.setAttribute('data-user-role', newRole);
-                        
+
                         // Update the select element in the table
                         const roleSelect = row.querySelector('.role-select');
                         if (roleSelect) {
                             roleSelect.value = newRole;
                             roleSelect.dataset.originalValue = newRole; // Update the original value
                         }
-                        
+
                         // Update the role in the user details modal if it exists
                         const userModal = document.querySelector(`#userModal-${userId}`);
                         if (userModal) {
@@ -387,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     }
-                    
+
                     showToast(data.message, 'success');
                 } else {
                     showToast(data.message, 'error');
@@ -418,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.delete-confirm').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-user-id');
-            
+
             fetch('/Admin/DeleteUser', {
                 method: 'POST',
                 headers: {
@@ -455,7 +460,7 @@ document.querySelectorAll('th div[data-sort]').forEach(header => {
     header.addEventListener('click', function() {
         const sortColumn = this.getAttribute('data-sort');
         const icon = this.querySelector('.sort-icon');
-        
+
         // Reset other icons
         document.querySelectorAll('.sort-icon').forEach(i => {
             if (i !== icon) {
@@ -481,7 +486,7 @@ document.querySelectorAll('th div[data-sort]').forEach(header => {
         // Sort rows
         rows.sort((a, b) => {
             let aValue, bValue;
-            
+
             if (sortColumn === 'name') {
                 aValue = a.querySelector('.user-info span').textContent.trim().toLowerCase();
                 bValue = b.querySelector('.user-info span').textContent.trim().toLowerCase();

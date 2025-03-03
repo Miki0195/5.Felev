@@ -1,76 +1,111 @@
 ﻿@model Managly.Models.CreateProfile
 
-<div class="profile-create-container">
-    <div class="glass-card">
-        <h2 class="text-center mb-4">Create New Profile</h2>
+<link rel="stylesheet" href="~/css/Admin/CreateProfile.css">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
+<div class="page-wrapper">
+    <div class="design-element"></div>
+    <div class="design-element-2"></div>
 
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        <form asp-action="CreateProfile" method="post" class="needs-validation" novalidate>
-            <div class="form-floating mb-3">
-                <input asp-for="Name" class="form-control glass-input" placeholder="Name" required 
-                       data-val="true" data-val-required="Name is required" />
-                <label asp-for="Name">Full Name</label>
-                <div class="invalid-feedback">Please enter a name.</div>
-                <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="container">
+        <div class="form-container" data-aos="fade-up" data-aos-duration="800">
+            <!-- Header Section -->
+            <div class="form-header text-center">
+                <div class="header-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h1>Create New Profile</h1>
+                <p>Add a new member to your organization</p>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Email" class="form-control glass-input" placeholder="Email" required 
-                       data-val="true" data-val-required="Email is required" 
-                       data-val-email="Please enter a valid email address" />
-                <label asp-for="Email">Email Address</label>
-                <div class="invalid-feedback">Please enter a valid email address.</div>
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+            <!-- Alerts -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="custom-alert success" data-aos="fade-down">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
 
-            <div class="form-floating mb-4">
-                <select asp-for="Role" class="form-select glass-input" required
-                        data-val="true" data-val-required="Role is required">
-                    <option value="">Select a role...</option>
-                    <option value="Employee">Employee</option>
-                    <option value="Manager">Manager</option>
-                </select>
-                <label asp-for="Role">Role</label>
-                <div class="invalid-feedback">Please select a role.</div>
-                <span asp-validation-for="Role" class="text-danger"></span>
-            </div>
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="custom-alert error" data-aos="fade-down">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg glass-button">
-                    <i class="bi bi-person-plus-fill me-2"></i>Create Profile
+            <!-- Form -->
+            <form asp-action="CreateProfile" method="post" class="needs-validation" novalidate>
+                <div class="form-section">
+                    <div class="form-group" data-aos="fade-up" data-aos-delay="100">
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input asp-for="Name" class="form-input" placeholder="First Name" required />
+                        </div>
+                        <span asp-validation-for="Name" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-group" data-aos="fade-up" data-aos-delay="150">
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input asp-for="LastName" class="form-input" placeholder="Last Name" required />
+                        </div>
+                        <span asp-validation-for="LastName" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-group" data-aos="fade-up" data-aos-delay="200">
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input asp-for="Email" type="email" class="form-input" placeholder="Email Address" required />
+                        </div>
+                        <span asp-validation-for="Email" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-group" data-aos="fade-up" data-aos-delay="300">
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="bi bi-briefcase"></i>
+                            </span>
+                            <select asp-for="Role" class="form-input" required>
+                                <option value="">Select Role</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="Role" class="validation-message"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="custom-button">
+                    <span class="button-content">
+                        <i class="bi bi-person-plus-fill"></i>
+                        Create Profile
+                    </span>
+                    <div class="button-background"></div>
                 </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+    <script>document.addEventListener("DOMContentLoaded", function () {
+            AOS.init();
             loadNotifications();
 
-            // Form validation
             const form = document.querySelector('.needs-validation');
             const inputs = form.querySelectorAll('input, select');
 
-            // Handle form submission
             form.addEventListener('submit', event => {
                 if (!form.checkValidity()) {
                     event.preventDefault();
@@ -79,20 +114,16 @@
                 form.classList.add('was-validated');
             });
 
-            // Clear validation messages on input
             inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    // Remove bootstrap validation classes
+                input.addEventListener('input', function () {
                     this.classList.remove('is-invalid');
                     this.classList.remove('is-valid');
-                    
-                    // Clear ASP.NET validation messages
+
                     const validationSpan = this.parentElement.querySelector('[data-valmsg-for]');
                     if (validationSpan) {
                         validationSpan.textContent = '';
                     }
-                    
-                    // Reset form validation state if all fields are valid
+
                     if (form.checkValidity()) {
                         form.classList.remove('was-validated');
                     }

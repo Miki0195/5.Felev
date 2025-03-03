@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "AgFQSrVjTx3lxWr+r9F2JESy+tTQBqDLNEwHPIP021Y=",
+  "Hash": "aQ15k4rrhmhYe9/rHWKTsDymi3ya+WCasI1FUzTzZmU=",
   "Source": "Managly",
   "BasePath": "_content/Managly",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "Managly/wwwroot",
       "Source": "Managly",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/Managly.styles.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/Managly.styles.css",
       "SourceId": "Managly",
       "SourceType": "Computed",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/",
       "BasePath": "_content/Managly",
       "RelativePath": "Managly.styles.css",
       "AssetKind": "All",
@@ -33,13 +33,13 @@
       "AssetTraitValue": "ApplicationBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/Managly.styles.css"
+      "OriginalItemSpec": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/bundle/Managly.styles.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/Managly.bundle.scp.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/Managly.bundle.scp.css",
       "SourceId": "Managly",
       "SourceType": "Computed",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/",
       "BasePath": "_content/Managly",
       "RelativePath": "Managly.bundle.scp.css",
       "AssetKind": "All",
@@ -52,13 +52,13 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/Managly.bundle.scp.css"
+      "OriginalItemSpec": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/scopedcss/projectbundle/Managly.bundle.scp.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Account/AccessDenied.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Account/AccessDenied.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Account/AccessDenied.css",
       "AssetKind": "All",
@@ -74,10 +74,10 @@
       "OriginalItemSpec": "wwwroot/css/Account/AccessDenied.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Account/ChangePassword.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Account/ChangePassword.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Account/ChangePassword.css",
       "AssetKind": "All",
@@ -93,10 +93,10 @@
       "OriginalItemSpec": "wwwroot/css/Account/ChangePassword.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Account/Profile.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Account/Profile.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Account/Profile.css",
       "AssetKind": "All",
@@ -112,10 +112,29 @@
       "OriginalItemSpec": "wwwroot/css/Account/Profile.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Admin/UserManagement.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Admin/CreateProfile.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
+      "BasePath": "_content/Managly",
+      "RelativePath": "css/Admin/CreateProfile.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/Admin/CreateProfile.css"
+    },
+    {
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Admin/UserManagement.css",
+      "SourceId": "Managly",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Admin/UserManagement.css",
       "AssetKind": "All",
@@ -131,10 +150,10 @@
       "OriginalItemSpec": "wwwroot/css/Admin/UserManagement.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Chat/Index.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Chat/Index.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Chat/Index.css",
       "AssetKind": "All",
@@ -150,10 +169,10 @@
       "OriginalItemSpec": "wwwroot/css/Chat/Index.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/ClockIn/Index.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/ClockIn/Index.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/ClockIn/Index.css",
       "AssetKind": "All",
@@ -169,10 +188,10 @@
       "OriginalItemSpec": "wwwroot/css/ClockIn/Index.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Login.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Home/Login.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Home/Login.css",
       "AssetKind": "All",
@@ -188,10 +207,10 @@
       "OriginalItemSpec": "wwwroot/css/Home/Login.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Home/Register.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Home/Register.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Home/Register.css",
       "AssetKind": "All",
@@ -207,10 +226,10 @@
       "OriginalItemSpec": "wwwroot/css/Home/Register.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Projects/Index.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Projects/Index.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Projects/Index.css",
       "AssetKind": "All",
@@ -226,10 +245,10 @@
       "OriginalItemSpec": "wwwroot/css/Projects/Index.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Reports/Index.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Reports/Index.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Reports/Index.css",
       "AssetKind": "All",
@@ -245,10 +264,10 @@
       "OriginalItemSpec": "wwwroot/css/Reports/Index.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/Schedule/Manage.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Schedule/Manage.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/Schedule/Manage.css",
       "AssetKind": "All",
@@ -264,10 +283,10 @@
       "OriginalItemSpec": "wwwroot/css/Schedule/Manage.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/css/site.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/site.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "css/site.css",
       "AssetKind": "All",
@@ -283,10 +302,10 @@
       "OriginalItemSpec": "wwwroot/css/site.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/favicon.ico",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/favicon.ico",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "favicon.ico",
       "AssetKind": "All",
@@ -302,10 +321,10 @@
       "OriginalItemSpec": "wwwroot/favicon.ico"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/images/default/default-profile.png",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/images/default/default-profile.png",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "images/default/default-profile.png",
       "AssetKind": "All",
@@ -321,10 +340,10 @@
       "OriginalItemSpec": "wwwroot/images/default/default-profile.png"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/Account/PasswordVisibility.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/Account/PasswordVisibility.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "js/Account/PasswordVisibility.js",
       "AssetKind": "All",
@@ -340,10 +359,10 @@
       "OriginalItemSpec": "wwwroot/js/Account/PasswordVisibility.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/Chat/chat.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/Chat/chat.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "js/Chat/chat.js",
       "AssetKind": "All",
@@ -359,10 +378,10 @@
       "OriginalItemSpec": "wwwroot/js/Chat/chat.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/Reports/Index.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/Reports/Index.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "js/Reports/Index.js",
       "AssetKind": "All",
@@ -378,10 +397,10 @@
       "OriginalItemSpec": "wwwroot/js/Reports/Index.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/js/site.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/site.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "js/site.js",
       "AssetKind": "All",
@@ -397,10 +416,10 @@
       "OriginalItemSpec": "wwwroot/js/site.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.css",
       "AssetKind": "All",
@@ -416,10 +435,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.css.map",
       "AssetKind": "All",
@@ -435,10 +454,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.min.css",
       "AssetKind": "All",
@@ -454,10 +473,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.min.css.map",
       "AssetKind": "All",
@@ -473,10 +492,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.rtl.css",
       "AssetKind": "All",
@@ -492,10 +511,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map",
       "AssetKind": "All",
@@ -511,10 +530,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css",
       "AssetKind": "All",
@@ -530,10 +549,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map",
       "AssetKind": "All",
@@ -549,10 +568,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-grid.rtl.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.css",
       "AssetKind": "All",
@@ -568,10 +587,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.css.map",
       "AssetKind": "All",
@@ -587,10 +606,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.min.css",
       "AssetKind": "All",
@@ -606,10 +625,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.min.css.map",
       "AssetKind": "All",
@@ -625,10 +644,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.rtl.css",
       "AssetKind": "All",
@@ -644,10 +663,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map",
       "AssetKind": "All",
@@ -663,10 +682,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css",
       "AssetKind": "All",
@@ -682,10 +701,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map",
       "AssetKind": "All",
@@ -701,10 +720,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-reboot.rtl.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.css",
       "AssetKind": "All",
@@ -720,10 +739,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.css.map",
       "AssetKind": "All",
@@ -739,10 +758,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.min.css",
       "AssetKind": "All",
@@ -758,10 +777,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.min.css.map",
       "AssetKind": "All",
@@ -777,10 +796,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.rtl.css",
       "AssetKind": "All",
@@ -796,10 +815,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map",
       "AssetKind": "All",
@@ -815,10 +834,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css",
       "AssetKind": "All",
@@ -834,10 +853,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map",
       "AssetKind": "All",
@@ -853,10 +872,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap-utilities.rtl.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.css",
       "AssetKind": "All",
@@ -872,10 +891,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.css.map",
       "AssetKind": "All",
@@ -891,10 +910,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.min.css",
       "AssetKind": "All",
@@ -910,10 +929,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.min.css.map",
       "AssetKind": "All",
@@ -929,10 +948,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.rtl.css",
       "AssetKind": "All",
@@ -948,10 +967,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.rtl.css.map",
       "AssetKind": "All",
@@ -967,10 +986,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.rtl.min.css",
       "AssetKind": "All",
@@ -986,10 +1005,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/css/bootstrap.rtl.min.css.map",
       "AssetKind": "All",
@@ -1005,10 +1024,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/css/bootstrap.rtl.min.css.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.bundle.js",
       "AssetKind": "All",
@@ -1024,10 +1043,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.bundle.js.map",
       "AssetKind": "All",
@@ -1043,10 +1062,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.bundle.min.js",
       "AssetKind": "All",
@@ -1062,10 +1081,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.bundle.min.js.map",
       "AssetKind": "All",
@@ -1081,10 +1100,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.esm.js",
       "AssetKind": "All",
@@ -1100,10 +1119,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.esm.js.map",
       "AssetKind": "All",
@@ -1119,10 +1138,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.esm.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.esm.min.js",
       "AssetKind": "All",
@@ -1138,10 +1157,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.esm.min.js.map",
       "AssetKind": "All",
@@ -1157,10 +1176,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.esm.min.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.js",
       "AssetKind": "All",
@@ -1176,10 +1195,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.js.map",
       "AssetKind": "All",
@@ -1195,10 +1214,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.min.js",
       "AssetKind": "All",
@@ -1214,10 +1233,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/dist/js/bootstrap.min.js.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/dist/js/bootstrap.min.js.map",
       "AssetKind": "All",
@@ -1233,10 +1252,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/bootstrap/LICENSE",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/LICENSE",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/bootstrap/LICENSE",
       "AssetKind": "All",
@@ -1252,10 +1271,10 @@
       "OriginalItemSpec": "wwwroot/lib/bootstrap/LICENSE"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
       "AssetKind": "All",
@@ -1271,10 +1290,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
       "AssetKind": "All",
@@ -1290,10 +1309,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation-unobtrusive/LICENSE.txt",
       "AssetKind": "All",
@@ -1309,10 +1328,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation/dist/additional-methods.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation/dist/additional-methods.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation/dist/additional-methods.js",
       "AssetKind": "All",
@@ -1328,10 +1347,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation/dist/additional-methods.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation/dist/additional-methods.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation/dist/additional-methods.min.js",
       "AssetKind": "All",
@@ -1347,10 +1366,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation/dist/additional-methods.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation/dist/jquery.validate.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation/dist/jquery.validate.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation/dist/jquery.validate.js",
       "AssetKind": "All",
@@ -1366,10 +1385,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation/dist/jquery.validate.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation/dist/jquery.validate.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation/dist/jquery.validate.min.js",
       "AssetKind": "All",
@@ -1385,10 +1404,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation/dist/jquery.validate.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery-validation/LICENSE.md",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery-validation/LICENSE.md",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery-validation/LICENSE.md",
       "AssetKind": "All",
@@ -1404,10 +1423,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery-validation/LICENSE.md"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery/dist/jquery.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery/dist/jquery.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery/dist/jquery.js",
       "AssetKind": "All",
@@ -1423,10 +1442,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery/dist/jquery.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery/dist/jquery.min.js",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery/dist/jquery.min.js",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery/dist/jquery.min.js",
       "AssetKind": "All",
@@ -1442,10 +1461,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery/dist/jquery.min.js"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery/dist/jquery.min.map",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery/dist/jquery.min.map",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery/dist/jquery.min.map",
       "AssetKind": "All",
@@ -1461,10 +1480,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery/dist/jquery.min.map"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/lib/jquery/LICENSE.txt",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/jquery/LICENSE.txt",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "lib/jquery/LICENSE.txt",
       "AssetKind": "All",
@@ -1480,10 +1499,10 @@
       "OriginalItemSpec": "wwwroot/lib/jquery/LICENSE.txt"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "uploads/c91db657-b474-4b70-a85d-540617b35994.jpg",
       "AssetKind": "All",
@@ -1499,10 +1518,10 @@
       "OriginalItemSpec": "wwwroot/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg",
       "SourceId": "Managly",
       "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/wwwroot/",
+      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
       "RelativePath": "uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg",
       "AssetKind": "All",
