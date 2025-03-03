@@ -4,6 +4,7 @@ using Managly.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Managly.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250303151935_GroupChatModels")]
+    partial class GroupChatModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,102 +24,6 @@ namespace Managly.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("GroupChat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.ToTable("GroupChats");
-                });
-
-            modelBuilder.Entity("GroupMember", b =>
-                {
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("GroupId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("GroupMembers");
-                });
-
-            modelBuilder.Entity("GroupMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("GroupMessages");
-                });
-
-            modelBuilder.Entity("GroupMessageRead", b =>
-                {
-                    b.Property<int>("MessageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("MessageId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("GroupMessageReads");
-                });
 
             modelBuilder.Entity("Managly.Models.Attendance", b =>
                 {
@@ -165,6 +72,84 @@ namespace Managly.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("Managly.Models.GroupChat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.ToTable("GroupChats");
+                });
+
+            modelBuilder.Entity("Managly.Models.GroupMember", b =>
+                {
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("GroupId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("GroupMembers");
+                });
+
+            modelBuilder.Entity("Managly.Models.GroupMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("GroupMessages");
                 });
 
             modelBuilder.Entity("Managly.Models.Leave", b =>
@@ -809,7 +794,18 @@ namespace Managly.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("GroupChat", b =>
+            modelBuilder.Entity("Managly.Models.Attendance", b =>
+                {
+                    b.HasOne("Managly.Models.User", "User")
+                        .WithMany("Attendances")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Managly.Models.GroupChat", b =>
                 {
                     b.HasOne("Managly.Models.User", "CreatedBy")
                         .WithMany()
@@ -820,9 +816,9 @@ namespace Managly.Migrations
                     b.Navigation("CreatedBy");
                 });
 
-            modelBuilder.Entity("GroupMember", b =>
+            modelBuilder.Entity("Managly.Models.GroupMember", b =>
                 {
-                    b.HasOne("GroupChat", "Group")
+                    b.HasOne("Managly.Models.GroupChat", "Group")
                         .WithMany("Members")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -839,9 +835,9 @@ namespace Managly.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("GroupMessage", b =>
+            modelBuilder.Entity("Managly.Models.GroupMessage", b =>
                 {
-                    b.HasOne("GroupChat", "Group")
+                    b.HasOne("Managly.Models.GroupChat", "Group")
                         .WithMany("Messages")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -856,36 +852,6 @@ namespace Managly.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("GroupMessageRead", b =>
-                {
-                    b.HasOne("GroupMessage", "Message")
-                        .WithMany("ReadBy")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Managly.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Managly.Models.Attendance", b =>
-                {
-                    b.HasOne("Managly.Models.User", "User")
-                        .WithMany("Attendances")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Managly.Models.Leave", b =>
@@ -1110,21 +1076,16 @@ namespace Managly.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("GroupChat", b =>
+            modelBuilder.Entity("Managly.Models.Company", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Managly.Models.GroupChat", b =>
                 {
                     b.Navigation("Members");
 
                     b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("GroupMessage", b =>
-                {
-                    b.Navigation("ReadBy");
-                });
-
-            modelBuilder.Entity("Managly.Models.Company", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Managly.Models.Project", b =>

@@ -11,11 +11,32 @@
 
 <div class="chat-container">
     <div class="search-area">
-        <input type="text" id="searchInput" placeholder="Search users...">
+        <div class="search-header">
+            <input type="text" id="searchInput" placeholder="Search users...">
+            <button class="create-group-btn" onclick="openCreateGroupModal()">
+                <i class="bi bi-people-fill"></i>
+                <span>New Group</span>
+            </button>
+        </div>
         <div id="searchResults"></div>
 
-        <h3>Recent Chats</h3>
-        <div id="recentChats"></div>
+        <div class="chat-tabs">
+            <button class="tab-btn active" data-tab="direct">
+                <i class="bi bi-chat-text"></i> Direct
+            </button>
+            <button class="tab-btn" data-tab="groups">
+                <i class="bi bi-people"></i> Groups
+            </button>
+        </div>
+
+        <div id="recentChats" class="tab-content active" data-tab="direct">
+            <h3>Recent Chats</h3>
+            <div id="recentChats"></div>
+        </div>
+        
+        <div id="groupChats" class="tab-content" data-tab="groups">
+            <!-- Group chats will be loaded here -->
+        </div>
     </div>
 
     <div class="chat-area">
@@ -51,6 +72,43 @@
     </div>
 </div>
 
+<div class="modal fade" id="createGroupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="group-form">
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" id="groupName" class="form-control" placeholder="Enter group name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Add Members</label>
+                        <div class="search-members">
+                            <input type="text" id="memberSearch" class="form-control" placeholder="Search users...">
+                            <div id="memberSearchResults" class="member-search-results"></div>
+                        </div>
+                    </div>
+
+                    <div class="selected-members">
+                        <label>Selected Members</label>
+                        <div id="selectedMembers" class="selected-members-list">
+                            <!-- Selected members will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createGroup()">Create Group</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
@@ -61,6 +119,21 @@
 
 <script>
     let selectedUserId = null;
+    let selectedMembers = new Set();
+    let createGroupModal;
+    let selectedGroupId = null;
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         loadRecentChats();
@@ -80,76 +153,45 @@
             messageInput.focus();
         }
 
+        // Initialize the group modal
+        createGroupModal = new bootstrap.Modal(document.getElementById('createGroupModal'));
+        
+        // Add tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                button.classList.add('active');
+                const tabName = button.getAttribute('data-tab');
+                document.querySelector(`.tab-content[data-tab="${tabName}"]`).classList.add('active');
+                
+                if (tabName === 'groups') {
+                    loadGroupChats();
+                }
+            });
+        });
+
+        // Add member search functionality
+        const memberSearch = document.getElementById('memberSearch');
+        if (memberSearch) {
+            memberSearch.addEventListener('input', debounce(searchMembers, 300));
+        }
+
         // Send message function
-        function sendMessage() {
+        async function sendMessage() {
             const message = messageInput.value.trim();
-            const senderId = document.getElementById("currentUserId").value;
+            if (!message) return;
 
-            if (!selectedUserId) {
-                showToast("Select a user to chat with first!", "error");
-                return;
+            if (selectedUserId) {
+                // Existing direct message logic
+                await sendDirectMessage(message);
+            } else if (selectedGroupId) {
+                // New group message logic
+                await sendGroupMessage(message);
             }
 
-            if (message === "") {
-                showToast("Message cannot be empty!", "error");
-                return;
-            }
-
-            fetch(`/chat/user/${senderId}`)
-                .then(response => response.json())
-                .then(user => {
-                    let chatBox = document.getElementById("chatBox");
-
-                    let wrapper = document.createElement("div");
-                    wrapper.classList.add("message-wrapper", "sent");
-
-                    let messageDiv = document.createElement("div");
-                    messageDiv.classList.add("my-message");
-                    messageDiv.textContent = message;
-
-                    let profileImg = document.createElement("img");
-                    profileImg.src = user.profilePicturePath;
-                    profileImg.classList.add("message-profile-img");
-
-                    wrapper.appendChild(messageDiv);
-                    wrapper.appendChild(profileImg);
-                    chatBox.appendChild(wrapper);
-
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                });
-
-            messageInput.value = "";
-
-            fetch("/chat/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ SenderId: senderId, ReceiverId: selectedUserId, Content: message })
-            }).then(response => response.json())
-                .then(data => {
-                    if (!data.messageId) {
-                        console.error("❌ Error: Message ID is undefined.");
-                        return;
-                    }
-
-                    let sentMessageWrapper = document.querySelector(".message-wrapper.sent:last-child");
-                    let sentMessage = sentMessageWrapper.querySelector(".my-message");
-
-                    if (sentMessageWrapper && sentMessage) {
-                        sentMessageWrapper.setAttribute("data-message-id", data.messageId);
-                        sentMessage.onclick = function () {
-                            openMessageOptionsModal(data.messageId, message);
-                        };
-                    }
-
-                    updateRecentChat(selectedUserId, message, true);
-
-                    //connection.invoke("SendMessage", senderId, selectedUserId, message, data.messageId)
-                    connection.invoke("SendMessage", senderId, selectedUserId, message)
-                        .catch(err => console.error("❌ Error calling SendMessage:", err));
-
-                }).catch(err => console.error("❌ Error saving message: ", err));
-
-            updateRecentChat(selectedUserId, message, true);
+            messageInput.value = '';
         }
 
         // Send button click event
@@ -157,7 +199,7 @@
 
         // Enter key press event
         messageInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) {
+            if (event.key === "Enter") {
                 event.preventDefault();
                 sendMessage();
             }
@@ -729,4 +771,307 @@
             }
         }
     });
-</script>   
+
+    function openCreateGroupModal() {
+        selectedMembers.clear();
+        document.getElementById('selectedMembers').innerHTML = '';
+        document.getElementById('groupName').value = '';
+        createGroupModal.show();
+    }
+
+    async function searchMembers(event) {
+        const searchTerm = event.target.value.trim();
+        const resultsContainer = document.getElementById('memberSearchResults');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.classList.remove('active');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/chat/search/${searchTerm}`);
+            const users = await response.json();
+            
+            resultsContainer.innerHTML = '';
+            users.forEach(user => {
+                if (!selectedMembers.has(user.id)) {
+                    const div = document.createElement('div');
+                    div.className = 'user-search-result';
+                    div.innerHTML = `
+                        <img src="${user.profilePicturePath || '/images/default/default-profile.png'}" alt="${user.fullName}">
+                        <span>${user.fullName}</span>
+                    `;
+                    div.onclick = () => addMember(user);
+                    resultsContainer.appendChild(div);
+                }
+            });
+            
+            resultsContainer.classList.add('active');
+        } catch (error) {
+            console.error('Error searching members:', error);
+        }
+    }
+
+    function addMember(user) {
+        if (selectedMembers.has(user.id)) return;
+        
+        selectedMembers.add(user.id);
+        const memberElement = document.createElement('div');
+        memberElement.className = 'selected-member';
+        memberElement.innerHTML = `
+            <img src="${user.profilePicturePath || '/images/default/default-profile.png'}" alt="${user.fullName}">
+            <span>${user.fullName}</span>
+            <button class="remove-member" onclick="removeMember('${user.id}', this)">
+                <i class="bi bi-x"></i>
+            </button>
+        `;
+        
+        document.getElementById('selectedMembers').appendChild(memberElement);
+        document.getElementById('memberSearchResults').classList.remove('active');
+        document.getElementById('memberSearch').value = '';
+    }
+
+    function removeMember(userId, button) {
+        selectedMembers.delete(userId);
+        button.closest('.selected-member').remove();
+    }
+
+    async function createGroup() {
+        const groupName = document.getElementById('groupName').value.trim();
+        
+        if (!groupName) {
+            showToast('Please enter a group name', 'error');
+            return;
+        }
+        
+        if (selectedMembers.size < 2) {
+            showToast('Please add at least 2 members', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/chat/groups/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: groupName,
+                    members: Array.from(selectedMembers)
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                createGroupModal.hide();
+                showToast('Group created successfully!', 'success');
+                loadGroupChats();
+            } else {
+                showToast(result.message || 'Failed to create group', 'error');
+            }
+        } catch (error) {
+            console.error('Error creating group:', error);
+            showToast('Failed to create group', 'error');
+        }
+    }
+
+    async function loadGroupChats() {
+        try {
+            const response = await fetch('/chat/groups');
+            const groups = await response.json();
+            
+            const container = document.getElementById('groupChats');
+            container.innerHTML = '<h3>Group Chats</h3>';
+            
+            groups.forEach(group => {
+                const div = document.createElement('div');
+                div.className = 'user-recent-chat';
+                if (group.hasUnreadMessages) {
+                    div.classList.add('unread'); // Add unread class for styling
+                }
+                div.setAttribute('data-group-id', group.id);
+                div.innerHTML = `
+                    <div class="chat-info">
+                        <div class="chat-name">${group.name}</div>
+                        <div class="last-message">${group.lastMessage || 'No messages yet'}</div>
+                    </div>
+                `;
+                div.onclick = () => openGroupChat(group.id);
+                container.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error loading group chats:', error);
+        }
+    }
+
+    async function openGroupChat(groupId) {
+        try {
+            selectedGroupId = groupId;
+            
+            // Mark messages as read when opening the chat
+            await fetch(`/chat/groups/${groupId}/read`, { method: 'POST' });
+            
+            // Remove unread styling from the group chat item
+            const groupChatItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
+            if (groupChatItem) {
+                groupChatItem.classList.remove('unread');
+            }
+
+            const response = await fetch(`/chat/groups/${groupId}`);
+            const groupData = await response.json();
+            
+            // Update chat header
+            document.getElementById('chatHeader').innerHTML = `
+                <div class="chat-header-info">
+                    <h4>${groupData.name}</h4>
+                    <small>${groupData.memberCount} members</small>
+                </div>
+            `;
+            
+            // Show chat area
+            document.getElementById('chatBox').style.display = 'block';
+            document.getElementById('chatBox').innerHTML = ''; // Clear existing messages
+            
+            // Load group messages
+            if (groupData.messages) {
+                groupData.messages.forEach(message => {
+                    const isCurrentUser = message.senderId === document.getElementById('currentUserId').value;
+                    const messageHtml = `
+                        <div class="message-wrapper ${isCurrentUser ? 'my-message' : 'other-message'}" data-message-id="${message.id}">
+                            <div class="message-sender">${message.senderName}</div>
+                            <div class="message-content">
+                                ${message.content}
+                            </div>
+                            <div class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                    `;
+                    document.getElementById('chatBox').insertAdjacentHTML('beforeend', messageHtml);
+                });
+            }
+            
+            // Update selected chat
+            selectedUserId = null; // Reset selected user since we're in a group chat
+            
+        } catch (error) {
+            console.error('Error opening group chat:', error);
+            showToast('Failed to load group chat', 'error');
+        }
+    }
+
+    // Add this new function for sending group messages
+    async function sendGroupMessage(content) {
+        try {
+            const response = await fetch('/chat/groups/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    groupId: selectedGroupId,
+                    content: content
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send message');
+            }
+
+            // Message will be added to the chat through SignalR
+        } catch (error) {
+            console.error('Error sending group message:', error);
+            showToast('Failed to send message', 'error');
+        }
+    }
+
+    // Add this to your existing SignalR connection.on handlers
+    connection.on("ReceiveGroupMessage", function (message) {
+        // If we're not the sender and not viewing the group chat, mark as unread
+        if (message.senderId !== document.getElementById('currentUserId').value && 
+            selectedGroupId !== message.groupId) {
+            const groupChatItem = document.querySelector(`.user-recent-chat[data-group-id="${message.groupId}"]`);
+            if (groupChatItem) {
+                groupChatItem.classList.add('unread');
+            }
+        }
+
+        if (selectedGroupId === message.groupId) {
+            const isCurrentUser = message.senderId === document.getElementById('currentUserId').value;
+            const messageHtml = `
+                <div class="message-wrapper ${isCurrentUser ? 'my-message' : 'other-message'}" data-message-id="${message.messageId}">
+                    <div class="message-sender">${message.senderName}</div>
+                    <div class="message-content">
+                        ${message.content}
+                    </div>
+                    <div class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</div>
+                </div>
+            `;
+            document.getElementById('chatBox').insertAdjacentHTML('beforeend', messageHtml);
+            scrollToBottom();
+        }
+    });
+
+    // Add this function to handle direct messages
+    async function sendDirectMessage(message) {
+        const senderId = document.getElementById("currentUserId").value;
+
+        if (!selectedUserId) {
+            showToast("Select a user to chat with first!", "error");
+            return;
+        }
+
+        try {
+            const userResponse = await fetch(`/chat/user/${senderId}`);
+            const user = await userResponse.json();
+
+            let chatBox = document.getElementById("chatBox");
+            let wrapper = document.createElement("div");
+            wrapper.classList.add("message-wrapper", "sent");
+
+            let messageDiv = document.createElement("div");
+            messageDiv.classList.add("my-message");
+            messageDiv.textContent = message;
+
+            let profileImg = document.createElement("img");
+            profileImg.src = user.profilePicturePath;
+            profileImg.classList.add("message-profile-img");
+
+            wrapper.appendChild(messageDiv);
+            wrapper.appendChild(profileImg);
+            chatBox.appendChild(wrapper);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const response = await fetch("/chat/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ SenderId: senderId, ReceiverId: selectedUserId, Content: message })
+            });
+
+            const data = await response.json();
+            
+            if (!data.messageId) {
+                console.error("❌ Error: Message ID is undefined.");
+                return;
+            }
+
+            let sentMessageWrapper = document.querySelector(".message-wrapper.sent:last-child");
+            let sentMessage = sentMessageWrapper.querySelector(".my-message");
+
+            if (sentMessageWrapper && sentMessage) {
+                sentMessageWrapper.setAttribute("data-message-id", data.messageId);
+                sentMessage.onclick = function () {
+                    openMessageOptionsModal(data.messageId, message);
+                };
+            }
+
+            updateRecentChat(selectedUserId, message, true);
+            connection.invoke("SendMessage", senderId, selectedUserId, message)
+                .catch(err => console.error("❌ Error calling SendMessage:", err));
+
+        } catch (err) {
+            console.error("❌ Error saving message: ", err);
+            showToast("Failed to send message", "error");
+        }
+    }
+</script>

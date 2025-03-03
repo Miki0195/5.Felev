@@ -25,6 +25,7 @@ h2 {
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 20px;
+    display: none;
 }
 
 h3 {
@@ -109,4 +110,39 @@ h3 {
     height: 100%;
     background: linear-gradient(135deg, #42a5f5, #007BFF);
     transition: width 0.5s ease-in-out;
+}
+
+/* Add these styles at the top of your existing CSS file */
+.form-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+}
+
+.header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.form-header h1 {
+    color: #2d3748;  /* Darker color since your clock container has white background */
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: #718096;  /* Adjusted for white background */
+    font-size: 1rem;
 }

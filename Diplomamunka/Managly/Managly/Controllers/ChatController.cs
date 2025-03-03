@@ -275,6 +275,191 @@ namespace Managly.Controllers
             return Ok(new { success = true, message = "Message hidden for you." });
         }
 
-       
+        [HttpPost("groups/create")]
+        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupDto dto)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                return BadRequest(new { success = false, message = "Group name is required" });
+
+            if (dto.Members == null || dto.Members.Count < 2)
+                return BadRequest(new { success = false, message = "At least 2 members are required" });
+
+            var group = new GroupChat
+            {
+                Name = dto.Name,
+                CreatedById = currentUser.Id
+            };
+
+            var members = new List<GroupMember>();
+            members.Add(new GroupMember { UserId = currentUser.Id }); // Add creator
+
+            foreach (var memberId in dto.Members)
+            {
+                if (await _context.Users.AnyAsync(u => u.Id == memberId))
+                {
+                    members.Add(new GroupMember { UserId = memberId });
+                }
+            }
+
+            group.Members = members;
+
+            _context.GroupChats.Add(group);
+            await _context.SaveChangesAsync();
+
+            // Notify members through SignalR
+            foreach (var member in members)
+            {
+                await _hubContext.Clients.User(member.UserId)
+                    .SendAsync("GroupCreated", new { group.Id, group.Name });
+            }
+
+            return Ok(new { success = true, groupId = group.Id });
+        }
+
+        [HttpGet("groups")]
+        public async Task<IActionResult> GetGroups()
+        {
+            var userId = _userManager.GetUserId(User);
+            
+            var groups = await _context.GroupChats
+                .Where(g => g.Members.Any(m => m.UserId == userId))
+                .Select(g => new
+                {
+                    g.Id,
+                    g.Name,
+                    LastMessage = g.Messages
+                        .OrderByDescending(m => m.Timestamp)
+                        .Select(m => m.IsDeleted ? "Message deleted" : m.Content)
+                        .FirstOrDefault(),
+                    HasUnreadMessages = g.Messages.Any(m => 
+                        !m.ReadBy.Any(r => r.UserId == userId) && 
+                        m.SenderId != userId)
+                })
+                .ToListAsync();
+
+            return Ok(groups);
+        }
+
+        [HttpGet("groups/{groupId}")]
+        public async Task<IActionResult> GetGroupChat(int groupId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var group = await _context.GroupChats
+                .Include(g => g.Members)
+                    .ThenInclude(m => m.User)
+                .Include(g => g.Messages)
+                    .ThenInclude(m => m.Sender)
+                .Where(g => g.Id == groupId && g.Members.Any(m => m.UserId == userId))
+                .Select(g => new
+                {
+                    g.Id,
+                    g.Name,
+                    MemberCount = g.Members.Count,
+                    Members = g.Members.Select(m => new 
+                    {
+                        m.User.Id,
+                        FullName = m.User.Name + " " + m.User.LastName,
+                        m.User.ProfilePicturePath
+                    }),
+                    Messages = g.Messages
+                        .OrderBy(m => m.Timestamp)
+                        .Select(m => new
+                        {
+                            m.Id,
+                            m.SenderId,
+                            SenderName = m.Sender.Name + " " + m.Sender.LastName,
+                            m.Content,
+                            m.Timestamp,
+                            m.IsDeleted
+                        })
+                })
+                .FirstOrDefaultAsync();
+
+            if (group == null)
+                return NotFound(new { error = "Group not found" });
+
+            return Ok(group);
+        }
+
+        [HttpPost("groups/message")]
+        public async Task<IActionResult> SendGroupMessage([FromBody] GroupMessageDto message)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            // Verify user is member of the group
+            var isMember = await _context.GroupMembers
+                .AnyAsync(m => m.GroupId == message.GroupId && m.UserId == userId);
+
+            if (!isMember)
+                return BadRequest(new { error = "You are not a member of this group" });
+
+            var groupMessage = new GroupMessage
+            {
+                GroupId = message.GroupId,
+                SenderId = userId,
+                Content = message.Content
+            };
+
+            _context.GroupMessages.Add(groupMessage);
+            await _context.SaveChangesAsync();
+
+            // Get the sender's full name
+            var sender = await _userManager.FindByIdAsync(userId);
+            var senderName = $"{sender.Name} {sender.LastName}";
+
+            // Get all group members
+            var groupMembers = await _context.GroupMembers
+                .Where(m => m.GroupId == message.GroupId)
+                .Select(m => m.UserId)
+                .ToListAsync();
+
+            // Notify all group members through SignalR
+            foreach (var memberId in groupMembers)
+            {
+                await _hubContext.Clients.User(memberId).SendAsync("ReceiveGroupMessage", new
+                {
+                    groupId = message.GroupId,
+                    messageId = groupMessage.Id,
+                    senderId = userId,
+                    senderName = senderName,
+                    content = message.Content,
+                    timestamp = groupMessage.Timestamp
+                });
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpPost("groups/{groupId}/read")]
+        public async Task<IActionResult> MarkGroupMessagesAsRead(int groupId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var unreadMessages = await _context.GroupMessages
+                .Where(m => 
+                    m.GroupId == groupId && 
+                    !m.ReadBy.Any(r => r.UserId == userId) &&
+                    m.SenderId != userId)
+                .ToListAsync();
+
+            foreach (var message in unreadMessages)
+            {
+                _context.GroupMessageReads.Add(new GroupMessageRead
+                {
+                    MessageId = message.Id,
+                    UserId = userId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }

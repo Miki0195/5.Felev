@@ -1,4 +1,8 @@
-﻿.chat-container {
+﻿*{
+    color: black;
+}
+
+.chat-container {
     display: flex;
     width: 100%;
     height: 85vh;
@@ -444,4 +448,149 @@ emoji-picker {
 .status-dot.offline {
     background-color: #95a5a6;
     box-shadow: 0 0 10px rgba(149, 165, 166, 0.5);
+}
+
+.search-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.create-group-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.create-group-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.chat-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-btn.active {
+    background: #f0f2f5;
+    color: #0084ff;
+    font-weight: 500;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Group creation modal styles */
+.group-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.search-members {
+    position: relative;
+    margin-top: 10px;
+}
+
+.member-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+.member-search-results.active {
+    display: block;
+}
+
+.selected-members-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    min-height: 50px;
+}
+
+.selected-member {
+    background: #e3f2fd;
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.selected-member img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.remove-member {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.remove-member:hover {
+    color: #dc3545;
+}
+
+.user-recent-chat.unread {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid #3b82f6;
+}
+
+.user-recent-chat.unread .chat-name {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.user-recent-chat.unread .last-message {
+    font-weight: 500;
+    color: #1f2937;
 }

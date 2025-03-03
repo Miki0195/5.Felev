@@ -25,6 +25,21 @@ namespace Managly.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<ProjectMember> ProjectMembers { get; set; }
         public DbSet<TaskAssignment> TaskAssignments { get; set; }
+        public DbSet<GroupChat> GroupChats { get; set; }
+        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<GroupMessage> GroupMessages { get; set; }
+        public DbSet<GroupMessageRead> GroupMessageReads { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<GroupMember>()
+                .HasKey(gm => new { gm.GroupId, gm.UserId });
+
+            builder.Entity<GroupMessageRead>()
+                .HasKey(gmr => new { gmr.MessageId, gmr.UserId });
+        }
     }
 }
 
