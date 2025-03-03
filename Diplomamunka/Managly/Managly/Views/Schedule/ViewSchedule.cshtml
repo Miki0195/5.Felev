@@ -305,6 +305,14 @@
         }).then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Clear the orange background from selected dates
+                    selectedDates.forEach(date => {
+                        const dayEl = document.querySelector(`.fc-day[data-date="${date}"]`);
+                        if (dayEl) {
+                            dayEl.style.backgroundColor = "";
+                        }
+                    });
+                    
                     calendar.refetchEvents();
                     selectedDates = [];
                 } else {
