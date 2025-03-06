@@ -29,6 +29,7 @@ namespace Managly.Data
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
         public DbSet<GroupMessageRead> GroupMessageReads { get; set; }
+        public DbSet<DashboardLayout> DashboardLayouts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

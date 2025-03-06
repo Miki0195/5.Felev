@@ -15,7 +15,7 @@
             <p>Track your daily work hours</p>
         </div>
 
-        <h4 id="workTimer" class="">00:00:00</h4>
+        <h4 id="workTimer" style="color: #42a5f5">00:00:00</h4>
 
         <div class="button-group">
             <button id="clockInBtn" class="btn btn-primary btn-modern">Clock In</button>
@@ -59,8 +59,19 @@
 
     function startTimer(elapsedSeconds = 0) {
         startTime = new Date();
-        startTime.setSeconds(startTime.getSeconds() - elapsedSeconds); // Adjust timer with elapsed time
+        startTime.setSeconds(startTime.getSeconds() - elapsedSeconds);
+        if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(updateTimer, 1000);
+        document.getElementById("workTimer").style.color = "green";
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        document.getElementById("workTimer").innerText = "00:00:00";
+        document.getElementById("workTimer").style.color = "#42a5f5";
     }
 
     function updateTimer() {
@@ -78,11 +89,16 @@
         if (data.success) {
             document.getElementById("clockOutBtn").classList.remove("d-none");
             document.getElementById("clockInBtn").classList.add("d-none");
-            document.getElementById("workTimer").style.color = "green"; 
 
             startTimer();
             loadWorkHistory();
             loadWeeklyHours(true);
+
+            // Update localStorage to sync with widget
+            localStorage.setItem('clockInStatus', JSON.stringify({
+                active: true,
+                checkInTime: data.checkInTime
+            }));
         }
     });
 
@@ -92,12 +108,15 @@
         if (data.success) {
             document.getElementById("clockInBtn").classList.remove("d-none");
             document.getElementById("clockOutBtn").classList.add("d-none");
-            clearInterval(timerInterval);
-            document.getElementById("workTimer").innerText = "00:00:00";
-            document.getElementById("workTimer").style.color = "#42a5f5";
+            stopTimer();
 
             loadWorkHistory();
             loadWeeklyHours(false);
+
+            // Update localStorage to sync with widget
+            localStorage.setItem('clockInStatus', JSON.stringify({
+                active: false
+            }));
         }
     });
 
@@ -115,10 +134,10 @@
             } else {
                 data.forEach(session => {
                     let row = `<tr>
-                    <td>${new Date(session.checkInTime).toLocaleString()}</td>
-                    <td>${session.checkOutTime ? new Date(session.checkOutTime).toLocaleString() : "Active"}</td>
-                    <td>${session.duration}</td>
-                </tr>`;
+                        <td>${new Date(session.checkInTime).toLocaleString()}</td>
+                        <td>${session.checkOutTime ? new Date(session.checkOutTime).toLocaleString() : "Active"}</td>
+                        <td>${session.duration}</td>
+                    </tr>`;
                     tableBody.innerHTML += row;
                 });
             }
@@ -138,8 +157,14 @@
                 document.getElementById("clockOutBtn").classList.remove("d-none");
                 document.getElementById("clockInBtn").classList.add("d-none");
 
-                let elapsedSeconds = Math.round(data.elapsedMinutes * 60);
-                startTimer(elapsedSeconds); 
+                let elapsedSeconds = Math.round(data.elapsedTime);
+                startTimer(elapsedSeconds);
+
+                // Update localStorage to sync with widget
+                localStorage.setItem('clockInStatus', JSON.stringify({
+                    active: true,
+                    checkInTime: data.checkInTime
+                }));
 
                 loadWeeklyHours(true);
             }
@@ -168,25 +193,25 @@
                 document.getElementById("workProgress").classList.remove("bg-warning");
                 document.getElementById("workProgress").classList.add("bg-success");
             }
-
-            // Rethink this because it doesnt work
-            if (updateLive) {
-                if (liveUpdateInterval) clearInterval(liveUpdateInterval);
-                liveUpdateInterval = setInterval(() => {
-                    totalMinutes += 1; 
-                    if (totalMinutes >= 60) {
-                        totalMinutes = 0;
-                        totalHours += 1;
-                    }
-                    document.getElementById("weeklyHoursText").innerText = `Total Hours Worked: ${totalHours}h ${totalMinutes}m`;
-                    let progressPercentage = ((totalHours * 60 + totalMinutes) / (40 * 60)) * 100;
-                    document.getElementById("workProgress").style.width = `${progressPercentage}%`;
-                }, 60000); 
-            }
         } catch (error) {
             console.error("Error loading weekly hours:", error);
             document.getElementById("weeklyHoursText").innerText = "Error loading data";
         }
     }
 
-    </script>
+    // Add event listener for storage events to sync between pages
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'clockInStatus') {
+            const status = JSON.parse(e.newValue);
+            if (status.active) {
+                document.getElementById("clockOutBtn").classList.remove("d-none");
+                document.getElementById("clockInBtn").classList.add("d-none");
+                startTimer(Math.round((new Date() - new Date(status.checkInTime)) / 1000));
+            } else {
+                document.getElementById("clockInBtn").classList.remove("d-none");
+                document.getElementById("clockOutBtn").classList.add("d-none");
+                stopTimer();
+            }
+        }
+    });
+</script>

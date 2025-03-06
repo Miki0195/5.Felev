@@ -1,9 +1,1304 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link rel="stylesheet" href="~/css/Home/dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/7.2.3/gridstack.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <h1>Welcome back, @ViewData["UserFullName"]!</h1>
+            <p class="text-muted">Your personalized workspace</p>
+        </div>
+        <div class="dashboard-actions">
+            <button id="addWidgetBtn" class="btn-add-widget" onclick="openWidgetModal()">
+                <i class="fas fa-plus"></i>
+                Add Widget
+            </button>
+            <button id="saveLayoutBtn" class="btn-save-layout" onclick="saveLayout()">
+                <i class="fas fa-save"></i>
+                Save Layout
+            </button>
+        </div>
+    </div>
+
+    <!-- Widget Grid -->
+    <div class="grid-stack"></div>
 </div>
+
+<!-- Add Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+<!-- Widget Selection Modal -->
+<div class="modal fade" id="widgetModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Widgets</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="widget-categories">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="projects">Projects</button>
+                    <button class="category-btn" data-category="communication">Communication</button>
+                    <button class="category-btn" data-category="analytics">Analytics</button>
+                    <button class="category-btn" data-category="personal">Personal</button>
+                </div>
+                <div class="widgets-grid">
+                    <!-- Projects Widgets -->
+                    <div class="widget-item" data-category="projects">
+                        <div class="widget-preview">
+                            <i class="fas fa-tasks"></i>
+                            <h4>My Tasks</h4>
+                            <p>View and manage your assigned tasks</p>
+                            <button onclick="addWidget('tasks')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                    <div class="widget-item" data-category="projects">
+                        <div class="widget-preview">
+                            <i class="fas fa-project-diagram"></i>
+                            <h4>Project Timeline</h4>
+                            <p>Track project progress and deadlines</p>
+                            <button onclick="addWidget('timeline')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+
+                    <!-- Communication Widgets -->
+                    <div class="widget-item" data-category="communication">
+                        <div class="widget-preview">
+                            <i class="fas fa-comments"></i>
+                            <h4>Recent Chats</h4>
+                            <p>Quick access to your recent conversations</p>
+                            <button onclick="addWidget('chats')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                    <div class="widget-item" data-category="communication">
+                        <div class="widget-preview">
+                            <i class="fas fa-video"></i>
+                            <h4>Video Meetings</h4>
+                            <p>Upcoming and recent video calls</p>
+                            <button onclick="addWidget('meetings')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Widgets -->
+                    <div class="widget-item" data-category="analytics">
+                        <div class="widget-preview">
+                            <i class="fas fa-chart-bar"></i>
+                            <h4>Project Analytics</h4>
+                            <p>Key metrics and project statistics</p>
+                            <button onclick="addWidget('analytics')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                    <div class="widget-item" data-category="analytics">
+                        <div class="widget-preview">
+                            <i class="fas fa-file-alt"></i>
+                            <h4>Reports Overview</h4>
+                            <p>Quick access to important reports</p>
+                            <button onclick="addWidget('reports')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+
+                    <!-- Personal Widgets -->
+                    <div class="widget-item" data-category="personal">
+                        <div class="widget-preview">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h4>Weekly Schedule</h4>
+                            <p>Your schedule and important dates</p>
+                            <button onclick="addWidget('calendar')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                    <div class="widget-item" data-category="personal">
+                        <div class="widget-preview">
+                            <i class="fas fa-clock"></i>
+                            <h4>Clock In</h4>
+                            <p>Track your work hours and attendance</p>
+                            <button onclick="addWidget('clockin')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                    <div class="widget-item" data-category="personal">
+                        <div class="widget-preview">
+                            <i class="fas fa-bell"></i>
+                            <h4>Notifications</h4>
+                            <p>Stay updated with recent activities</p>
+                            <button onclick="addWidget('notifications')" class="btn-add">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/7.2.3/gridstack-all.js"></script>
+    <script>
+        let grid;
+        let widgetModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize GridStack
+            grid = GridStack.init({
+                column: 12,
+                cellHeight: 50,
+                animate: true,
+                draggable: {
+                    handle: '.widget-header'
+                },
+                resizable: {
+                    handles: 'e, se, s, sw, w'
+                }
+            });
+
+            // Initialize the widget modal
+            widgetModal = new bootstrap.Modal(document.getElementById('widgetModal'));
+
+            // Load saved layout and initialize widgets
+            loadSavedLayout().then(() => {
+                // Initialize any Clock In widgets that might have been missed
+                initializeAllClockInWidgets();
+            });
+
+            // Widget category filtering
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const category = btn.dataset.category;
+                    document.querySelectorAll('.widget-item').forEach(item => {
+                        if (category === 'all' || item.dataset.category === category) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+
+        function openWidgetModal() {
+            widgetModal.show();
+        }
+
+        function addWidget(type) {
+            let widget;
+            switch(type) {
+                case 'tasks':
+                    widget = createTasksWidget();
+                    break;
+                case 'timeline':
+                    widget = createTimelineWidget();
+                    break;
+                case 'chats':
+                    widget = createChatsWidget();
+                    break;
+                case 'meetings':
+                    widget = createMeetingsWidget();
+                    break;
+                case 'analytics':
+                    widget = createAnalyticsWidget();
+                    break;
+                case 'reports':
+                    widget = createReportsWidget();
+                    break;
+                case 'calendar':
+                    widget = createCalendarWidget();
+                    break;
+                case 'notifications':
+                    widget = createNotificationsWidget();
+                    break;
+                case 'clockin':
+                    widget = createClockInWidget();
+                    break;
+            }
+
+            if (widget) {
+                const node = grid.addWidget(widget);
+                if (type === 'clockin') {
+                    const clockinContainer = node.querySelector('.clockin-widget');
+                    if (clockinContainer && !clockinContainer.dataset.initialized) {
+                        initializeClockInWidget(clockinContainer);
+                    }
+                } else {
+                    const container = node.querySelector(`.${type}-list`);
+                    if (container) {
+                        loadWidgetContent(type, container);
+                    }
+                }
+                widgetModal.hide();
+            }
+        }
+
+        function createTasksWidget() {
+            return {
+                x: 0, y: 0, w: 4, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-tasks"></i>
+                            <h3>My Tasks</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'tasks')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="tasks-list">
+                                Loading tasks...
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createChatsWidget() {
+            return {
+                x: 4, y: 0, w: 4, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-comments"></i>
+                            <h3>Recent Chats</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'chats')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="chats-list">
+                                Loading chats...
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createNotificationsWidget() {
+            return {
+                x: 8, y: 0, w: 4, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-bell"></i>
+                            <h3>Notifications</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'notifications')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="notifications-list">
+                                Loading notifications...
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createTimelineWidget() {
+            return {
+                x: 0, y: 4, w: 8, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-project-diagram"></i>
+                            <h3>Project Timeline</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'timeline')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="timeline-list">
+                                <div class="empty-state">Timeline feature coming soon...</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createMeetingsWidget() {
+            return {
+                x: 8, y: 4, w: 4, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-video"></i>
+                            <h3>Video Meetings</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'meetings')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="meetings-list">
+                                <div class="empty-state">Video meetings feature coming soon...</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createAnalyticsWidget() {
+            return {
+                x: 0, y: 8, w: 6, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>Project Analytics</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'analytics')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="analytics-list">
+                                <div class="empty-state">Analytics feature coming soon...</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createReportsWidget() {
+            return {
+                x: 6, y: 8, w: 6, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>Reports Overview</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'reports')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="reports-list">
+                                <div class="empty-state">Reports feature coming soon...</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createCalendarWidget() {
+            return {
+                x: 8, y: 0, w: 4, h: 4,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>Weekly Schedule</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'calendar')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="calendar-list">
+                                <div class="week-calendar">
+                                    <div class="week-header"></div>
+                                    <div class="week-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createClockInWidget() {
+            return {
+                x: 0, y: 0, w: 4, h: 2,
+                content: `
+                    <div class="widget">
+                        <div class="widget-header">
+                            <i class="fas fa-clock"></i>
+                            <h3>Clock In</h3>
+                            <div class="widget-actions">
+                                <button onclick="refreshWidget(this, 'clockin')" class="btn-refresh">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <div class="clockin-widget">
+                                <div class="timer-display">
+                                    <div class="time" style="color: #42a5f5">00:00:00</div>
+                                    <div class="status text-muted">Not clocked in</div>
+                                </div>
+                                <div class="clockin-actions">
+                                    <button class="btn btn-success btn-clockin">
+                                        <i class="fas fa-play"></i> Clock In
+                                    </button>
+                                    <button class="btn btn-danger btn-clockout" style="display: none;">
+                                        <i class="fas fa-stop"></i> Clock Out
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        async function loadWidgetContent(widgetType, container) {
+            try {
+                const response = await fetch(`/api/Dashboard/${widgetType}`);
+                const data = await response.json();
+                
+                switch(widgetType) {
+                    case 'tasks':
+                        renderTasks(data, container);
+                        break;
+                    case 'chats':
+                        renderChats(data, container);
+                        break;
+                    case 'notifications':
+                        renderNotifications(data, container);
+                        break;
+                    case 'timeline':
+                        renderTimeline(data, container);
+                        break;
+                    case 'meetings':
+                        renderMeetings(data, container);
+                        break;
+                    case 'analytics':
+                        renderAnalytics(data, container);
+                        break;
+                    case 'reports':
+                        renderReports(data, container);
+                        break;
+                    case 'calendar':
+                        renderCalendar(data, container);
+                        break;
+                    case 'clockin':
+                        const clockinContainer = container.querySelector('.clockin-widget');
+                        if (clockinContainer && !clockinContainer.dataset.initialized) {
+                            initializeClockInWidget(clockinContainer);
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error(`Error loading ${widgetType}:`, error);
+                container.innerHTML = `<div class="error-message">Failed to load ${widgetType}</div>`;
+            }
+        }
+
+        function renderTasks(tasks, container) {
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state">No pending tasks</div>';
+                return;
+            }
+
+            const html = tasks.map(task => `
+                <div class="task-item" data-task-id="${task.id}">
+                    <div class="task-header">
+                        <h4>${task.title}</h4>
+                        <span class="badge bg-${getPriorityColor(task.priority)}">${task.priority}</span>
+                    </div>
+                    <div class="task-project">${task.projectName}</div>
+                    <div class="task-due-date">Due: ${task.dueDate}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderChats(chats, container) {
+            if (chats.length === 0) {
+                container.innerHTML = '<div class="empty-state">No recent chats</div>';
+                return;
+            }
+
+            const html = chats.map(chat => `
+                <div class="chat-item" onclick="openChat('${chat.userId}')">
+                    <img src="${chat.profilePicture}" alt="${chat.userName}" class="chat-avatar">
+                    <div class="chat-details">
+                        <div class="chat-name">${chat.userName}</div>
+                        <div class="chat-message">${chat.lastMessage}</div>
+                    </div>
+                    <div class="chat-time">${formatTimestamp(chat.timestamp)}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderNotifications(notifications, container) {
+            if (notifications.length === 0) {
+                container.innerHTML = '<div class="empty-state">No new notifications</div>';
+                return;
+            }
+
+            const html = notifications.map(notification => `
+                <div class="notification-item">
+                    <a href="${notification.link}" class="notification-link">
+                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-time">${notification.timestamp}</div>
+                    </a>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderTimeline(projects, container) {
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="empty-state">No active projects</div>';
+                return;
+            }
+
+            const html = projects.map(project => `
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <h4>${project.name}</h4>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                style="width: ${project.progress}%" 
+                                aria-valuenow="${project.progress}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                                ${Math.round(project.progress)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-details">
+                        <span class="timeline-date">
+                            <i class="fas fa-calendar"></i> ${project.startDate} - ${project.endDate}
+                        </span>
+                        <span class="timeline-tasks">
+                            <i class="fas fa-tasks"></i> ${project.completedTasks}/${project.taskCount} tasks completed
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderMeetings(meetings, container) {
+            if (meetings.length === 0) {
+                container.innerHTML = '<div class="empty-state">No upcoming meetings</div>';
+                return;
+            }
+
+            const html = meetings.map(meeting => `
+                <div class="meeting-item">
+                    <div class="meeting-header">
+                        <h4>${meeting.title}</h4>
+                        <a href="${meeting.meetingLink}" class="btn btn-sm btn-primary" target="_blank">
+                            <i class="fas fa-video"></i> Join
+                        </a>
+                    </div>
+                    <div class="meeting-details">
+                        <span class="meeting-date">
+                            <i class="fas fa-calendar"></i> ${meeting.date}
+                        </span>
+                        <span class="meeting-time">
+                            <i class="fas fa-clock"></i> ${meeting.time}
+                        </span>
+                        <span class="meeting-participants">
+                            <i class="fas fa-users"></i> ${meeting.participantCount} participants
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderAnalytics(data, container) {
+            const taskStatsHtml = `
+                <div class="analytics-section">
+                    <h4>Task Status Distribution</h4>
+                    <div class="task-stats">
+                        ${data.taskStatistics.map(stat => `
+                            <div class="stat-item">
+                                <div class="stat-label">${stat.status}</div>
+                                <div class="stat-value">${stat.count}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            const projectProgressHtml = `
+                <div class="analytics-section">
+                    <h4>Project Progress</h4>
+                    ${data.projectProgress.map(project => `
+                        <div class="project-progress">
+                            <div class="progress-label">${project.name}</div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                    style="width: ${project.progress}%" 
+                                    aria-valuenow="${project.progress}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                    ${Math.round(project.progress)}%
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            const activityTrendHtml = `
+                <div class="analytics-section">
+                    <h4>Activity Trend</h4>
+                    <div class="activity-chart">
+                        ${data.activityTrend.map(activity => `
+                            <div class="activity-bar" style="height: ${activity.count * 10}px" 
+                                title="${activity.date}: ${activity.count} activities">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = taskStatsHtml + projectProgressHtml + activityTrendHtml;
+        }
+
+        function renderReports(reports, container) {
+            if (reports.length === 0) {
+                container.innerHTML = '<div class="empty-state">No project reports available</div>';
+                return;
+            }
+
+            const html = reports.map(report => `
+                <div class="report-item">
+                    <div class="report-header">
+                        <h4>${report.projectName}</h4>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                style="width: ${report.progress}%" 
+                                aria-valuenow="${report.progress}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                                ${Math.round(report.progress)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-stats">
+                        <div class="stat-group">
+                            <div class="stat">
+                                <span class="stat-label">Total Tasks</span>
+                                <span class="stat-value">${report.tasksTotal}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Completed</span>
+                                <span class="stat-value text-success">${report.tasksCompleted}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Pending</span>
+                                <span class="stat-value text-warning">${report.tasksPending}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Overdue</span>
+                                <span class="stat-value text-danger">${report.tasksOverdue}</span>
+                            </div>
+                        </div>
+                        <div class="team-size">
+                            <i class="fas fa-users"></i> Team Size: ${report.teamSize}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderCalendar(data, container) {
+            if (!data.schedules && !data.leaves) {
+                container.innerHTML = '<div class="empty-state">No schedule for this week</div>';
+                return;
+            }
+
+            const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const startDate = new Date(data.currentWeek.start);
+            
+            // Create week header
+            const headerHtml = weekDays.map((day, index) => {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + index);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const isToday = dateStr === data.currentWeek.today;
+                
+                return `
+                    <div class="week-day ${isToday ? 'today' : ''}">
+                        <div class="day-name">${day}</div>
+                        <div class="day-date">${currentDate.getDate()}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Create week body with schedules
+            const weekSchedule = {};
+            [...(data.schedules || []), ...(data.leaves || [])].forEach(event => {
+                if (!weekSchedule[event.start]) {
+                    weekSchedule[event.start] = [];
+                }
+                weekSchedule[event.start].push(event);
+            });
+
+            const bodyHtml = weekDays.map((_, index) => {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + index);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const dayEvents = weekSchedule[dateStr] || [];
+                const isToday = dateStr === data.currentWeek.today;
+
+                return `
+                    <div class="week-cell ${isToday ? 'today' : ''}">
+                        ${dayEvents.map(event => `
+                            <div class="schedule-event" style="${event.color ? `background-color: ${event.color};` : ''}">
+                                <div class="event-time">${event.startTime || ''}</div>
+                                <div class="event-title">${event.title}</div>
+                                ${event.description ? `<div class="event-desc">${event.description}</div>` : ''}
+                            </div>
+                        `).join('') || '<div class="no-events">No shifts</div>'}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="week-calendar">
+                    <div class="week-header">${headerHtml}</div>
+                    <div class="week-body">${bodyHtml}</div>
+                </div>
+            `;
+
+            // Set up auto-refresh for next week
+            const now = new Date();
+            const endOfWeek = new Date(data.currentWeek.end);
+            if (now > endOfWeek) {
+                refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
+            } else {
+                const timeUntilNextWeek = endOfWeek.getTime() - now.getTime() + 1000; // Add 1 second buffer
+                setTimeout(() => {
+                    refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
+                }, timeUntilNextWeek);
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function getPriorityColor(priority) {
+            switch(priority.toLowerCase()) {
+                case 'high': return 'danger';
+                case 'medium': return 'warning';
+                case 'low': return 'success';
+                default: return 'secondary';
+            }
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 86400000) { // Less than 24 hours
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        function openChat(userId) {
+            window.location.href = `/chat?userId=${userId}`;
+        }
+
+        async function refreshWidget(btn, widgetType) {
+            const widgetContent = btn.closest('.widget').querySelector('.widget-content');
+            if (!widgetContent) return;
+
+            if (widgetType === 'clockin') {
+                const clockinContainer = widgetContent.querySelector('.clockin-widget');
+                if (clockinContainer && !clockinContainer.dataset.initialized) {
+                    initializeClockInWidget(clockinContainer);
+                }
+                return;
+            }
+
+            const container = widgetContent.querySelector(`.${widgetType}-list`);
+            if (!container) return;
+            
+            container.innerHTML = '<div class="loading">Refreshing...</div>';
+            await loadWidgetContent(widgetType, container);
+        }
+
+        function removeWidget(btn) {
+            const widget = btn.closest('.grid-stack-item');
+            grid.removeWidget(widget);
+        }
+
+        async function saveLayout() {
+            const serializedData = grid.save();
+            localStorage.setItem('dashboardLayout', JSON.stringify(serializedData));
+            
+            try {
+                const response = await fetch('/api/Dashboard/layout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        layoutData: JSON.stringify(serializedData)
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Layout saved successfully!', 'success');
+                } else {
+                    throw new Error('Failed to save layout');
+                }
+            } catch (error) {
+                console.error('Error saving layout:', error);
+                showToast('Failed to save layout', 'error');
+            }
+        }
+
+        async function loadSavedLayout() {
+            try {
+                const savedLayout = localStorage.getItem('dashboardLayout');
+                if (savedLayout) {
+                    grid.load(JSON.parse(savedLayout));
+                    
+                    // Initialize Clock In widgets after loading layout
+                    document.querySelectorAll('.clockin-widget').forEach(container => {
+                        if (!container.dataset.initialized) {
+                            initializeClockInWidget(container);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading layout:', error);
+            }
+        }
+
+        function getWidgetType(node) {
+            if (node.querySelector('.tasks-list')) return 'tasks';
+            if (node.querySelector('.chats-list')) return 'chats';
+            if (node.querySelector('.notifications-list')) return 'notifications';
+            if (node.querySelector('.clockin-widget')) return 'clockin';
+            return null;
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        function initializeClockInWidget(container) {
+            // Check if widget is already initialized
+            if (container.dataset.initialized === 'true') {
+                return;
+            }
+
+            const clockInBtn = container.querySelector('.btn-clockin');
+            const clockOutBtn = container.querySelector('.btn-clockout');
+            const timerDisplay = container.querySelector('.time');
+            const statusDisplay = container.querySelector('.status');
+            let timerInterval;
+
+            function startTimer(startTime) {
+                if (timerInterval) clearInterval(timerInterval);
+                const updateDisplay = () => {
+                    const now = new Date();
+                    const diff = now - new Date(startTime);
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                };
+                updateDisplay();
+                timerInterval = setInterval(updateDisplay, 1000);
+                timerDisplay.style.color = 'green';
+            }
+
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                timerDisplay.textContent = '00:00:00';
+                timerDisplay.style.color = '#42a5f5';
+            }
+
+            function updateWidgetState(isActive, checkInTime = null) {
+                if (isActive) {
+                    clockInBtn.style.display = 'none';
+                    clockOutBtn.style.display = 'block';
+                    statusDisplay.textContent = 'Currently working';
+                    statusDisplay.className = 'status text-success';
+                    if (checkInTime) {
+                        startTimer(checkInTime);
+                    }
+                } else {
+                    clockOutBtn.style.display = 'none';
+                    clockInBtn.style.display = 'block';
+                    statusDisplay.textContent = 'Not clocked in';
+                    statusDisplay.className = 'status text-muted';
+                    stopTimer();
+                }
+            }
+
+            // Check current session status
+            fetch('/api/attendance/current-session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.active) {
+                        updateWidgetState(true, data.checkInTime);
+                        localStorage.setItem('clockInStatus', JSON.stringify({
+                            active: true,
+                            checkInTime: data.checkInTime
+                        }));
+                    } else {
+                        updateWidgetState(false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to check session status:', error);
+                });
+
+            clockInBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/attendance/clock-in', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateWidgetState(true, data.checkInTime);
+                        showToast('Successfully clocked in!', 'success');
+
+                        localStorage.setItem('clockInStatus', JSON.stringify({
+                            active: true,
+                            checkInTime: data.checkInTime
+                        }));
+
+                        window.dispatchEvent(new StorageEvent('storage', {
+                            key: 'clockInStatus',
+                            newValue: JSON.stringify({
+                                active: true,
+                                checkInTime: data.checkInTime
+                            })
+                        }));
+                    } else {
+                        showToast(data.error || 'Failed to clock in', 'error');
+                    }
+                } catch (error) {
+                    console.error('Clock in failed:', error);
+                    showToast('Failed to clock in', 'error');
+                }
+            });
+
+            clockOutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/attendance/clock-out', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        updateWidgetState(false);
+                        showToast('Successfully clocked out!', 'success');
+
+                        localStorage.setItem('clockInStatus', JSON.stringify({
+                            active: false
+                        }));
+
+                        window.dispatchEvent(new StorageEvent('storage', {
+                            key: 'clockInStatus',
+                            newValue: JSON.stringify({
+                                active: false
+                            })
+                        }));
+                    } else {
+                        showToast(data.error || 'Failed to clock out', 'error');
+                    }
+                } catch (error) {
+                    console.error('Clock out failed:', error);
+                    showToast('Failed to clock out', 'error');
+                }
+            });
+
+            // Listen for storage events from other pages
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'clockInStatus') {
+                    const status = JSON.parse(e.newValue);
+                    updateWidgetState(status.active, status.checkInTime);
+                }
+            });
+
+            // Check localStorage on initialization
+            const savedStatus = localStorage.getItem('clockInStatus');
+            if (savedStatus) {
+                const status = JSON.parse(savedStatus);
+                updateWidgetState(status.active, status.checkInTime);
+            }
+
+            // Mark widget as initialized
+            container.dataset.initialized = 'true';
+        }
+
+        // Add a function to initialize all Clock In widgets
+        function initializeAllClockInWidgets() {
+            document.querySelectorAll('.clockin-widget').forEach(container => {
+                initializeClockInWidget(container);
+            });
+        }
+    </script>
+}
+
+<style>
+.dashboard-container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    min-height: calc(100vh - 60px); /* Adjust this value based on your navbar height */
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.week-calendar {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.week-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.week-day {
+    padding: 0.5rem;
+    text-align: center;
+    border-right: 1px solid #e2e8f0;
+}
+
+.week-day:last-child {
+    border-right: none;
+}
+
+.week-day.today {
+    background: #ebf8ff;
+    color: #2b6cb0;
+    font-weight: 600;
+}
+
+.day-name {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.day-date {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.week-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    min-height: 100px;
+}
+
+.week-cell {
+    padding: 0.5rem;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    min-height: 100px;
+}
+
+.week-cell:last-child {
+    border-right: none;
+}
+
+.week-cell.today {
+    background: #ebf8ff;
+}
+
+.schedule-event {
+    background: #4299e1;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.event-time {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.event-title {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.event-desc {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.no-events {
+    color: #a0aec0;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.clockin-widget {
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.timer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timer-display .time {
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-family: monospace;
+    color: #2d3748;
+    line-height: 1;
+}
+
+.timer-display .status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.status.text-success {
+    color: #10B981;
+}
+
+.status.text-muted {
+    color: #6B7280;
+}
+
+.clockin-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.clockin-actions button {
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.clockin-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-clockin {
+    background-color: #10B981;
+    border-color: #059669;
+}
+
+.btn-clockin:hover {
+    background-color: #059669;
+}
+
+.btn-clockout {
+    background-color: #EF4444;
+    border-color: #DC2626;
+}
+
+.btn-clockout:hover {
+    background-color: #DC2626;
+}
+</style>
 

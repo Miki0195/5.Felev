@@ -32,82 +32,126 @@ namespace Managly.Controllers
         [HttpPost("clock-in")]
         public async Task<IActionResult> ClockIn()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var existingAttendance = await _context.Attendances
-                .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
-                .FirstOrDefaultAsync();
-
-            if (existingAttendance != null)
+            try
             {
-                return BadRequest(new { error = "You are already clocked in." });
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return Unauthorized(new { success = false, error = "User not found" });
+
+                // Check if already clocked in
+                var existingAttendance = await _context.Attendances
+                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
+                    .FirstOrDefaultAsync();
+
+                if (existingAttendance != null)
+                {
+                    return BadRequest(new { 
+                        success = false, 
+                        error = "You are already clocked in" 
+                    });
+                }
+
+                var now = DateTime.UtcNow;
+                var attendance = new Attendance
+                {
+                    UserId = user.Id,
+                    CheckInTime = now
+                };
+
+                _context.Attendances.Add(attendance);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    success = true, 
+                    checkInTime = attendance.CheckInTime 
+                });
             }
-
-            var attendance = new Attendance
+            catch (Exception ex)
             {
-                UserId = user.Id,
-                CheckInTime = DateTime.UtcNow
-            };
-
-            _context.Attendances.Add(attendance);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, checkInTime = attendance.CheckInTime });
+                return StatusCode(500, new { 
+                    success = false, 
+                    error = "An error occurred while clocking in",
+                    details = ex.Message 
+                });
+            }
         }
 
         [HttpPost("clock-out")]
         public async Task<IActionResult> ClockOut()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var attendance = await _context.Attendances
-                .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
-                .OrderByDescending(a => a.CheckInTime)
-                .FirstOrDefaultAsync();
-
-            if (attendance == null)
+            try
             {
-                return BadRequest(new { error = "No active session found." });
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return Unauthorized(new { success = false, error = "User not found" });
+
+                var attendance = await _context.Attendances
+                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
+                    .OrderByDescending(a => a.CheckInTime)
+                    .FirstOrDefaultAsync();
+
+                if (attendance == null)
+                {
+                    return BadRequest(new { 
+                        success = false, 
+                        error = "No active session found" 
+                    });
+                }
+
+                attendance.CheckOutTime = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    success = true, 
+                    checkOutTime = attendance.CheckOutTime,
+                    duration = (attendance.CheckOutTime - attendance.CheckInTime).Value.TotalHours
+                });
             }
-
-            attendance.CheckOutTime = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, checkOutTime = attendance.CheckOutTime });
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    success = false, 
+                    error = "An error occurred while clocking out",
+                    details = ex.Message 
+                });
+            }
         }
 
         [HttpGet("current-session")]
         public async Task<IActionResult> GetCurrentSession()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var attendance = await _context.Attendances
-                .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
-                .OrderByDescending(a => a.CheckInTime)
-                .FirstOrDefaultAsync();
-
-            if (attendance == null)
+            try
             {
-                return Ok(new { active = false });
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return Unauthorized(new { success = false, error = "User not found" });
+
+                var attendance = await _context.Attendances
+                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
+                    .OrderByDescending(a => a.CheckInTime)
+                    .FirstOrDefaultAsync();
+
+                if (attendance == null)
+                {
+                    return Ok(new { active = false });
+                }
+
+                return Ok(new
+                {
+                    active = true,
+                    checkInTime = attendance.CheckInTime,
+                    elapsedTime = (DateTime.UtcNow - attendance.CheckInTime).TotalSeconds
+                });
             }
-
-            // Calculate elapsed time
-            var elapsedMinutes = (DateTime.UtcNow - attendance.CheckInTime).TotalMinutes;
-
-            return Ok(new
+            catch (Exception ex)
             {
-                active = true,
-                checkInTime = attendance.CheckInTime,
-                elapsedMinutes
-            });
+                return StatusCode(500, new { 
+                    success = false, 
+                    error = "An error occurred while checking session status",
+                    details = ex.Message 
+                });
+            }
         }
-
 
         [HttpGet("work-history")]
         public async Task<IActionResult> GetWorkHistory()
@@ -135,7 +179,6 @@ namespace Managly.Controllers
                     : "Ongoing"
             }));
         }
-
 
         [HttpGet("weekly-hours")]
         public async Task<IActionResult> GetWeeklyHours()
@@ -169,8 +212,5 @@ namespace Managly.Controllers
                 return StatusCode(500, new { error = "An error occurred while fetching weekly hours.", details = ex.Message });
             }
         }
-
-
-
     }
 }

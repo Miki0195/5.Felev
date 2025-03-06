@@ -25,8 +25,19 @@ public class HomeController : Controller
     }
 
     [Authorize]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        var fullName = !string.IsNullOrEmpty(user.Name) && !string.IsNullOrEmpty(user.LastName)
+            ? $"{user.Name} {user.LastName}"
+            : user.Email?.Split('@')[0] ?? "User";
+
+        ViewData["UserFullName"] = fullName;
         return View();
     }
 
