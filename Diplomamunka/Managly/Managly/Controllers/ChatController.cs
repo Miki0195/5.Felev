@@ -10,6 +10,7 @@ using System.Text.Json;
 using Managly.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using SendGrid.Helpers.Mail;
+using System.Security.Claims;
 
 namespace Managly.Controllers
 {
@@ -35,8 +36,9 @@ namespace Managly.Controllers
             _chatHub = chatHub;
         }
 
-        [Authorize]
-        public async Task<IActionResult> Index(string userId = null)
+        [HttpGet]
+        [Route("")]
+        public async Task<IActionResult> Index([FromQuery]string userId = null, [FromQuery]int? groupId = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -46,6 +48,33 @@ namespace Managly.Controllers
 
             ViewBag.CurrentUserId = user.Id;
             ViewBag.SelectedUserId = userId;
+            ViewBag.SelectedGroupId = groupId;
+
+            // If it's a group chat, get the group details
+            if (groupId.HasValue)
+            {
+                var group = await _context.GroupChats
+                    .Include(g => g.Members)
+                    .Where(g => g.Id == groupId && g.Members.Any(m => m.UserId == user.Id))
+                    .Select(g => new
+                    {
+                        g.Id,
+                        g.Name,
+                        g.CreatedById,
+                        CurrentUserRole = new
+                        {
+                            IsAdmin = g.Members.Any(m => m.UserId == user.Id && m.IsAdmin),
+                            IsCreator = g.CreatedById == user.Id
+                        }
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (group != null)
+                {
+                    ViewBag.GroupInfo = group;
+                }
+            }
+
             return View();
         }
 
@@ -294,13 +323,14 @@ namespace Managly.Controllers
             };
 
             var members = new List<GroupMember>();
-            members.Add(new GroupMember { UserId = currentUser.Id }); // Add creator
+            // Add creator as admin
+            members.Add(new GroupMember { UserId = currentUser.Id, IsAdmin = true }); 
 
             foreach (var memberId in dto.Members)
             {
                 if (await _context.Users.AnyAsync(u => u.Id == memberId))
                 {
-                    members.Add(new GroupMember { UserId = memberId });
+                    members.Add(new GroupMember { UserId = memberId, IsAdmin = false });
                 }
             }
 
@@ -332,7 +362,10 @@ namespace Managly.Controllers
                     g.Name,
                     LastMessage = g.Messages
                         .OrderByDescending(m => m.Timestamp)
-                        .Select(m => m.IsDeleted ? "Message deleted" : m.Content)
+                        .Select(m => new { 
+                            Content = m.IsDeleted ? "Message deleted" : m.Content,
+                            SenderId = m.SenderId
+                        })
                         .FirstOrDefault(),
                     HasUnreadMessages = g.Messages.Any(m => 
                         !m.ReadBy.Any(r => r.UserId == userId) && 
@@ -340,7 +373,16 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(groups);
+            var result = groups.Select(g => new
+            {
+                g.Id,
+                g.Name,
+                LastMessage = g.LastMessage?.Content,
+                LastMessageSenderId = g.LastMessage?.SenderId,
+                g.HasUnreadMessages
+            });
+
+            return Ok(result);
         }
 
         [HttpGet("groups/{groupId}")]
@@ -354,36 +396,65 @@ namespace Managly.Controllers
                     .ThenInclude(m => m.User)
                 .Include(g => g.Messages)
                     .ThenInclude(m => m.Sender)
-                .Where(g => g.Id == groupId && g.Members.Any(m => m.UserId == userId))
-                .Select(g => new
-                {
-                    g.Id,
-                    g.Name,
-                    MemberCount = g.Members.Count,
-                    Members = g.Members.Select(m => new 
-                    {
-                        m.User.Id,
-                        FullName = m.User.Name + " " + m.User.LastName,
-                        m.User.ProfilePicturePath
-                    }),
-                    Messages = g.Messages
-                        .OrderBy(m => m.Timestamp)
-                        .Select(m => new
-                        {
-                            m.Id,
-                            m.SenderId,
-                            SenderName = m.Sender.Name + " " + m.Sender.LastName,
-                            m.Content,
-                            m.Timestamp,
-                            m.IsDeleted
-                        })
-                })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(g => g.Id == groupId && g.Members.Any(m => m.UserId == userId));
 
             if (group == null)
                 return NotFound(new { error = "Group not found" });
 
-            return Ok(group);
+            // Get current user's member info
+            var currentUserMember = group.Members.FirstOrDefault(m => m.UserId == userId);
+            var isCreator = group.CreatedById == userId;
+            var isAdmin = currentUserMember?.IsAdmin ?? false;
+
+            // Sort members: creator first, then others alphabetically
+            var sortedMembers = group.Members
+                .OrderByDescending(m => m.UserId == group.CreatedById) // Creator first
+                .ThenBy(m => m.User.Name) // Then by first name
+                .ThenBy(m => m.User.LastName) // Then by last name if first names are same
+                .Select(m => new
+                {
+                    m.User.Id,
+                    FullName = m.User.Name + " " + m.User.LastName,
+                    m.User.ProfilePicturePath,
+                    m.IsAdmin,
+                    IsCreator = group.CreatedById == m.UserId,
+                    // Fix CanManageGroup logic:
+                    // - Creator can manage everyone except themselves
+                    // - Admins can manage non-admin members
+                    CanManageGroup = (isCreator && m.UserId != userId) || // Creator can manage others
+                                    (isAdmin && !m.IsAdmin && m.UserId != group.CreatedById && m.UserId != userId), // Admins can manage non-admins except creator and themselves
+                    CanManageRoles = group.CreatedById == userId
+                }).ToList();
+
+            var result = new
+            {
+                group.Id,
+                group.Name,
+                group.CreatedById,
+                MemberCount = group.Members.Count,
+                Members = sortedMembers,
+                CurrentUserRole = new
+                {
+                    IsAdmin = isAdmin,
+                    IsCreator = isCreator,
+                    CanManageGroup = isAdmin || isCreator,
+                    CanManageRoles = isCreator
+                },
+                Messages = group.Messages
+                    .OrderBy(m => m.Timestamp)
+                    .Select(m => new
+                    {
+                        m.Id,
+                        m.SenderId,
+                        SenderName = m.Sender.Name + " " + m.Sender.LastName,
+                        SenderProfilePicture = m.Sender.ProfilePicturePath,
+                        m.Content,
+                        m.Timestamp,
+                        m.IsDeleted
+                    }).ToList()
+            };
+
+            return Ok(result);
         }
 
         [HttpPost("groups/message")]
@@ -461,5 +532,280 @@ namespace Managly.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPut("groups/{groupId}/name")]
+        public async Task<IActionResult> UpdateGroupName(int groupId, [FromBody] UpdateGroupNameDto dto)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var group = await _context.GroupChats
+                .Include(g => g.Members)
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group == null)
+                return NotFound(new { error = "Group not found" });
+
+            // Check if current user is creator or admin
+            var currentUserMember = group.Members.FirstOrDefault(m => m.UserId == userId);
+            if (currentUserMember == null || (!currentUserMember.IsAdmin && group.CreatedById != userId))
+                return Unauthorized(new { error = "Only group creator and admins can update group name" });
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                return BadRequest(new { error = "Group name cannot be empty" });
+
+            group.Name = dto.Name;
+            await _context.SaveChangesAsync();
+
+            // Notify all group members about the name change
+            var groupMembers = group.Members.Select(m => m.UserId).ToList();
+            foreach (var memberId in groupMembers)
+            {
+                await _hubContext.Clients.User(memberId)
+                    .SendAsync("GroupNameUpdated", groupId, dto.Name);
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete("groups/{groupId}/members/{memberId}")]
+        public async Task<IActionResult> RemoveGroupMember(int groupId, string memberId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var group = await _context.GroupChats
+                .Include(g => g.Members)
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group == null)
+                return NotFound(new { error = "Group not found" });
+
+            // Check if current user is creator or admin
+            var currentUserMember = group.Members.FirstOrDefault(m => m.UserId == userId);
+            if (currentUserMember == null || (!currentUserMember.IsAdmin && group.CreatedById != userId))
+                return Unauthorized(new { error = "Only group creator and admins can remove members" });
+
+            // Prevent removing the creator
+            if (memberId == group.CreatedById)
+                return BadRequest(new { error = "Cannot remove the group creator" });
+
+            // Prevent non-creator admins from removing other admins
+            var memberToRemove = group.Members.FirstOrDefault(m => m.UserId == memberId);
+            if (memberToRemove == null)
+                return NotFound(new { error = "Member not found in group" });
+
+            if (memberToRemove.IsAdmin && group.CreatedById != userId)
+                return Unauthorized(new { error = "Only the group creator can remove admins" });
+
+            group.Members.Remove(memberToRemove);
+            await _context.SaveChangesAsync();
+
+            // Notify the removed member and other group members
+            await _hubContext.Clients.User(memberId)
+                .SendAsync("RemovedFromGroup", groupId);
+
+            var remainingMembers = group.Members.Select(m => m.UserId).ToList();
+            foreach (var member in remainingMembers)
+            {
+                await _hubContext.Clients.User(member)
+                    .SendAsync("GroupMemberRemoved", groupId, memberId);
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpPost("groups/{groupId}/members")]
+        public async Task<IActionResult> AddGroupMember(int groupId, [FromBody] AddMemberDto dto)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            var group = await _context.GroupChats
+                .Include(g => g.Members)
+                .FirstOrDefaultAsync(g => g.Id == groupId);
+
+            if (group == null)
+                return NotFound(new { error = "Group not found" });
+
+            // Check if current user is creator or admin
+            var currentUserMember = group.Members.FirstOrDefault(m => m.UserId == userId);
+            if (currentUserMember == null || (!currentUserMember.IsAdmin && group.CreatedById != userId))
+                return Unauthorized(new { error = "Only group creator and admins can add members" });
+
+            if (group.Members.Any(m => m.UserId == dto.UserId))
+                return BadRequest(new { error = "User is already a member of this group" });
+
+            var newMember = new GroupMember { GroupId = groupId, UserId = dto.UserId, IsAdmin = false };
+            group.Members.Add(newMember);
+            await _context.SaveChangesAsync();
+
+            // Notify the new member and existing members
+            await _hubContext.Clients.User(dto.UserId)
+                .SendAsync("AddedToGroup", new { group.Id, group.Name });
+
+            foreach (var member in group.Members.Where(m => m.UserId != dto.UserId))
+            {
+                await _hubContext.Clients.User(member.UserId)
+                    .SendAsync("GroupMemberAdded", groupId, dto.UserId);
+            }
+
+            return Ok(new { success = true });
+        }
+
+        [HttpPost("groups/{groupId}/admins/{userId}")]
+        public async Task<IActionResult> AddGroupAdmin(int groupId, string userId)
+        {
+            var currentUserId = _userManager.GetUserId(User);
+            if (currentUserId == null)
+                return Unauthorized();
+
+            try
+            {
+                Console.WriteLine($"Starting AddGroupAdmin for groupId: {groupId}, userId: {userId}");
+
+                // Find the group and include members in a single query
+                var group = await _context.GroupChats
+                    .Include(g => g.Members)
+                    .FirstOrDefaultAsync(g => g.Id == groupId);
+
+                if (group == null)
+                {
+                    Console.WriteLine("Group not found");
+                    return NotFound(new { error = "Group not found" });
+                }
+
+                // Check if the current user is the creator
+                if (group.CreatedById != currentUserId)
+                {
+                    Console.WriteLine("User not authorized to manage admin roles");
+                    return Unauthorized(new { error = "Only group creator can manage admin roles" });
+                }
+
+                // Find the member to make admin from the already loaded members
+                var targetMember = group.Members.FirstOrDefault(m => m.UserId == userId);
+
+                if (targetMember == null)
+                {
+                    Console.WriteLine("Target member not found");
+                    return NotFound(new { error = "User is not a member of the group" });
+                }
+
+                // Don't allow modifying the creator's admin status
+                if (userId == group.CreatedById)
+                {
+                    Console.WriteLine("Attempted to modify creator's admin status");
+                    return BadRequest(new { error = "Cannot modify the creator's admin status" });
+                }
+
+                Console.WriteLine($"Current IsAdmin status: {targetMember.IsAdmin}");
+                Console.WriteLine("Attempting to update admin status...");
+
+                // Update the admin status
+                targetMember.IsAdmin = true;
+                _context.Entry(targetMember).State = EntityState.Modified;
+                
+                // Save changes
+                var saveResult = await _context.SaveChangesAsync();
+                Console.WriteLine($"SaveChanges result: {saveResult} changes saved");
+
+                // Verify the change immediately after saving
+                var verifyMember = await _context.GroupMembers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
+
+                Console.WriteLine($"Verification check - IsAdmin status: {verifyMember?.IsAdmin}");
+
+                if (verifyMember == null || !verifyMember.IsAdmin)
+                {
+                    throw new Exception("Failed to verify admin status update");
+                }
+
+                // Notify all group members about the admin role change
+                foreach (var member in group.Members)
+                {
+                    await _hubContext.Clients.User(member.UserId)
+                        .SendAsync("AdminRoleUpdated", new
+                        {
+                            groupId,
+                            userId,
+                            isAdmin = true,
+                            canManageGroup = true
+                        });
+                }
+
+                Console.WriteLine("Successfully updated admin status");
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in AddGroupAdmin: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { error = $"Failed to update admin role: {ex.Message}" });
+            }
+        }
+
+        [HttpDelete("groups/{groupId}/admins/{userId}")]
+        public async Task<IActionResult> RemoveGroupAdmin(int groupId, string userId)
+        {
+            var currentUserId = _userManager.GetUserId(User);
+            if (currentUserId == null)
+                return Unauthorized();
+
+            try
+            {
+                // Find the group and include members
+                var group = await _context.GroupChats
+                    .Include(g => g.Members)
+                    .FirstOrDefaultAsync(g => g.Id == groupId);
+
+                if (group == null)
+                    return NotFound(new { error = "Group not found" });
+
+                // Check if the current user is the creator
+                if (group.CreatedById != currentUserId)
+                    return Unauthorized(new { error = "Only group creator can remove admins" });
+
+                // Find the member to remove admin status
+                var targetMember = await _context.GroupMembers
+                    .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId);
+
+                if (targetMember == null)
+                    return NotFound(new { error = "User is not a member of the group" });
+
+                // Don't allow modifying the creator's admin status
+                if (userId == group.CreatedById)
+                    return BadRequest(new { error = "Cannot modify the creator's admin status" });
+
+                // Update admin status
+                targetMember.IsAdmin = false;
+                _context.GroupMembers.Update(targetMember);
+                await _context.SaveChangesAsync();
+
+                // Notify all group members about the admin role change
+                var groupMembers = group.Members.Select(m => m.UserId).ToList();
+                foreach (var memberId in groupMembers)
+                {
+                    await _hubContext.Clients.User(memberId)
+                        .SendAsync("AdminRoleUpdated", groupId, userId, false);
+                }
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Failed to update admin role: {ex.Message}" });
+            }
+        }
+    }
+
+    public class UpdateGroupNameDto
+    {
+        public string Name { get; set; }
+    }
+
+    public class AddMemberDto
+    {
+        public string UserId { get; set; }
     }
 }

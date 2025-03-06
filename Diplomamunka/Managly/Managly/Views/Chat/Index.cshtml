@@ -110,6 +110,66 @@
     </div>
 </div>
 
+<!-- Add this new modal for group members -->
+<div class="modal fade" id="groupMembersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Group Members</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="groupMembersList" class="group-members-list">
+                    <!-- Members will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this new modal for editing group name -->
+<div class="modal fade" id="editGroupNameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Group Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="newGroupName" class="form-control" placeholder="Enter new group name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveGroupName()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Members Modal -->
+<div class="modal fade" id="addGroupMembersModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Members</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="addMembersGroupId" />
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search users..." 
+                           oninput="searchNewMembers(event)" />
+                </div>
+                <div id="newMemberSearchResults" class="mt-3">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 
@@ -136,7 +196,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        loadRecentChats();
+        loadRecentChats(); // Load direct messages by default
 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get("userId");
@@ -145,8 +205,38 @@
         const emojiButton = document.getElementById('emojiButton');
         const emojiPicker = document.getElementById('emojiPicker');
 
+        // Add tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                    content.style.display = 'none';
+                });
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Show corresponding content
+                const tabName = button.getAttribute('data-tab');
+                const targetContent = tabName === 'direct' ? document.getElementById('recentChats') : document.getElementById('groupChats');
+                targetContent.classList.add('active');
+                targetContent.style.display = 'flex';
+                
+                if (tabName === 'direct') {
+                    loadRecentChats(); // Refresh direct messages
+                } else if (tabName === 'groups') {
+                    loadGroupChats(); // Load group chats
+                }
+            });
+        });
+
+        // Trigger click on direct messages tab by default
+        document.querySelector('.tab-btn[data-tab="direct"]').click();
+
         if (userId) {
-            console.log(`✅ Opening chat with user: ${userId}`); 
+            console.log(`✅ Opening chat with user: ${userId}`);
             selectedUserId = userId;
             loadMessages(userId);
             document.getElementById("chatBox").style.display = "block";
@@ -156,22 +246,6 @@
         // Initialize the group modal
         createGroupModal = new bootstrap.Modal(document.getElementById('createGroupModal'));
         
-        // Add tab switching functionality
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                
-                button.classList.add('active');
-                const tabName = button.getAttribute('data-tab');
-                document.querySelector(`.tab-content[data-tab="${tabName}"]`).classList.add('active');
-                
-                if (tabName === 'groups') {
-                    loadGroupChats();
-                }
-            });
-        });
-
         // Add member search functionality
         const memberSearch = document.getElementById('memberSearch');
         if (memberSearch) {
@@ -286,7 +360,7 @@
                             <img src="${user.profilePicturePath}" class="chat-header-img" alt="Profile">
                             <div class="user-info-container">
                                 <span>${user.fullName}</span>
-                                <div style="display: flex; align-items: center;">
+                                <div class="user-status-container">
                                     <span class="user-status-text">${user.isOnline ? 'Online' : 'Offline'}</span>
                                     <div class="online-status ${user.isOnline ? 'online' : 'offline'}"></div>
                                 </div>
@@ -884,19 +958,63 @@
             const container = document.getElementById('groupChats');
             container.innerHTML = '<h3>Group Chats</h3>';
             
+            const currentUserId = document.getElementById('currentUserId').value;
+            
             groups.forEach(group => {
                 const div = document.createElement('div');
                 div.className = 'user-recent-chat';
                 if (group.hasUnreadMessages) {
-                    div.classList.add('unread'); // Add unread class for styling
+                    div.classList.add('unread-message');
                 }
                 div.setAttribute('data-group-id', group.id);
-                div.innerHTML = `
-                    <div class="chat-info">
-                        <div class="chat-name">${group.name}</div>
-                        <div class="last-message">${group.lastMessage || 'No messages yet'}</div>
-                    </div>
-                `;
+
+                const groupIcon = document.createElement('img');
+                groupIcon.src = '/images/default/default-group.png';
+                groupIcon.className = 'recent-chat-img';
+
+                const textWrapper = document.createElement('div');
+                textWrapper.className = 'recent-chat-text';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'user-name group-name-container';
+                
+                // Add edit icon if user is the creator
+                if (group.createdById === currentUserId) {
+                    nameDiv.innerHTML = `
+                        <span style="cursor: pointer;" onclick="openGroupChat(${group.id})">${group.name}</span>
+                    `;
+                } else {
+                    nameDiv.innerHTML = `
+                        <span style="cursor: pointer;" onclick="openGroupChat(${group.id})">${group.name}</span>
+                    `;
+                }
+
+                const lastMessageDiv = document.createElement('div');
+                lastMessageDiv.className = 'message-preview';
+
+                if (group.lastMessage) {
+                    if (group.lastMessageSenderId === currentUserId) {
+                        lastMessageDiv.textContent = `You: ${group.lastMessage}`;
+                    } else {
+                        lastMessageDiv.textContent = group.lastMessage;
+                    }
+                } else {
+                    lastMessageDiv.textContent = 'No messages yet';
+                }
+
+                textWrapper.appendChild(nameDiv);
+                textWrapper.appendChild(lastMessageDiv);
+
+                div.appendChild(groupIcon);
+                div.appendChild(textWrapper);
+
+                if (group.hasUnreadMessages) {
+                    const unreadBadge = document.createElement('span');
+                    unreadBadge.className = 'unread-badge';
+                    unreadBadge.textContent = '●';
+                    div.appendChild(unreadBadge);
+                }
+
                 div.onclick = () => openGroupChat(group.id);
                 container.appendChild(div);
             });
@@ -908,51 +1026,111 @@
     async function openGroupChat(groupId) {
         try {
             selectedGroupId = groupId;
+            selectedUserId = null;
             
-            // Mark messages as read when opening the chat
             await fetch(`/chat/groups/${groupId}/read`, { method: 'POST' });
             
-            // Remove unread styling from the group chat item
             const groupChatItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
             if (groupChatItem) {
-                groupChatItem.classList.remove('unread');
+                groupChatItem.classList.remove('unread-message');
+                const badge = groupChatItem.querySelector('.unread-badge');
+                if (badge) badge.remove();
             }
 
             const response = await fetch(`/chat/groups/${groupId}`);
             const groupData = await response.json();
             
-            // Update chat header
+            const currentUserId = document.getElementById('currentUserId').value;
+            const isCreator = groupData.createdById === currentUserId;
+            console.log(currentUserId);
+            console.log(groupData.createdById);
+            console.log(isCreator);
+            
             document.getElementById('chatHeader').innerHTML = `
-                <div class="chat-header-info">
-                    <h4>${groupData.name}</h4>
-                    <small>${groupData.memberCount} members</small>
+                <div class="group-chat-header">
+                    ${isCreator ? 
+                        `<h4 style="display: flex; align-items: center; gap: 10px;">
+                            ${groupData.name}
+                            <i class="bi bi-pencil-square edit-group-name" 
+                               style="cursor: pointer; font-size: 0.8em;" 
+                               onclick="openEditGroupName(event, ${groupId}, '${groupData.name}')"></i>
+                        </h4>` : 
+                        `<h4>${groupData.name}</h4>`
+                    }
+                    <small class="member-count" onclick="showGroupMembers(${groupId})">${groupData.memberCount} members</small>
                 </div>
             `;
             
-            // Show chat area
-            document.getElementById('chatBox').style.display = 'block';
-            document.getElementById('chatBox').innerHTML = ''; // Clear existing messages
+            const chatBox = document.getElementById('chatBox');
+            chatBox.style.display = 'block';
+            chatBox.innerHTML = '';
             
-            // Load group messages
+            let lastDate = null;
+
             if (groupData.messages) {
-                groupData.messages.forEach(message => {
+                for (const message of groupData.messages) {
+                    const messageDate = new Date(message.timestamp);
+                    const formattedDate = messageDate.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric"
+                    });
+
+                    if (lastDate !== formattedDate) {
+                        const dateSeparator = document.createElement("div");
+                        dateSeparator.classList.add("date-separator");
+                        dateSeparator.textContent = formattedDate;
+                        chatBox.appendChild(dateSeparator);
+                        lastDate = formattedDate;
+                    }
+
                     const isCurrentUser = message.senderId === document.getElementById('currentUserId').value;
-                    const messageHtml = `
-                        <div class="message-wrapper ${isCurrentUser ? 'my-message' : 'other-message'}" data-message-id="${message.id}">
-                            <div class="message-sender">${message.senderName}</div>
-                            <div class="message-content">
-                                ${message.content}
-                            </div>
-                            <div class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</div>
-                        </div>
-                    `;
-                    document.getElementById('chatBox').insertAdjacentHTML('beforeend', messageHtml);
-                });
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `message-wrapper ${isCurrentUser ? 'sent' : 'received'}`;
+                    wrapper.setAttribute('data-message-id', message.id);
+
+                    const messageContentWrapper = document.createElement('div');
+                    messageContentWrapper.className = 'message-content-wrapper';
+
+                    const messageContentInner = document.createElement('div');
+                    messageContentInner.className = 'message-content-inner';
+
+                    if (!isCurrentUser) {
+                        const senderName = document.createElement('div');
+                        senderName.className = 'message-sender-name';
+                        senderName.textContent = message.senderName;
+                        messageContentWrapper.appendChild(senderName);
+                    }
+
+                    const senderImg = document.createElement('img');
+                    senderImg.src = message.senderProfilePicture || '/images/default/default-profile.png';
+                    senderImg.className = 'message-profile-img';
+
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = isCurrentUser ? 'my-message' : 'other-message';
+
+                    if (message.isDeleted) {
+                        messageDiv.classList.add('deleted-message');
+                        messageDiv.innerHTML = '<em>Deleted message</em>';
+                    } else {
+                        messageDiv.textContent = message.content;
+                    }
+
+                    if (isCurrentUser) {
+                        messageContentInner.appendChild(messageDiv);
+                        messageContentInner.appendChild(senderImg);
+                    } else {
+                        messageContentInner.appendChild(senderImg);
+                        messageContentInner.appendChild(messageDiv);
+                    }
+
+                    messageContentWrapper.appendChild(messageContentInner);
+                    wrapper.appendChild(messageContentWrapper);
+                    chatBox.appendChild(wrapper);
+                }
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
-            
-            // Update selected chat
-            selectedUserId = null; // Reset selected user since we're in a group chat
-            
         } catch (error) {
             console.error('Error opening group chat:', error);
             showToast('Failed to load group chat', 'error');
@@ -985,29 +1163,75 @@
     }
 
     // Add this to your existing SignalR connection.on handlers
-    connection.on("ReceiveGroupMessage", function (message) {
-        // If we're not the sender and not viewing the group chat, mark as unread
-        if (message.senderId !== document.getElementById('currentUserId').value && 
-            selectedGroupId !== message.groupId) {
+    connection.on("ReceiveGroupMessage", async function (message) {
+        const currentUserId = document.getElementById('currentUserId').value;
+        
+        if (message.senderId !== currentUserId && selectedGroupId !== message.groupId) {
             const groupChatItem = document.querySelector(`.user-recent-chat[data-group-id="${message.groupId}"]`);
             if (groupChatItem) {
-                groupChatItem.classList.add('unread');
+                groupChatItem.classList.add('unread-message');
+                
+                if (!groupChatItem.querySelector('.unread-badge')) {
+                    const unreadBadge = document.createElement('span');
+                    unreadBadge.className = 'unread-badge';
+                    unreadBadge.textContent = '●';
+                    groupChatItem.appendChild(unreadBadge);
+                }
+
+                const messagePreview = groupChatItem.querySelector('.message-preview');
+                if (messagePreview) {
+                    messagePreview.textContent = message.content;
+                }
             }
         }
 
         if (selectedGroupId === message.groupId) {
-            const isCurrentUser = message.senderId === document.getElementById('currentUserId').value;
-            const messageHtml = `
-                <div class="message-wrapper ${isCurrentUser ? 'my-message' : 'other-message'}" data-message-id="${message.messageId}">
-                    <div class="message-sender">${message.senderName}</div>
-                    <div class="message-content">
-                        ${message.content}
-                    </div>
-                    <div class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</div>
-                </div>
-            `;
-            document.getElementById('chatBox').insertAdjacentHTML('beforeend', messageHtml);
-            scrollToBottom();
+            const isCurrentUser = message.senderId === currentUserId;
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${isCurrentUser ? 'sent' : 'received'}`;
+            wrapper.setAttribute('data-message-id', message.messageId);
+
+            const messageContentWrapper = document.createElement('div');
+            messageContentWrapper.className = 'message-content-wrapper';
+
+            const messageContentInner = document.createElement('div');
+            messageContentInner.className = 'message-content-inner';
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isCurrentUser ? 'my-message' : 'other-message';
+            messageDiv.textContent = message.content;
+
+            if (!isCurrentUser) {
+                const senderName = document.createElement('div');
+                senderName.className = 'message-sender-name';
+                senderName.textContent = message.senderName;
+                messageContentWrapper.appendChild(senderName);
+            }
+
+            // Fetch the sender's profile picture
+            try {
+                const userResponse = await fetch(`/chat/user/${message.senderId}`);
+                const userData = await userResponse.json();
+                
+                const senderImg = document.createElement('img');
+                senderImg.src = userData.profilePicturePath || '/images/default/default-profile.png';
+                senderImg.className = 'message-profile-img';
+
+                if (isCurrentUser) {
+                    messageContentInner.appendChild(messageDiv);
+                    messageContentInner.appendChild(senderImg);
+                } else {
+                    messageContentInner.appendChild(senderImg);
+                    messageContentInner.appendChild(messageDiv);
+                }
+
+                messageContentWrapper.appendChild(messageContentInner);
+                wrapper.appendChild(messageContentWrapper);
+                document.getElementById('chatBox').appendChild(wrapper);
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
         }
     });
 
@@ -1028,16 +1252,24 @@
             let wrapper = document.createElement("div");
             wrapper.classList.add("message-wrapper", "sent");
 
+            let messageContentWrapper = document.createElement('div');
+            messageContentWrapper.className = 'message-content-wrapper';
+
+            let messageContentInner = document.createElement('div');
+            messageContentInner.className = 'message-content-inner';
+
             let messageDiv = document.createElement("div");
             messageDiv.classList.add("my-message");
             messageDiv.textContent = message;
 
             let profileImg = document.createElement("img");
             profileImg.src = user.profilePicturePath;
-            profileImg.classList.add("message-profile-img");
+            profileImg.className = "message-profile-img";
 
-            wrapper.appendChild(messageDiv);
-            wrapper.appendChild(profileImg);
+            messageContentInner.appendChild(messageDiv);
+            messageContentInner.appendChild(profileImg);
+            messageContentWrapper.appendChild(messageContentInner);
+            wrapper.appendChild(messageContentWrapper);
             chatBox.appendChild(wrapper);
 
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -1074,4 +1306,457 @@
             showToast("Failed to send message", "error");
         }
     }
+
+    // Add these new functions for handling group name editing and member list
+    function openEditGroupName(event, groupId, currentName) {
+        event.stopPropagation();
+        const modal = new bootstrap.Modal(document.getElementById('editGroupNameModal'));
+        document.getElementById('newGroupName').value = currentName;
+        document.getElementById('newGroupName').setAttribute('data-group-id', groupId);
+        modal.show();
+    }
+
+    async function saveGroupName() {
+        const input = document.getElementById('newGroupName');
+        const groupId = input.getAttribute('data-group-id');
+        const newName = input.value.trim();
+        
+        if (!newName) {
+            showToast('Group name cannot be empty', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/chat/groups/${groupId}/name`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newName })
+            });
+            
+            if (response.ok) {
+                const currentUserId = document.getElementById('currentUserId').value;
+                bootstrap.Modal.getInstance(document.getElementById('editGroupNameModal')).hide();
+                
+                // Update group name in the list
+                const groupItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
+                if (groupItem) {
+                    const nameDiv = groupItem.querySelector('.user-name');
+                    if (nameDiv) {
+                        nameDiv.innerHTML = `
+                            <span style="cursor: pointer;" onclick="openGroupChat(${groupId})">${newName}</span>
+                            <i class="bi bi-pencil-square edit-group-name" onclick="openEditGroupName(event, ${groupId}, '${newName}')"></i>
+                        `;
+                    }
+                }
+
+                // Update group name in the chat header if it's open
+                if (selectedGroupId === parseInt(groupId)) {
+                    document.querySelector('.group-chat-header h4').innerHTML = `
+                        ${newName}
+                        <i class="bi bi-pencil-square edit-group-name" 
+                           style="cursor: pointer; font-size: 0.8em; margin-left: 10px;" 
+                           onclick="openEditGroupName(event, ${groupId}, '${newName}')"></i>
+                    `;
+                }
+                
+                showToast('Group name updated successfully', 'success');
+            } else {
+                showToast('Failed to update group name', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating group name:', error);
+            showToast('Failed to update group name', 'error');
+        }
+    }
+
+    async function showGroupMembers(groupId) {
+        try {
+            const response = await fetch(`/chat/groups/${groupId}`);
+            const groupData = await response.json();
+            
+            const membersList = document.getElementById('groupMembersList');
+            membersList.innerHTML = '';
+            
+            const currentUserId = document.getElementById('currentUserId').value;
+            const isCreator = currentUserId === groupData.createdById;
+            const isAdmin = groupData.currentUserRole.isAdmin;
+            console.log(isAdmin);
+            
+            groupData.members.forEach(member => {
+                const isGroupCreator = member.id === groupData.createdById;
+                const isMemberAdmin = isGroupCreator || member.isAdmin;
+                const canModifyAdmin = isCreator && !isGroupCreator;
+                const canRemoveMember =
+                    // First check if current user has permission to remove members
+                    (isCreator || isAdmin) &&
+                    // Cannot remove the group creator under any circumstances
+                    !isGroupCreator &&
+                    // Cannot remove yourself
+                    member.id !== currentUserId &&
+                    // Only creator can remove admins
+                    (!member.isAdmin || isCreator);
+
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'group-member-item';
+                memberDiv.innerHTML = `
+                    <img src="${member.profilePicturePath || '/images/default/default-profile.png'}" alt="${member.fullName}">
+                    <span>${member.fullName}</span>
+                    ${isGroupCreator ? 
+                        '<span class="admin-badge creator">Creator</span>' : 
+                        (isMemberAdmin ? '<span class="admin-badge">Admin</span>' : '')}
+                    <div class="member-actions">
+                        ${canModifyAdmin ? 
+                            `<button class="admin-toggle-btn" onclick="toggleAdminRole(event, ${groupId}, '${member.id}', ${isMemberAdmin})">
+                                ${isMemberAdmin ? 'Remove Admin' : 'Make Admin'}
+                            </button>` : 
+                        ''}
+                        ${(canRemoveMember) ? 
+                            `<button class="remove-member-btn" onclick="removeMemberFromGroup(${groupId}, '${member.id}')">
+                                <i class="bi bi-x-circle"></i>
+                            </button>` : 
+                            ''}
+                    </div>
+                `;
+                membersList.appendChild(memberDiv);
+            });
+
+            // Add member management buttons for admin
+            if (isCreator || isAdmin) {
+                const managementDiv = document.createElement('div');
+                managementDiv.className = 'member-management';
+                managementDiv.innerHTML = `
+                    <button class="btn btn-primary mt-3" onclick="openAddMembersModal(${groupId})">
+                        <i class="bi bi-person-plus"></i> Add Members
+                    </button>
+                `;
+                membersList.appendChild(managementDiv);
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('groupMembersModal'));
+            modal.show();
+        } catch (error) {
+            console.error('Error loading group members:', error);
+            showToast('Failed to load group members', 'error');
+        }
+    }
+
+    async function toggleAdminRole(event, groupId, memberId, isCurrentlyAdmin) {
+        event.stopPropagation();
+        try {
+            const response = await fetch(`/chat/groups/${groupId}/admins/${memberId}`, {
+                method: isCurrentlyAdmin ? 'DELETE' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update admin role');
+            }
+            
+            showToast(`Successfully ${isCurrentlyAdmin ? 'removed' : 'added'} admin role`, 'success');
+            
+            // Update the UI immediately for the user performing the action
+            const memberItem = event.target.closest('.group-member-item');
+            if (memberItem) {
+                // Toggle admin badge
+                const existingBadge = memberItem.querySelector('.admin-badge:not(.creator)');
+                if (!isCurrentlyAdmin) {
+                    // Adding admin
+                    if (!existingBadge) {
+                        const badge = document.createElement('span');
+                        badge.className = 'admin-badge';
+                        badge.textContent = 'Admin';
+                        const nameSpan = memberItem.querySelector('span');
+                        nameSpan.insertAdjacentElement('afterend', badge);
+                    }
+                } else {
+                    // Removing admin
+                    if (existingBadge) {
+                        existingBadge.remove();
+                    }
+                }
+                
+                // Update the button text and onclick handler
+                const button = memberItem.querySelector('.admin-toggle-btn');
+                if (button) {
+                    button.textContent = isCurrentlyAdmin ? 'Make Admin' : 'Remove Admin';
+                    button.onclick = (e) => toggleAdminRole(e, groupId, memberId, !isCurrentlyAdmin);
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error updating admin role:', error);
+            showToast(error.message || 'Failed to update admin role', 'error');
+        }
+    }
+
+    connection.on("AdminRoleUpdated", function(data) {
+        const memberItem = document.querySelector(`.group-member-item:has([onclick*="${data.userId}"])`);
+        if (memberItem) {
+            // Handle admin badge
+            const existingBadge = memberItem.querySelector('.admin-badge:not(.creator)');
+            if (data.isAdmin) {
+                if (!existingBadge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'admin-badge';
+                    badge.textContent = 'Admin';
+                    const nameSpan = memberItem.querySelector('span');
+                    nameSpan.insertAdjacentElement('afterend', badge);
+                }
+            } else {
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+            }
+
+            // Handle admin toggle button
+            const button = memberItem.querySelector('.admin-toggle-btn');
+            if (button) {
+                button.textContent = data.isAdmin ? 'Remove Admin' : 'Make Admin';
+                button.onclick = (e) => toggleAdminRole(e, data.groupId, data.userId, data.isAdmin);
+            }
+        }
+    });
+
+    // Add new functions for member management
+    async function removeMemberFromGroup(groupId, memberId) {
+        if (!confirm('Are you sure you want to remove this member?')) return;
+        
+        try {
+            const response = await fetch(`/chat/groups/${groupId}/members/${memberId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                showToast('Member removed successfully', 'success');
+                
+                // Properly close the modal and remove backdrop
+                const modal = bootstrap.Modal.getInstance(document.getElementById('groupMembersModal'));
+                modal.hide();
+                
+                // Remove modal backdrop if it exists
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                // Remove modal-open class from body
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // Reopen the modal with updated member list
+                setTimeout(() => {
+                    showGroupMembers(groupId);
+                }, 100);
+            } else {
+                showToast('Failed to remove member', 'error');
+            }
+        } catch (error) {
+            console.error('Error removing member:', error);
+            showToast('Failed to remove member', 'error');
+        }
+    }
+
+    function openAddMembersModal(groupId) {
+        // Properly close the members modal
+        const membersModal = bootstrap.Modal.getInstance(document.getElementById('groupMembersModal'));
+        membersModal.hide();
+        
+        // Remove modal backdrop and cleanup
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // Show the add members modal after a short delay
+        setTimeout(() => {
+            const addMembersModal = new bootstrap.Modal(document.getElementById('addGroupMembersModal'));
+            document.getElementById('addMembersGroupId').value = groupId;
+            addMembersModal.show();
+        }, 100);
+    }
+
+    // Add member search functionality for the add members modal
+    async function searchNewMembers(event) {
+        const searchTerm = event.target.value.trim();
+        const resultsContainer = document.getElementById('newMemberSearchResults');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/chat/search/${searchTerm}`);
+            const users = await response.json();
+            
+            resultsContainer.innerHTML = '';
+            users.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'user-search-result';
+                div.innerHTML = `
+                    <img src="${user.profilePicturePath || '/images/default/default-profile.png'}" alt="${user.fullName}">
+                    <span>${user.fullName}</span>
+                    <button class="btn btn-sm btn-primary" onclick="addNewMemberToGroup('${user.id}', '${user.fullName}')">
+                        Add
+                    </button>
+                `;
+                resultsContainer.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error searching users:', error);
+        }
+    }
+
+    async function addNewMemberToGroup(userId, userName) {
+        const groupId = document.getElementById('addMembersGroupId').value;
+        
+        try {
+            const response = await fetch(`/chat/groups/${groupId}/members`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId })
+            });
+            
+            if (response.ok) {
+                showToast(`${userName} added to the group`, 'success');
+                
+                // Properly close the add members modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addGroupMembersModal'));
+                modal.hide();
+                
+                // Remove modal backdrop and cleanup
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // Reopen the members modal with updated list
+                setTimeout(() => {
+                    showGroupMembers(groupId);
+                }, 100);
+            } else {
+                showToast('Failed to add member', 'error');
+            }
+        } catch (error) {
+            console.error('Error adding member:', error);
+            showToast('Failed to add member', 'error');
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+
+    function scrollToBottom() {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Add SignalR connection handler for group name updates
+    connection.on("GroupNameUpdated", function(groupId, newName) {
+        const groupItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
+        if (groupItem) {
+            const nameDiv = groupItem.querySelector('.user-name');
+            if (nameDiv) {
+                const currentUserId = document.getElementById('currentUserId').value;
+                const isCreator = groupItem.querySelector('.edit-group-name') !== null;
+                
+                if (isCreator) {
+                    nameDiv.innerHTML = `
+                        <span style="cursor: pointer;" onclick="openGroupChat(${groupId})">${newName}</span>
+                        <i class="bi bi-pencil-square edit-group-name" onclick="openEditGroupName(event, ${groupId}, '${newName}')"></i>
+                    `;
+                } else {
+                    nameDiv.textContent = newName;
+                }
+            }
+        }
+
+        if (selectedGroupId === groupId) {
+            const headerTitle = document.querySelector('.group-chat-header h4');
+            if (headerTitle) {
+                headerTitle.textContent = newName;
+            }
+        }
+    });
+
+    // Add these new SignalR handlers after the existing connection.on handlers
+    connection.on("GroupMemberRemoved", function(groupId, memberId) {
+        // Update member count in group chat list
+        const groupItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
+        if (groupItem) {
+            const memberCountElement = groupItem.querySelector('.member-count');
+            if (memberCountElement) {
+                const currentCount = parseInt(memberCountElement.textContent);
+                memberCountElement.textContent = `${currentCount - 1} members`;
+            }
+        }
+
+        // Update member count in chat header if the group is currently open
+        if (selectedGroupId === groupId) {
+            const headerMemberCount = document.querySelector('.group-chat-header .member-count');
+            if (headerMemberCount) {
+                const currentCount = parseInt(headerMemberCount.textContent);
+                headerMemberCount.textContent = `${currentCount - 1} members`;
+            }
+        }
+    });
+
+    connection.on("GroupMemberAdded", function(groupId, memberId) {
+        // Update member count in group chat list
+        const groupItem = document.querySelector(`.user-recent-chat[data-group-id="${groupId}"]`);
+        if (groupItem) {
+            const memberCountElement = groupItem.querySelector('.member-count');
+            if (memberCountElement) {
+                const currentCount = parseInt(memberCountElement.textContent);
+                memberCountElement.textContent = `${currentCount + 1} members`;
+            }
+        }
+
+        // Update member count in chat header if the group is currently open
+        if (selectedGroupId === groupId) {
+            const headerMemberCount = document.querySelector('.group-chat-header .member-count');
+            if (headerMemberCount) {
+                const currentCount = parseInt(headerMemberCount.textContent);
+                headerMemberCount.textContent = `${currentCount + 1} members`;
+            }
+        }
+    });
 </script>
