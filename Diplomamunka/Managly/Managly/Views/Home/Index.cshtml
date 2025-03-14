@@ -805,7 +805,7 @@
             if (now > endOfWeek) {
                 refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
             } else {
-                const timeUntilNextWeek = endOfWeek.getTime() - now.getTime() + 1000; // Add 1 second buffer
+                const timeUntilNextWeek = endOfWeek.getTime() - now.getTime() + 1000; 
                 setTimeout(() => {
                     refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
                 }, timeUntilNextWeek);
@@ -902,7 +902,6 @@
                 if (savedLayout) {
                     grid.load(JSON.parse(savedLayout));
                     
-                    // Initialize Clock In widgets after loading layout
                     document.querySelectorAll('.clockin-widget').forEach(container => {
                         if (!container.dataset.initialized) {
                             initializeClockInWidget(container);
@@ -923,7 +922,6 @@
         }
 
         function showToast(message, type = 'info') {
-            // Create toast container if it doesn't exist
             let toastContainer = document.getElementById('toastContainer');
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
@@ -957,7 +955,6 @@
         }
 
         function initializeClockInWidget(container) {
-            // Check if widget is already initialized
             if (container.dataset.initialized === 'true') {
                 return;
             }
@@ -1010,7 +1007,6 @@
                 }
             }
 
-            // Check current session status
             fetch('/api/attendance/current-session')
                 .then(response => response.json())
                 .then(data => {
@@ -1092,7 +1088,6 @@
                 }
             });
 
-            // Listen for storage events from other pages
             window.addEventListener('storage', (e) => {
                 if (e.key === 'clockInStatus') {
                     const status = JSON.parse(e.newValue);
@@ -1100,18 +1095,15 @@
                 }
             });
 
-            // Check localStorage on initialization
             const savedStatus = localStorage.getItem('clockInStatus');
             if (savedStatus) {
                 const status = JSON.parse(savedStatus);
                 updateWidgetState(status.active, status.checkInTime);
             }
 
-            // Mark widget as initialized
             container.dataset.initialized = 'true';
         }
 
-        // Add a function to initialize all Clock In widgets
         function initializeAllClockInWidgets() {
             document.querySelectorAll('.clockin-widget').forEach(container => {
                 initializeClockInWidget(container);
