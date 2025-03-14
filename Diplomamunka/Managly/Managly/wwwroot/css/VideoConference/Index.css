@@ -1,4 +1,4 @@
-﻿ :root {
+﻿:root {
     --primary-color: #6366f1;
     --primary-hover: #4f46e5;
     --success-color: #10b981;
@@ -126,6 +126,19 @@ body {
 
 #searchUsers:focus {
     outline: none;
+}
+
+#searchUsers:disabled, 
+#searchUsers.disabled {
+    background-color: rgba(15, 23, 42, 0.3);
+    color: var(--text-secondary);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.search-box:has(#searchUsers:disabled) .search-icon,
+.search-box:has(#searchUsers.disabled) .search-icon {
+    opacity: 0.5;
 }
 
 .clear-search-btn {
@@ -773,3 +786,10 @@ body {
         box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
     }
 }
+
+/* Adjust waiting indicator for left panel */
+.left-panel .waiting-indicator {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+

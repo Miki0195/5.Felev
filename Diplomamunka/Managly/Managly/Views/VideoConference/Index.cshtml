@@ -31,11 +31,11 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Updated user selection interface -->
                 <div class="contact-selection">
                     <div id="userResults" class="contact-results custom-scroll"></div>
-                    
+
                     <div id="selectedContact" class="selected-contact-card hidden">
                         <div class="contact-avatar">
                             <i class="fas fa-user"></i>
@@ -47,13 +47,31 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    
+
+                    <!-- Add waiting indicator to the left panel -->
+                    <div id="waitingIndicator" class="waiting-indicator hidden">
+                        <div class="waiting-pulse"></div>
+                        <div class="waiting-content">
+                            <div class="waiting-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="waiting-text">
+                                <h4>Waiting for response</h4>
+                                <div class="typing-indicator">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="emptySelection" class="empty-selection">
                         <i class="fas fa-user-plus"></i>
                         <p>Search and select a contact to call</p>
                     </div>
                 </div>
-                
+
                 <button id="startCallBtn" class="primary-btn call-btn hidden">
                     <i class="fas fa-video"></i>
                     <span>Start Video Call</span>
@@ -67,10 +85,10 @@
                 <div class="status-banner" id="callStatusBanner">
                     <span id="callStatusText"></span>
                 </div>
-                
+
                 <video id="remoteVideo" class="main-video" autoplay playsinline></video>
                 <video id="localVideo" class="main-video hidden" autoplay playsinline muted></video>
-                
+
                 <div id="localVideoSmall" class="pip-video">
                     <video id="selfView" autoplay playsinline muted></video>
                 </div>
@@ -132,26 +150,8 @@
                 <div class="recent-calls custom-scroll">
                     <ul id="recentCallsList"></ul>
                 </div>
-                
-                <div class="call-status">
-                    <!-- New waiting indicator -->
-                    <div id="waitingIndicator" class="waiting-indicator hidden">
-                        <div class="waiting-pulse"></div>
-                        <div class="waiting-content">
-                            <div class="waiting-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="waiting-text">
-                                <h4>Waiting for response</h4>
-                                <div class="typing-indicator">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
+                <div class="call-status">
                     <div id="waitingRoom" class="waiting-room">
                         <h4 id="waitingRoomText"></h4>
                     </div>
@@ -242,10 +242,10 @@
         try {
             await signalRConnection.start();
             console.log("✅ SignalR connected successfully");
-            
+
             signalRConnection.onclose(async (error) => {
                 console.log("SignalR connection closed.", error ? `Error: ${error}` : "");
-                
+
                 // Only try to reconnect if we're not intentionally stopping
                 if (!window.intentionalDisconnect) {
                     await tryReconnect();
@@ -264,7 +264,7 @@
     async function tryReconnect() {
         let attempts = 0;
         const maxAttempts = 5;
-        
+
         while (attempts < maxAttempts) {
             attempts++;
             try {
@@ -281,7 +281,7 @@
                 }
             }
         }
-        
+
         console.error("❌ Failed to reconnect after multiple attempts");
         return false;
     }
@@ -293,21 +293,21 @@
 
         signalRConnection.on("ReceiveCallRequest", (callerId, callerName, receivedCallId) => {
             console.log("📞 Received call request from:", callerName);
-            
+
             targetUserId = callerId;
             callId = receivedCallId;
 
             // Hide the no video placeholder
             document.getElementById("noVideoText").style.display = "none";
-            
+
             // Show incoming call in main area
             const incomingCallElement = document.getElementById("incomingCall");
             incomingCallElement.classList.remove("hidden");
             incomingCallElement.style.display = "flex";
-            
+
             // Update call message
             document.getElementById("callMessage").innerText = `${callerName} is calling you`;
-            
+
             // Show join button and set sender ID
             const joinCallBtn = document.getElementById("joinCallBtn");
             joinCallBtn.setAttribute("data-sender-id", callerId);
@@ -317,7 +317,7 @@
         signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
             try {
                 const parsedSignal = JSON.parse(signal);
-                
+
                 if (!peerConnection) {
                     initializeWebRTC();
                 }
@@ -325,13 +325,13 @@
                 if (parsedSignal.type === "offer") {
                     console.log("📡 Received offer from:", senderId);
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
-                    
+
                     // Only create answer if we already have localStream (meaning user accepted the call)
                     if (localStream) {
                         console.log("📡 Creating answer...");
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
-                        
+
                         console.log("📡 Sending answer to:", senderId);
                         await signalRConnection.invoke("SendSignal", senderId, JSON.stringify(peerConnection.localDescription))
                             .catch(err => console.error("Error sending answer:", err));
@@ -341,7 +341,7 @@
                 } else if (parsedSignal.type === "answer") {
                     console.log("📡 Received answer from:", senderId);
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
-            
+
                     // Hide waiting indicator when we get an answer (other user accepted)
                     document.getElementById("waitingIndicator").classList.add("hidden");
                     console.log("✅ Remote description set successfully");
@@ -360,32 +360,32 @@
 
         signalRConnection.on("CallEnded", (endedCallId, durationText) => {
             console.log("📞 Call ended:", endedCallId);
-            
+
             // Hide waiting indicator if it was showing
             document.getElementById("waitingIndicator").classList.add("hidden");
-            
+
             // Hide incoming call UI if it was showing (for the user who didn't accept yet)
             const incomingCallElement = document.getElementById("incomingCall");
             if (!incomingCallElement.classList.contains("hidden")) {
                 incomingCallElement.classList.add("hidden");
                 incomingCallElement.style.display = "none";
             }
-            
+
             // Hide rejoin call UI if it was showing
             const rejoinCallElement = document.getElementById("rejoinCall");
             if (!rejoinCallElement.classList.contains("hidden")) {
                 rejoinCallElement.classList.add("hidden");
             }
-            
+
             // Show call ended message with the previous design
             const statusBanner = document.getElementById("callStatusBanner");
             statusBanner.innerHTML = `<span>Call ended: ${durationText}</span>`;
             statusBanner.style.display = "block";
-            
+
             // Show the no video placeholder with call ended message
             const noVideoText = document.getElementById("noVideoText");
             noVideoText.style.display = "flex";
-            
+
             // Create call ended UI with duration
             noVideoText.innerHTML = `
                 <div class="placeholder-content">
@@ -394,14 +394,14 @@
                     <p class="text-lg">${durationText}</p>
                 </div>
             `;
-            
+
             // Clean up the call without initiating another end call request
             cleanupCallResources();
-            
+
             // Refresh page after a delay
             setTimeout(() => {
                 window.intentionalDisconnect = false; // Reset the flag
-                window.location.reload(); 
+                window.location.reload();
             }, 5000);
         });
 
@@ -481,14 +481,14 @@
             await signalRConnection.invoke("SendSignal", userId, signal);
         } catch (error) {
             console.error("❌ Failed to send signal:", error);
-            
+
             // Only try once more to avoid infinite loops
             if (!error.message.includes("already tried")) {
                 error.message += " (already tried reconnecting)";
-                
+
                 // Wait a moment before trying again
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 try {
                     await connectToSignalR();
                     await signalRConnection.invoke("SendSignal", userId, signal);
@@ -510,22 +510,22 @@
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             }
-            
+
             // Clear any existing video sources first
             remoteVideo.srcObject = null;
             selfViewVideo.srcObject = null;
-            
+
             // Show local stream in main video area
             localVideo.srcObject = localStream;
             localVideo.style.display = 'block';
             localVideo.classList.remove('hidden');
             remoteVideo.style.display = 'none';
-            
+
             // Hide PiP initially
             const pipContainer = document.getElementById('localVideoSmall');
             pipContainer.style.opacity = '0';
             pipContainer.style.transform = 'scale(0.95)';
-            
+
             // Hide placeholder
             document.getElementById('noVideoText').style.display = 'none';
 
@@ -592,7 +592,7 @@
             } else {
                 console.error("❌ Call data missing user IDs:", call);
             }
-            
+
             // Verify we have a valid target user ID
             if (!targetUserId) {
                 console.error("❌ Failed to determine target user ID");
@@ -634,13 +634,13 @@
                     `;
                     return;
                 }
-                
+
                 // Show local video immediately
                 localVideo.srcObject = localStream;
                 localVideo.style.display = 'block';
                 localVideo.classList.remove('hidden');
                 remoteVideo.style.display = 'none';
-                
+
                 // Hide placeholder and rejoin UI
                 document.getElementById('noVideoText').style.display = 'none';
                 document.getElementById('rejoinCall').classList.add('hidden');
@@ -683,17 +683,17 @@
                     pipContainer.classList.add('active');
                     pipContainer.style.opacity = '1';
                     pipContainer.style.transform = 'scale(1)';
-                    
+
                     // Hide waiting indicator when we receive video
                     document.getElementById("waitingIndicator").classList.add("hidden");
-                    
+
                     console.log("✅ Remote video feed set successfully");
                 };
 
                 // Add tracks to peer connection
                 const videoTrack = localStream.getVideoTracks()[0];
                 const audioTrack = localStream.getAudioTracks()[0];
-                
+
                 if (videoTrack) {
                     peerConnection.addTrack(videoTrack, localStream);
                 }
@@ -706,15 +706,15 @@
                     offerToReceiveAudio: true,
                     offerToReceiveVideo: true
                 });
-                
+
                 await peerConnection.setLocalDescription(offer);
-                
+
                 // Send the offer with our improved sendSignalSafely function
                 await sendSignalSafely(targetUserId, JSON.stringify(offer));
 
                 // Mark call as active
                 await fetch(`/api/videoconference/mark-call-active/${callId}`, { method: "POST" });
-                
+
                 console.error("✅ Reconnection process completed successfully");
             } catch (error) {
                 console.error("❌ Error during reconnection:", error);
@@ -755,33 +755,33 @@
 
         peerConnection.ontrack = (event) => {
             console.log("📡 Received remote track");
-            
+
             // Clear any existing video sources first
             if (remoteVideo.srcObject !== event.streams[0]) {
                 remoteVideo.srcObject = null;
                 localVideo.srcObject = null;
                 selfViewVideo.srcObject = null;
             }
-            
+
             // Move local stream to PiP
             selfViewVideo.srcObject = localStream;
             selfViewVideo.muted = true;
-            
+
             // Show remote stream in main area
             remoteVideo.srcObject = event.streams[0];
             remoteVideo.muted = false;
             remoteVideo.style.display = 'block';
             localVideo.style.display = 'none';
-            
+
             // Show PiP container with animation
             const pipContainer = document.getElementById('localVideoSmall');
             pipContainer.classList.add('active');
             pipContainer.style.opacity = '1';
             pipContainer.style.transform = 'scale(1)';
-            
+
             // Hide waiting indicator when we receive video
             document.getElementById("waitingIndicator").classList.add("hidden");
-            
+
             console.log("✅ Remote video feed set successfully");
         };
 
@@ -789,7 +789,7 @@
         if (localStream) {
             const videoTrack = localStream.getVideoTracks()[0];
             const audioTrack = localStream.getAudioTracks()[0];
-            
+
             if (videoTrack) {
                 peerConnection.addTrack(videoTrack, localStream);
             }
@@ -824,37 +824,51 @@
         isSwapped = !isSwapped;
     });
 
-    async function endCall() {
-        console.error("📴 Ending call...");
+    endCallBtn.addEventListener("click", function() {
+        endCall();
+    });
 
+    function endCall() {
         if (!callId) {
-            console.error("❌ Error: No Call ID found. Cannot end call.");
+            console.error("❌ No active call to end");
             return;
         }
 
-        try {
-            // First, invoke the SignalR EndCall method to notify the other user
-            await signalRConnection.invoke("EndCall", callId);
-            console.log("✅ SignalR EndCall invoked successfully");
-            
-            // Then call the API to update the call status in the database
-            const response = await fetch(`/api/videoconference/end-call/${callId}`, { method: "POST" });
-            const data = await response.json();
-            console.log("✅ API call to end call completed:", data);
-
-            document.getElementById("waitingRoomText").innerHTML = "";
-            cleanupCallUI();
-        } catch (error) {
-            console.error("❌ Failed to end call properly:", error);
-            
-            // Try the API call even if SignalR failed
-            try {
-                await fetch(`/api/videoconference/end-call/${callId}`, { method: "POST" });
-                cleanupCallUI();
-            } catch (apiError) {
-                console.error("❌ Failed to update call end time:", apiError);
+        console.log("📞 Ending call:", callId);
+        
+        // First call the API to end the call and mark invitation as accepted
+        fetch(`/api/videoconference/end-call/${callId}`, {
+            method: "POST"
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => { throw new Error(errorData.error || "Unknown error"); });
             }
-        }
+            return response.json();
+        })
+        .then(data => {
+            console.log("✅ Call ended successfully:", data);
+            
+            // Clean up resources
+            cleanupCallResources();
+            
+            // Show call ended message
+            const statusBanner = document.getElementById("callStatusBanner");
+            statusBanner.innerHTML = `<span>Call ended: ${data.message}</span>`;
+            statusBanner.style.display = "block";
+            
+            // Show the no video placeholder
+            const noVideoText = document.getElementById("noVideoText");
+            noVideoText.style.display = "flex";
+            
+            // Update UI
+            loadRecentCalls();
+        })
+        .catch(error => {
+            console.error("❌ Failed to end call:", error);
+            // Still clean up resources even if the API call fails
+            cleanupCallResources();
+        });
     }
 
     function cleanupCallResources() {
@@ -890,14 +904,19 @@
         // Clear UI elements
         document.getElementById("searchUsers").value = "";
         document.getElementById("userResults").innerHTML = "";
-        
+
         // Reset selected contact UI
         document.getElementById("selectedContact").classList.add("hidden");
         document.getElementById("emptySelection").classList.remove("hidden");
         document.getElementById("startCallBtn").classList.add("hidden");
-        
+
         // Hide waiting indicator
         document.getElementById("waitingIndicator").classList.add("hidden");
+        
+        // Re-enable search field
+        document.getElementById("searchUsers").disabled = false;
+        document.getElementById("searchUsers").classList.remove("disabled");
+        document.getElementById("clearSearch").style.opacity = "1";
 
         let waitingRoomText = document.getElementById("waitingRoomText");
         if (waitingRoomText) {
@@ -913,11 +932,11 @@
     function cleanupCallUI() {
         // Clean up resources
         cleanupCallResources();
-        
+
         // Refresh page after a delay
         setTimeout(() => {
             window.intentionalDisconnect = false; // Reset the flag
-            window.location.reload(); 
+            window.location.reload();
         }, 5000);
     }
 
@@ -978,15 +997,15 @@
 
     function showRejoinButton() {
         console.error("🔄 Showing rejoin message...");
-        
+
         // Show the rejoin UI in the middle
         const rejoinUI = document.getElementById("rejoinCall");
         rejoinUI.classList.remove("hidden");
-        
+
         // Hide other UI elements
         document.getElementById("noVideoText").style.display = "none";
         document.getElementById("incomingCall").classList.add("hidden");
-        
+
         // Add click handler to rejoin button
         document.getElementById("rejoinCallBtn").addEventListener("click", function() {
             console.error("🟢 Rejoin button clicked! Attempting to reconnect...");
@@ -994,10 +1013,9 @@
             reconnectToCall();
         });
     }
-    
+
 
     startCallBtn.addEventListener("click", startCall);
-    endCallBtn.addEventListener("click", endCall);
 
     document.addEventListener("DOMContentLoaded", function () {
         connectToSignalR();
@@ -1015,11 +1033,11 @@
 
         document.getElementById("searchUsers").addEventListener("input", function () {
             let query = this.value.trim();
-            
+
             // Show/hide clear button based on input
             const clearBtn = document.getElementById("clearSearch");
             clearBtn.style.opacity = query.length > 0 ? "1" : "0";
-            
+
             if (query.length < 2) {
                 document.getElementById("userResults").innerHTML = "";
                 return;
@@ -1048,7 +1066,7 @@
                         contactCard.className = "contact-card";
                         contactCard.setAttribute("data-user-id", user.id);
                         contactCard.setAttribute("data-user-name", user.fullName);
-                        
+
                         contactCard.innerHTML = `
                             <div class="contact-avatar">
                                 <i class="fas fa-user"></i>
@@ -1057,11 +1075,11 @@
                                 <h3>${user.fullName}</h3>
                             </div>
                         `;
-                        
+
                         contactCard.addEventListener("click", function () {
                             selectContact(user.id, user.fullName);
                         });
-                        
+
                         resultsList.appendChild(contactCard);
                     });
                 })
@@ -1077,36 +1095,36 @@
             if (previouslySelected) {
                 previouslySelected.classList.remove("active");
             }
-            
+
             // Mark the selected contact card as active
             const selectedCard = document.querySelector(`.contact-card[data-user-id="${userId}"]`);
             if (selectedCard) {
                 selectedCard.classList.add("active");
             }
-            
+
             // Update the selected contact display
             document.getElementById("selectedContactName").textContent = fullName;
             document.getElementById("selectedContact").classList.remove("hidden");
             document.getElementById("emptySelection").classList.add("hidden");
-            
+
             // Show the start call button
             document.getElementById("startCallBtn").classList.remove("hidden");
-            
+
             // Store the selected contact info
             selectedContact = { id: userId, name: fullName };
             targetUserId = userId;
-            
+
             // Clear the search results
             document.getElementById("userResults").innerHTML = "";
             document.getElementById("searchUsers").value = "";
         }
-        
+
         document.getElementById("removeSelectedContact").addEventListener("click", function() {
             // Clear the selected contact
             document.getElementById("selectedContact").classList.add("hidden");
             document.getElementById("emptySelection").classList.remove("hidden");
             document.getElementById("startCallBtn").classList.add("hidden");
-            
+
             // Reset variables
             selectedContact = null;
             targetUserId = null;
@@ -1133,8 +1151,18 @@
             }
 
             targetUserId = userId;
+
+            // Hide user selection UI elements
+            document.getElementById("selectedContact").classList.add("hidden");
+            document.getElementById("emptySelection").classList.add("hidden");
+            document.getElementById("startCallBtn").classList.add("hidden");
             
-            // Show waiting indicator
+            // Disable search field during call
+            document.getElementById("searchUsers").disabled = true;
+            document.getElementById("searchUsers").classList.add("disabled");
+            document.getElementById("clearSearch").style.opacity = "0";
+
+            // Show waiting indicator in the left panel
             document.getElementById("waitingIndicator").classList.remove("hidden");
             document.getElementById("waitingRoomText").innerHTML = "";
 
@@ -1172,6 +1200,15 @@
                 console.error("❌ Call invitation failed:", error);
                 // Hide waiting indicator on error
                 document.getElementById("waitingIndicator").classList.add("hidden");
+                
+                // Re-enable search field
+                document.getElementById("searchUsers").disabled = false;
+                document.getElementById("searchUsers").classList.remove("disabled");
+                document.getElementById("clearSearch").style.opacity = "1";
+                
+                // Show user selection UI elements again
+                document.getElementById("selectedContact").classList.remove("hidden");
+                document.getElementById("startCallBtn").classList.remove("hidden");
             });
         }
 
@@ -1199,7 +1236,7 @@
                             // Show missed call message in the middle of the screen
                             const noVideoText = document.getElementById("noVideoText");
                             noVideoText.style.display = "flex";
-                            
+
                             // Create missed call UI
                             noVideoText.innerHTML = `
                                 <div class="placeholder-content">
@@ -1209,7 +1246,7 @@
                                     <p class="text-md text-gray-300">Please try again later.</p>
                                 </div>
                             `;
-                            
+
                             // Hide other UI elements
                             document.getElementById("incomingCall").classList.add("hidden");
                             document.getElementById("rejoinCall").classList.add("hidden");
@@ -1217,11 +1254,11 @@
 
                             // Clean up resources but don't refresh page yet
                             cleanupCallResources();
-                            
+
                             // Update UI
                             loadNotifications();
                             loadRecentCalls();
-                            
+
                             // After 5 seconds, refresh the page
                             setTimeout(() => {
                                 window.location.reload();
@@ -1248,19 +1285,19 @@
                     if (data.hasInvite) {
                         // Store the call ID and target user ID for potential call end events
                         targetUserId = data.senderId;
-                        
+
                         // Check if the call is still active before showing the invitation
                         fetch(`/api/videoconference/get-call-by-users?senderId=${data.senderId}`)
                             .then(response => response.json())
                             .then(callData => {
                                 if (callData && callData.callId) {
                                     callId = callData.callId;
-                                    
+
                                     // Only show the invitation if the call is still pending or active
                                     if (callData.status !== "Ended" && callData.status !== "Missed") {
                                         // Hide the no video placeholder
                                         document.getElementById("noVideoText").style.display = "none";
-                                        
+
                                         // Show incoming call in main area
                                         document.getElementById("incomingCall").classList.remove("hidden");
                                         document.getElementById("callMessage").innerText = `You have been invited to a video call by ${data.senderName}`;
@@ -1287,7 +1324,7 @@
                     } else {
                         // Show no video placeholder if no call
                         document.getElementById("noVideoText").style.display = "flex";
-                        
+
                         // Hide incoming call
                         document.getElementById("incomingCall").classList.add("hidden");
                         document.getElementById("callMessage").innerText = "";
@@ -1300,12 +1337,12 @@
             let senderId = this.getAttribute("data-sender-id");
 
             try {
-                const response = await fetch(`/api/videoconference/accept-invite/${senderId}`, { 
-                    method: "POST" 
+                const response = await fetch(`/api/videoconference/accept-invite/${senderId}`, {
+                    method: "POST"
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (!response.ok) {
                     throw new Error(data.error || "Failed to accept call");
                 }
@@ -1320,6 +1357,16 @@
                     incomingCallElement.style.display = "none";
                     document.getElementById("callMessage").innerText = "";
 
+                    // Disable search field during call
+                    document.getElementById("searchUsers").disabled = true;
+                    document.getElementById("searchUsers").classList.add("disabled");
+                    document.getElementById("clearSearch").style.opacity = "0";
+                    
+                    // Hide user selection UI elements
+                    document.getElementById("selectedContact").classList.add("hidden");
+                    document.getElementById("emptySelection").classList.add("hidden");
+                    document.getElementById("startCallBtn").classList.add("hidden");
+
                     if (missedCallTimer) {
                         clearTimeout(missedCallTimer);
                         missedCallTimer = null;
@@ -1328,7 +1375,7 @@
                     try {
                         // Get camera/mic access ONLY after accepting
                         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                        
+
                         // Show our video in main area initially
                         localVideo.srcObject = localStream;
                         localVideo.style.display = 'block';
@@ -1350,13 +1397,28 @@
                         await fetch(`/api/videoconference/mark-call-active/${callId}`, { method: "POST" });
                     } catch (error) {
                         console.error("❌ Error setting up media devices:", error);
+                        
+                        // Re-enable search field on error
+                        document.getElementById("searchUsers").disabled = false;
+                        document.getElementById("searchUsers").classList.remove("disabled");
+                        document.getElementById("clearSearch").style.opacity = "1";
+                        
+                        // Show empty selection again
+                        document.getElementById("emptySelection").classList.remove("hidden");
                     }
                 }
             } catch (error) {
                 console.error("❌ Error accepting invite:", error.message);
+                
+                // Re-enable search field on error
+                document.getElementById("searchUsers").disabled = false;
+                document.getElementById("searchUsers").classList.remove("disabled");
+                document.getElementById("clearSearch").style.opacity = "1";
+                
+                // Show empty selection again
+                document.getElementById("emptySelection").classList.remove("hidden");
             }
         });
 
 
-    });</script> 
-
+    });</script>
