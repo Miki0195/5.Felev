@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "umNZTK9hYrw2lV6q7AWKZbSbgiLXmVkrRUajxFUrqlKfupuGZZlgBOQmf+Mq0bDneRsFGxeSg9sEYLBvDhHd5g==",
+  "dgSpecHash": "zHo+czWDFs8=",
   "success": true,
   "projectFilePath": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Managly.csproj",
   "expectedPackageFiles": [
@@ -106,5 +106,16 @@
     "/Users/buchsbaummiklos/.nuget/packages/system.text.json/9.0.1/system.text.json.9.0.1.nupkg.sha512",
     "/Users/buchsbaummiklos/.nuget/packages/system.threading.channels/9.0.1/system.threading.channels.9.0.1.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.AspNetCore.Identity' 2.3.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-2865-hh9g-w894",
+      "libraryId": "Microsoft.AspNetCore.Identity",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }

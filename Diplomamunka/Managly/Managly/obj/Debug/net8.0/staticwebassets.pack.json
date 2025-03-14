@@ -57,6 +57,10 @@
       "PackagePath": "staticwebassets/css/Schedule/Manage.css"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/VideoConference/Index.css",
+      "PackagePath": "staticwebassets/css/VideoConference/Index.css"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
     },

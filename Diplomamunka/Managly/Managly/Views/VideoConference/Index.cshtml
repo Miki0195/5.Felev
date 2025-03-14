@@ -1,60 +1,138 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Video Conference";
+    // Get the current user ID directly in the view
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/VideoConference/Index.css">
 
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-</div>
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
-<div class="bg-gray-900 text-white min-h-screen flex">
-    <!-- Left Sidebar -->
-    <div class="w-1/4 bg-gray-800 p-5 border-r border-gray-700 flex flex-col h-full">
-        <h2 class="text-xl font-semibold mb-4">Users</h2>
-        <input type="text" id="searchUsers" class="w-full p-2 rounded-lg bg-gray-700 text-white placeholder-gray-400" placeholder="Search users...">
-        <ul id="userResults" class="mt-4 space-y-3"></ul>
-        <h4 class="mt-4 text-lg font-semibold">Selected Users</h4>
-        <ul id="selectedUsers" class="space-y-2"></ul>
-        @*hidden*@
-        <button id="startCallBtn" class="bg-blue-500 text-white w-full py-2 rounded-lg mt-3">Start Call</button>
-
-        <!-- Recent Calls -->
-        <div class="mt-4">
-            <h2 class="text-xl font-semibold mb-2">Recent Calls</h2>
-            <ul id="recentCallsList" class="space-y-2 overflow-auto max-h-[250px]"></ul>
-        </div>
-
-        <!-- Waiting Room -->
-        <div class="mt-4 text-yellow-400" id="waitingRoom">
-            <h4 id="waitingRoomText"></h4>
-        </div>
-
-        <!-- Incoming Call -->
-        <div class="mt-4 text-yellow-400" id="incomingCall" style="display: none;">
-            <h3 id="callMessage"></h3>
-            <button id="joinCallBtn" class="bg-blue-500 text-white w-full py-2 rounded-lg mt-3">Join Call</button>
-        </div>
-    </div>
-
-    <!-- Main Video Call Area -->
-    <div class="flex-1 flex flex-col items-center justify-center p-5 relative">
-        <div class="relative w-3/4 h-3/4 bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
-            <video id="localVideo" class="absolute w-full h-full object-cover" autoplay playsinline muted></video>
-            <video id="remoteVideo" class="absolute w-full h-full object-cover" autoplay playsinline></video>
-
-            <div id="localVideoSmall" class="absolute top-3 right-3 w-24 h-24 border-2 border-white rounded-lg overflow-hidden transition-all duration-500 opacity-0 scale-95 cursor-pointer">
-                <video id="selfView" class="w-full h-full object-cover" autoplay playsinline muted></video>
+<div class="video-conference-wrapper">
+    <div class="video-conference-container">
+        <!-- Left Panel -->
+        <div class="side-panel left-panel">
+            <div class="panel-content glass-effect">
+                <div class="panel-header">
+                    <h2><i class="fas fa-users"></i>Contacts</h2>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchUsers" placeholder="Search contacts...">
+                    </div>
+                </div>
+                <div class="search-results">
+                    <ul id="userResults" class="user-list custom-scroll"></ul>
+                </div>
+                <div class="selected-participants">
+                    <h3>Selected Participants</h3>
+                    <ul id="selectedUsers" class="selected-list custom-scroll"></ul>
+                </div>
+                <button id="startCallBtn" class="primary-btn">
+                    <i class="fas fa-video"></i>
+                    <span>Start Video Call</span>
+                </button>
             </div>
-
-            <span id="noVideoText" class="text-gray-500">No active video feed</span>
         </div>
 
-        <div class="flex space-x-4 mt-4">
-            <button id="endCallBtn" class="bg-red-500 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-phone-slash mr-2"></i>End Call</button>
-            <button id="muteAudioBtn" class="bg-gray-700 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-microphone mr-2"></i>Mute</button>
-            <button id="toggleVideoBtn" class="bg-gray-700 px-6 py-2 rounded-lg text-white flex items-center"><i class="fas fa-video mr-2"></i>Video</button>
+        <!-- Main Video Area -->
+        <div class="main-video-area">
+            <div class="video-container glass-effect">
+                <div class="status-banner" id="callStatusBanner">
+                    <span id="callStatusText"></span>
+                </div>
+                
+                <video id="remoteVideo" class="main-video" autoplay playsinline></video>
+                <video id="localVideo" class="main-video hidden" autoplay playsinline muted></video>
+                
+                <div id="localVideoSmall" class="pip-video">
+                    <video id="selfView" autoplay playsinline muted></video>
+                </div>
+
+                <div id="noVideoText" class="no-video-placeholder">
+                    <div class="placeholder-content">
+                        <i class="fas fa-video-slash"></i>
+                        <p>No active video call</p>
+                    </div>
+                </div>
+
+                <!-- Moved incoming call UI here -->
+                <div id="incomingCall" class="incoming-call-main hidden">
+                    <div class="incoming-call-content">
+                        <div class="call-indicator">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                        <h3 id="callMessage"></h3>
+                        <button id="joinCallBtn" class="primary-btn accept-call">
+                            <i class="fas fa-phone"></i>
+                            <span>Accept Call</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="rejoinCall" class="incoming-call-main hidden">
+                    <div class="incoming-call-content">
+                        <div class="call-indicator">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                        <h3>You disconnected from an active call</h3>
+                        <button id="rejoinCallBtn" class="primary-btn accept-call">
+                            <i class="fas fa-phone"></i>
+                            <span>Rejoin Call</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="video-controls">
+                    <button id="muteAudioBtn" class="control-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button id="toggleVideoBtn" class="control-btn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button id="endCallBtn" class="control-btn end-call">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="side-panel right-panel">
+            <div class="panel-content glass-effect">
+                <div class="panel-header">
+                    <h2><i class="fas fa-clock-rotate-left"></i>Recent Calls</h2>
+                </div>
+                <div class="recent-calls custom-scroll">
+                    <ul id="recentCallsList"></ul>
+                </div>
+                
+                <div class="call-status">
+                    <div id="waitingRoom" class="waiting-room">
+                        <h4 id="waitingRoomText"></h4>
+                    </div>
+
+                    <div id="incomingCall" class="incoming-call" style="display: none;">
+                        <div class="incoming-call-content">
+                            <div class="call-indicator">
+                                <i class="fas fa-phone-volume"></i>
+                            </div>
+                            <h3 id="callMessage"></h3>
+                            <button id="joinCallBtn" class="primary-btn accept-call">
+                                <i class="fas fa-phone"></i>
+                                <span>Accept Call</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -70,7 +148,7 @@
     let localStream;
     let peerConnection;
     let signalRConnection;
-    let currentUserId = "USER_ID_FROM_SERVER";
+    let currentUserId = "@currentUserId"; // Use the server-side value
     let targetUserId = null;
     let callId = null;
     selectedUsers = [];
@@ -91,7 +169,7 @@
             localStream.getAudioTracks()[0].enabled = isMuted;
             isMuted = !isMuted;
             this.classList.toggle("bg-red-500");
-            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-microphone-slash mr-2"></i>Unmute' : '<i class="fas fa-microphone mr-2"></i>Mute';
+            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-microphone-slash mr-2"></i>' : '<i class="fas fa-microphone mr-2"></i>';
         }
     });
 
@@ -100,133 +178,548 @@
             localStream.getVideoTracks()[0].enabled = isVideoOff;
             isVideoOff = !isVideoOff;
             this.classList.toggle("bg-red-500");
-            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-video-slash mr-2"></i>Enable Video' : '<i class="fas fa-video mr-2"></i>Disable Video';
+            this.innerHTML = this.classList.contains("bg-red-500") ? '<i class="fas fa-video-slash mr-2"></i>' : '<i class="fas fa-video mr-2"></i>';
         }
     });
 
 
     async function connectToSignalR() {
+        // If we already have a connection, close it first
+        if (signalRConnection) {
+            try {
+                await signalRConnection.stop();
+                console.log("Stopped existing SignalR connection");
+            } catch (error) {
+                console.error("Error stopping existing SignalR connection:", error);
+            }
+        }
+
+        // Create a new connection
         signalRConnection = new signalR.HubConnectionBuilder()
-            //.withUrl("https://192.168.1.193:7221/videocallhub", {  // Ensure this matches backend CORS setup
-            //    transport: signalR.HttpTransportType.WebSockets,
-            //    skipNegotiation: true, // THESE TWO JUST FOR LOCAL TESTING
-            //    withCredentials: false
-            //})
-            .withUrl("https://192.168.0.134:7221/videocallhub")
+            .withUrl("/videocallhub")
             .configureLogging(signalR.LogLevel.Information)
-            .withAutomaticReconnect()
+            .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 15000])
             .build();
 
         try {
             await signalRConnection.start();
-            console.error("✅ SignalR connected successfully");
+            console.log("✅ SignalR connected successfully");
+            
+            signalRConnection.onclose(async (error) => {
+                console.log("SignalR connection closed.", error ? `Error: ${error}` : "");
+                
+                // Only try to reconnect if we're not intentionally stopping
+                if (!window.intentionalDisconnect) {
+                    await tryReconnect();
+                }
+            });
+
+            setupSignalRHandlers();
+            return true;
         } catch (error) {
             console.error("❌ SignalR connection failed:", error);
+            await tryReconnect();
+            return false;
         }
+    }
 
+    async function tryReconnect() {
+        let attempts = 0;
+        const maxAttempts = 5;
+        
+        while (attempts < maxAttempts) {
+            attempts++;
+            try {
+                console.log(`SignalR reconnection attempt ${attempts}/${maxAttempts}...`);
+                await signalRConnection.start();
+                console.log("✅ SignalR reconnected successfully");
+                setupSignalRHandlers();
+                return true;
+            } catch (error) {
+                console.error(`❌ SignalR reconnection attempt ${attempts} failed:`, error);
+                if (attempts < maxAttempts) {
+                    // Wait longer between each attempt
+                    await new Promise(resolve => setTimeout(resolve, 2000 * attempts));
+                }
+            }
+        }
+        
+        console.error("❌ Failed to reconnect after multiple attempts");
+        return false;
+    }
+
+    function setupSignalRHandlers() {
         signalRConnection.off("ReceiveCallRequest");
         signalRConnection.off("ReceiveSignal");
         signalRConnection.off("CallEnded");
 
         signalRConnection.on("ReceiveCallRequest", (callerId, callerName, receivedCallId) => {
+            console.log("📞 Received call request from:", callerName);
+            
             targetUserId = callerId;
             callId = receivedCallId;
 
-            document.getElementById("incomingCall").style.display = "block";
-            document.getElementById("callMessage").innerText = `You have been invited to a video call by ${callerName}`;
-            document.getElementById("joinCallBtn").setAttribute("data-sender-id", callerId);
+            // Hide the no video placeholder
+            document.getElementById("noVideoText").style.display = "none";
+            
+            // Show incoming call in main area
+            const incomingCallElement = document.getElementById("incomingCall");
+            incomingCallElement.classList.remove("hidden");
+            incomingCallElement.style.display = "flex";
+            
+            // Update call message
+            document.getElementById("callMessage").innerText = `${callerName} is calling you`;
+            
+            // Show join button and set sender ID
+            const joinCallBtn = document.getElementById("joinCallBtn");
+            joinCallBtn.setAttribute("data-sender-id", callerId);
+            joinCallBtn.style.display = "block";
         });
 
         signalRConnection.on("ReceiveSignal", async (senderId, signal) => {
-            console.error(`📡 Signal received from ${senderId}`, signal);
-
-            let parsedSignal;
             try {
-                parsedSignal = JSON.parse(signal);
-            } catch (error) {
-                console.error("❌ Error parsing signal JSON:", error.message);
-                return;
-            }
-
-            if (!peerConnection) {
-                console.warn("⚠️ PeerConnection is not initialized yet. Delaying ICE candidate processing.");
-                return;
-            }
-
-            if (parsedSignal.type === "offer") {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
-
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-
-                signalRConnection.invoke("SendSignal", senderId, JSON.stringify(answer));
-            } else if (parsedSignal.type === "answer") {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
-            } else if (parsedSignal.type === "candidate") {
-                if (peerConnection) {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(parsedSignal.candidate));
-                } else {
-                    console.warn("⚠️ Skipping ICE candidate. PeerConnection is not ready.");
+                const parsedSignal = JSON.parse(signal);
+                
+                if (!peerConnection) {
+                    initializeWebRTC();
                 }
+
+                if (parsedSignal.type === "offer") {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+                    
+                    // Only create answer if we already have localStream (meaning user accepted the call)
+                    if (localStream) {
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        await sendSignalSafely(senderId, JSON.stringify(answer));
+                    }
+                } else if (parsedSignal.type === "answer") {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(parsedSignal));
+                } else if (parsedSignal.type === "candidate" && parsedSignal.candidate) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(parsedSignal.candidate));
+                }
+            } catch (error) {
+                console.error("❌ Error handling signal:", error);
             }
         });
 
         signalRConnection.on("CallEnded", (endedCallId, duration) => {
             if (callId === endedCallId) {
                 localStorage.removeItem("activeCall");
-                let statusElement = document.getElementById("noVideoText");
-                if (statusElement) {
-                    statusElement.innerHTML = `<p class="text-red-500 font-bold text-xl">Call Ended</p>
-                                       <p class="text-white text-lg">Duration: ${duration}</p>`;
-
-                    setTimeout(() => {
-                        statusElement.innerHTML = `<p class="text-gray-500">No active video feed</p>`;
-                    }, 5000);
-                } else {
-                    console.warn("⚠️ callStatus element not found.");
-                }
-
+                
+                // Show call ended message in the middle of the screen
+                const noVideoText = document.getElementById("noVideoText");
+                noVideoText.style.display = "flex";
+                
+                // Create call ended UI
+                noVideoText.innerHTML = `
+                    <div class="placeholder-content">
+                        <i class="fas fa-phone-slash text-red-500"></i>
+                        <h3 class="text-xl font-bold text-red-500">Call Ended</h3>
+                        <p class="text-lg text-white">Duration: ${duration}</p>
+                    </div>
+                `;
+                
+                // Hide other UI elements
+                document.getElementById("incomingCall").classList.add("hidden");
+                document.getElementById("rejoinCall").classList.add("hidden");
+                
+                // After 5 seconds, reset to default message
+                setTimeout(() => {
+                    noVideoText.innerHTML = `
+                        <div class="placeholder-content">
+                            <i class="fas fa-video-slash"></i>
+                            <p>No active video call</p>
+                        </div>
+                    `;
+                }, 5000);
+                
                 cleanupCallUI();
             }
         });
 
+        signalRConnection.on("CallStarted", async (receivedCallId) => {
+            console.log("📞 Call started with ID:", receivedCallId);
+            callId = receivedCallId;
+
+            try {
+                // Get local stream if we don't have it yet
+                if (!localStream) {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                }
+
+                // Initialize WebRTC if not already initialized
+                if (!peerConnection) {
+                    initializeWebRTC();
+                }
+
+                // Show local stream in main area initially
+                remoteVideo.srcObject = localStream;
+                remoteVideo.muted = true;
+                remoteVideo.style.display = 'block';
+
+                // Hide PiP initially
+                const pipContainer = document.getElementById('localVideoSmall');
+                pipContainer.style.opacity = '0';
+                pipContainer.style.transform = 'scale(0.95)';
+
+                // Hide placeholder and incoming call UI
+                document.getElementById('noVideoText').style.display = 'none';
+                document.getElementById('incomingCall').classList.add('hidden');
+            } catch (error) {
+                console.error("❌ Error in CallStarted handler:", error);
+            }
+        });
     }
 
-    //smallSelfView.addEventListener("click", function () {
-    //    console.log("🔄 Attempting to swap video feeds...");
-    //    console.log("🎥 Local Video Stream:", localVideo.srcObject);
-    //    console.log("🎥 Remote Video Stream:", remoteVideo.srcObject);
-    //    console.log("🎥 Self View Video Stream:", selfViewVideo.srcObject);
+    async function sendSignalSafely(userId, signal) {
+        // Don't attempt to send if userId is not valid
+        if (!userId) {
+            console.error("❌ Cannot send signal: Missing target user ID");
+            return;
+        }
 
-    //    // Ensure that both local and remote video elements have valid streams before swapping
-    //    if (!localVideo.srcObject || !remoteVideo.srcObject || !selfViewVideo.srcObject) {
-    //        console.error("❌ Missing video streams, swap not possible.");
-    //        return;
-    //    }
+        // Check if we have a valid connection
+        if (!signalRConnection) {
+            console.error("❌ SignalR connection object is null");
+            try {
+                await connectToSignalR();
+            } catch (error) {
+                console.error("❌ Failed to establish SignalR connection:", error);
+                return; // Exit if we can't connect
+            }
+        }
 
-    //    if (isSwapped) {
-    //        // Swap back to original positions
-    //        selfViewVideo.srcObject = localStream;  // ✅ Fix: Restore local video properly
-    //        remoteVideo.srcObject = remoteStream;
+        // Check connection state
+        if (signalRConnection.state !== signalR.HubConnectionState.Connected) {
+            console.warn("⚠️ SignalR not connected. Current state:", signalRConnection.state);
+            try {
+                // If disconnected, try to reconnect
+                if (signalRConnection.state === signalR.HubConnectionState.Disconnected) {
+                    await signalRConnection.start();
+                    console.log("✅ SignalR reconnected successfully");
+                    setupSignalRHandlers();
+                } else {
+                    // If in connecting or reconnecting state, wait a bit
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            } catch (error) {
+                console.error("❌ Failed to reconnect SignalR:", error);
+                return; // Exit if we can't reconnect
+            }
+        }
 
-    //        remoteVideo.muted = false;
-    //        selfViewVideo.muted = true;
-    //    } else {
-    //        // Swap self-view with main remote video
-    //        let tempStream = selfViewVideo.srcObject;
-    //        selfViewVideo.srcObject = remoteVideo.srcObject;
-    //        remoteVideo.srcObject = tempStream;
+        // Now try to send the signal
+        try {
+            await signalRConnection.invoke("SendSignal", userId, signal);
+        } catch (error) {
+            console.error("❌ Failed to send signal:", error);
+            
+            // Only try once more to avoid infinite loops
+            if (!error.message.includes("already tried")) {
+                error.message += " (already tried reconnecting)";
+                
+                // Wait a moment before trying again
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                try {
+                    await connectToSignalR();
+                    await signalRConnection.invoke("SendSignal", userId, signal);
+                } catch (retryError) {
+                    console.error("❌ Final attempt to send signal failed:", retryError);
+                }
+            }
+        }
+    }
 
-    //        remoteVideo.muted = true;
-    //        selfViewVideo.muted = false;
-    //    }
+    async function startCall() {
+        if (!targetUserId || !callId) {
+            console.error("❌ Missing target user or call ID.");
+            return;
+        }
 
-    //    console.log("✅ Swap complete!");
-    //    console.log("🎥 Self View Video Stream (After Swap):", selfViewVideo.srcObject);
-    //    console.log("🎥 Remote Video Stream (After Swap):", remoteVideo.srcObject);
+        try {
+            // Get local media stream if we don't have it
+            if (!localStream) {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            }
+            
+            // Clear any existing video sources first
+            remoteVideo.srcObject = null;
+            selfViewVideo.srcObject = null;
+            
+            // Show local stream in main video area
+            localVideo.srcObject = localStream;
+            localVideo.style.display = 'block';
+            localVideo.classList.remove('hidden');
+            remoteVideo.style.display = 'none';
+            
+            // Hide PiP initially
+            const pipContainer = document.getElementById('localVideoSmall');
+            pipContainer.style.opacity = '0';
+            pipContainer.style.transform = 'scale(0.95)';
+            
+            // Hide placeholder
+            document.getElementById('noVideoText').style.display = 'none';
 
-    //    isSwapped = !isSwapped;
-    //});
+            // Initialize WebRTC
+            initializeWebRTC();
+
+            // Create and send offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await sendSignalSafely(targetUserId, JSON.stringify(offer));
+
+        } catch (error) {
+            console.error("❌ Error starting call:", error);
+        }
+    }
+
+    async function reconnectToCall() {
+        console.error("🔄 Attempting to reconnect to call...");
+
+        if (!callId) {
+            console.error("❌ No Call ID available. Cannot reconnect.");
+            return;
+        }
+
+        try {
+            // First, ensure SignalR is connected with proper error handling
+            if (!signalRConnection || signalRConnection.state !== signalR.HubConnectionState.Connected) {
+                console.error("📡 Reconnecting SignalR...");
+                try {
+                    await connectToSignalR();
+                    // Wait a moment to ensure connection is stable
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (error) {
+                    console.error("❌ Failed to reconnect SignalR:", error);
+                    document.getElementById("noVideoText").innerHTML = `
+                        <p class="text-red-500">Failed to reconnect to SignalR</p>
+                        <button onclick="reconnectToCall()" class="primary-btn mt-3">Try Again</button>
+                    `;
+                    return;
+                }
+            }
+
+            // Get call information
+            const response = await fetch(`/api/videoconference/get-call/${callId}`);
+            const call = await response.json();
+
+            if (!call || call.Status === "Ended") {
+                document.getElementById("noVideoText").innerHTML = `<p class="text-red-500">The call has ended. You cannot rejoin.</p>`;
+                return;
+            }
+
+            console.log("Call data:", call);
+            console.log("Current user ID:", currentUserId);
+
+            // Set target user ID based on call data
+            if (call.CallerId && call.ReceiverId) {
+                // If we have both IDs in the call, determine which one is not the current user
+                if (call.CallerId !== currentUserId) {
+                    targetUserId = call.CallerId;
+                } else {
+                    targetUserId = call.ReceiverId;
+                }
+                console.log("Target user ID set to:", targetUserId);
+            } else {
+                console.error("❌ Call data missing user IDs:", call);
+            }
+            
+            // Verify we have a valid target user ID
+            if (!targetUserId) {
+                console.error("❌ Failed to determine target user ID");
+                document.getElementById("noVideoText").innerHTML = `
+                    <p class="text-red-500">Failed to identify the other participant</p>
+                    <p class="text-sm text-gray-400">Call data: ${JSON.stringify(call)}</p>
+                    <p class="text-sm text-gray-400">Current user: ${currentUserId}</p>
+                    <button onclick="reconnectToCall()" class="primary-btn mt-3">Try Again</button>
+                `;
+                return;
+            }
+
+            try {
+                // Clean up any existing connections first
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+
+                // Stop all tracks in the existing stream
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+
+                // Clear all video sources
+                remoteVideo.srcObject = null;
+                localVideo.srcObject = null;
+                selfViewVideo.srcObject = null;
+
+                // Get fresh camera/mic access
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                } catch (mediaError) {
+                    console.error("❌ Failed to access camera/mic:", mediaError);
+                    document.getElementById("noVideoText").innerHTML = `
+                        <p class="text-red-500">Failed to access camera or microphone</p>
+                        <button onclick="reconnectToCall()" class="primary-btn mt-3">Try Again</button>
+                    `;
+                    return;
+                }
+                
+                // Show local video immediately
+                localVideo.srcObject = localStream;
+                localVideo.style.display = 'block';
+                localVideo.classList.remove('hidden');
+                remoteVideo.style.display = 'none';
+                
+                // Hide placeholder and rejoin UI
+                document.getElementById('noVideoText').style.display = 'none';
+                document.getElementById('rejoinCall').classList.add('hidden');
+
+                // Create new peer connection
+                peerConnection = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: "stun:stun.l.google.com:19302" },
+                        { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
+                    ]
+                });
+
+                // Set up event handlers
+                peerConnection.onicecandidate = async (event) => {
+                    if (event.candidate) {
+                        try {
+                            await sendSignalSafely(targetUserId, JSON.stringify({
+                                type: "candidate",
+                                candidate: event.candidate
+                            }));
+                        } catch (error) {
+                            console.error("❌ Error sending ICE candidate:", error);
+                        }
+                    }
+                };
+
+                peerConnection.ontrack = (event) => {
+                    console.log("📡 Received remote track");
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteVideo.muted = false;
+                    remoteVideo.style.display = 'block';
+                    localVideo.style.display = 'none';
+
+                    // Move local stream to PiP
+                    selfViewVideo.srcObject = localStream;
+                    selfViewVideo.muted = true;
+
+                    // Show PiP container
+                    const pipContainer = document.getElementById('localVideoSmall');
+                    pipContainer.style.opacity = '1';
+                    pipContainer.style.transform = 'scale(1)';
+                };
+
+                // Add tracks to peer connection
+                const videoTrack = localStream.getVideoTracks()[0];
+                const audioTrack = localStream.getAudioTracks()[0];
+                
+                if (videoTrack) {
+                    peerConnection.addTrack(videoTrack, localStream);
+                }
+                if (audioTrack) {
+                    peerConnection.addTrack(audioTrack, localStream);
+                }
+
+                // Create and send new offer
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+                
+                await peerConnection.setLocalDescription(offer);
+                
+                // Send the offer with our improved sendSignalSafely function
+                await sendSignalSafely(targetUserId, JSON.stringify(offer));
+
+                // Mark call as active
+                await fetch(`/api/videoconference/mark-call-active/${callId}`, { method: "POST" });
+                
+                console.error("✅ Reconnection process completed successfully");
+            } catch (error) {
+                console.error("❌ Error during reconnection:", error);
+                document.getElementById("noVideoText").innerHTML = `
+                    <p class="text-red-500">Failed to rejoin the call</p>
+                    <button onclick="reconnectToCall()" class="primary-btn mt-3">Try Again</button>
+                `;
+            }
+        } catch (error) {
+            console.error("❌ Error fetching call status:", error);
+        }
+    }
+
+    function initializeWebRTC() {
+        if (peerConnection) {
+            peerConnection.close();
+        }
+
+        peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
+            ]
+        });
+
+        peerConnection.onicecandidate = async (event) => {
+            if (event.candidate) {
+                try {
+                    await sendSignalSafely(targetUserId, JSON.stringify({
+                        type: "candidate",
+                        candidate: event.candidate
+                    }));
+                } catch (error) {
+                    console.error("❌ Error sending ICE candidate:", error);
+                }
+            }
+        };
+
+        peerConnection.ontrack = (event) => {
+            console.log("📡 Received remote track");
+            
+            // Clear any existing video sources first
+            if (remoteVideo.srcObject !== event.streams[0]) {
+                remoteVideo.srcObject = null;
+                localVideo.srcObject = null;
+                selfViewVideo.srcObject = null;
+            }
+            
+            // Move local stream to PiP
+            selfViewVideo.srcObject = localStream;
+            selfViewVideo.muted = true;
+            
+            // Show remote stream in main area
+            remoteVideo.srcObject = event.streams[0];
+            remoteVideo.muted = false;
+            remoteVideo.style.display = 'block';
+            localVideo.style.display = 'none';
+            
+            // Show PiP container with animation
+            const pipContainer = document.getElementById('localVideoSmall');
+            pipContainer.style.opacity = '1';
+            pipContainer.style.transform = 'scale(1)';
+        };
+
+        // Only add tracks if we have localStream
+        if (localStream) {
+            const videoTrack = localStream.getVideoTracks()[0];
+            const audioTrack = localStream.getAudioTracks()[0];
+            
+            if (videoTrack) {
+                peerConnection.addTrack(videoTrack, localStream);
+            }
+            if (audioTrack) {
+                peerConnection.addTrack(audioTrack, localStream);
+            }
+        }
+    }
+
     smallSelfView.addEventListener("click", function () {
         if (!localStream || !remoteVideo.srcObject) {
             console.error("❌ Missing video streams, swap not possible.");
@@ -252,114 +745,6 @@
         isSwapped = !isSwapped;
     });
 
-
-
-    //async function startCall() {
-    //    if (!targetUserId || targetUserId === "TARGET_USER_ID_FROM_SERVER") {
-    //        showToast("No target user for the call.", "danger");
-    //        return;
-    //    }
-
-    //    if (peerConnection) {
-    //        peerConnection.onicecandidate = null;
-    //        peerConnection.ontrack = null;
-    //        peerConnection.close();
-    //        peerConnection = null;
-    //    }
-
-    //    if (localStream) {
-    //        localStream.getTracks().forEach(track => track.stop());
-    //        localStream = null;
-    //    }
-
-    //    localVideo.srcObject = null;
-    //    remoteVideo.srcObject = null;
-
-    //    try {
-    //        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    //        localVideo.srcObject = localStream;
-    //        selfViewVideo.srcObject = localStream;
-    //    } catch (error) {
-    //        console.error("❌ Failed to access camera/microphone:", error);
-    //        return;
-    //    }
-
-    //    peerConnection = new RTCPeerConnection({
-    //        iceServers: [
-    //            { urls: "stun:stun.l.google.com:19302" },
-    //            { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
-    //        ]
-    //    });
-
-    //    localStream.getTracks().forEach(track => {
-    //        peerConnection.addTrack(track, localStream);
-    //    });
-
-    //    peerConnection.ontrack = (event) => {
-    //        remoteVideo.srcObject = event.streams[0];
-
-    //        smallSelfView.classList.remove("opacity-0", "scale-95", "hidden");
-    //        smallSelfView.classList.add("opacity-100", "scale-100");
-    //    };
-
-    //    peerConnection.onicecandidate = (event) => {
-    //        if (event.candidate) {
-
-    //            if (signalRConnection && signalRConnection.state === signalR.HubConnectionState.Connected) {
-    //                signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify({
-    //                    type: "candidate",
-    //                    candidate: event.candidate,
-    //                    callId: callId
-    //                })).catch(err => console.error("❌ Failed to send ICE candidate:", err));
-    //            } else {
-    //                console.error("❌ SignalR is not connected! ICE candidate not sent.");
-    //            }
-    //        }
-    //    };
-
-    //    try {
-    //        const offer = await peerConnection.createOffer();
-    //        await peerConnection.setLocalDescription(offer);
-
-    //        signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify(offer))
-    //            .catch(err => console.error("❌ Failed to send WebRTC Offer:", err));
-    //    } catch (error) {
-    //        showToast("Failed to start the call!", "danger");
-    //    }
-    //}
-    async function startCall() {
-        if (!targetUserId || !callId) {
-            console.error("❌ Missing target user or call ID.");
-            return;
-        }
-
-        console.error(`📞 Starting/rejoining call with ${targetUserId}`);
-
-        initializeWebRTC();
-
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localVideo.srcObject = localStream;
-            selfViewVideo.srcObject = localStream;
-
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-
-            if (signalRConnection.state !== signalR.HubConnectionState.Connected) {
-                await signalRConnection.start();
-            }
-
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-
-            signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify(offer))
-                .catch(err => console.error("❌ Failed to send WebRTC Offer:", err));
-        } catch (error) {
-            console.error("❌ Error setting up call:", error);
-        }
-    }
-
     async function endCall() {
         console.error("📴 Ending call...");
 
@@ -383,6 +768,9 @@
     }
 
     function cleanupCallUI() {
+        // Set flag to prevent automatic reconnection attempts when we intentionally disconnect
+        window.intentionalDisconnect = true;
+        
         if (peerConnection) {
             peerConnection.ontrack = null;
             peerConnection.onicecandidate = null;
@@ -397,25 +785,34 @@
 
         localVideo.srcObject = null;
         remoteVideo.srcObject = null;
+        selfViewVideo.srcObject = null;
 
-        smallSelfView.classList.remove("opacity-100", "scale-100");
-        smallSelfView.classList.add("opacity-0", "scale-95");
+        const pipContainer = document.getElementById('localVideoSmall');
+        pipContainer.style.opacity = '0';
+        pipContainer.style.transform = 'scale(0.95)';
 
-        callId = null;
-        targetUserId = null;
-        selectedUsers = [];
-
-        document.getElementById("searchUsers").value = "";
-        document.getElementById("userResults").innerHTML = "";
-        document.getElementById("selectedUsers").innerHTML = "";
-        document.getElementById("startCallBtn").classList.add("d-none");
-
-        let waitingRoomText = document.getElementById("waitingRoomText");
-        if (waitingRoomText) {
-            waitingRoomText.innerHTML = "";
-        }
-
+        // Don't immediately clear these values to allow the end call message to display properly
         setTimeout(() => {
+            callId = null;
+            targetUserId = null;
+            selectedUsers = [];
+
+            document.getElementById("searchUsers").value = "";
+            document.getElementById("userResults").innerHTML = "";
+            document.getElementById("selectedUsers").innerHTML = "";
+            document.getElementById("startCallBtn").classList.add("d-none");
+
+            let waitingRoomText = document.getElementById("waitingRoomText");
+            if (waitingRoomText) {
+                waitingRoomText.innerHTML = "";
+            }
+
+            // Stop SignalR connection
+            if (signalRConnection) {
+                signalRConnection.stop().catch(err => console.error("Error stopping SignalR:", err));
+            }
+
+            window.intentionalDisconnect = false; // Reset the flag
             window.location.reload(); 
         }, 5000);
     }
@@ -476,117 +873,24 @@
     }
 
     function showRejoinButton() {
-        console.error("🔄 Showing 'Join Back' button...");
-
-        document.getElementById("waitingRoom").innerHTML = `
-            <p class="text-yellow-400">You disconnected from the video chat.</p>
-            <button id="rejoinCallBtn" class="bg-blue-500 text-white px-4 py-2 mt-2 rounded">Join Back</button>
-        `;
-
-        setTimeout(() => {
-            let rejoinBtn = document.getElementById("rejoinCallBtn");
-            if (rejoinBtn) {
-                console.error("✅ 'Join Back' button found. Attaching event listener.");
-                rejoinBtn.addEventListener("click", function () {
-                    console.error("🟢 'Join Back' button CLICKED! Attempting to reconnect...");
-                    reconnectToCall();
-                });
-            } else {
-                console.error("❌ 'Join Back' button NOT found! Event listener NOT attached.");
-            }
-        }, 500);
+        console.error("🔄 Showing rejoin message...");
+        
+        // Show the rejoin UI in the middle
+        const rejoinUI = document.getElementById("rejoinCall");
+        rejoinUI.classList.remove("hidden");
+        
+        // Hide other UI elements
+        document.getElementById("noVideoText").style.display = "none";
+        document.getElementById("incomingCall").classList.add("hidden");
+        
+        // Add click handler to rejoin button
+        document.getElementById("rejoinCallBtn").addEventListener("click", function() {
+            console.error("🟢 Rejoin button clicked! Attempting to reconnect...");
+            rejoinUI.classList.add("hidden");
+            reconnectToCall();
+        });
     }
     
-
-    async function reconnectToCall() {
-        console.error("🔄 Checking if call is still active before rejoining...");
-
-        if (!callId) {
-            console.error("❌ No Call ID available. Cannot reconnect.");
-            return;
-        }
-
-        fetch(`/api/videoconference/get-call/${callId}?nocache=${new Date().getTime()}`)
-            .then(response => response.json())
-            .then(call => {
-
-                if (!call) {
-                    console.error("❌ API returned NULL. Call not found.");
-                    return;
-                }
-
-                if (call.Status === 0) {
-                    document.getElementById("noVideoText").innerHTML = `<p class="text-red-500">The call has ended. You cannot rejoin.</p>`;
-                    return;
-                }
-
-                callId = call.callId;
-                targetUserId = call.callerId === currentUserId ? call.receiverId : call.callerId;
-                if (!callId || !targetUserId) {
-                    console.error("❌ Call ID or Target User ID is still missing!");
-                    return;
-                }
-
-                document.getElementById("waitingRoom").innerHTML = "";
-                initializeWebRTC();
-                startCall();
-            })
-            .catch(error => console.error("❌ Error fetching call status:", error));
-    }
-
-
-    function initializeWebRTC() {
-        console.error("🔄 Initializing WebRTC...");
-
-        if (peerConnection) {
-            peerConnection.onicecandidate = null;
-            peerConnection.ontrack = null;
-            peerConnection.close();
-            peerConnection = null;
-        }
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-
-        peerConnection = new RTCPeerConnection({
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302" },
-                { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" }
-            ]
-        });
-
-        peerConnection.onicecandidate = event => {
-            if (event.candidate) {
-                signalRConnection.invoke("SendSignal", targetUserId, JSON.stringify({
-                    type: "candidate",
-                    candidate: event.candidate,
-                    callId: callId
-                })).catch(err => console.error("❌ Failed to send ICE candidate:", err));
-            }
-        };
-
-        peerConnection.ontrack = (event) => {
-            if (!remoteVideo.srcObject) {
-                remoteStream = new MediaStream(); // ✅ Fix: Store remote stream separately
-            }
-
-            remoteStream.addTrack(event.track);
-            remoteVideo.srcObject = remoteStream;
-            console.log("✅ Remote video stream set!");
-
-            smallSelfView.classList.remove("opacity-0", "scale-95", "hidden");
-            smallSelfView.classList.add("opacity-100", "scale-100");
-        };
-
-        console.error("✅ WebRTC initialized.");
-    }
-
-
-
-
-
 
     startCallBtn.addEventListener("click", startCall);
     endCallBtn.addEventListener("click", endCall);
@@ -691,53 +995,48 @@
             }
 
             targetUserId = userId;
-
             document.getElementById("waitingRoomText").innerHTML = "";
 
-            signalRConnection.invoke("SendCallRequest", userId)
-                .then(() => {
-                    missedCallTimer = setTimeout(() => {
-                        markMissedCall();
-                    }, 60000); // **60 seconds**
-                })
-                .catch(error => {
-                    console.error("❌ SignalR call request failed. Falling back to API:", error);
-                });
-
-            signalRConnection.on("ReceiveCallId", (receivedCallId) => {
-                callId = receivedCallId;
-                startCall();
-            });
-
+            // First send the API request to create the call
             let requestBody = JSON.stringify({ ReceiverId: userId });
-
             fetch("/api/videoconference/invite", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: requestBody
             })
-                .then(async response => {
-                    let responseBody = await response.json();
-                    console.error("🟢 Server Response (API):", responseBody);
+            .then(async response => {
+                let responseBody = await response.json();
+                console.error("🟢 Server Response (API):", responseBody);
 
-                    if (!response.ok) {
-                        throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
-                    }
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${JSON.stringify(responseBody)}`);
+                }
 
-                    if (!callId && responseBody.callId) {
-                        callId = responseBody.callId;
-                        console.error("✅ Call ID received from API:", callId);
-                        startCall();
-                    }
+                callId = responseBody.callId;
+                console.error("✅ Call ID received from API:", callId);
 
-                    document.getElementById("searchUsers").value = "";
-                    document.getElementById("userResults").innerHTML = "";
-                    document.getElementById("selectedUsers").innerHTML = "";
-                    document.getElementById("startCallBtn").classList.add("d-none");
+                // Only after getting callId, send SignalR request
+                return signalRConnection.invoke("SendCallRequest", userId);
+            })
+            .then(() => {
+                // Start the missed call timer
+                missedCallTimer = setTimeout(() => {
+                    markMissedCall();
+                }, 60000);
 
-                    document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
-                })
-                .catch(error => console.error("❌ API request failed:", error));
+                // Get camera access and start the call
+                startCall();
+
+                // Update UI
+                document.getElementById("searchUsers").value = "";
+                document.getElementById("userResults").innerHTML = "";
+                document.getElementById("selectedUsers").innerHTML = "";
+                document.getElementById("startCallBtn").classList.add("d-none");
+                document.getElementById("waitingRoomText").innerHTML = "Waiting for the other user to accept..";
+            })
+            .catch(error => {
+                console.error("❌ Call invitation failed:", error);
+            });
         }
 
         function markMissedCall() {
@@ -761,15 +1060,24 @@
                                 return;
                             }
 
-                            let statusElement = document.getElementById("noVideoText");
-                            if (statusElement) {
-                                statusElement.innerHTML = `<p class="text-red-500 font-bold text-xl">Missed Call</p>
-                                                   <p class="text-white text-lg">Try again later.</p>`;
-                            }
-
-                            document.getElementById("incomingCall").style.display = "none";
-                            document.getElementById("callMessage").innerText = "";
-                            document.getElementById("joinCallBtn").style.display = "none";
+                            // Show missed call message in the middle of the screen
+                            const noVideoText = document.getElementById("noVideoText");
+                            noVideoText.style.display = "flex";
+                            
+                            // Create missed call UI
+                            noVideoText.innerHTML = `
+                                <div class="placeholder-content">
+                                    <i class="fas fa-user-clock text-yellow-500"></i>
+                                    <h3 class="text-xl font-bold text-yellow-500">User Not Available</h3>
+                                    <p class="text-lg text-white">The other user didn't join the call.</p>
+                                    <p class="text-md text-gray-300">Please try again later.</p>
+                                </div>
+                            `;
+                            
+                            // Hide other UI elements
+                            document.getElementById("incomingCall").classList.add("hidden");
+                            document.getElementById("rejoinCall").classList.add("hidden");
+                            document.getElementById("waitingRoomText").innerHTML = "";
 
                             cleanupCallUI();
                             loadNotifications();
@@ -794,49 +1102,84 @@
                 })
                 .then(data => {
                     if (data.hasInvite) {
-                        document.getElementById("incomingCall").style.display = "block";
+                        // Hide the no video placeholder
+                        document.getElementById("noVideoText").style.display = "none";
+                        
+                        // Show incoming call in main area
+                        document.getElementById("incomingCall").classList.remove("hidden");
                         document.getElementById("callMessage").innerText = `You have been invited to a video call by ${data.senderName}`;
                         document.getElementById("joinCallBtn").setAttribute("data-sender-id", data.senderId);
                     } else {
-                        document.getElementById("incomingCall").style.display = "none";
+                        // Show no video placeholder if no call
+                        document.getElementById("noVideoText").style.display = "flex";
+                        
+                        // Hide incoming call
+                        document.getElementById("incomingCall").classList.add("hidden");
                         document.getElementById("callMessage").innerText = "";
-                        document.getElementById("joinCallBtn").style.display = "none";
                     }
                 })
                 .catch(error => console.error("❌ Error checking for invites:", error.message));
         }
 
-        document.getElementById("joinCallBtn").addEventListener("click", function () {
+        document.getElementById("joinCallBtn").addEventListener("click", async function () {
             let senderId = this.getAttribute("data-sender-id");
 
-            fetch(`/api/videoconference/accept-invite/${senderId}`, { method: "POST" })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => { throw new Error(err.error || "Unexpected server error"); });
+            try {
+                const response = await fetch(`/api/videoconference/accept-invite/${senderId}`, { 
+                    method: "POST" 
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to accept call");
+                }
+
+                if (data.success) {
+                    targetUserId = senderId;
+                    callId = data.callId;
+
+                    // Hide incoming call UI
+                    const incomingCallElement = document.getElementById("incomingCall");
+                    incomingCallElement.classList.add("hidden");
+                    incomingCallElement.style.display = "none";
+                    document.getElementById("callMessage").innerText = "";
+
+                    if (missedCallTimer) {
+                        clearTimeout(missedCallTimer);
+                        missedCallTimer = null;
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        targetUserId = senderId;
-                        callId = data.callId;
-                        document.getElementById("incomingCall").style.display = "none";
-                        document.getElementById("callMessage").innerText = "";
-                        document.getElementById("joinCallBtn").style.display = "none";
 
-                        if (missedCallTimer) {
-                            clearTimeout(missedCallTimer);
-                            missedCallTimer = null;
-                        }
+                    try {
+                        // Get camera/mic access ONLY after accepting
+                        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                        
+                        // Show our video in main area initially
+                        localVideo.srcObject = localStream;
+                        localVideo.style.display = 'block';
+                        localVideo.classList.remove('hidden');
+                        remoteVideo.style.display = 'none';
 
-                        fetch(`/api/videoconference/mark-call-active/${callId}`, { method: "POST" });
+                        // Hide placeholder
+                        document.getElementById('noVideoText').style.display = 'none';
 
-                        startCall();
-                    } else {
-                        console.error("❌ Call was not accepted properly.");
+                        // Initialize WebRTC
+                        initializeWebRTC();
+
+                        // Create and send offer
+                        const offer = await peerConnection.createOffer();
+                        await peerConnection.setLocalDescription(offer);
+                        await sendSignalSafely(targetUserId, JSON.stringify(offer));
+
+                        // Mark call as active
+                        await fetch(`/api/videoconference/mark-call-active/${callId}`, { method: "POST" });
+                    } catch (error) {
+                        console.error("❌ Error setting up media devices:", error);
                     }
-                })
-                .catch(error => console.error("❌ Error accepting invite:", error.message));
+                }
+            } catch (error) {
+                console.error("❌ Error accepting invite:", error.message);
+            }
         });
 
 
