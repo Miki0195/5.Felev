@@ -74,64 +74,219 @@ body {
 
 /* Search Box */
 .search-container {
-    position: relative;
+    margin-bottom: 1rem;
 }
 
 .search-box {
     position: relative;
     width: 100%;
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-    .search-box input {
-        width: 100%;
-        padding: 1rem 1rem 1rem 3rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        color: var(--text-primary);
-        font-size: 0.95rem;
-        transition: var(--transition);
-    }
+.search-box:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    transform: translateY(-1px);
+}
 
-    .search-box i {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-secondary);
-    }
+.search-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
 
-    .search-box input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
+.search-box:focus-within .search-icon {
+    color: var(--primary-color);
+}
 
-/* User Lists */
-.user-list, .selected-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
+#searchUsers {
+    width: 100%;
+    padding: 14px 14px 14px 44px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+#searchUsers::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+#searchUsers:focus {
+    outline: none;
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.clear-search-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ef4444;
+}
+
+#searchUsers:not(:placeholder-shown) + .clear-search-btn {
+    opacity: 1;
+}
+
+.contact-selection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+    min-height: 200px;
+    position: relative;
+}
+
+.contact-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     max-height: 300px;
+    overflow-y: auto;
 }
 
-.user-result-item {
+.no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 12px;
+    font-size: 0.9rem;
+}
+
+.contact-card {
+    display: flex;
+    align-items: center;
     padding: 1rem;
-    margin-bottom: 0.75rem;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    transition: all 0.3s ease;
 }
 
-    .user-result-item:hover {
-        background: rgba(99, 102, 241, 0.1);
-        transform: translateY(-1px);
-    }
+.contact-card:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.contact-card.active {
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid var(--primary-color);
+}
+
+.contact-avatar {
+    width: 48px;
+    height: 48px;
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.selected-contact-card {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--primary-color);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.empty-selection {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-selection i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-selection p {
+    font-size: 0.9rem;
+}
+
+.call-btn {
+    margin-top: auto;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+}
+
+.call-btn i {
+    font-size: 1.2rem;
+}
+
+.hidden {
+    display: none !important;
+}
 
 /* Main Video Area */
 .main-video-area {
@@ -423,10 +578,6 @@ body {
     }
 
 /* Add these new utility classes */
-.hidden {
-    display: none !important;
-}
-
 .visible {
     display: block !important;
 }
@@ -501,10 +652,124 @@ body {
     }
 }
 
-.hidden {
-    display: none !important;
+/* New waiting indicator styles */
+.waiting-indicator {
+    position: relative;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
 }
 
-.visible {
-    display: flex !important;
+.waiting-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(15, 23, 42, 0) 70%);
+    opacity: 0.8;
+    animation: pulse-animation 2s infinite;
+    z-index: 0;
+}
+
+.waiting-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.waiting-avatar {
+    width: 48px;
+    height: 48px;
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    animation: avatar-pulse 3s infinite;
+}
+
+.waiting-text {
+    flex: 1;
+}
+
+.waiting-text h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    display: inline-block;
+    animation: typing 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% {
+        transform: scale(0.6);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-animation {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes avatar-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+    }
 }

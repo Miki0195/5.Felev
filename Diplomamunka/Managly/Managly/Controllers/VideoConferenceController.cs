@@ -432,5 +432,33 @@ namespace Managly.Controllers
 
             return Ok(recentCalls);
         }
+
+        [HttpGet("get-call-by-users")]
+        public async Task<IActionResult> GetCallByUsers([FromQuery] string senderId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized(new { error = "User not authenticated." });
+
+            // Find the most recent call between these two users
+            var call = await _context.VideoConferences
+                .Where(c => 
+                    (c.CallerId == senderId && c.ReceiverId == user.Id) || 
+                    (c.CallerId == user.Id && c.ReceiverId == senderId))
+                .OrderByDescending(c => c.StartTime)
+                .FirstOrDefaultAsync();
+
+            if (call == null)
+            {
+                return Ok(new { hasCall = false });
+            }
+
+            return Ok(new
+            {
+                hasCall = true,
+                callId = call.CallId,
+                status = call.Status.ToString(),
+                isEnded = call.IsEnded
+            });
+        }
     }
 }
