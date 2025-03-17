@@ -194,6 +194,24 @@
     </div>
 </div>
 
+<!-- Cannot Edit Past Shift Modal -->
+<div class="modal fade" id="cannotEditPastShiftModal" tabindex="-1" aria-labelledby="cannotEditPastShiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cannotEditPastShiftLabel">Cannot Edit Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You cannot edit shifts from <strong>past dates</strong>. Only future shifts can be modified.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Add this new modal for recurring shifts -->
 <div class="modal fade" 
      id="recurringShiftModal" 
@@ -289,6 +307,8 @@
         let selectedDate = null;
         let selectedWorkerId = null;
         let existingShiftId = null;
+        let selectedShiftId = null;
+        let selectedVacationId = null;
         let calendar = null;
         let debounceTimeout;
 
@@ -359,7 +379,7 @@
                 headerToolbar: { 
                     left: "prev,next today",
                     center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay"
+                    right: ""
                 },
                 events: async function (fetchInfo, successCallback, failureCallback) {
                     try {
@@ -390,6 +410,7 @@
                     if (newDate < today) {
                         showToast("Cannot move events to a past date!", "error");
                         info.revert();
+                        calendar.refetchEvents();
                         return;
                     }
 
@@ -516,12 +537,28 @@
                     if (info.el.querySelector(".event-content")) return;
 
                     let contentHtml = "";
+                    
+                    // Check if the event is in the past
+                    const eventDate = info.event.startStr;
+                    const today = new Date().toISOString().split("T")[0];
+                    const isPastEvent = eventDate < today && !eventTitle.includes("Vacation");
+                    
+                    if (isPastEvent) {
+                        // Add a past event indicator
+                        info.el.style.opacity = "0.7";
+                        info.el.style.backgroundColor = "#6c757d"; // Gray color for past events
+                    }
 
                     if (eventTitle.includes("Vacation")) {
                         contentHtml = `<div class="event-content" style="color: white; font-weight: bold;">Vacation</div>`;
                     } else {
                         contentHtml = `<div class="event-content" style="color: white;"><strong>${timeText}</strong></div>
                                          <div class="event-content" style="font-size: 0.8rem; color: white; border-top: 1px solid rgba(255,255,255,0.2);">${commentText}</div>`;
+                        
+                        // Add a "Past" indicator for past events
+                        if (isPastEvent) {
+                            contentHtml += `<div class="event-content" style="font-size: 0.7rem; color: white; font-style: italic;">(Past)</div>`;
+                        }
                     }
 
                     info.el.innerHTML = contentHtml;
@@ -565,11 +602,13 @@
                         .catch(error => console.error("Error:", error));
                 },
                 eventClick: function (info) {
-                    selectedShiftId = info.event.id;
-                    let shiftParts = info.event.title.split("\n");
-                    let shiftTime = shiftParts[0].split(" - ");
                     let eventTitle = info.event.title;
-
+                    
+                    // Always set the ID of the clicked event
+                    selectedShiftId = info.event.id;
+                    
+                    let shiftParts = eventTitle.split("\n");
+                    
                     if (eventTitle.includes("Vacation") && eventTitle.includes("Approved")) {
                         selectedVacationId = info.event.id;
                         document.getElementById("vacationDateText").textContent = info.event.startStr;
@@ -577,17 +616,26 @@
                         updateVacationStatus();
                     }
 
-                    if (!info.event.title.includes("Vacation")) {
+                    if (!eventTitle.includes("Vacation")) {
+                        // Check if the shift is in the past
+                        const shiftDate = info.event.startStr;
+                        const today = new Date().toISOString().split("T")[0];
+                        
+                        if (shiftDate < today) {
+                            showCannotEditPastShiftModal();
+                            return;
+                        }
+                        
+                        let shiftTime = shiftParts[0].split(" - ");
                         document.getElementById("editShiftStartTime").value = shiftTime[0];
                         document.getElementById("editShiftEndTime").value = shiftTime[1];
                         document.getElementById("editShiftComment").value = shiftParts[1] || "";
 
                         showEditShiftModal();
                     } else {
-                        let leaveId = info.event.id;
-                        if (info.event.title.includes("Pending")) {
+                        if (eventTitle.includes("Pending")) {
                             document.getElementById("vacationDate").textContent = info.event.startStr;
-                            selectedVacationId = leaveId;
+                            selectedVacationId = info.event.id;
 
                             approveRejectVacationRequest();
                         }
@@ -643,7 +691,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-
+                        showToast("Vacation status changed.", "success");
                         calendar.refetchEvents();
 
                         let modalElement = document.getElementById("approveRejectVacationModal");
@@ -696,6 +744,11 @@
             modal.show();
         }
 
+        function showCannotEditPastShiftModal() {
+            let modal = new bootstrap.Modal(document.getElementById("cannotEditPastShiftModal"));
+            modal.show();
+        }
+
         document.getElementById("saveShift").addEventListener("click", function () {
             let startTime = document.getElementById("shiftStartTime").value;
             let endTime = document.getElementById("shiftEndTime").value;
@@ -734,33 +787,101 @@
             let newComment = document.getElementById("editShiftComment").value;
 
             if (!newStartTime || !newEndTime) {
-                alert("Please select both start and end times.");
+                showToast("Please select both start and end times.", "warning");
                 return;
             }
+            
+            if (!selectedShiftId) {
+                showToast("Error: No shift selected for editing.", "error");
+                console.error("No selectedShiftId found when trying to save edit");
+                return;
+            }
+            
             let shiftEvent = calendar.getEventById(selectedShiftId);
             if (!shiftEvent) {
-                alert("Error: Shift not found.");
+                showToast("Error: Shift not found in calendar.", "error");
+                console.error("Could not find event with ID:", selectedShiftId);
                 return;
             }
 
-            let shiftDate = shiftEvent.startStr; 
+            let shiftDate = shiftEvent.startStr;
+            
+            // Double-check that the shift is not in the past
+            const today = new Date().toISOString().split("T")[0];
+            if (shiftDate < today) {
+                showToast("Cannot edit shifts from past dates!", "error");
+                var modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
+                modal.hide();
+                return;
+            }
+            
+            console.log("Editing shift:", {
+                id: selectedShiftId,
+                date: shiftDate,
+                startTime: newStartTime,
+                endTime: newEndTime,
+                comment: newComment
+            });
 
             updateShift(selectedShiftId, newStartTime, newEndTime, shiftDate, newComment);
         });
 
         function updateShift(shiftId, startTime, endTime, shiftDate, comment) {
+            // Log the data being sent for debugging
+            console.log("Updating shift with data:", {
+                shiftId: shiftId,
+                startTime: startTime,
+                endTime: endTime,
+                shiftDate: shiftDate,
+                comment: comment
+            });
+            
+            // Create the request payload matching the updated ScheduleUpdateDTO expected by the API
+            const payload = {
+                startTime: startTime,
+                endTime: endTime,
+                shiftDate: shiftDate,  // Now expecting a string
+                comment: comment || ""
+            };
+            
             fetch(`/api/schedule/update/${shiftId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ startTime: startTime, endTime: endTime, shiftDate : shiftDate, comment: comment })
+                body: JSON.stringify(payload)
             })
-                .then(response => response.json())
-                .then(() => {
-                    calendar.refetchEvents();
-                    var modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
-                    modal.hide();
+                .then(response => {
+                    // Log the full response for debugging
+                    console.log("Response status:", response.status);
+                    
+                    if (!response.ok) {
+                        // Get the response text to see the error message
+                        return response.text().then(text => {
+                            console.error("Error response:", text);
+                            throw new Error(`Server returned ${response.status}: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Update response data:", data);
+                    
+                    if (data.success) {
+                        // Force a complete refresh of the calendar events
+                        calendar.refetchEvents();
+                        
+                        // Close the modal
+                        var modal = bootstrap.Modal.getInstance(document.getElementById("editShiftModal"));
+                        modal.hide();
 
-                    showToast("Shift updated successfully!", "success");
+                        // Show success message
+                        showToast("Shift updated successfully!", "success");
+                    } else {
+                        showToast("Failed to update shift: " + (data.message || "Unknown error"), "error");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating shift:", error);
+                    showToast("Error updating shift: " + error.message, "error");
                 });
         }
 
@@ -776,6 +897,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        showToast("Shift deleted succefully.", "success");
                         calendar.refetchEvents();
                         var modal = bootstrap.Modal.getInstance(document.getElementById("deleteShiftModal"));
                         modal.hide();
@@ -812,6 +934,12 @@
                 .catch(error => console.error("Error:", error));
         }
 
+        // Function to load notifications
+        function loadNotifications() {
+            // This function can be implemented to load any pending notifications
+            // For now, it's just a placeholder
+        }
+
         document.getElementById("approveVacationBtn").addEventListener("click", function () {
             updateLeaveStatus(selectedVacationId, "Approved");
         });
@@ -828,7 +956,11 @@
         document.getElementById('rangeStart').valueAsDate = today;
         document.getElementById('rangeEnd').valueAsDate = nextMonth;
 
-        // Update the preview function
+        // Add min attribute to date inputs to prevent selecting past dates
+        document.getElementById('rangeStart').min = today.toISOString().split('T')[0];
+        document.getElementById('rangeEnd').min = today.toISOString().split('T')[0];
+
+        // Update the preview function to include availability checks
         function updatePreview() {
             const startDate = new Date(document.getElementById('rangeStart').value);
             const endDate = new Date(document.getElementById('rangeEnd').value);
@@ -840,34 +972,104 @@
             const previewDates = document.getElementById('previewDates');
             previewDates.innerHTML = '';
 
+            // Check if dates are valid (not in the past)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+            
+            if (startDate < today) {
+                previewDates.innerHTML = '<div class="text-danger">Start date cannot be in the past</div>';
+                return;
+            }
+
             if (!startTime || !endTime || selectedDays.length === 0) {
                 previewDates.innerHTML = '<div class="text-muted">Select time and days to see preview</div>';
                 return;
             }
 
-            let currentDate = new Date(startDate);
-            let shiftsCount = 0;
+            // Check for availability conflicts
+            checkAvailabilityForPreview(startDate, endDate, selectedDays, startTime, endTime);
+        }
 
-            while (currentDate <= endDate && shiftsCount < 50) {
-                // Get day name in correct format
-                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-                if (selectedDays.includes(dayName)) {
-                    const dateString = currentDate.toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric' 
-                    });
-                    previewDates.innerHTML += `
-                        <div class="preview-date-item">
-                            ${dateString} (${startTime} - ${endTime})
-                        </div>`;
-                    shiftsCount++;
+        // New function to check availability and update preview
+        async function checkAvailabilityForPreview(startDate, endDate, selectedDays, startTime, endTime) {
+            const previewDates = document.getElementById('previewDates');
+            previewDates.innerHTML = '<div class="text-muted">Checking availability...</div>';
+            
+            try {
+                // First, get all existing shifts and vacations
+                const [scheduleResponse, leaveResponse] = await Promise.all([
+                    fetch(`/api/schedule/${selectedWorkerId}`),
+                    fetch(`/api/leave/${selectedWorkerId}`)
+                ]);
+                
+                const scheduleEvents = await scheduleResponse.json();
+                const leaveEvents = await leaveResponse.json();
+                
+                // Create a map of dates that are unavailable
+                const unavailableDates = new Map();
+                
+                scheduleEvents.forEach(event => {
+                    unavailableDates.set(event.start, 'shift');
+                });
+                
+                leaveEvents.forEach(event => {
+                    const status = event.title.includes('Pending') ? 'pending vacation' : 'approved vacation';
+                    unavailableDates.set(event.start, status);
+                });
+                
+                // Now generate the preview with availability information
+                let currentDate = new Date(startDate);
+                let shiftsCount = 0;
+                let conflictsCount = 0;
+                
+                while (currentDate <= endDate && shiftsCount < 50) {
+                    // Get day name in correct format
+                    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                    if (selectedDays.includes(dayName)) {
+                        const dateString = currentDate.toLocaleDateString('en-US', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                        
+                        const dateISOString = currentDate.toISOString().split('T')[0];
+                        const conflictType = unavailableDates.get(dateISOString);
+                        
+                        if (conflictType) {
+                            // This date has a conflict
+                            previewDates.innerHTML += `
+                                <div class="preview-date-item text-danger">
+                                    ${dateString} - Cannot add shift (${conflictType} exists)
+                                </div>`;
+                            conflictsCount++;
+                        } else {
+                            // This date is available
+                            previewDates.innerHTML += `
+                                <div class="preview-date-item">
+                                    ${dateString} (${startTime} - ${endTime})
+                                </div>`;
+                            shiftsCount++;
+                        }
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
                 }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            if (shiftsCount === 0) {
-                previewDates.innerHTML = '<div class="text-muted">No shifts in selected range</div>';
+                
+                if (shiftsCount === 0 && conflictsCount === 0) {
+                    previewDates.innerHTML = '<div class="text-muted">No shifts in selected range</div>';
+                } else if (shiftsCount === 0 && conflictsCount > 0) {
+                    previewDates.innerHTML += `
+                        <div class="text-danger mt-2">
+                            All selected dates have conflicts. Please select different days or date range.
+                        </div>`;
+                } else if (conflictsCount > 0) {
+                    previewDates.innerHTML += `
+                        <div class="text-warning mt-2">
+                            Note: ${conflictsCount} date(s) with conflicts will be skipped.
+                        </div>`;
+                }
+            } catch (error) {
+                console.error('Error checking availability:', error);
+                previewDates.innerHTML = '<div class="text-danger">Error checking availability. Please try again.</div>';
             }
         }
 
@@ -881,30 +1083,81 @@
             const selectedDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
                 .filter(day => document.getElementById(day).checked);
 
+            // Validate inputs
             if (!startTime || !endTime || selectedDays.length === 0) {
                 showToast('Please fill in all required fields', 'error');
                 return;
             }
 
-            const shifts = [];
-            let currentDate = new Date(startDate);
+            // Check if dates are valid (not in the past)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+            
+            if (startDate < today) {
+                showToast('Cannot add shifts for past dates', 'error');
+                return;
+            }
 
-            while (currentDate <= endDate) {
-                // Get day name in correct format
-                const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-                if (selectedDays.includes(dayName)) {
-                    shifts.push({
-                        userId: selectedWorkerId,
-                        shiftDate: currentDate.toISOString().split('T')[0],
-                        startTime: startTime,
-                        endTime: endTime,
-                        comment: comment
-                    });
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
+            if (endDate < startDate) {
+                showToast('End date must be after start date', 'error');
+                return;
             }
 
             try {
+                // First, get all existing shifts and vacations to check for conflicts
+                const [scheduleResponse, leaveResponse] = await Promise.all([
+                    fetch(`/api/schedule/${selectedWorkerId}`),
+                    fetch(`/api/leave/${selectedWorkerId}`)
+                ]);
+                
+                const scheduleEvents = await scheduleResponse.json();
+                const leaveEvents = await leaveResponse.json();
+                
+                // Create a map of dates that are unavailable
+                const unavailableDates = new Map();
+                
+                scheduleEvents.forEach(event => {
+                    unavailableDates.set(event.start, true);
+                });
+                
+                leaveEvents.forEach(event => {
+                    unavailableDates.set(event.start, true);
+                });
+
+                // Create shifts array, skipping dates with conflicts
+                const shifts = [];
+                let currentDate = new Date(startDate);
+                let skippedCount = 0;
+
+                while (currentDate <= endDate) {
+                    // Get day name in correct format
+                    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                    const dateISOString = currentDate.toISOString().split('T')[0];
+                    
+                    if (selectedDays.includes(dayName) && !unavailableDates.has(dateISOString)) {
+                        shifts.push({
+                            userId: selectedWorkerId,
+                            shiftDate: dateISOString,
+                            startTime: startTime,
+                            endTime: endTime,
+                            comment: comment
+                        });
+                    } else if (selectedDays.includes(dayName) && unavailableDates.has(dateISOString)) {
+                        skippedCount++;
+                    }
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                if (shifts.length === 0) {
+                    if (skippedCount > 0) {
+                        showToast('All selected dates have conflicts. No shifts were added.', 'warning');
+                    } else {
+                        showToast('No shifts to add in the selected range', 'warning');
+                    }
+                    return;
+                }
+
                 const response = await fetch('/api/schedule/bulk', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -930,7 +1183,12 @@
                     
                     // Refresh calendar and show success message
                     calendar.refetchEvents();
-                    showToast('Recurring shifts added successfully!', 'success');
+                    
+                    if (skippedCount > 0) {
+                        showToast(`Recurring shifts added successfully! (${skippedCount} conflicting dates were skipped)`, 'success');
+                    } else {
+                        showToast('Recurring shifts added successfully!', 'success');
+                    }
                 } else {
                     showToast('Failed to add recurring shifts', 'error');
                 }
@@ -942,37 +1200,39 @@
 
         // Add event listeners for preview updates
         ['rangeStart', 'rangeEnd', 'recurringStartTime', 'recurringEndTime'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updatePreview);
+            document.getElementById(id).addEventListener('change', function() {
+                // For date inputs, validate they're not in the past
+                if (id === 'rangeStart' || id === 'rangeEnd') {
+                    const selectedDate = new Date(this.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+                    
+                    if (selectedDate < today) {
+                        showToast('Cannot select dates in the past', 'error');
+                        // Reset to today
+                        this.valueAsDate = today;
+                    }
+                    
+                    // For end date, also check it's not before start date
+                    if (id === 'rangeEnd') {
+                        const startDate = new Date(document.getElementById('rangeStart').value);
+                        if (selectedDate < startDate) {
+                            showToast('End date cannot be before start date', 'error');
+                            // Set to start date
+                            const newEndDate = new Date(startDate);
+                            newEndDate.setDate(startDate.getDate() + 1);
+                            this.valueAsDate = newEndDate;
+                        }
+                    }
+                }
+                
+                updatePreview();
+            });
         });
 
         ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].forEach(day => {
-            document.getElementById(day).addEventListener('change', async function() {
-                // Check for existing shifts/vacations before updating preview
-                const startDate = new Date(document.getElementById('rangeStart').value);
-                const endDate = new Date(document.getElementById('rangeEnd').value);
-                const selectedDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-                    .filter(day => document.getElementById(day).checked);
-
-                try {
-                    const response = await fetch(`/api/schedule/${selectedWorkerId}/check-availability`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            startDate: startDate.toISOString().split('T')[0],
-                            endDate: endDate.toISOString().split('T')[0],
-                            selectedDays: selectedDays
-                        })
-                    });
-
-                    const result = await response.json();
-                    if (!result.available) {
-                        this.checked = false;
-                        showToast('Cannot add shifts on some selected days due to existing shifts or vacation requests', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error checking availability:', error);
-                }
-
+            document.getElementById(day).addEventListener('change', function() {
+                // Simply update the preview - conflicts will be shown there
                 updatePreview();
             });
         });
@@ -988,6 +1248,13 @@
             const nextMonth = new Date(today);
             nextMonth.setMonth(today.getMonth() + 1);
             
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // Set min attribute to prevent selecting past dates
+            document.getElementById('rangeStart').min = todayStr;
+            document.getElementById('rangeEnd').min = todayStr;
+            
+            // Set default values
             document.getElementById('rangeStart').valueAsDate = today;
             document.getElementById('rangeEnd').valueAsDate = nextMonth;
             

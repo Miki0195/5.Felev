@@ -6,9 +6,35 @@ using Managly.Data;
 using Managly.Models;
 using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 
 namespace Managly.Controllers
 {
+    // Add or update DTO classes
+    public class ScheduleDTO
+    {
+        public string UserId { get; set; }
+        public DateTime ShiftDate { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string Comment { get; set; }
+    }
+
+    public class ScheduleUpdateDTO
+    {
+        public string ShiftDate { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string Comment { get; set; }
+    }
+
+    public class AvailabilityCheckDTO
+    {
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public List<string> SelectedDays { get; set; }
+    }
+
     [Authorize]
     public class ScheduleController : Controller
     {
@@ -111,34 +137,59 @@ namespace Managly.Controllers
         [Route("api/schedule/update/{id}")]
         public async Task<IActionResult> UpdateSchedule(int id, [FromBody] ScheduleUpdateDTO model)
         {
-            var schedule = await _context.Schedules.FindAsync(id);
-            if (schedule == null)
+            try
             {
-                return NotFound(new { success = false, message = "Shift not found" });
-            }
+                // Log the received data for debugging
+                Console.WriteLine($"Updating schedule {id} with data: {JsonSerializer.Serialize(model)}");
+                
+                var schedule = await _context.Schedules.FindAsync(id);
+                if (schedule == null)
+                {
+                    return NotFound(new { success = false, message = "Shift not found" });
+                }
 
-            if (model.ShiftDate != default)
+                // Parse the shift date if provided
+                if (!string.IsNullOrEmpty(model.ShiftDate))
+                {
+                    if (DateTime.TryParse(model.ShiftDate, out DateTime parsedDate))
+                    {
+                        schedule.ShiftDate = parsedDate.Date;
+                        
+                        // Check if the date is in the past
+                        if (parsedDate.Date < DateTime.Today)
+                        {
+                            return BadRequest(new { success = false, message = "Cannot move shift to a past date." });
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(new { success = false, message = $"Invalid date format: {model.ShiftDate}" });
+                    }
+                }
+
+                if (string.IsNullOrEmpty(model.StartTime) || string.IsNullOrEmpty(model.EndTime))
+                {
+                    return BadRequest(new { success = false, message = "Start time and end time are required." });
+                }
+
+                if (!TimeSpan.TryParse(model.StartTime, out TimeSpan parsedStartTime) ||
+                    !TimeSpan.TryParse(model.EndTime, out TimeSpan parsedEndTime))
+                {
+                    return BadRequest(new { success = false, message = $"Invalid time format. Start: {model.StartTime}, End: {model.EndTime}" });
+                }
+
+                schedule.StartTime = parsedStartTime;
+                schedule.EndTime = parsedEndTime;
+                schedule.Comment = model.Comment ?? schedule.Comment; // Keep existing comment if new one is null
+
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, message = "Shift updated successfully" });
+            }
+            catch (Exception ex)
             {
-                schedule.ShiftDate = model.ShiftDate;
+                Console.WriteLine($"Error updating schedule: {ex.Message}");
+                return StatusCode(500, new { success = false, message = $"Server error: {ex.Message}" });
             }
-
-            if (!TimeSpan.TryParse(model.StartTime, out TimeSpan parsedStartTime) ||
-                !TimeSpan.TryParse(model.EndTime, out TimeSpan parsedEndTime))
-            {
-                return BadRequest(new { success = false, message = "Invalid time format." });
-            }
-
-            if (model.ShiftDate < DateTime.Today)
-            {
-                return BadRequest(new { success = false, message = "Cannot move shift to a past date." });
-            }
-
-            schedule.StartTime = parsedStartTime;
-            schedule.EndTime = parsedEndTime;
-            schedule.Comment = model.Comment; 
-
-            await _context.SaveChangesAsync();
-            return Ok(new { success = true});
         }
 
         [Authorize] 
