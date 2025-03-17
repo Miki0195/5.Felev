@@ -35,6 +35,15 @@ namespace Managly.Controllers
         public List<string> SelectedDays { get; set; }
     }
 
+    public class LeaveRequestDTO
+    {
+        public string UserId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Type { get; set; } // "Vacation", "Sick", "Personal", etc.
+        public string Reason { get; set; }
+    }
+
     [Authorize]
     public class ScheduleController : Controller
     {
@@ -236,45 +245,83 @@ namespace Managly.Controllers
         [Route("api/leave/request")]
         public async Task<IActionResult> RequestLeave([FromBody] List<Leave> leaveRequests)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            try
             {
-                return Unauthorized();
-            }
+                if (leaveRequests == null || !leaveRequests.Any())
+                {
+                    return BadRequest(new { success = false, message = "No leave dates provided." });
+                }
 
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated." });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
+                // Calculate working days (excluding weekends)
+                int workingDaysCount = 0;
+                foreach (var leave in leaveRequests)
+                {
+                    if (leave.LeaveDate.DayOfWeek != DayOfWeek.Saturday && leave.LeaveDate.DayOfWeek != DayOfWeek.Sunday)
+                    {
+                        workingDaysCount++;
+                    }
+                }
+
+                // Check if user has enough vacation days
+                int remainingVacationDays = user.TotalVacationDays - user.UsedVacationDays;
+                if (workingDaysCount > remainingVacationDays)
+                {
+                    return BadRequest(new { 
+                        success = false, 
+                        message = $"You don't have enough vacation days. You have {remainingVacationDays} days available, but you're requesting {workingDaysCount} working days." 
+                    });
+                }
+
+                foreach (var leave in leaveRequests)
+                {
+                    leave.UserId = userId;
+                    leave.Status = "Pending";
+                    
+                    if (string.IsNullOrEmpty(leave.MedicalProof))
+                    {
+                        leave.MedicalProof = "";
+                    }
+                    
+                    _context.Leaves.Add(leave);
+                }
+
+                await _context.SaveChangesAsync();
+
+                var companyId = user.CompanyId;
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                var adminEmails = adminUsers
+                    .Where(admin => admin.CompanyId == companyId)
+                    .Select(admin => admin.Email)
+                    .ToList();
+
+                if (adminEmails.Count > 0)
+                {
+                    string subject = "New Leave Request Submitted";
+                    string message = $"User {user.Name} {user.LastName} has requested leave on multiple days.";
+
+                    var emailService = new EmailService(_configuration);
+                    await emailService.SendEmailsWithSmtpAsync(adminEmails, subject, message, "no-reply@yourcompany.com", "Managly System");
+                }
+
+                return Ok(new { success = true, message = "Leave request submitted successfully." });
+            }
+            catch (Exception ex)
             {
-                return NotFound("User not found.");
+                Console.WriteLine($"Error requesting leave: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "An error occurred while submitting the leave request." });
             }
-
-            foreach (var leave in leaveRequests)
-            {
-                leave.UserId = userId;
-                leave.Status = "Pending";
-                leave.MedicalProof = leave.MedicalProof ?? "";
-                _context.Leaves.Add(leave);
-            }
-
-            await _context.SaveChangesAsync();
-
-            var companyId = user.CompanyId;
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-            var adminEmails = adminUsers
-                .Where(admin => admin.CompanyId == companyId)
-                .Select(admin => admin.Email)
-                .ToList();
-
-            if (adminEmails.Count > 0)
-            {
-                string subject = "New Leave Request Submitted";
-                string message = $"User {user.Name} {user.LastName} has requested leave on multiple days.";
-
-                var emailService = new EmailService(_configuration);
-                await emailService.SendEmailsWithSmtpAsync(adminEmails, subject, message, "no-reply@yourcompany.com", "Managly System");
-            }
-
-            return Ok(new { success = true });
         }
         
         [Authorize]
@@ -329,16 +376,58 @@ namespace Managly.Controllers
         [Route("api/leave/{id}/status")]
         public async Task<IActionResult> UpdateLeaveStatus(int id, [FromBody] string status)
         {
-            var leave = await _context.Leaves.FindAsync(id);
-            if (leave == null)
+            try
             {
-                return NotFound();
+                var leave = await _context.Leaves.FindAsync(id);
+                if (leave == null)
+                {
+                    return NotFound(new { success = false, message = "Leave request not found." });
+                }
+
+                // Check if this is a status change from pending to approved or vice versa
+                bool wasApproved = leave.Status == "Approved";
+                bool isNowApproved = status == "Approved";
+
+                // Update the leave status
+                leave.Status = status;
+                
+                // Get the user who requested the leave
+                var user = await _userManager.FindByIdAsync(leave.UserId);
+                if (user != null)
+                {
+                    // If approving a leave request that wasn't approved before
+                    if (isNowApproved && !wasApproved)
+                    {
+                        // Check if the leave date is a weekday (not Saturday or Sunday)
+                        if (leave.LeaveDate.DayOfWeek != DayOfWeek.Saturday && leave.LeaveDate.DayOfWeek != DayOfWeek.Sunday)
+                        {
+                            // Increment used vacation days
+                            user.UsedVacationDays += 1;
+                            await _userManager.UpdateAsync(user);
+                        }
+                    }
+                    // If rejecting a leave request that was previously approved
+                    else if (!isNowApproved && wasApproved)
+                    {
+                        // Check if the leave date is a weekday (not Saturday or Sunday)
+                        if (leave.LeaveDate.DayOfWeek != DayOfWeek.Saturday && leave.LeaveDate.DayOfWeek != DayOfWeek.Sunday)
+                        {
+                            // Decrement used vacation days, but don't go below zero
+                            user.UsedVacationDays = Math.Max(0, user.UsedVacationDays - 1);
+                            await _userManager.UpdateAsync(user);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Leave status updated successfully." });
             }
-
-            leave.Status = status;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true });
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating leave status: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the leave status." });
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -368,16 +457,40 @@ namespace Managly.Controllers
         [Route("api/leave/delete/{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {
-            var leave = await _context.Leaves.FindAsync(id);
-            if (leave == null)
+            try
             {
-                return NotFound(new { success = false, message = "Vacation request not found" });
+                var leave = await _context.Leaves.FindAsync(id);
+                if (leave == null)
+                {
+                    return NotFound(new { success = false, message = "Vacation request not found." });
+                }
+
+                // If the leave was approved, restore the vacation day
+                if (leave.Status == "Approved")
+                {
+                    var user = await _userManager.FindByIdAsync(leave.UserId);
+                    if (user != null)
+                    {
+                        // Check if the leave date is a weekday (not Saturday or Sunday)
+                        if (leave.LeaveDate.DayOfWeek != DayOfWeek.Saturday && leave.LeaveDate.DayOfWeek != DayOfWeek.Sunday)
+                        {
+                            // Decrement used vacation days, but don't go below zero
+                            user.UsedVacationDays = Math.Max(0, user.UsedVacationDays - 1);
+                            await _userManager.UpdateAsync(user);
+                        }
+                    }
+                }
+
+                _context.Leaves.Remove(leave);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Vacation request deleted successfully." });
             }
-
-            _context.Leaves.Remove(leave);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true });
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting leave request: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "An error occurred while deleting the vacation request." });
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -598,5 +711,236 @@ namespace Managly.Controllers
             return Ok(schedules);
         }
 
+        [HttpGet]
+        [Route("api/schedule/myvacationinfo")]
+        public async Task<IActionResult> GetCurrentUserVacationInfo()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated." });
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
+                // Check if we need to reset vacation days for the new year
+                int currentYear = DateTime.Now.Year;
+                if (user.VacationYear < currentYear)
+                {
+                    user.VacationYear = currentYear;
+                    user.UsedVacationDays = 0;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                return Ok(new
+                {
+                    id = user.Id,
+                    name = user.Name,
+                    lastName = user.LastName,
+                    email = user.Email,
+                    phoneNumber = user.PhoneNumber,
+                    totalVacationDays = user.TotalVacationDays,
+                    usedVacationDays = user.UsedVacationDays,
+                    remainingVacationDays = user.RemainingVacationDays,
+                    vacationYear = user.VacationYear
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user vacation info: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "An error occurred while getting user information." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SubmitLeaveRequest([FromBody] LeaveRequestDTO request)
+        {
+            try
+            {
+                if (request == null || string.IsNullOrEmpty(request.UserId) || request.StartDate == default || request.EndDate == default)
+                {
+                    return BadRequest(new { success = false, message = "Invalid request data." });
+                }
+
+                var user = await _userManager.FindByIdAsync(request.UserId);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
+                // Calculate the number of working days in the leave request
+                int workingDays = CountWorkingDays(request.StartDate, request.EndDate);
+
+                // Check if user has enough vacation days remaining
+                if (request.Type == "Vacation" && user.RemainingVacationDays < workingDays)
+                {
+                    return BadRequest(new { 
+                        success = false, 
+                        message = $"Not enough vacation days remaining. You have {user.RemainingVacationDays} days available, but requested {workingDays} days." 
+                    });
+                }
+
+                // Create leave entries for each day in the date range
+                var currentDate = request.StartDate.Date;
+                var endDate = request.EndDate.Date;
+                var schedules = new List<Schedule>();
+
+                while (currentDate <= endDate)
+                {
+                    // Skip weekends if it's a vacation request
+                    if (request.Type == "Vacation" && (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday))
+                    {
+                        currentDate = currentDate.AddDays(1);
+                        continue;
+                    }
+
+                    var schedule = new Schedule
+                    {
+                        UserId = request.UserId,
+                        ShiftDate = currentDate,
+                        StartTime = new TimeSpan(9, 0, 0), // Default work hours
+                        EndTime = new TimeSpan(17, 0, 0),
+                        Comment = request.Reason,
+                        IsHolidayRequest = true,
+                        Status = "Pending"
+                    };
+
+                    schedules.Add(schedule);
+                    currentDate = currentDate.AddDays(1);
+                }
+
+                await _context.Schedules.AddRangeAsync(schedules);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Leave request submitted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while submitting the leave request." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveLeaveRequest(int requestId)
+        {
+            try
+            {
+                var schedule = await _context.Schedules.FindAsync(requestId);
+                if (schedule == null || !schedule.IsHolidayRequest)
+                {
+                    return NotFound(new { success = false, message = "Leave request not found." });
+                }
+
+                var user = await _userManager.FindByIdAsync(schedule.UserId);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found." });
+                }
+
+                // Update schedule status
+                schedule.Status = "Approved";
+
+                // If it's a vacation day (not weekend), increment used vacation days
+                if (schedule.ShiftDate.DayOfWeek != DayOfWeek.Saturday && 
+                    schedule.ShiftDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    user.UsedVacationDays += 1;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Leave request approved successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while approving the leave request." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectLeaveRequest(int requestId)
+        {
+            try
+            {
+                var schedule = await _context.Schedules.FindAsync(requestId);
+                if (schedule == null || !schedule.IsHolidayRequest)
+                {
+                    return NotFound(new { success = false, message = "Leave request not found." });
+                }
+
+                // Update schedule status
+                schedule.Status = "Rejected";
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Leave request rejected successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while rejecting the leave request." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelLeaveRequest(int requestId)
+        {
+            try
+            {
+                var schedule = await _context.Schedules.FindAsync(requestId);
+                if (schedule == null || !schedule.IsHolidayRequest)
+                {
+                    return NotFound(new { success = false, message = "Leave request not found." });
+                }
+
+                // If the request was approved, restore the vacation day
+                if (schedule.Status == "Approved")
+                {
+                    var user = await _userManager.FindByIdAsync(schedule.UserId);
+                    if (user != null && schedule.ShiftDate.DayOfWeek != DayOfWeek.Saturday && 
+                        schedule.ShiftDate.DayOfWeek != DayOfWeek.Sunday)
+                    {
+                        user.UsedVacationDays = Math.Max(0, user.UsedVacationDays - 1);
+                        await _userManager.UpdateAsync(user);
+                    }
+                }
+
+                // Remove the schedule entry
+                _context.Schedules.Remove(schedule);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Leave request cancelled successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while cancelling the leave request." });
+            }
+        }
+
+        /// <summary>
+        /// Counts the number of working days (Monday to Friday) between two dates
+        /// </summary>
+        private int CountWorkingDays(DateTime startDate, DateTime endDate)
+        {
+            int workingDays = 0;
+            DateTime currentDate = startDate.Date;
+
+            while (currentDate <= endDate.Date)
+            {
+                // Check if the current day is a weekday (Monday to Friday)
+                if (currentDate.DayOfWeek != DayOfWeek.Saturday && currentDate.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    workingDays++;
+                }
+                currentDate = currentDate.AddDays(1);
+            }
+
+            return workingDays;
+        }
     }
 }

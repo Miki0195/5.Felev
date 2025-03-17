@@ -140,6 +140,9 @@ namespace Managly.Controllers
             var userRoles = new List<UserManagement>();
             var availableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
 
+            // Check if we need to reset vacation days for the new year
+            await CheckAndResetVacationDaysForNewYear(usersInCompany);
+
             foreach (var user in usersInCompany)
             {
                 var roles = await _userManager.GetRolesAsync(user);
@@ -170,11 +173,16 @@ namespace Managly.Controllers
                     Address = user.Address,
                     DateOfBirth = user.DateOfBirth,
                     Gender = user.Gender,
-                    ProfilePicturePath = user.ProfilePicturePath
+                    ProfilePicturePath = user.ProfilePicturePath,
+                    TotalVacationDays = user.TotalVacationDays,
+                    UsedVacationDays = user.UsedVacationDays,
+                    RemainingVacationDays = user.RemainingVacationDays,
+                    VacationYear = user.VacationYear
                 });
             }
 
             ViewData["AvailableRoles"] = availableRoles;
+            ViewData["CurrentYear"] = DateTime.Now.Year;
             return View(userRoles);
         }
 
@@ -248,6 +256,75 @@ namespace Managly.Controllers
             else
             {
                 return Json(new { success = false, message = "Failed to update role." });
+            }
+        }
+
+        /// <summary>
+        /// Updates a user's vacation days allocation
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateVacationDays(string userId, int totalVacationDays)
+        {
+            if (string.IsNullOrEmpty(userId) || totalVacationDays < 20)
+            {
+                return Json(new { success = false, message = "Invalid request data. Total vacation days must be at least 20." });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found." });
+            }
+
+            // Update total vacation days
+            user.TotalVacationDays = totalVacationDays;
+            
+            // Ensure used days don't exceed total days
+            if (user.UsedVacationDays > totalVacationDays)
+            {
+                user.UsedVacationDays = totalVacationDays;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Json(new { 
+                    success = true, 
+                    message = $"Vacation days for {user.Name} updated successfully.",
+                    totalDays = user.TotalVacationDays,
+                    usedDays = user.UsedVacationDays,
+                    remainingDays = user.RemainingVacationDays
+                });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Failed to update vacation days." });
+            }
+        }
+
+        /// <summary>
+        /// Checks if the vacation year needs to be reset and resets vacation days if needed
+        /// </summary>
+        private async Task CheckAndResetVacationDaysForNewYear(List<User> users)
+        {
+            int currentYear = DateTime.Now.Year;
+            bool anyChanges = false;
+
+            foreach (var user in users)
+            {
+                if (user.VacationYear < currentYear)
+                {
+                    // Reset for new year
+                    user.VacationYear = currentYear;
+                    user.UsedVacationDays = 0;
+                    anyChanges = true;
+                }
+            }
+
+            if (anyChanges)
+            {
+                await _context.SaveChangesAsync();
             }
         }
     }

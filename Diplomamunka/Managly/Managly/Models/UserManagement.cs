@@ -19,6 +19,12 @@ namespace Managly.Models
         public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
         public string ProfilePicturePath { get; set; }
+        
+        // Vacation days tracking
+        public int TotalVacationDays { get; set; }
+        public int UsedVacationDays { get; set; }
+        public int RemainingVacationDays { get; set; }
+        public int VacationYear { get; set; }
     }
 
     public class ProjectInfo

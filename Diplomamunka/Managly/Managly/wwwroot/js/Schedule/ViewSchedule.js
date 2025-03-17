@@ -3,6 +3,15 @@ let editMode = false;
 let selectedDates = [];
 let calendar = null;
 let domCache = {};
+let currentUserId = '';
+let remainingVacationDays = 0;
+let totalVacationDays = 0;
+let usedVacationDays = 0;
+let vacationInfo = {
+    totalDays: 0,
+    usedDays: 0,
+    remainingDays: 0
+};
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function () {
@@ -11,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadNotifications();
     initializeCalendar();
     setupEventListeners();
+    fetchUserVacationInfo();
 });
 
 /**
@@ -26,7 +36,14 @@ function cacheDOM() {
         legendText: document.querySelector('.legend small'),
         scheduleDate: document.getElementById('scheduleDate'),
         scheduleTime: document.getElementById('scheduleTime'),
-        scheduleComment: document.getElementById('scheduleComment')
+        scheduleComment: document.getElementById('scheduleComment'),
+        leaveRequestModal: document.getElementById('leaveRequestModal'),
+        leaveStartDate: document.getElementById('leaveStartDate'),
+        leaveEndDate: document.getElementById('leaveEndDate'),
+        leaveType: document.getElementById('leaveType'),
+        leaveReason: document.getElementById('leaveReason'),
+        submitLeaveRequest: document.getElementById('submitLeaveRequest'),
+        vacationDaysInfo: document.getElementById('vacationDaysInfo')
     };
 }
 
@@ -63,6 +80,22 @@ function setupEventListeners() {
     domCache.editScheduleBtn.addEventListener("click", startVacationSelection);
     domCache.doneEditingBtn.addEventListener("click", submitVacationSelection);
     domCache.cancelSelection.addEventListener("click", cancelVacationSelection);
+
+    if (domCache.leaveRequestModal) {
+        domCache.leaveRequestModal.addEventListener('show.bs.modal', function () {
+            resetLeaveRequestForm();
+        });
+    }
+
+    if (domCache.leaveStartDate && domCache.leaveEndDate) {
+        domCache.leaveStartDate.addEventListener('change', updateVacationDaysCount);
+        domCache.leaveEndDate.addEventListener('change', updateVacationDaysCount);
+        domCache.leaveType.addEventListener('change', updateVacationDaysCount);
+    }
+
+    if (domCache.submitLeaveRequest) {
+        domCache.submitLeaveRequest.addEventListener('click', handleLeaveRequestSubmission);
+    }
 }
 
 // ========== EVENT HANDLERS ==========
@@ -274,6 +307,19 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
  * @param {Array} selectedDates - Array of selected date strings
  */
 function submitLeaveRequest(selectedDates) {
+    let workingDays = 0;
+    for (let dateStr of selectedDates) {
+        const date = new Date(dateStr);
+        if (date.getDay() !== 0 && date.getDay() !== 6) { 
+            workingDays++;
+        }
+    }
+    
+    if (workingDays > remainingVacationDays) {
+        showToast(`You don't have enough vacation days. You have ${remainingVacationDays} days available, but you're requesting ${workingDays} working days.`, "error");
+        return;
+    }
+
     const leaveRequests = selectedDates.map(date => ({
         LeaveDate: new Date(date).toISOString().split("T")[0],
         Reason: "Vacation",
@@ -287,7 +333,14 @@ function submitLeaveRequest(selectedDates) {
         },
         body: JSON.stringify(leaveRequests)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Failed to submit leave request');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             clearSelectedDatesHighlighting();
@@ -298,12 +351,14 @@ function submitLeaveRequest(selectedDates) {
             calendar.refetchEvents();
             
             showToast("Vacation request submitted successfully!", "success");
+            
+            fetchUserVacationInfo();
         } else {
-            showToast("Failed to submit leave request.", "error");
+            showToast(data.message || "Failed to submit leave request.", "error");
         }
     })
     .catch(error => {
-        showToast("An error occurred while submitting your request.", "error");
+        showToast(error.message || "An error occurred while submitting your request.", "error");
     });
 }
 
@@ -441,10 +496,29 @@ function updateSelectionCount() {
     const count = selectedDates.length;
 
     if (count > 0) {
-        domCache.selectionCounter.innerHTML = `
+        let workingDays = 0;
+        for (let dateStr of selectedDates) {
+            const date = new Date(dateStr);
+            if (date.getDay() !== 0 && date.getDay() !== 6) { 
+                workingDays++;
+            }
+        }
+        
+        let counterHtml = `
             <i class="fas fa-calendar-check"></i>
-            ${count} day${count !== 1 ? 's' : ''} selected
+            ${count} day${count !== 1 ? 's' : ''} selected (${workingDays} working day${workingDays !== 1 ? 's' : ''})
         `;
+        
+        if (workingDays > remainingVacationDays) {
+            counterHtml += `
+                <div class="text-danger mt-1">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Warning: You only have ${remainingVacationDays} vacation days remaining!
+                </div>
+            `;
+        }
+        
+        domCache.selectionCounter.innerHTML = counterHtml;
         domCache.selectionCounter.classList.remove('d-none');
     } else {
         domCache.selectionCounter.classList.add('d-none');
@@ -490,5 +564,138 @@ function showCannotAddPastVacationModal() {
     modal.show();
 }
 
+/**
+ * Fetch current user's vacation information
+ */
+function fetchUserVacationInfo() {
+    fetch('/api/schedule/myvacationinfo')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            currentUserId = data.id;
+            totalVacationDays = data.totalVacationDays;
+            usedVacationDays = data.usedVacationDays;
+            remainingVacationDays = data.remainingVacationDays;
+            
+            vacationInfo.totalDays = totalVacationDays;
+            vacationInfo.usedDays = usedVacationDays;
+            vacationInfo.remainingDays = remainingVacationDays;
+            
+            updateVacationDaysDisplay();
+        })
+        .catch(error => {
+            console.error('Error fetching user vacation info:', error);
+            showToast("Failed to load vacation information. Please refresh the page.", "error");
+        });
+}
 
+/**
+ * Update the vacation days display in the UI
+ */
+function updateVacationDaysDisplay() {
+    if (domCache.vacationDaysInfo) {
+        const percentage = (vacationInfo.usedDays / vacationInfo.totalDays) * 100 || 0;
+        
+        domCache.vacationDaysInfo.innerHTML = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Vacation Days</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-1">Total: <strong>${vacationInfo.totalDays}</strong></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1">Used: <strong>${vacationInfo.usedDays}</strong></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1">Remaining: <strong>${vacationInfo.remainingDays}</strong></p>
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar ${percentage > 75 ? 'bg-danger' : percentage > 50 ? 'bg-warning' : 'bg-success'}" 
+                             role="progressbar" 
+                             style="width: ${percentage}%" 
+                             aria-valuenow="${vacationInfo.usedDays}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="${vacationInfo.totalDays}">
+                            ${Math.round(percentage)}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
 
+/**
+ * Updates the count of the vacation days
+ */
+function updateVacationDaysCount() {
+    const startDate = new Date(domCache.leaveStartDate.value);
+    const endDate = new Date(domCache.leaveEndDate.value);
+    const leaveType = domCache.leaveType.value;
+    
+    const messageElement = document.getElementById('leaveDaysMessage');
+    if (messageElement) {
+        messageElement.remove();
+    }
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
+        return;
+    }
+    
+    const workingDays = countWorkingDays(startDate, endDate);
+    
+    const newMessage = document.createElement('div');
+    newMessage.id = 'leaveDaysMessage';
+    newMessage.className = 'alert mt-3';
+    
+    if (leaveType === 'Vacation') {
+        if (workingDays > vacationInfo.remainingDays) {
+            newMessage.className += ' alert-danger';
+            newMessage.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i> 
+                This request is for <strong>${workingDays}</strong> working days, but you only have 
+                <strong>${vacationInfo.remainingDays}</strong> vacation days remaining.
+            `;
+        } else {
+            newMessage.className += ' alert-info';
+            newMessage.innerHTML = `
+                <i class="fas fa-info-circle"></i> 
+                This request is for <strong>${workingDays}</strong> working days. 
+                You have <strong>${vacationInfo.remainingDays}</strong> vacation days remaining.
+            `;
+        }
+    } else {
+        newMessage.className += ' alert-info';
+        newMessage.innerHTML = `
+            <i class="fas fa-info-circle"></i> 
+            This request is for <strong>${workingDays}</strong> working days.
+        `;
+    }
+    
+    domCache.leaveReason.parentNode.after(newMessage);
+}
+
+/**
+ * Counts have many actual working days the user selected for vacation
+ */
+function countWorkingDays(startDate, endDate) {
+    let workingDays = 0;
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+        const dayOfWeek = currentDate.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+            workingDays++;
+        }
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return workingDays;
+}

@@ -227,6 +227,55 @@
                                                 </div>
                                             </div>
 
+                                            <!-- Vacation Days Management Section -->
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <h6 class="detail-heading">Vacation Days</h6>
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label for="totalVacationDays-@user.UserId">Total Days</label>
+                                                                        <input type="number" class="form-control" id="totalVacationDays-@user.UserId" 
+                                                                               value="@user.TotalVacationDays" min="20">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Used Days</label>
+                                                                        <input type="number" class="form-control" value="@user.UsedVacationDays" readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label>Remaining Days</label>
+                                                                        <input type="number" class="form-control" value="@user.RemainingVacationDays" readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="progress mt-3" style="height: 20px;">
+                                                                @{ 
+                                                                    var usedPercentage = user.TotalVacationDays > 0 ? 
+                                                                        (user.UsedVacationDays * 100) / user.TotalVacationDays : 0;
+                                                                }
+                                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                                     style="width: @usedPercentage%;" 
+                                                                     aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100">
+                                                                    @usedPercentage%
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-3">
+                                                                <button type="button" class="btn btn-primary save-vacation-days" 
+                                                                        data-user-id="@user.UserId">
+                                                                    <i class="fas fa-save"></i> Save Changes
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             @if (user.AssignedProjects.Any())
                                             {
                                                 <div class="row mt-4">
@@ -452,6 +501,72 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+    
+    // Vacation days management
+    document.querySelectorAll('.save-vacation-days').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const totalDaysInput = document.getElementById(`totalVacationDays-${userId}`);
+            const totalDays = parseInt(totalDaysInput.value);
+            
+            // Validate input
+            if (isNaN(totalDays) || totalDays < 20) {
+                showToast('Total vacation days must be at least 20', 'error');
+                totalDaysInput.value = 20;
+                return;
+            }
+            
+            // Send update request
+            fetch('/Admin/UpdateVacationDays', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': '@token'
+                },
+                body: new URLSearchParams({ 
+                    userId: userId,
+                    totalVacationDays: totalDays
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI with new values
+                    const modalBody = button.closest('.card-body');
+                    const inputs = modalBody.querySelectorAll('input');
+                    inputs[0].value = data.totalDays;
+                    inputs[1].value = data.usedDays;
+                    inputs[2].value = data.remainingDays;
+                    
+                    // Update progress bar
+                    const progressBar = modalBody.querySelector('.progress-bar');
+                    const usedPercentage = data.totalDays > 0 ? 
+                        (data.usedDays * 100) / data.totalDays : 0;
+                    progressBar.style.width = `${usedPercentage}%`;
+                    progressBar.setAttribute('aria-valuenow', usedPercentage);
+                    progressBar.textContent = `${Math.round(usedPercentage)}%`;
+                    
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('An error occurred while updating vacation days.', 'error');
+            });
+        });
+    });
+    
+    // Input validation for vacation days
+    document.querySelectorAll('input[id^="totalVacationDays-"]').forEach(input => {
+        input.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (isNaN(value) || value < 20) {
+                this.value = 20;
+                showToast('Total vacation days must be at least 20', 'warning');
+            }
+        });
+    });
 });
 
 // Add sorting functionality
@@ -509,5 +624,91 @@ document.querySelectorAll('th div[data-sort]').forEach(header => {
         // Reorder rows in the DOM
         rows.forEach(row => tbody.appendChild(row));
     });
+});
+
+function openEditModal(userId) {
+    $.ajax({
+        url: '@Url.Action("GetUserDetails", "Admin")',
+        type: 'GET',
+        data: { userId: userId },
+        success: function (data) {
+            $('#editUserId').val(data.userId);
+            $('#editName').val(data.name);
+            $('#editLastName').val(data.lastName);
+            $('#editEmail').val(data.email);
+            $('#editRole').val(data.roles);
+            $('#editPhoneNumber').val(data.phoneNumber);
+            $('#editCountry').val(data.country);
+            $('#editCity').val(data.city);
+            $('#editAddress').val(data.address);
+            $('#editDateOfBirth').val(data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : '');
+            $('#editGender').val(data.gender);
+            
+            // Set vacation days information
+            $('#editTotalVacationDays').val(data.totalVacationDays);
+            $('#editUsedVacationDays').val(data.usedVacationDays);
+            $('#editRemainingVacationDays').val(data.remainingVacationDays);
+            
+            $('#editUserModal').modal('show');
+        },
+        error: function (error) {
+            console.error('Error fetching user details:', error);
+        }
+    });
+}
+
+// Update vacation days when total is changed
+$('#editTotalVacationDays').on('change', function() {
+    const totalDays = parseInt($(this).val());
+    const usedDays = parseInt($('#editUsedVacationDays').val());
+    
+    if (totalDays < 20) {
+        $(this).val(20);
+        alert('Minimum vacation days allowed is 20');
+        return;
+    }
+    
+    // Update remaining days
+    const remainingDays = Math.max(0, totalDays - usedDays);
+    $('#editRemainingVacationDays').val(remainingDays);
+});
+
+// Function to update vacation days
+function updateVacationDays(userId, totalDays) {
+    $.ajax({
+        url: '@Url.Action("UpdateVacationDays", "Admin")',
+        type: 'POST',
+        data: { 
+            userId: userId,
+            totalVacationDays: totalDays
+        },
+        success: function(response) {
+            if (response.success) {
+                showToast('Success', response.message, 'success');
+                // Update the displayed values
+                $('#editTotalVacationDays').val(response.totalDays);
+                $('#editUsedVacationDays').val(response.usedDays);
+                $('#editRemainingVacationDays').val(response.remainingDays);
+            } else {
+                showToast('Error', response.message, 'error');
+            }
+        },
+        error: function(error) {
+            console.error('Error updating vacation days:', error);
+            showToast('Error', 'Failed to update vacation days', 'error');
+        }
+    });
+}
+
+// Add event handler for save button to include vacation days update
+$('#saveUserChanges').on('click', function() {
+    const userId = $('#editUserId').val();
+    const totalVacationDays = parseInt($('#editTotalVacationDays').val());
+    
+    // Update vacation days first
+    updateVacationDays(userId, totalVacationDays);
+    
+    // Continue with existing save functionality
+    // ... existing save code ...
 });
 </script>

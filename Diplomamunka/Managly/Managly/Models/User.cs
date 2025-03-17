@@ -34,6 +34,12 @@ namespace Managly.Models
 
         public string ProfilePicturePath { get; set; } = "/images/default/default-profile.png";
 
+        // Vacation days tracking
+        public int TotalVacationDays { get; set; } = 20; // Default to 20 days per year
+        public int UsedVacationDays { get; set; } = 0;
+        public int RemainingVacationDays { get => TotalVacationDays - UsedVacationDays; }
+        public int VacationYear { get; set; } = DateTime.Now.Year; // Track the current year for resets
+
         public virtual ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
         public virtual ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     }
