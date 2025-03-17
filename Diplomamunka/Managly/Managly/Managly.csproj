@@ -64,6 +64,7 @@
     <Folder Include="Views\VideoConference\" />
     <Folder Include="Controllers\Api\" />
     <Folder Include="wwwroot\css\VideoConference\" />
+    <Folder Include="wwwroot\js\Schedule\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />
@@ -79,6 +80,7 @@
     <Content Remove="wwwroot\css\Chat\" />
     <Content Remove="wwwroot\css\ClockIn\" />
     <Content Remove="wwwroot\css\VideoConference\" />
+    <Content Remove="wwwroot\js\Schedule\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">
