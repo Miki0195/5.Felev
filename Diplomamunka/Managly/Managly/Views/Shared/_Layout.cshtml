@@ -45,9 +45,9 @@
                         }
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
+                            @*<li class="nav-item">
                                 <a class="nav-link" asp-controller="Admin" asp-action="CreateProfile">Create Profile</a>
-                            </li>
+                            </li>*@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Admin" asp-action="UserManagement">User Management</a>
                             </li>

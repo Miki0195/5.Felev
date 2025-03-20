@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Managly.Models
+namespace Managly.Models.DTOs.Schedule
 {
     public class ScheduleDTO
     {

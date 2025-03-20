@@ -78,7 +78,12 @@
                             <i class="fas fa-sort sort-icon"></i>
                         </div>
                     </th>
-                    <th>Projects</th>
+                    <th>
+                        <div class="d-flex align-items-center gap-2">
+                            Active Projects
+                            <i class="fas fa-info-circle" title="Only showing non-completed projects"></i>
+                        </div>
+                    </th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
@@ -86,11 +91,20 @@
             <tbody id="userTableBody">
                 @foreach (var user in Model)
                 {
-                    <tr data-user-name="@user.Name.ToLower()" data-user-email="@user.Email.ToLower()" data-user-role="@user.Roles">
+                    <tr data-user-name="@user.Name.ToLower()" data-user-email="@user.Email.ToLower()" data-user-role="@user.Roles" data-profile-pic="@user.ProfilePicturePath">
                         <td>
                             <div class="user-info cursor-pointer" data-bs-toggle="modal" data-bs-target="#userModal-@user.UserId">
-                                <div class="user-avatar">@user.Name[0].ToString().ToUpper()</div>
-                                <span>@user.Name</span>
+                                <div class="user-avatar">
+                                    @if (!string.IsNullOrEmpty(user.ProfilePicturePath))
+                                    {
+                                        <img src="@user.ProfilePicturePath" alt="@user.Name" class="avatar-img" />
+                                    }
+                                    else
+                                    {
+                                        @user.Name[0].ToString().ToUpper()
+                                    }
+                                </div>
+                                <span>@user.Name @user.LastName</span>
                             </div>
                         </td>
                         <td>@user.Email</td>
@@ -280,7 +294,10 @@
                                             {
                                                 <div class="row mt-4">
                                                     <div class="col-12">
-                                                        <h6 class="detail-heading">Assigned Projects</h6>
+                                                        <h6 class="detail-heading">
+                                                            Active Projects
+                                                            <small class="text-muted">(Excluding completed projects)</small>
+                                                        </h6>
                                                         <div class="project-badges mt-2">
                                                             @foreach (var project in user.AssignedProjects)
                                                             {
@@ -323,392 +340,4 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('userSearch');
-    const searchResults = document.getElementById('searchResults');
-    const roleFilter = document.getElementById('roleFilter');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    const rows = document.querySelectorAll('#userTableBody tr');
-
-    // Enhanced search functionality
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
-
-        rows.forEach(row => {
-            const name = row.getAttribute('data-user-name');
-            const email = row.getAttribute('data-user-email');
-            const role = row.getAttribute('data-user-role');
-            const roleFilterValue = roleFilter.value.toLowerCase();
-
-            const matchesSearch = searchTerm === '' ||
-                                name.includes(searchTerm) ||
-                                email.includes(searchTerm);
-
-            const matchesRole = roleFilterValue === '' ||
-                              role.toLowerCase() === roleFilterValue;
-
-            row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
-        });
-    });
-
-    // Role filter functionality
-    roleFilter.addEventListener('change', function() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        const roleValue = this.value.toLowerCase();
-
-        rows.forEach(row => {
-            const name = row.getAttribute('data-user-name');
-            const email = row.getAttribute('data-user-email');
-            const role = row.getAttribute('data-user-role');
-
-            const matchesSearch = searchTerm === '' ||
-                                name.includes(searchTerm) ||
-                                email.includes(searchTerm);
-
-            const matchesRole = roleValue === '' ||
-                              role.toLowerCase() === roleValue;
-
-            row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
-        });
-    });
-
-    // Clear filters
-    clearFiltersBtn.addEventListener('click', function() {
-        searchInput.value = '';
-        roleFilter.value = '';
-        rows.forEach(row => row.style.display = '');
-        showToast('Filters cleared', 'success');
-    });
-
-    // Role change handling
-    let activeForm = null;
-    let originalValue = null;
-
-    document.querySelectorAll('.role-select').forEach(select => {
-        // Store original value
-        select.dataset.originalValue = select.value;
-
-        select.addEventListener('change', function(e) {
-            e.preventDefault();
-            const userName = this.getAttribute('data-user-name');
-            const newRole = this.value;
-            activeForm = this.closest('form');
-            originalValue = this.dataset.originalValue;
-
-            // Update modal content
-            document.getElementById('roleUserName').textContent = userName;
-            document.getElementById('newRole').textContent = newRole;
-
-            // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('confirmRoleChangeModal'));
-            modal.show();
-        });
-    });
-
-    // Update the role change confirmation handler
-    document.getElementById('confirmRoleChange').addEventListener('click', function() {
-        if (activeForm) {
-            const formData = new FormData(activeForm);
-            const userId = formData.get('userId');
-            const newRole = formData.get('role');
-
-            fetch(activeForm.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRoleChangeModal'));
-                modal.hide();
-
-                if (data.success) {
-                    // Update the UI immediately
-                    const row = activeForm.closest('tr');
-                    if (row) {
-                        // Update the data attribute
-                        row.setAttribute('data-user-role', newRole);
-
-                        // Update the select element in the table
-                        const roleSelect = row.querySelector('.role-select');
-                        if (roleSelect) {
-                            roleSelect.value = newRole;
-                            roleSelect.dataset.originalValue = newRole; // Update the original value
-                        }
-
-                        // Update the role in the user details modal if it exists
-                        const userModal = document.querySelector(`#userModal-${userId}`);
-                        if (userModal) {
-                            const roleText = userModal.querySelector('.profile-basic-info p.text-muted');
-                            if (roleText) {
-                                roleText.textContent = newRole;
-                            }
-                        }
-                    }
-
-                    showToast(data.message, 'success');
-                } else {
-                    showToast(data.message, 'error');
-                    // Revert the select to original value
-                    activeForm.querySelector('select').value = originalValue;
-                }
-            })
-            .catch(error => {
-                showToast('An error occurred while updating the role.', 'error');
-                // Revert the select to original value
-                activeForm.querySelector('select').value = originalValue;
-                const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRoleChangeModal'));
-                modal.hide();
-            });
-        }
-    });
-
-    // Handle modal dismissal
-    document.getElementById('confirmRoleChangeModal').addEventListener('hidden.bs.modal', function() {
-        if (activeForm && originalValue) {
-            activeForm.querySelector('select').value = originalValue;
-        }
-        activeForm = null;
-        originalValue = null;
-    });
-
-    // Delete user handling
-    document.querySelectorAll('.delete-confirm').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-
-            fetch('/Admin/DeleteUser', {
-                method: 'POST',
-                headers: {
-                    'RequestVerificationToken': '@token'
-                },
-                body: new URLSearchParams({ userId: userId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const row = this.closest('tr');
-                    if (row) {
-                        row.remove();
-                    }
-                    showToast(data.message, 'success');
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(error => {
-                showToast('An error occurred while deleting the user.', 'error');
-            });
-        });
-    });
-    
-    // Vacation days management
-    document.querySelectorAll('.save-vacation-days').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const totalDaysInput = document.getElementById(`totalVacationDays-${userId}`);
-            const totalDays = parseInt(totalDaysInput.value);
-            
-            // Validate input
-            if (isNaN(totalDays) || totalDays < 20) {
-                showToast('Total vacation days must be at least 20', 'error');
-                totalDaysInput.value = 20;
-                return;
-            }
-            
-            // Send update request
-            fetch('/Admin/UpdateVacationDays', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': '@token'
-                },
-                body: new URLSearchParams({ 
-                    userId: userId,
-                    totalVacationDays: totalDays
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update UI with new values
-                    const modalBody = button.closest('.card-body');
-                    const inputs = modalBody.querySelectorAll('input');
-                    inputs[0].value = data.totalDays;
-                    inputs[1].value = data.usedDays;
-                    inputs[2].value = data.remainingDays;
-                    
-                    // Update progress bar
-                    const progressBar = modalBody.querySelector('.progress-bar');
-                    const usedPercentage = data.totalDays > 0 ? 
-                        (data.usedDays * 100) / data.totalDays : 0;
-                    progressBar.style.width = `${usedPercentage}%`;
-                    progressBar.setAttribute('aria-valuenow', usedPercentage);
-                    progressBar.textContent = `${Math.round(usedPercentage)}%`;
-                    
-                    showToast(data.message, 'success');
-                } else {
-                    showToast(data.message, 'error');
-                }
-            })
-            .catch(error => {
-                showToast('An error occurred while updating vacation days.', 'error');
-            });
-        });
-    });
-    
-    // Input validation for vacation days
-    document.querySelectorAll('input[id^="totalVacationDays-"]').forEach(input => {
-        input.addEventListener('change', function() {
-            const value = parseInt(this.value);
-            if (isNaN(value) || value < 20) {
-                this.value = 20;
-                showToast('Total vacation days must be at least 20', 'warning');
-            }
-        });
-    });
-});
-
-// Add sorting functionality
-let currentSort = {
-    column: '',
-    direction: 'asc'
-};
-
-document.querySelectorAll('th div[data-sort]').forEach(header => {
-    header.addEventListener('click', function() {
-        const sortColumn = this.getAttribute('data-sort');
-        const icon = this.querySelector('.sort-icon');
-
-        // Reset other icons
-        document.querySelectorAll('.sort-icon').forEach(i => {
-            if (i !== icon) {
-                i.className = 'fas fa-sort sort-icon';
-            }
-        });
-
-        // Update sort direction
-        if (currentSort.column === sortColumn) {
-            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSort.column = sortColumn;
-            currentSort.direction = 'asc';
-        }
-
-        // Update icon
-        icon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'} sort-icon`;
-
-        // Get all rows and convert to array for sorting
-        const tbody = document.querySelector('#userTableBody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-
-        // Sort rows
-        rows.sort((a, b) => {
-            let aValue, bValue;
-
-            if (sortColumn === 'name') {
-                aValue = a.querySelector('.user-info span').textContent.trim().toLowerCase();
-                bValue = b.querySelector('.user-info span').textContent.trim().toLowerCase();
-            } else if (sortColumn === 'email') {
-                aValue = a.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
-                bValue = b.querySelector('td:nth-child(2)').textContent.trim().toLowerCase();
-            }
-
-            if (currentSort.direction === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
-        });
-
-        // Reorder rows in the DOM
-        rows.forEach(row => tbody.appendChild(row));
-    });
-});
-
-function openEditModal(userId) {
-    $.ajax({
-        url: '@Url.Action("GetUserDetails", "Admin")',
-        type: 'GET',
-        data: { userId: userId },
-        success: function (data) {
-            $('#editUserId').val(data.userId);
-            $('#editName').val(data.name);
-            $('#editLastName').val(data.lastName);
-            $('#editEmail').val(data.email);
-            $('#editRole').val(data.roles);
-            $('#editPhoneNumber').val(data.phoneNumber);
-            $('#editCountry').val(data.country);
-            $('#editCity').val(data.city);
-            $('#editAddress').val(data.address);
-            $('#editDateOfBirth').val(data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : '');
-            $('#editGender').val(data.gender);
-            
-            // Set vacation days information
-            $('#editTotalVacationDays').val(data.totalVacationDays);
-            $('#editUsedVacationDays').val(data.usedVacationDays);
-            $('#editRemainingVacationDays').val(data.remainingVacationDays);
-            
-            $('#editUserModal').modal('show');
-        },
-        error: function (error) {
-            console.error('Error fetching user details:', error);
-        }
-    });
-}
-
-// Update vacation days when total is changed
-$('#editTotalVacationDays').on('change', function() {
-    const totalDays = parseInt($(this).val());
-    const usedDays = parseInt($('#editUsedVacationDays').val());
-    
-    if (totalDays < 20) {
-        $(this).val(20);
-        alert('Minimum vacation days allowed is 20');
-        return;
-    }
-    
-    // Update remaining days
-    const remainingDays = Math.max(0, totalDays - usedDays);
-    $('#editRemainingVacationDays').val(remainingDays);
-});
-
-// Function to update vacation days
-function updateVacationDays(userId, totalDays) {
-    $.ajax({
-        url: '@Url.Action("UpdateVacationDays", "Admin")',
-        type: 'POST',
-        data: { 
-            userId: userId,
-            totalVacationDays: totalDays
-        },
-        success: function(response) {
-            if (response.success) {
-                showToast('Success', response.message, 'success');
-                // Update the displayed values
-                $('#editTotalVacationDays').val(response.totalDays);
-                $('#editUsedVacationDays').val(response.usedDays);
-                $('#editRemainingVacationDays').val(response.remainingDays);
-            } else {
-                showToast('Error', response.message, 'error');
-            }
-        },
-        error: function(error) {
-            console.error('Error updating vacation days:', error);
-            showToast('Error', 'Failed to update vacation days', 'error');
-        }
-    });
-}
-
-// Add event handler for save button to include vacation days update
-$('#saveUserChanges').on('click', function() {
-    const userId = $('#editUserId').val();
-    const totalVacationDays = parseInt($('#editTotalVacationDays').val());
-    
-    // Update vacation days first
-    updateVacationDays(userId, totalVacationDays);
-    
-    // Continue with existing save functionality
-    // ... existing save code ...
-});
-</script>
+<script src="~/js/Admin/UserManagement.js"></script>

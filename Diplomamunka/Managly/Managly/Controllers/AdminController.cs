@@ -102,11 +102,6 @@ namespace Managly.Controllers
                 TempData["ErrorMessage"] = "Failed to create the user.";
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
             return View(model);
         }
 
@@ -148,9 +143,11 @@ namespace Managly.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 string role = roles.FirstOrDefault() ?? "Employee";
 
+                // Only get projects that are not completed
                 var projects = await _context.ProjectMembers
                     .Where(pm => pm.UserId == user.Id)
                     .Include(pm => pm.Project)
+                    .Where(pm => pm.Project.Status != "Completed") // Filter out completed projects
                     .Select(pm => new ProjectInfo
                     {
                         ProjectId = pm.ProjectId,
@@ -166,7 +163,7 @@ namespace Managly.Controllers
                     LastName = user.LastName,
                     Email = user.Email,
                     Roles = role,
-                    AssignedProjects = projects,
+                    AssignedProjects = projects, // This now only contains non-completed projects
                     PhoneNumber = user.PhoneNumber,
                     Country = user.Country,
                     City = user.City,

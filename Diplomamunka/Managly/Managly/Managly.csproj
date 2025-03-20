@@ -38,6 +38,7 @@
     <None Remove="Views\ClockIn\" />
     <None Remove="Views\VideoConference\" />
     <None Remove="Controllers\Api\" />
+    <None Remove="Models\DTOs\Schedule\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -65,6 +66,8 @@
     <Folder Include="Controllers\Api\" />
     <Folder Include="wwwroot\css\VideoConference\" />
     <Folder Include="wwwroot\js\Schedule\" />
+    <Folder Include="Models\DTOs\Schedule\" />
+    <Folder Include="wwwroot\js\Admin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />
@@ -81,6 +84,7 @@
     <Content Remove="wwwroot\css\ClockIn\" />
     <Content Remove="wwwroot\css\VideoConference\" />
     <Content Remove="wwwroot\js\Schedule\" />
+    <Content Remove="wwwroot\js\Admin\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">

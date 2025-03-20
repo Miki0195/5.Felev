@@ -79,13 +79,11 @@
     border-bottom: none;
 }
 
-/* Modern Container Styles */
 .container {
     max-width: 1400px;
     padding: 2rem;
 }
 
-/* Page Header */
 .page-header {
     margin-bottom: 2rem;
 }
@@ -102,7 +100,6 @@
     font-size: 1rem;
 }
 
-/* Search Card Styling */
 .search-card {
     background: white;
     border: none;
@@ -120,7 +117,6 @@
     font-weight: 500;
 }
 
-/* Search Input Styling */
 .search-input {
     background: white !important;
     padding: 1rem;
@@ -150,7 +146,6 @@
     font-size: 1.25rem;
 }
 
-/* Search Results Styling */
 .search-results-container {
     background: white;
     margin-top: 0.5rem;
@@ -170,7 +165,6 @@
     background: #f7fafc;
 }
 
-/* Calendar Container */
 .calendar-container {
     background: white;
     border-radius: 1rem;
@@ -186,14 +180,12 @@
     display: none !important;
 }
 
-/* Ensure the calendar has proper dimensions */
 #calendar {
     height: 100%;
     min-height: 600px;
     width: 100%;
 }
 
-/* Make sure FullCalendar renders properly */
 .fc {
     height: 100% !important;
     width: 100% !important;
@@ -203,7 +195,6 @@
     color: black;
 }
 
-/* Add Recurring Shift Button */
 .add-recurring-btn {
     background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
     color: white;
@@ -224,7 +215,6 @@
     text-decoration: none;
 }
 
-/* Modal Styling */
 .modal-content {
     background: white;
     border: none;
@@ -244,7 +234,6 @@
     color: #2d3748;
 }
 
-/* Form Controls */
 .form-control, .form-select {
     background: white !important;
     border: 2px solid #e2e8f0 !important;
@@ -257,13 +246,11 @@
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
-/* Labels */
 .form-label {
     color: #2d3748;
     font-weight: 500;
 }
 
-/* Weekday Selector */
 .weekday-selector .btn-outline-primary {
     color: #4299e1;
     border-color: #4299e1;
@@ -279,7 +266,6 @@
     color: white;
 }
 
-/* Preview Section */
 .preview-dates {
     background: #f7fafc;
     border-radius: 0.75rem;
@@ -293,7 +279,6 @@
     color: #2d3748;
 }
 
-/* Calendar Customization */
 .fc {
     color: #2d3748;
 }
@@ -312,7 +297,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Text colors for specific elements */
 .modal-title {
     color: white;
 }
@@ -325,7 +309,6 @@ h6, .preview-dates, .align-self-center, p {
     color: #718096 !important;
 }
 
-/* Selected Users Styling */
 .selected-users-container {
     display: flex;
     flex-wrap: wrap;
@@ -363,7 +346,6 @@ h6, .preview-dates, .align-self-center, p {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Availability Grid */
 .availability-grid {
     display: grid;
     gap: 1rem;
@@ -403,7 +385,6 @@ h6, .preview-dates, .align-self-center, p {
     background: #f59e0b;
 }
 
-/* Calendar Event Styling */
 .fc-daygrid-event-harness {
     margin: 4px 6px !important;
 }
@@ -423,7 +404,6 @@ h6, .preview-dates, .align-self-center, p {
     border-radius: 8px;
 }
 
-/* Hover effect for events */
 .fc-event {
     transition: all 0.2s ease !important;
 }
@@ -434,13 +414,11 @@ h6, .preview-dates, .align-self-center, p {
     z-index: 1;
 }
 
-/* Make sure events don't get cut off */
 .fc-daygrid-day-events {
     min-height: 0;
     padding: 2px 0;
 }
 
-/* Ensure consistent text styling */
 .fc-event .event-content div {
     line-height: 1.2;
 }
@@ -453,7 +431,6 @@ h6, .preview-dates, .align-self-center, p {
     font-size: 0.8rem;
     opacity: 0.9;
     padding-top: 4px;
-/*    border-top: 1px solid rgba(255, 255, 255, 0.2);*/
 }
 
 .calendar-card {
@@ -467,7 +444,6 @@ h5 {
     color: black;
 }
 
-/* Filter Card Styles */
 .filter-card {
     background: white;
     border-radius: 1rem;
@@ -475,12 +451,10 @@ h5 {
     margin-bottom: 2rem;
 }
 
-/* Project Filter Styles */
 .project-filter-container {
     position: relative;
 }
 
-/* Update Project Filter Styles */
 .project-filter-container select {
     width: 100%;
     padding: 0.75rem;
@@ -505,7 +479,6 @@ h5 {
     color: white;
 }
 
-/* Active Filters */
 .active-filters-container {
     padding: 1rem;
     background: #f7fafc;
@@ -574,7 +547,6 @@ h5 {
     word-break: break-word;
 }
 
-/* Event colors */
 .fc-event-success {
     background-color: #22c55e !important;
     border-color: #16a34a !important;
@@ -590,14 +562,12 @@ h5 {
     border-color: #2b6cb0 !important;
 }
 
-/* Ensure event text is always white */
 .fc-event-success .event-content,
 .fc-event-warning .event-content,
 .fc-event-primary .event-content {
     color: white !important;
 }
 
-/* Vacation Selection Styling */
 .vacation-selection-overlay {
     position: absolute;
     top: 0;
@@ -634,7 +604,6 @@ h5 {
     background-color: rgba(246, 173, 85, 0.2) !important;
 }
 
-/* Tooltip styling */
 .vacation-tooltip {
     position: fixed;
     background: #2d3748;
@@ -649,7 +618,6 @@ h5 {
     margin-top: -8px;
 }
 
-/* Animation for checkmark */
 .vacation-checkmark {
     animation: fadeIn 0.2s ease;
 }
@@ -675,7 +643,6 @@ h5 {
     color: #f6ad55;
 }
 
-/* Animation for checkmark */
 .shift-checkmark {
     animation: fadeIn 0.2s ease;
 }
@@ -685,7 +652,6 @@ h5 {
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-/* Selection styling */
 .fc-day.selectable {
     cursor: pointer;
     transition: all 0.2s ease;
@@ -696,7 +662,6 @@ h5 {
     cursor: pointer;
 }
 
-/* Event content styling */
 .event-content {
     display: flex;
     flex-direction: column;
@@ -708,7 +673,6 @@ h5 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Selection counter */
 .selection-counter {
     background: #2d3748;
     color: white;
@@ -776,7 +740,6 @@ h5 {
     100% { transform: rotate(360deg); }
 }
 
-/* Add these styles if they're not already in your Manage.css file */
 .form-header {
     margin-bottom: 3rem;
     text-align: center;
