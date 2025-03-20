@@ -31,6 +31,23 @@ namespace Managly.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
             ViewBag.IsAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            
+            // Get counts of active and archived projects for the ViewBag
+            if (currentUser != null)
+            {
+                var activeCount = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId && p.Status != "Completed")
+                    .CountAsync();
+                    
+                var archivedCount = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId && p.Status == "Completed")
+                    .CountAsync();
+                
+                ViewBag.ActiveProjectsCount = activeCount;
+                ViewBag.ArchivedProjectsCount = archivedCount;
+            }
+
+            _logger.LogInformation("Loading Projects Index with partials");
 
             return View();
         }
@@ -50,7 +67,7 @@ namespace Managly.Controllers
 
                 var projects = await _context.Projects
                     .Where(p => p.CompanyId == currentUser.CompanyId && 
-                               p.Status == "In Progress")
+                               p.Status != "Completed")
                     .Select(p => new { id = p.Id, name = p.Name })
                     .ToListAsync();
                 

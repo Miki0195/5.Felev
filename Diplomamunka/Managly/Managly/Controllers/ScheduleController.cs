@@ -135,12 +135,12 @@ namespace Managly.Controllers
         public async Task<IActionResult> UpdateSchedule(int id, [FromBody] ScheduleUpdateDTO model)
         {
             try
+        {
+            var schedule = await _context.Schedules.FindAsync(id);
+            if (schedule == null)
             {
-                var schedule = await _context.Schedules.FindAsync(id);
-                if (schedule == null)
-                {
-                    return NotFound(new { success = false, message = "Shift not found" });
-                }
+                return NotFound(new { success = false, message = "Shift not found" });
+            }
 
                 if (!string.IsNullOrEmpty(model.ShiftDate))
                 {
@@ -149,9 +149,9 @@ namespace Managly.Controllers
                         schedule.ShiftDate = parsedDate.Date;
                         
                         if (parsedDate.Date < DateTime.Today)
-                        {
-                            return BadRequest(new { success = false, message = "Cannot move shift to a past date." });
-                        }
+            {
+                return BadRequest(new { success = false, message = "Cannot move shift to a past date." });
+            }
                     }
                     else
                     {
@@ -174,7 +174,7 @@ namespace Managly.Controllers
                 schedule.EndTime = parsedEndTime;
                 schedule.Comment = model.Comment ?? schedule.Comment; // Keep existing comment if new one is null
 
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
                 return Ok(new { success = true, message = "Shift updated successfully" });
             }
             catch (Exception ex)

@@ -35,47 +35,34 @@ namespace Managly.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> GetProjects()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
-
-            var projects = await _context.Projects
-                .Where(p => p.CompanyId == currentUser.CompanyId &&
-                    (isAdmin || p.ProjectMembers.Any(m => m.UserId == currentUser.Id)))
-                .Include(p => p.ProjectMembers)
-                    .ThenInclude(m => m.User)
-                .Include(p => p.CreatedBy)
-                .OrderByDescending(p => p.CreatedAt)
-                .Select(p => new
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                
+                if (currentUser == null)
                 {
-                    p.Id,
-                    p.Name,
-                    p.Description,
-                    p.StartDate,
-                    p.Deadline,
-                    p.Status,
-                    p.Priority,
-                    p.CreatedAt,
-                    Progress = p.TotalTasks == 0 ? 0 : (p.CompletedTasks * 100 / p.TotalTasks),
-                    CreatedBy = new
-                    {
-                        p.CreatedBy.Id,
-                        p.CreatedBy.Name,
-                        p.CreatedBy.LastName,
-                        p.CreatedBy.ProfilePicturePath
-                    },
-                    Members = p.ProjectMembers.Select(m => new
-                    {
-                        m.User.Id,
-                        m.User.Name,
-                        m.User.LastName,
-                        m.User.ProfilePicturePath,
-                        m.Role,
-                        m.JoinedAt
-                    })
-                })
-                .ToListAsync();
+                    return Unauthorized(new { success = false, message = "User not found" });
+                }
 
-            return Ok(projects);
+                var projects = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId)
+                    .Select(p => new { 
+                        id = p.Id, 
+                        name = p.Name,
+                        description = p.Description,
+                        startDate = p.StartDate,
+                        deadline = p.Deadline,
+                        priority = p.Priority,
+                        status = p.Status
+                    })
+                    .ToListAsync();
+                
+                return Ok(projects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error fetching projects: " + ex.Message });
+            }
         }
 
         // GET: api/projects/{id}
@@ -971,6 +958,39 @@ namespace Managly.Controllers.Api
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("archived")]
+        public async Task<IActionResult> GetArchivedProjects()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                
+                if (currentUser == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not found" });
+                }
+
+                var projects = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId && 
+                              p.Status == "Completed")
+                    .Select(p => new { 
+                        id = p.Id, 
+                        name = p.Name,
+                        description = p.Description,
+                        startDate = p.StartDate,
+                        deadline = p.Deadline,
+                        priority = p.Priority
+                    })
+                    .ToListAsync();
+                
+                return Ok(projects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error fetching archived projects: " + ex.Message });
             }
         }
     }

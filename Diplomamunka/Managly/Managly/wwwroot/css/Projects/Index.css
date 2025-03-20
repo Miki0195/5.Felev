@@ -530,3 +530,17 @@ select[multiple] option:hover {
 .tasks-filters .btn:hover:not(.active) {
     background-color: #e9ecef;
 }
+
+/* Styling for archived projects */
+#archivedProjectsList .project-item {
+    opacity: 0.8;
+}
+
+#archivedProjectsList .project-item:hover {
+    opacity: 1;
+}
+
+.projects-dropdown .badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}

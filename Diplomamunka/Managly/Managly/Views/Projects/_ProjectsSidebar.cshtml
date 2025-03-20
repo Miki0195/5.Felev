@@ -1,0 +1,45 @@
+<div class="projects-sidebar">
+    <div class="sidebar-header">
+        <h3>Projects</h3>
+    </div>
+
+    <div class="sidebar-menu">
+        @if (ViewBag.IsAdmin)
+        {
+            <button class="menu-item create-project" onclick="openCreateProjectModal()">
+                <i class="bi bi-plus-circle"></i>
+                <span>Create Project</span>
+            </button>
+        }
+
+        <div class="menu-item projects-dropdown">
+            <div class="dropdown-header" onclick="toggleProjectsList()">
+                <i class="bi bi-folder"></i>
+                <span>My Projects</span>
+                @if (ViewBag.ActiveProjectsCount > 0)
+                {
+                    <span class="badge bg-primary rounded-pill ms-2">@ViewBag.ActiveProjectsCount</span>
+                }
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="projects-list" id="projectsList">
+                <!-- Active projects will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="menu-item projects-dropdown">
+            <div class="dropdown-header" onclick="toggleArchivedProjectsList()">
+                <i class="bi bi-archive"></i>
+                <span>Archived Projects</span>
+                @if (ViewBag.ArchivedProjectsCount > 0)
+                {
+                    <span class="badge bg-secondary rounded-pill ms-2">@ViewBag.ArchivedProjectsCount</span>
+                }
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="projects-list" id="archivedProjectsList">
+                <!-- Archived/completed projects will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div> 

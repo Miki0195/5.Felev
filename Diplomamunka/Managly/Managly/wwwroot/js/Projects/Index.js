@@ -298,28 +298,74 @@ function showToast(message, type = 'info') {
 // Load projects on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
+    // Also load archived projects during initial page load
+    const archivedList = document.getElementById('archivedProjectsList');
+    if (archivedList && archivedList.children.length === 0) {
+        loadArchivedProjects();
+    }
 });
 
 async function loadProjects() {
     try {
-        const response = await fetch('/api/projectsapi');
-        const projects = await response.json();
-
+        const response = await fetch('/api/ProjectsApi');
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error loading projects');
+        }
+        
+        const data = await response.json();
         const projectsList = document.getElementById('projectsList');
-        projectsList.innerHTML = projects.map(project => `
-                    <div class="project-item" onclick="loadProject(${project.id})">
-                        <span>${project.name}</span>
-                    </div>
-                `).join('');
+        projectsList.innerHTML = '';
+        
+        if (data.length === 0) {
+            projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
+            return;
+        }
+        
+        // Filter out completed projects
+        const activeProjects = data.filter(project => project.status !== "Completed");
+        
+        if (activeProjects.length === 0) {
+            projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
+            return;
+        }
+        
+        activeProjects.forEach(project => {
+            const projectItem = document.createElement('div');
+            projectItem.className = 'project-item';
+            projectItem.innerHTML = `
+                <div onclick="loadProject(${project.id})" style="cursor: pointer;">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>${project.name}</span>
+                </div>
+            `;
+            projectsList.appendChild(projectItem);
+        });
+        
+        console.log('Active projects loaded successfully:', activeProjects.length);
     } catch (error) {
-        console.error('Error loading projects:', error);
-        showToast('Error loading projects', 'error');
+        console.error('Failed to load projects:', error);
+        showToast('Failed to load projects: ' + error.message, 'error');
     }
 }
 
 function toggleProjectsList() {
     const projectsList = document.getElementById('projectsList');
+    const icon = event.currentTarget.querySelector('.bi-chevron-down, .bi-chevron-up');
+    
     projectsList.classList.toggle('active');
+    
+    // Toggle icon
+    if (icon) {
+        if (icon.classList.contains('bi-chevron-down')) {
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-up');
+        } else {
+            icon.classList.remove('bi-chevron-up');
+            icon.classList.add('bi-chevron-down');
+        }
+    }
 }
 
 async function loadProject(projectId) {
@@ -590,6 +636,16 @@ async function updateProject(projectId) {
         // Refresh the view
         await loadProject(projectId);
         await loadProjects();
+
+        // Check if status changed to Completed, refresh sidebar if needed
+        if (projectData.status === 'Completed') {
+            // Refresh both project lists
+            loadProjects();
+            loadArchivedProjects();
+            
+            // Show a special message
+            showToast('Project marked as completed and moved to archives', 'success');
+        }
     } catch (error) {
         console.error('Error updating project:', error);
         showToast(error.message, 'error');
@@ -1116,5 +1172,65 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
     } catch (error) {
         console.error('Error updating task status:', error);
         showToast(error.message, 'error');
+    }
+}
+
+function toggleArchivedProjectsList() {
+    const archivedProjectsList = document.getElementById('archivedProjectsList');
+    const icon = event.currentTarget.querySelector('.bi-chevron-down, .bi-chevron-up');
+    
+    archivedProjectsList.classList.toggle('active');
+    
+    // Toggle icon
+    if (icon) {
+        if (icon.classList.contains('bi-chevron-down')) {
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-up');
+            
+            // Only load projects if the list is empty
+            if (archivedProjectsList.children.length === 0) {
+                loadArchivedProjects();
+            }
+        } else {
+            icon.classList.remove('bi-chevron-up');
+            icon.classList.add('bi-chevron-down');
+        }
+    }
+}
+
+async function loadArchivedProjects() {
+    try {
+        console.log('Loading archived projects...');
+        const response = await fetch('/api/ProjectsApi/archived');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error loading archived projects');
+        }
+        
+        const projects = await response.json();
+        const archivedProjectsList = document.getElementById('archivedProjectsList');
+        archivedProjectsList.innerHTML = '';
+        
+        if (projects.length === 0) {
+            archivedProjectsList.innerHTML = '<div class="project-item text-muted">No archived projects</div>';
+            return;
+        }
+        
+        projects.forEach(project => {
+            const projectItem = document.createElement('div');
+            projectItem.className = 'project-item';
+            projectItem.innerHTML = `
+                <div onclick="loadProject(${project.id})" style="cursor: pointer;">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>${project.name}</span>
+                </div>
+            `;
+            archivedProjectsList.appendChild(projectItem);
+        });
+        
+        console.log('Archived projects loaded successfully:', projects.length);
+    } catch (error) {
+        console.error('Failed to load archived projects:', error);
+        showToast('Failed to load archived projects: ' + error.message, 'error');
     }
 }
