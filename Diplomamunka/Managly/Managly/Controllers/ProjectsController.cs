@@ -80,5 +80,23 @@ namespace Managly.Controllers
                 return StatusCode(500, new { error = "Error fetching projects" });
             }
         }
+
+        [HttpGet("RenderPartial/{partialName}")]
+        public IActionResult RenderPartial(string partialName)
+        {
+            if (string.IsNullOrEmpty(partialName))
+            {
+                return BadRequest("Partial name is required");
+            }
+            
+            // Ensure the partialName starts with underscore
+            if (!partialName.StartsWith("_"))
+            {
+                partialName = "_" + partialName;
+            }
+            
+            // This will render the partial view with the given name
+            return PartialView(partialName);
+        }
     }
 }

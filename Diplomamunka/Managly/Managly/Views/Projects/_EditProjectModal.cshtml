@@ -7,6 +7,9 @@
             </div>
             <div class="modal-body">
                 <form id="editProjectForm">
+                    <!-- Hidden input for project ID -->
+                    <input type="hidden" id="editProjectId" name="editProjectId" value="">
+                    
                     <div class="mb-3">
                         <label class="form-label">Project Name</label>
                         <input type="text" class="form-control" id="editProjectName" required>
@@ -18,17 +21,17 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="editStartDate" required>
+                            <input type="date" class="form-control" id="editProjectStartDate" required>
                         </div>
                         <div class="col">
                             <label class="form-label">Deadline</label>
-                            <input type="date" class="form-control" id="editDeadline" required>
+                            <input type="date" class="form-control" id="editProjectDeadline" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label">Priority</label>
-                            <select class="form-select" id="editPriority">
+                            <select class="form-select" id="editProjectPriority">
                                 <option value="Low">Low</option>
                                 <option value="Medium">Medium</option>
                                 <option value="High">High</option>
@@ -36,7 +39,7 @@
                         </div>
                         <div class="col">
                             <label class="form-label">Status</label>
-                            <select class="form-select" id="editStatus">
+                            <select class="form-select" id="editProjectStatus">
                                 <option value="Not Started">Not Started</option>
                                 <option value="In Progress">In Progress</option>
                                 <option value="Completed">Completed</option>
@@ -47,7 +50,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="updateProjectButton">Save Changes</button>
+                <button type="button" class="btn btn-primary" onclick="updateProject()" id="updateProjectButton">Save Changes</button>
             </div>
         </div>
     </div>
