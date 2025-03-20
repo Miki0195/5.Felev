@@ -993,5 +993,37 @@ namespace Managly.Controllers.Api
                 return StatusCode(500, new { success = false, message = "Error fetching archived projects: " + ex.Message });
             }
         }
+
+        [HttpGet("counts")]
+        public async Task<IActionResult> GetProjectCounts()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                
+                if (currentUser == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not found" });
+                }
+
+                var activeCount = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId && p.Status != "Completed")
+                    .CountAsync();
+                    
+                var archivedCount = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId && p.Status == "Completed")
+                    .CountAsync();
+                
+                return Ok(new { 
+                    active = activeCount,
+                    archived = archivedCount,
+                    total = activeCount + archivedCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error fetching project counts: " + ex.Message });
+            }
+        }
     }
 }

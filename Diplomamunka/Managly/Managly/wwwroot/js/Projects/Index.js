@@ -298,11 +298,15 @@ function showToast(message, type = 'info') {
 // Load projects on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
+    
     // Also load archived projects during initial page load
     const archivedList = document.getElementById('archivedProjectsList');
     if (archivedList && archivedList.children.length === 0) {
         loadArchivedProjects();
     }
+    
+    // Update the project count badges
+    updateProjectCountBadges();
 });
 
 async function loadProjects() {
@@ -379,6 +383,14 @@ async function loadProject(projectId) {
         const projectContent = document.querySelector('.projects-content');
         const currentUserId = project.currentUserId;
 
+        // Check if project is archived (completed)
+        if (project.status === "Completed") {
+            // Load archived project view
+            await loadArchivedProjectView(project);
+            return;
+        }
+
+        // Load regular project view - existing code
         projectContent.innerHTML = `
                     <div class="project-details">
                         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -467,7 +479,7 @@ async function loadProject(projectId) {
                 `;
     } catch (error) {
         console.error('Error loading project:', error);
-        showToast(error.message, 'error');
+        showToast('Failed to load project: ' + error.message, 'error');
     }
 }
 
@@ -584,6 +596,12 @@ async function updateProject(projectId) {
         }
         const currentProject = await projectResponse.json();
 
+        const newStatus = document.getElementById('editStatus').value;
+        const wasCompletionStatusChanged = currentProject.status !== "Completed" && newStatus === "Completed";
+        
+        // Set completion date if project is being marked as completed
+        const completionDate = wasCompletionStatusChanged ? new Date().toISOString() : null;
+
         const projectData = {
             id: projectId,
             name: document.getElementById('editProjectName').value,
@@ -591,7 +609,8 @@ async function updateProject(projectId) {
             startDate: document.getElementById('editStartDate').value,
             deadline: document.getElementById('editDeadline').value,
             priority: document.getElementById('editPriority').value,
-            status: document.getElementById('editStatus').value,
+            status: newStatus,
+            completedAt: completionDate,
             companyId: currentProject.companyId,
             company: currentProject.company,
             createdById: currentProject.createdById,
@@ -615,7 +634,8 @@ async function updateProject(projectId) {
                 startDate: projectData.startDate,
                 deadline: projectData.deadline,
                 status: projectData.status,
-                priority: projectData.priority
+                priority: projectData.priority,
+                completedAt: projectData.completedAt
             })
         });
 
@@ -638,10 +658,13 @@ async function updateProject(projectId) {
         await loadProjects();
 
         // Check if status changed to Completed, refresh sidebar if needed
-        if (projectData.status === 'Completed') {
+        if (wasCompletionStatusChanged) {
             // Refresh both project lists
             loadProjects();
             loadArchivedProjects();
+            
+            // Update project count badges
+            await updateProjectCountBadges();
             
             // Show a special message
             showToast('Project marked as completed and moved to archives', 'success');
@@ -1232,5 +1255,314 @@ async function loadArchivedProjects() {
     } catch (error) {
         console.error('Failed to load archived projects:', error);
         showToast('Failed to load archived projects: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Loads the archived project view with watermark and restricted functionality
+ * @param {Object} project - The project data
+ */
+async function loadArchivedProjectView(project) {
+    try {
+        // Use a more appropriate approach to handle the archived view
+        const projectContent = document.querySelector('.projects-content');
+        
+        // Get creator name - properly handle the case when createdBy might be missing
+        let creatorName = 'Unknown';
+        if (project.createdBy && project.createdBy.name) {
+            creatorName = `${project.createdBy.name} ${project.createdBy.lastName || ''}`;
+        } else if (project.projectMembers && project.projectMembers.length > 0) {
+            // Try to find the project lead from members if creator is not available
+            const projectLead = project.projectMembers.find(m => m.role === 'Project Lead');
+            if (projectLead && projectLead.user) {
+                creatorName = `${projectLead.user.name} ${projectLead.user.lastName || ''}`;
+            }
+        }
+        
+        // Use the current date as completion date since we don't have the actual date when it was completed
+        // In a real app, you would store this in the database when the project is marked as completed
+        const completionDate = project.updatedAt ? formatDate(project.updatedAt) : formatDate(new Date());
+        
+        projectContent.innerHTML = `
+            <div class="project-details archived-project">
+                <div class="archived-overlay">
+                    <span>ARCHIVED</span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <h2>${project.name}</h2>
+                    </div>
+                    <button class="btn btn-success" onclick="showRestoreProjectModal()">
+                        <i class="bi bi-arrow-counterclockwise"></i> Restore Project
+                    </button>
+                </div>
+                
+                <div class="project-info mt-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="description">${project.description || 'No description provided'}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-card">
+                                <p><strong>Status:</strong> Completed</p>
+                                <p><strong>Priority:</strong> ${project.priority}</p>
+                                <p><strong>Start Date:</strong> ${formatDate(project.startDate)}</p>
+                                <p><strong>Original Deadline:</strong> ${formatDate(project.deadline)}</p>
+                                <p><strong>Completion Date:</strong> ${completionDate}</p>
+                                <p><strong>Created By:</strong> ${creatorName}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-members mt-4">
+                    <h5>Team Members</h5>
+                    <div class="members-list" id="archivedProjectMembers">
+                        <!-- Member cards will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="tasks-container mt-4">
+                    <h5>Tasks</h5>
+                    <div id="archivedProjectTasks">
+                        <!-- Tasks will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Set the project ID for restoration
+        document.getElementById('restoreProjectId').value = project.id;
+        
+        // Populate team members
+        const membersContainer = document.getElementById('archivedProjectMembers');
+        membersContainer.innerHTML = '';
+        
+        if (project.projectMembers && project.projectMembers.length > 0) {
+            project.projectMembers.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'member-card';
+                
+                // Handle potential missing data
+                const userProfilePic = member.user && member.user.profilePicturePath ? 
+                    member.user.profilePicturePath : '/images/default/default-profile.png';
+                const userName = member.user ? 
+                    `${member.user.name || ''} ${member.user.lastName || ''}` : 'Unknown User';
+                
+                memberCard.innerHTML = `
+                    <img src="${userProfilePic}" alt="${userName}" class="member-avatar" onerror="this.src='/images/default/default-profile.png'">
+                    <div class="member-info">
+                        <p class="member-name">${userName}</p>
+                        <p class="member-role">${member.role || 'Member'}</p>
+                    </div>
+                `;
+                membersContainer.appendChild(memberCard);
+            });
+        } else {
+            membersContainer.innerHTML = '<p class="text-muted">No team members</p>';
+        }
+        
+        // Populate tasks
+        const tasksContainer = document.getElementById('archivedProjectTasks');
+        tasksContainer.innerHTML = '';
+        
+        if (project.tasks && project.tasks.length > 0) {
+            project.tasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card ${task.priority ? task.priority.toLowerCase() : 'medium'} ${task.status === 'Completed' ? 'completed' : ''}`;
+                
+                // Generate assigned users HTML
+                let assignedUsersHtml = '';
+                if (task.assignments && task.assignments.length > 0) {
+                    assignedUsersHtml = `
+                        <div class="assigned-users">
+                            ${task.assignments.map(assignment => {
+                                const userName = assignment.user ? assignment.user.name : 'Unknown';
+                                const userPic = assignment.user && assignment.user.profilePicturePath ? 
+                                    assignment.user.profilePicturePath : '/images/default/default-profile.png';
+                                
+                                return `
+                                <div class="assigned-user">
+                                    <img src="${userPic}" 
+                                         alt="${userName}" 
+                                         class="user-avatar"
+                                         onerror="this.src='/images/default/default-profile.png'">
+                                    <span class="user-name">${userName}</span>
+                                </div>
+                            `}).join('')}
+                        </div>
+                    `;
+                } else {
+                    assignedUsersHtml = '<span class="text-muted">Unassigned</span>';
+                }
+                
+                // Handle task titles - they could be in different properties depending on the API
+                const taskTitle = task.title || task.taskTitle || 'Untitled Task';
+                
+                taskCard.innerHTML = `
+                    <div class="task-header">
+                        <h5 class="task-title">${taskTitle}</h5>
+                        <span class="task-priority badge ${task.priority ? task.priority.toLowerCase() : 'medium'}">${task.priority || 'Medium'}</span>
+                    </div>
+                    <p class="task-description">${task.description || 'No description'}</p>
+                    <div class="task-meta">
+                        <div>
+                            <small>Due: ${formatDate(task.dueDate)}</small>
+                        </div>
+                        <div class="assigned-to">
+                            <small>Assigned to:</small>
+                            ${assignedUsersHtml}
+                        </div>
+                    </div>
+                `;
+                
+                tasksContainer.appendChild(taskCard);
+            });
+        } else {
+            tasksContainer.innerHTML = '<p class="text-muted">No tasks</p>';
+        }
+    } catch (error) {
+        console.error('Error loading archived project view:', error);
+        showToast('Failed to load archived project: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Format date to a readable string
+ * @param {string} dateString - ISO date string
+ * @returns {string} Formatted date
+ */
+function formatDate(dateString) {
+    if (!dateString) return 'Not set';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Invalid date';
+    }
+}
+
+/**
+ * Show the restore project modal
+ */
+function showRestoreProjectModal() {
+    // Set default deadline to 2 weeks from now
+    const twoWeeksFromNow = new Date();
+    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
+    
+    const formattedDate = twoWeeksFromNow.toISOString().split('T')[0];
+    document.getElementById('restoreProjectDeadline').value = formattedDate;
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('restoreProjectModal'));
+    modal.show();
+}
+
+/**
+ * Restore an archived project to active status
+ */
+async function restoreProject() {
+    try {
+        const projectId = document.getElementById('restoreProjectId').value;
+        const newDeadline = document.getElementById('restoreProjectDeadline').value;
+        const newStatus = document.getElementById('restoreProjectStatus').value;
+        const newPriority = document.getElementById('restoreProjectPriority').value;
+        
+        if (!projectId || !newDeadline) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+        
+        const projectResponse = await fetch(`/api/projectsapi/${projectId}`);
+        if (!projectResponse.ok) {
+            throw new Error('Failed to load project details');
+        }
+        const currentProject = await projectResponse.json();
+        
+        // Update project with new data
+        const updateData = {
+            name: currentProject.name,
+            description: currentProject.description,
+            startDate: currentProject.startDate,
+            deadline: newDeadline,
+            status: newStatus,
+            priority: newPriority
+        };
+        
+        const response = await fetch(`/api/projectsapi/${projectId}/update`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.title || 'Failed to restore project');
+        }
+        
+        // Hide the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('restoreProjectModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        showToast(`Project restored with new deadline: ${formatDate(newDeadline)}`, 'success');
+        
+        // Refresh both project lists and reload project view
+        await loadProjects();
+        await loadArchivedProjects();
+        
+        // Update project count badges
+        await updateProjectCountBadges();
+        
+        await loadProject(projectId);
+    } catch (error) {
+        console.error('Error restoring project:', error);
+        showToast(error.message, 'error');
+    }
+}
+
+/**
+ * Updates the project count badges in the sidebar
+ */
+async function updateProjectCountBadges() {
+    try {
+        // Get the current counts from the server
+        const response = await fetch('/api/ProjectsApi/counts');
+        if (!response.ok) {
+            throw new Error('Failed to get project counts');
+        }
+        
+        const counts = await response.json();
+        
+        // Update the badges in the sidebar
+        const activeBadge = document.querySelector('#projectsList').closest('.projects-dropdown').querySelector('.badge');
+        const archivedBadge = document.querySelector('#archivedProjectsList').closest('.projects-dropdown').querySelector('.badge');
+        
+        if (activeBadge) {
+            if (counts.active > 0) {
+                activeBadge.textContent = counts.active;
+                activeBadge.classList.remove('d-none');
+            } else {
+                activeBadge.classList.add('d-none');
+            }
+        }
+        
+        if (archivedBadge) {
+            if (counts.archived > 0) {
+                archivedBadge.textContent = counts.archived;
+                archivedBadge.classList.remove('d-none');
+            } else {
+                archivedBadge.classList.add('d-none');
+            }
+        }
+    } catch (error) {
+        console.error('Error updating project count badges:', error);
+        // Don't show a toast for this error as it's not critical
     }
 }
