@@ -175,7 +175,7 @@ namespace Managly.Controllers
                 var projects = await _context.ProjectMembers
                     .Where(pm => pm.UserId == user.Id)
                     .Include(pm => pm.Project)
-                    .Where(pm => pm.Project.Status != "Completed") 
+                    .Where(pm => pm.Project.Status != "Completed" && pm.Project.Status != "Not started") 
                     .Select(pm => new ProjectInfo
                     {
                         ProjectId = pm.ProjectId,
