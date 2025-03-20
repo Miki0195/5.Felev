@@ -52,6 +52,7 @@
         elements.roleUserName = document.getElementById('roleUserName');
         elements.newRole = document.getElementById('newRole');
         elements.avatars = document.querySelectorAll('.avatar-img');
+        elements.antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]');
     }
     
     /**
@@ -86,6 +87,37 @@
         elements.avatars.forEach(img => {
             img.addEventListener('error', handleAvatarError);
         });
+    }
+    
+    /**
+     * Get the anti-forgery token
+     * @returns {string} - CSRF token value
+     */
+    function getAntiForgeryToken() {
+        return elements.antiForgeryToken ? elements.antiForgeryToken.value : '';
+    }
+    
+    /**
+     * Handle API response properly based on HTTP status and response content
+     * @param {Response} response - The fetch API response
+     * @returns {Promise} - Promise that resolves to the parsed response data
+     */
+    async function handleApiResponse(response) {
+        // Get the response body as JSON
+        const data = await response.json();
+        
+        // Check if the request was successful based on HTTP status code
+        if (!response.ok) {
+            // Add the HTTP status to the error data for better error handling
+            throw { 
+                ...data, 
+                status: response.status, 
+                statusText: response.statusText 
+            };
+        }
+        
+        // Return the data with status information
+        return { ...data, status: response.status };
     }
     
     // ===== FILTERING & SEARCHING =====
@@ -162,7 +194,7 @@
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(handleApiResponse)
         .then(data => {
             const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
             modal.hide();
@@ -176,8 +208,7 @@
             }
         })
         .catch(error => {
-            console.error('Error updating role:', error);
-            showToast('An error occurred while updating the role.', 'error');
+            showToast(error.message || 'An error occurred while updating the role.', 'error');
             revertRoleSelect(roleChangeState.activeForm);
             
             const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
@@ -241,7 +272,7 @@
      */
     function deleteUser() {
         const userId = this.getAttribute('data-user-id');
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const token = getAntiForgeryToken();
         
         fetch('/Admin/DeleteUser', {
             method: 'POST',
@@ -251,7 +282,7 @@
             },
             body: new URLSearchParams({ userId: userId })
         })
-        .then(response => response.json())
+        .then(handleApiResponse)
         .then(data => {
             if (data.success) {
                 const row = this.closest('tr');
@@ -264,8 +295,7 @@
             }
         })
         .catch(error => {
-            console.error('Error deleting user:', error);
-            showToast('An error occurred while deleting the user.', 'error');
+            showToast(error.message || 'An error occurred while deleting the user.', 'error');
         });
     }
     
@@ -275,7 +305,7 @@
      */
     function openEditModal(userId) {
         fetch(`/Admin/GetUserDetails?userId=${userId}`)
-            .then(response => response.json())
+            .then(handleApiResponse)
             .then(data => {
                 document.getElementById('editUserId').value = data.userId;
                 document.getElementById('editName').value = data.name;
@@ -298,8 +328,7 @@
                 modal.show();
             })
             .catch(error => {
-                console.error('Error fetching user details:', error);
-                showToast('Failed to load user details', 'error');
+                showToast(error.message || 'Failed to load user details', 'error');
             });
     }
     
@@ -345,7 +374,7 @@
         const userId = this.getAttribute('data-user-id');
         const totalDaysInput = document.getElementById(`totalVacationDays-${userId}`);
         const totalDays = parseInt(totalDaysInput.value);
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const token = getAntiForgeryToken();
         
         if (isNaN(totalDays) || totalDays < 20) {
             showToast('Total vacation days must be at least 20', 'error');
@@ -364,7 +393,7 @@
                 totalVacationDays: totalDays
             })
         })
-        .then(response => response.json())
+        .then(handleApiResponse)
         .then(data => {
             if (data.success) {
                 updateVacationDaysUI(this, data);
@@ -374,8 +403,7 @@
             }
         })
         .catch(error => {
-            console.error('Error updating vacation days:', error);
-            showToast('An error occurred while updating vacation days.', 'error');
+            showToast(error.message || 'An error occurred while updating vacation days.', 'error');
         });
     }
     
@@ -418,7 +446,7 @@
      * @param {number} totalDays - The total vacation days
      */
     function updateVacationDays(userId, totalDays) {
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const token = getAntiForgeryToken();
         
         fetch('/Admin/UpdateVacationDays', {
             method: 'POST',
@@ -431,7 +459,7 @@
                 totalVacationDays: totalDays
             })
         })
-        .then(response => response.json())
+        .then(handleApiResponse)
         .then(data => {
             if (data.success) {
                 const totalInput = document.getElementById('editTotalVacationDays');
@@ -448,8 +476,7 @@
             }
         })
         .catch(error => {
-            console.error('Error updating vacation days:', error);
-            showToast('Failed to update vacation days', 'error');
+            showToast(error.message || 'Failed to update vacation days', 'error');
         });
     }
     
@@ -516,6 +543,7 @@
     }
     
     // ===== UTILITIES =====
+    
     // Initialize UI enhancement event handlers for the edit modal
     function setupEditModalHandlers() {
         const totalDaysInput = document.getElementById('editTotalVacationDays');

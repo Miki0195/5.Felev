@@ -14,11 +14,14 @@ namespace Managly.Controllers
     [Authorize]
     public class ScheduleController : Controller
     {
+        #region Private Members
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<ScheduleController> _logger;
+        #endregion
 
+        #region Constructor
         public ScheduleController(ApplicationDbContext context, UserManager<User> userManager, IConfiguration configuration, ILogger<ScheduleController> logger)
         {
             _context = context;
@@ -26,6 +29,7 @@ namespace Managly.Controllers
             _configuration = configuration;
             _logger = logger;
         }
+        #endregion
 
         #region Admin Schedule Management
 

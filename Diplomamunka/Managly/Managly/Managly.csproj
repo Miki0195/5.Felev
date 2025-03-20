@@ -68,6 +68,7 @@
     <Folder Include="wwwroot\js\Schedule\" />
     <Folder Include="Models\DTOs\Schedule\" />
     <Folder Include="wwwroot\js\Admin\" />
+    <Folder Include="wwwroot\js\Projects\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\css\Home\" />
@@ -85,6 +86,7 @@
     <Content Remove="wwwroot\css\VideoConference\" />
     <Content Remove="wwwroot\js\Schedule\" />
     <Content Remove="wwwroot\js\Admin\" />
+    <Content Remove="wwwroot\js\Projects\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">
