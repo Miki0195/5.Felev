@@ -46,8 +46,8 @@
                         @if (User.IsInRole("Admin"))
                         {
                             @*<li class="nav-item">
-                                <a class="nav-link" asp-controller="Admin" asp-action="CreateProfile">Create Profile</a>
-                            </li>*@
+                                    <a class="nav-link" asp-controller="Admin" asp-action="CreateProfile">Create Profile</a>
+                                </li>*@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Admin" asp-action="UserManagement">User Management</a>
                             </li>
@@ -142,4 +142,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

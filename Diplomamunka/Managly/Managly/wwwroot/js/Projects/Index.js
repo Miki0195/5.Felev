@@ -1,4 +1,332 @@
-﻿let selectedUsers = new Set(); // Store selected user IDs
+﻿// Add these functions near the beginning of the file, before any existing functions
+
+// Create a project card for the sidebar
+function createProjectCardForSidebar(project) {
+    // Make sure we handle null or undefined values safely
+    if (!project) return "";
+    
+    // Calculate progress if project has tasks
+    const totalTasks = project.totalTasks || 0;
+    const completedTasks = project.completedTasks || 0;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    
+    // Format dates or provide defaults
+    const startDate = project.startDate ? formatDate(project.startDate) : 'Not set';
+    const deadline = project.deadline ? formatDate(project.deadline) : 'No deadline';
+    
+    // Ensure status and priority have default values and proper formatting
+    const status = project.status || 'Active';
+    const priority = project.priority || 'Medium';
+    
+    // Get status and priority classes
+    const statusClass = getStatusClass(status);
+    const priorityClass = getPriorityClass(priority);
+    
+    // Create project card HTML
+    const card = `
+        <div class="project-card" data-project-id="${project.id}" data-status="${status.toLowerCase()}">
+            <div class="project-card-header">
+                <h3 class="project-card-title">${project.name || 'Unnamed Project'}</h3>
+                <div class="project-card-badges">
+                    <span class="badge ${statusClass}">${status}</span>
+                    <span class="badge ${priorityClass}">${priority}</span>
+                </div>
+            </div>
+            <div class="project-card-details">
+                <div class="project-card-detail">
+                    <span class="detail-label">Start:</span>
+                    <span class="detail-value">${startDate}</span>
+                </div>
+                <div class="project-card-detail">
+                    <span class="detail-label">Deadline:</span>
+                    <span class="detail-value">${deadline}</span>
+                </div>
+            </div>
+            <div class="project-card-progress">
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+                <span class="progress-text">${progress}% complete</span>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Helper function to get status CSS class
+function getStatusClass(status) {
+    status = (status || '').toLowerCase();
+    switch (status) {
+        case 'active':
+            return 'status-active';
+        case 'completed':
+            return 'status-completed';
+        case 'on hold':
+        case 'onhold':
+            return 'status-onhold';
+        case 'cancelled':
+            return 'status-cancelled';
+        default:
+            return 'status-active';
+    }
+}
+
+// Helper function to get priority CSS class
+function getPriorityClass(priority) {
+    priority = (priority || '').toLowerCase();
+    switch (priority) {
+        case 'low':
+            return 'priority-low';
+        case 'medium':
+            return 'priority-medium';
+        case 'high':
+            return 'priority-high';
+        default:
+            return 'priority-medium';
+    }
+}
+
+// Simple date formatter function 
+function formatDate(dateString) {
+    if (!dateString) return 'Not set';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Invalid date';
+        
+        // Format as MM/DD/YYYY
+        return date.toLocaleDateString();
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Invalid date';
+    }
+}
+
+// Load projects for sidebar
+async function loadProjectsForSidebar() {
+    try {
+        // Show loading state
+        $("#projects-list").html(`
+            <div class="loading-state">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading projects...</p>
+            </div>
+        `);
+        
+        // Use the correct API endpoint that exists in your backend
+        const response = await fetch('/api/ProjectsApi');
+        
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const projects = await response.json();
+        
+        if (!projects || projects.length === 0) {
+            $("#projects-list").html('<p class="text-muted text-center p-3">No projects found</p>');
+            return;
+        }
+        
+        // Clear loading state and prepare container
+        $("#projects-list").empty();
+        
+        // Separate active and completed projects
+        const activeProjects = projects.filter(p => p.status !== "Completed");
+        const completedProjects = projects.filter(p => p.status === "Completed");
+        
+        // Update counters in the UI
+        $("#active-projects-count").text(activeProjects.length);
+        $("#archived-projects-count").text(completedProjects.length);
+        
+        // Render active projects
+        activeProjects.forEach(project => {
+            const card = createProjectCardForSidebar(project);
+            $("#projects-list").append(card);
+        });
+        
+        // Render completed/archived projects
+        $("#archived-projects-list").empty();
+        if (completedProjects.length > 0) {
+            completedProjects.forEach(project => {
+                const card = createProjectCardForSidebar(project);
+                $("#archived-projects-list").append(card);
+            });
+        } else {
+            $("#archived-projects-list").html('<p class="text-muted text-center p-3">No archived projects</p>');
+        }
+        
+        // Add click event to project cards
+        $(".project-card").on("click", function() {
+            const projectId = $(this).data("project-id");
+            
+            // Remove active class from all projects
+            $(".project-card").removeClass("active");
+            
+            // Add active class to clicked project
+            $(this).addClass("active");
+            
+            // Load the project
+            loadProject(projectId);
+        });
+    } catch (error) {
+        console.error("Error loading projects for sidebar:", error);
+        $("#projects-list").html(`
+            <div class="alert alert-danger m-3">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error loading projects: ${error.message}
+                <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadProjectsForSidebar()">
+                    <i class="fas fa-sync-alt me-1"></i> Retry
+                </button>
+            </div>
+        `);
+    }
+}
+
+// Filter projects in sidebar based on filter tab
+function filterProjectsInSidebar(filter) {
+    // Remove active class from all tabs and add to clicked tab
+    $('.filter-tab').removeClass('active');
+    $(`.filter-tab[data-filter="${filter}"]`).addClass('active');
+    
+    // Show/hide project sections based on filter
+    if (filter === 'all') {
+        // Show all projects
+        $('.project-card').show();
+    } else if (filter === 'completed') {
+        // For completed filter, focus on archived projects section
+        // First hide all projects
+        $('.project-card').hide();
+        // Then show only completed ones
+        $(`.project-card[data-status="completed"]`).show();
+    } else {
+        // For other filters (active, onhold)
+        // Hide all projects first
+        $('.project-card').hide();
+        // Then show only those matching the filter
+        $(`.project-card[data-status="${filter}"]`).show();
+    }
+    
+    // Show empty message if no projects visible in a section
+    $('.projects-section').each(function() {
+        const section = $(this);
+        const container = section.find('.projects-cards-container');
+        const visibleCards = container.find('.project-card:visible').length;
+        
+        // Remove any existing empty messages
+        container.find('.empty-filter-message').remove();
+        
+        // If no visible cards, show empty message
+        if (visibleCards === 0 && !container.find('.loading-state').length) {
+            container.append(`
+                <p class="text-muted text-center p-3 empty-filter-message">
+                    No ${filter === 'all' ? '' : filter} projects found
+                </p>
+            `);
+        }
+    });
+}
+
+// Filter projects by search term
+function searchProjects(searchTerm) {
+    // Get current active filter
+    const currentFilter = $('.filter-tab.active').data('filter');
+    
+    // If search is empty, just apply the current filter
+    if (!searchTerm || searchTerm.trim() === '') {
+        filterProjectsInSidebar(currentFilter);
+        return;
+    }
+    
+    searchTerm = searchTerm.toLowerCase().trim();
+    
+    // Apply both search and filter
+    $('.project-card').each(function() {
+        const card = $(this);
+        const projectTitle = card.find('.project-card-title').text().toLowerCase();
+        const status = card.data('status');
+        
+        // Check if matches search term
+        const matchesSearch = projectTitle.includes(searchTerm);
+        
+        // Check if matches current filter
+        const matchesFilter = (currentFilter === 'all' || status === currentFilter);
+        
+        // Show only if both conditions are met
+        if (matchesSearch && matchesFilter) {
+            card.show();
+        } else {
+            card.hide();
+        }
+    });
+    
+    // Show empty message if no results
+    $('.projects-section').each(function() {
+        const section = $(this);
+        const container = section.find('.projects-cards-container');
+        const visibleCards = container.find('.project-card:visible').length;
+        
+        // Remove any existing empty messages
+        container.find('.empty-filter-message, .empty-search-message').remove();
+        
+        // If no visible cards, show empty message
+        if (visibleCards === 0 && !container.find('.loading-state').length) {
+            container.append(`
+                <p class="text-muted text-center p-3 empty-search-message">
+                    No projects found matching "${searchTerm}"
+                </p>
+            `);
+        }
+    });
+}
+
+// Add event listeners for new sidebar elements
+$(document).ready(function() {
+    console.log("Projects page initializing...");
+    
+    // Debug API endpoints to help identify issues
+    debugApiEndpoint('/api/ProjectsApi');
+    
+    // Initialize the sidebar
+    loadProjectsForSidebar();
+    
+    // Filter tabs click event
+    $(".filter-tab").on("click", function() {
+        $(".filter-tab").removeClass("active");
+        $(this).addClass("active");
+        const filter = $(this).data("filter");
+        filterProjectsInSidebar(filter);
+    });
+    
+    // Search input event
+    $("#project-search").on("input", function() {
+        const searchTerm = $(this).val().toLowerCase();
+        searchProjects(searchTerm);
+    });
+    
+    // Create project button (if it doesn't already have an event handler)
+    if (!$('#btn-create-project').data('has-event')) {
+        $('#btn-create-project').on('click', function() {
+            openCreateProjectModal();
+        }).data('has-event', true);
+    }
+});
+
+// Find the existing loadProjects function and modify/wrap it
+const originalLoadProjects = loadProjects;
+loadProjects = async function() {
+    // Call both the original and the new sidebar loader
+    if (originalLoadProjects) {
+        await originalLoadProjects();
+    }
+    
+    // Also load the sidebar projects
+    await loadProjectsForSidebar();
+};
+
+let selectedUsers = new Set(); // Store selected user IDs
 let currentProjectMembers = new Set(); // Store current project members
 
 function createUserSearchContainer(containerId, resultsId, selectedId) {
@@ -311,6 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadProjects() {
     try {
+        // Note: This function is now primarily used by the original codebase
+        // Our sidebar now uses loadProjectsForSidebar() instead
+        
         const response = await fetch('/api/ProjectsApi');
         
         if (!response.ok) {
@@ -319,35 +650,41 @@ async function loadProjects() {
         }
         
         const data = await response.json();
+        
+        // Check if the old projectsList element exists before trying to update it
         const projectsList = document.getElementById('projectsList');
-        projectsList.innerHTML = '';
-        
-        if (data.length === 0) {
-            projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
-            return;
+        if (projectsList) {
+            projectsList.innerHTML = '';
+            
+            if (data.length === 0) {
+                projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
+                return;
+            }
+            
+            // Filter out completed projects
+            const activeProjects = data.filter(project => project.status !== "Completed");
+            
+            if (activeProjects.length === 0) {
+                projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
+                return;
+            }
+            
+            activeProjects.forEach(project => {
+                const projectItem = document.createElement('div');
+                projectItem.className = 'project-item';
+                projectItem.innerHTML = `
+                    <div onclick="loadProject(${project.id})" style="cursor: pointer;">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>${project.name}</span>
+                    </div>
+                `;
+                projectsList.appendChild(projectItem);
+            });
+        } else {
+            console.log('Original projectsList element not found - this is expected with the new sidebar.');
         }
         
-        // Filter out completed projects
-        const activeProjects = data.filter(project => project.status !== "Completed");
-        
-        if (activeProjects.length === 0) {
-            projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
-            return;
-        }
-        
-        activeProjects.forEach(project => {
-            const projectItem = document.createElement('div');
-            projectItem.className = 'project-item';
-            projectItem.innerHTML = `
-                <div onclick="loadProject(${project.id})" style="cursor: pointer;">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>${project.name}</span>
-                </div>
-            `;
-            projectsList.appendChild(projectItem);
-        });
-        
-        console.log('Active projects loaded successfully:', activeProjects.length);
+        console.log('Projects data loaded successfully');
     } catch (error) {
         console.error('Failed to load projects:', error);
         showToast('Failed to load projects: ' + error.message, 'error');
@@ -373,6 +710,10 @@ function toggleProjectsList() {
 }
 
 async function loadProject(projectId) {
+    // Highlight the selected project in the sidebar
+    $('.project-card').removeClass('active');
+    $(`.project-card[data-project-id="${projectId}"]`).addClass('active');
+    
     try {
         const response = await fetch(`/api/projectsapi/${projectId}`);
         if (!response.ok) throw new Error('Failed to load project');
@@ -552,7 +893,28 @@ async function loadProject(projectId) {
         // Load the activity feed
         const activityFeedContainer = document.getElementById('activityFeedContainer');
         activityFeedContainer.innerHTML = '<div id="activityFeed"></div>';
-        loadActivityFeed(projectId);
+        
+        // Use a simplified version if loadActivityFeed is not defined
+        if (typeof loadActivityFeed === 'function') {
+            loadActivityFeed(projectId);
+        } else {
+            console.log('loadActivityFeed function not available, using simplified activity feed');
+            const activityFeed = document.getElementById('activityFeed');
+            if (activityFeed) {
+                activityFeed.innerHTML = `
+                    <div class="activity-feed">
+                        <div class="activity-feed-header">
+                            <h5><i class="bi bi-activity"></i> Recent Activity</h5>
+                        </div>
+                        <div class="activity-feed-content">
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-info-circle"></i> Activity feed is loading...
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
         
         // Initialize filter buttons
         const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
@@ -565,7 +927,88 @@ async function loadProject(projectId) {
         
     } catch (error) {
         console.error('Error loading project:', error);
-        showToast('Failed to load project details.', 'danger');
+        showToast('Failed to load project details: ' + error.message, 'danger');
+    }
+}
+
+/**
+ * Loads the activity feed for a project
+ * @param {number} projectId - The ID of the project
+ */
+async function loadActivityFeed(projectId) {
+    try {
+        const activityFeed = document.getElementById('activityFeed');
+        if (!activityFeed) {
+            console.error('Activity feed container not found');
+            return;
+        }
+        
+        activityFeed.innerHTML = `
+            <div class="activity-feed">
+                <div class="activity-feed-header">
+                    <h5><i class="bi bi-activity"></i> Recent Activity</h5>
+                </div>
+                <div class="activity-feed-content" id="activityFeedContent">
+                    <div class="text-center my-3">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Check if the API endpoint exists
+        const response = await fetch(`/api/projectsapi/${projectId}/activities?limit=15`);
+        if (!response.ok) {
+            console.warn(`Activity feed API returned ${response.status}: ${response.statusText}`);
+            
+            // Show a placeholder instead of an error
+            const activityFeedContent = document.getElementById('activityFeedContent');
+            if (activityFeedContent) {
+                activityFeedContent.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-info-circle"></i> No recent activity found.
+                    </div>
+                `;
+            }
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.activities || data.activities.length === 0) {
+            const activityFeedContent = document.getElementById('activityFeedContent');
+            if (activityFeedContent) {
+                activityFeedContent.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-info-circle"></i> No activity found for this project.
+                    </div>
+                `;
+            }
+            return;
+        }
+        
+        const activities = data.activities;
+        const activityFeedContent = document.getElementById('activityFeedContent');
+        
+        if (activityFeedContent) {
+            activityFeedContent.innerHTML = `
+                <div class="activity-list">
+                    ${activities.map(activity => createActivityItem(activity)).join('')}
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading activity feed:', error);
+        const activityFeedContent = document.getElementById('activityFeedContent');
+        if (activityFeedContent) {
+            activityFeedContent.innerHTML = `
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-info-circle"></i> Activity feed could not be loaded.
+                </div>
+            `;
+        }
     }
 }
 
@@ -1639,11 +2082,6 @@ function toggleArchivedProjectsList() {
         if (icon.classList.contains('bi-chevron-down')) {
             icon.classList.remove('bi-chevron-down');
             icon.classList.add('bi-chevron-up');
-            
-            // Only load projects if the list is empty
-            if (archivedProjectsList.children.length === 0) {
-                loadArchivedProjects();
-            }
         } else {
             icon.classList.remove('bi-chevron-up');
             icon.classList.add('bi-chevron-down');
@@ -1965,80 +2403,21 @@ async function updateProjectCountBadges() {
         
         const counts = await response.json();
         
-        // Update the badges in the sidebar
-        const activeBadge = document.querySelector('#projectsList').closest('.projects-dropdown').querySelector('.badge');
-        const archivedBadge = document.querySelector('#archivedProjectsList').closest('.projects-dropdown').querySelector('.badge');
+        // Update the badges in the new sidebar
+        const activeBadge = document.getElementById('active-projects-count');
+        const archivedBadge = document.getElementById('archived-projects-count');
         
+        // Update active projects count if element exists
         if (activeBadge) {
-            if (counts.active > 0) {
-                activeBadge.textContent = counts.active;
-                activeBadge.classList.remove('d-none');
-            } else {
-                activeBadge.classList.add('d-none');
-            }
+            activeBadge.textContent = counts.active || 0;
         }
         
+        // Update archived projects count if element exists
         if (archivedBadge) {
-            if (counts.archived > 0) {
-                archivedBadge.textContent = counts.archived;
-                archivedBadge.classList.remove('d-none');
-            } else {
-                archivedBadge.classList.add('d-none');
-            }
-        }
-    } catch (error) {
-        console.error('Error updating project count badges:', error);
-        // Don't show a toast for this error as it's not critical
-    }
-}
-
-// New functions for Activity Feed
-
-/**
- * Loads the activity feed for a project
- * @param {number} projectId - The ID of the project
- */
-async function loadActivityFeed(projectId) {
-    try {
-        const activityFeed = document.getElementById('activityFeed');
-        activityFeed.innerHTML = `
-            <div class="activity-feed">
-                <div class="activity-feed-header">
-                    <h5><i class="bi bi-activity"></i> Recent Activity</h5>
-                </div>
-                <div class="activity-feed-content" id="activityFeedContent">
-                    <div class="text-center my-3">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const response = await fetch(`/api/projectsapi/${projectId}/activities?limit=15`);
-        if (!response.ok) throw new Error('Failed to load activity feed');
-        
-        const data = await response.json();
-        if (!data.success) throw new Error(data.message || 'Failed to load activity feed');
-        
-        const activities = data.activities;
-        const activityFeedContent = document.getElementById('activityFeedContent');
-        
-        if (activities.length === 0) {
-            activityFeedContent.innerHTML = `
-                <div class="text-center text-muted py-3">
-                    <i class="bi bi-info-circle"></i> No activity found for this project.
-                </div>
-            `;
-            return;
+            archivedBadge.textContent = counts.archived || 0;
         }
         
-        activityFeedContent.innerHTML = `
-            <div class="activity-list">
-                ${activities.map(activity => createActivityItem(activity)).join('')}
-            </div>
-        `;
+        console.log('Project count badges updated:', counts);
     } catch (error) {
         console.error('Error loading activity feed:', error);
         const activityFeedContent = document.getElementById('activityFeedContent');
@@ -2198,3 +2577,36 @@ function getPriorityBadgeColor(priority) {
         default: return 'secondary';
     }
 }
+
+// Add debug helper function
+function debugApiEndpoint(endpoint) {
+    console.log(`Testing API endpoint: ${endpoint}`);
+    fetch(endpoint)
+        .then(response => {
+            console.log(`Response status for ${endpoint}: ${response.status} ${response.statusText}`);
+            if (!response.ok) {
+                console.error(`Error with endpoint ${endpoint}: ${response.status} ${response.statusText}`);
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                console.log(`Data received from ${endpoint}:`, data);
+            }
+        })
+        .catch(error => {
+            console.error(`Fetch error with ${endpoint}:`, error);
+        });
+}
+
+// Error handler for source map errors (like signalr.min.js.map)
+window.addEventListener('error', function(event) {
+    // Only suppress source map errors
+    if (event.filename && event.filename.endsWith('.map')) {
+        // Prevent the error from appearing in console
+        event.preventDefault();
+        return true;
+    }
+    return false;
+}, true);

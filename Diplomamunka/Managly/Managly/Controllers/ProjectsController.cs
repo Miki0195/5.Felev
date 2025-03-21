@@ -81,22 +81,31 @@ namespace Managly.Controllers
             }
         }
 
-        [HttpGet("RenderPartial/{partialName}")]
-        public IActionResult RenderPartial(string partialName)
-        {
-            if (string.IsNullOrEmpty(partialName))
-            {
-                return BadRequest("Partial name is required");
-            }
+        //[HttpGet("RenderPartial/{partialName}")]
+        //public IActionResult RenderPartial(string partialName)
+        //{
+        //    if (string.IsNullOrEmpty(partialName))
+        //    {
+        //        return BadRequest("Partial name is required");
+        //    }
             
-            // Ensure the partialName starts with underscore
-            if (!partialName.StartsWith("_"))
-            {
-                partialName = "_" + partialName;
-            }
+        //    // Ensure the partialName starts with underscore only if it doesn't already
+        //    if (!partialName.StartsWith("_"))
+        //    {
+        //        partialName = "_" + partialName;
+        //    }
             
-            // This will render the partial view with the given name
-            return PartialView(partialName);
-        }
+        //    // Check if the partial view exists before trying to render it
+        //    try
+        //    {
+        //        // This will render the partial view with the given name
+        //        return PartialView(partialName);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error rendering partial view '{partialName}'");
+        //        return NotFound($"Partial view '{partialName}' not found.");
+        //    }
+        //}
     }
 }

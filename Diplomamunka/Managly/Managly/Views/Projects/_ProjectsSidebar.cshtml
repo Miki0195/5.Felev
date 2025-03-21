@@ -1,44 +1,54 @@
 <div class="projects-sidebar">
     <div class="sidebar-header">
         <h3>Projects</h3>
-    </div>
-
-    <div class="sidebar-menu">
         @if (ViewBag.IsAdmin)
         {
-            <button class="menu-item create-project" onclick="openCreateProjectModal()">
-                <i class="bi bi-plus-circle"></i>
-                <span>Create Project</span>
+            <button id="btn-create-project" class="btn btn-primary btn-create-project">
+                <i class="fas fa-plus"></i> New Project
             </button>
         }
+    </div>
 
-        <div class="menu-item projects-dropdown">
-            <div class="dropdown-header" onclick="toggleProjectsList()">
-                <i class="bi bi-folder"></i>
-                <span>My Projects</span>
-                @if (ViewBag.ActiveProjectsCount > 0)
-                {
-                    <span class="badge bg-primary rounded-pill ms-2">@ViewBag.ActiveProjectsCount</span>
-                }
-                <i class="bi bi-chevron-down"></i>
+    <div class="sidebar-search">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="fas fa-search"></i>
+            </span>
+            <input type="text" id="project-search" class="form-control" placeholder="Search projects...">
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="in progress">In Progress</button>
+        <button class="filter-tab" data-filter="completed">Completed</button>
+        <button class="filter-tab" data-filter="not started">Not Started</button>
+    </div>
+
+    <div class="projects-container-list">
+        <div class="projects-section">
+            <div class="section-header">
+                <h4>Active Projects</h4>
+                <span class="badge bg-primary" id="active-projects-count">@ViewBag.ActiveProjectsCount</span>
             </div>
-            <div class="projects-list" id="projectsList">
-                <!-- Active projects will be loaded here -->
+            <div id="projects-list" class="projects-cards-container">
+                <!-- Projects will be loaded here dynamically -->
+                <div class="loading-state">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading projects...</p>
+                </div>
             </div>
         </div>
-        
-        <div class="menu-item projects-dropdown">
-            <div class="dropdown-header" onclick="toggleArchivedProjectsList()">
-                <i class="bi bi-archive"></i>
-                <span>Archived Projects</span>
-                @if (ViewBag.ArchivedProjectsCount > 0)
-                {
-                    <span class="badge bg-secondary rounded-pill ms-2">@ViewBag.ArchivedProjectsCount</span>
-                }
-                <i class="bi bi-chevron-down"></i>
+
+        <div class="projects-section">
+            <div class="section-header">
+                <h4>Archived Projects</h4>
+                <span class="badge bg-secondary" id="archived-projects-count">@ViewBag.ArchivedProjectsCount</span>
             </div>
-            <div class="projects-list" id="archivedProjectsList">
-                <!-- Archived/completed projects will be loaded here -->
+            <div id="archived-projects-list" class="projects-cards-container">
+                <!-- Archived projects will be loaded here dynamically -->
             </div>
         </div>
     </div>

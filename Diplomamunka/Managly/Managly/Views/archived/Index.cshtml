@@ -1,0 +1,477 @@
+@{
+    ViewData["Title"] = "Projects";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/projects.css" />
+}
+
+@* Add meta tags for JavaScript *@
+<meta name="user-id" content="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+<meta name="is-admin" content="@ViewBag.IsAdmin.ToString().ToLower()" />
+
+<div class="projects-container">
+    <!-- Header Section -->
+    <div class="projects-header">
+        <div class="header-left">
+            <h1 class="page-title">Projects</h1>
+            <div class="project-stats">
+                <div class="stat-item">
+                    <span class="stat-count">@ViewBag.ActiveProjectsCount</span>
+                    <span class="stat-label">Active</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-count">@ViewBag.ArchivedProjectsCount</span>
+                    <span class="stat-label">Archived</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            @if (ViewBag.IsAdmin)
+            {
+                <button type="button" class="btn-create-project" data-toggle="modal" data-target="#createProjectModal">
+                    <i class="fas fa-plus"></i> New Project
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="projects-layout">
+        <!-- Projects List Section -->
+        <div class="projects-list-section">
+            <!-- Filter and Search -->
+            <div class="filter-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="project-search" placeholder="Search projects...">
+                </div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="active">Active</button>
+                    <button class="filter-tab" data-filter="onhold">On Hold</button>
+                    <button class="filter-tab" data-filter="completed">Completed</button>
+                </div>
+            </div>
+
+            <!-- Projects List -->
+            <div class="projects-list" id="projects-list">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading projects...</p>
+                </div>
+                <!-- Projects will be loaded here dynamically -->
+            </div>
+        </div>
+
+        <!-- Project Details Section -->
+        <div class="project-details-section" id="project-details-section">
+            <div class="empty-state" id="empty-project-state">
+                <img src="/img/select-project.svg" alt="Select a project" class="empty-state-img">
+                <h3>Select a project to view details</h3>
+                <p>Choose a project from the list to see its details, tasks, and team members.</p>
+            </div>
+            
+            <!-- Project Details Content (Hidden initially) -->
+            <div class="project-content" id="project-content" style="display: none;">
+                <!-- Project Details Header -->
+                <div class="project-details-header">
+                    <div class="project-title-section">
+                        <h2 id="project-title">Project Title</h2>
+                        <div class="project-badges">
+                            <span class="badge status" id="project-status">Status</span>
+                            <span class="badge priority" id="project-priority">Priority</span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <button class="btn-edit-project" id="btn-edit-project" data-toggle="modal" data-target="#editProjectModal">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Project Details Info -->
+                <div class="project-info-grid">
+                    <div class="info-card">
+                        <span class="info-label">Start Date</span>
+                        <span class="info-value" id="project-start-date">-</span>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">Deadline</span>
+                        <span class="info-value" id="project-deadline">-</span>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">Progress</span>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="project-progress-bar"></div>
+                            <span class="progress-text" id="project-progress-text">0%</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <span class="info-label">Tasks</span>
+                        <span class="info-value" id="project-tasks-count">0/0</span>
+                    </div>
+                </div>
+
+                <!-- Project Details Description -->
+                <div class="project-description-card">
+                    <h3>Description</h3>
+                    <p id="project-description">No description provided.</p>
+                </div>
+
+                <!-- Project Tabs -->
+                <div class="project-tabs">
+                    <button class="project-tab active" data-tab="tasks">Tasks</button>
+                    <button class="project-tab" data-tab="team">Team</button>
+                    <button class="project-tab" data-tab="activity">Activity</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Tasks Tab -->
+                    <div class="tab-pane active" id="tasks-tab">
+                        <div class="tab-header">
+                            <h3>Tasks</h3>
+                            @if (ViewBag.IsAdmin)
+                            {
+                                <button class="btn-create-task" id="btn-create-task" data-toggle="modal" data-target="#createTaskModal">
+                                    <i class="fas fa-plus"></i> Add Task
+                                </button>
+                            }
+                        </div>
+                        <div class="tasks-container" id="tasks-container">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading tasks...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Tab -->
+                    <div class="tab-pane" id="team-tab">
+                        <div class="tab-header">
+                            <h3>Team Members</h3>
+                            @if (ViewBag.IsAdmin)
+                            {
+                                <button class="btn-add-member" id="btn-add-member" data-toggle="modal" data-target="#addMemberModal">
+                                    <i class="fas fa-user-plus"></i> Add Members
+                                </button>
+                            }
+                        </div>
+                        <div class="team-container" id="team-container">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading team members...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Tab -->
+                    <div class="tab-pane" id="activity-tab">
+                        <div class="tab-header">
+                            <h3>Activity</h3>
+                        </div>
+                        <div class="activity-container" id="activity-container">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading activity...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- These are kept for functionality but will be shown as overlays instead of full-screen modals -->
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createProjectModalLabel">Create New Project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createProjectForm">
+                    <div class="form-group">
+                        <label for="projectName">Project Name</label>
+                        <input type="text" class="form-control" id="projectName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Description</label>
+                        <textarea class="form-control" id="projectDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="projectStartDate">Start Date</label>
+                                <input type="date" class="form-control" id="projectStartDate" name="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="projectDeadline">Deadline</label>
+                                <input type="date" class="form-control" id="projectDeadline" name="deadline" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="projectStatus">Status</label>
+                                <select class="form-control" id="projectStatus" name="status" required>
+                                    <option value="Active">Active</option>
+                                    <option value="On Hold">On Hold</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="projectPriority">Priority</label>
+                                <select class="form-control" id="projectPriority" name="priority" required>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectTeamMembers">Team Members</label>
+                        <select multiple class="form-control" id="projectTeamMembers" name="teamMemberIds">
+                            <!-- Team members will be loaded here -->
+                        </select>
+                        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple members</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="createProjectBtn">Create Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProjectModalLabel">Edit Project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProjectForm">
+                    <input type="hidden" id="editProjectId" name="id">
+                    <div class="form-group">
+                        <label for="editProjectName">Project Name</label>
+                        <input type="text" class="form-control" id="editProjectName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editProjectDescription">Description</label>
+                        <textarea class="form-control" id="editProjectDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editProjectStartDate">Start Date</label>
+                                <input type="date" class="form-control" id="editProjectStartDate" name="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editProjectDeadline">Deadline</label>
+                                <input type="date" class="form-control" id="editProjectDeadline" name="deadline" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editProjectStatus">Status</label>
+                                <select class="form-control" id="editProjectStatus" name="status" required>
+                                    <option value="Active">Active</option>
+                                    <option value="On Hold">On Hold</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editProjectPriority">Priority</label>
+                                <select class="form-control" id="editProjectPriority" name="priority" required>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger mr-auto" id="deleteProjectBtn">Delete Project</button>
+                <button type="button" class="btn btn-primary" id="updateProjectBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Task Modal -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createTaskModalLabel">Create New Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm">
+                    <input type="hidden" id="taskProjectId" name="projectId">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title</label>
+                        <input type="text" class="form-control" id="taskTitle" name="taskTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea class="form-control" id="taskDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" class="form-control" id="taskDueDate" name="dueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select class="form-control" id="taskPriority" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskAssignedTo">Assign To</label>
+                        <select class="form-control" id="taskAssignedTo" name="assignedToId" required>
+                            <!-- Team members will be loaded here -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="createTaskBtn">Create Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <input type="hidden" id="editTaskId" name="id">
+                    <div class="form-group">
+                        <label for="editTaskTitle">Task Title</label>
+                        <input type="text" class="form-control" id="editTaskTitle" name="taskTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskDescription">Description</label>
+                        <textarea class="form-control" id="editTaskDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskDueDate">Due Date</label>
+                        <input type="date" class="form-control" id="editTaskDueDate" name="dueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskPriority">Priority</label>
+                        <select class="form-control" id="editTaskPriority" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskStatus">Status</label>
+                        <select class="form-control" id="editTaskStatus" name="status" required>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Under Review">Under Review</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskAssignedUsers">Assigned Users</label>
+                        <select multiple class="form-control" id="editTaskAssignedUsers" name="assignedUserIds">
+                            <!-- Team members will be loaded here -->
+                        </select>
+                        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple users</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger mr-auto" id="deleteTaskBtn">Delete Task</button>
+                <button type="button" class="btn btn-primary" id="updateTaskBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMemberModalLabel">Add Team Members</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addMemberForm">
+                    <input type="hidden" id="memberProjectId" name="projectId">
+                    <div class="form-group">
+                        <label for="newMembers">Select Members to Add</label>
+                        <select multiple class="form-control" id="newMembers" name="memberIds" required>
+                            <!-- Available members will be loaded here -->
+                        </select>
+                        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple members</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="addMembersBtn">Add Members</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/projects.js"></script>
+} 
