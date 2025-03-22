@@ -1067,36 +1067,16 @@ async function showCreateTaskModal(projectId) {
 
 async function createTask(projectId) {
     try {
-        console.log('Creating task for project:', projectId);
-
-        // Get form elements with correct IDs
         const titleInput = document.getElementById('taskTitle');
         const descriptionInput = document.getElementById('taskDescription');
         const dueDateInput = document.getElementById('taskDueDate');
         const priorityInput = document.getElementById('taskPriority');
         const assignedToInput = document.getElementById('taskAssignedTo');
 
-        // Log which elements are missing for debugging
-        const missingElements = [];
-        if (!titleInput) missingElements.push('taskTitle');
-        if (!descriptionInput) missingElements.push('taskDescription');
-        if (!dueDateInput) missingElements.push('taskDueDate');
-        if (!priorityInput) missingElements.push('taskPriority');
-        if (!assignedToInput) missingElements.push('taskAssignedTo');
-
-        if (missingElements.length > 0) {
-            console.error('Missing form elements:', missingElements.join(', '));
-            showToast('Error: Some form elements are missing. Please try again.', 'error');
-            return;
-        }
-
-        // Get form values
         const taskTitle = titleInput.value.trim();
         const description = descriptionInput.value.trim();
         const dueDate = dueDateInput.value;
         const priority = priorityInput.value;
-
-        // Get selected users from the multi-select
         const assignedToId = assignedToInput.value;
 
         if (!taskTitle || !dueDate || !assignedToId) {
@@ -1104,24 +1084,17 @@ async function createTask(projectId) {
             return;
         }
 
-        // Create data object matching your TaskCreateDto structure
-        // Include additionalData to prevent null in ActivityLog
         const taskData = {
             taskTitle: taskTitle,
             description: description || "",
             dueDate: dueDate,
             priority: priority,
-            assignedToId: assignedToId,  // Make sure this matches your controller parameter name
-            // Add additional data for the ActivityLog to prevent null errors
+            assignedToId: assignedToId, 
             activityLogAdditions: [
                 { action: "created task", targetType: "Task", additionalData: "{}" },
                 { action: "assigned task", targetType: "Task", additionalData: "{}" }
             ]
         };
-
-        console.log('Creating task with data:', taskData);
-
-        // Set button to loading state
         const createButton = document.querySelector('#createTaskModal .btn-primary');
         if (createButton) {
             createButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
@@ -1136,22 +1109,14 @@ async function createTask(projectId) {
             body: JSON.stringify(taskData)
         });
 
-        // Log full response for debugging
-        console.log('Server response status:', response.status);
-        const responseText = await response.text();
-        console.log('Response from server:', responseText);
-
         if (!response.ok) {
-            console.error('Error response:', responseText);
             throw new Error('Failed to create task: ' + (response.status === 400 ? 'Invalid data' : 'Server error'));
         }
 
-        // Close the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('createTaskModal'));
         if (modal) {
             modal.hide();
         } else {
-            // Fallback if modal instance not found
             const modalElement = document.getElementById('createTaskModal');
             if (modalElement) {
                 modalElement.classList.remove('show');
@@ -1163,13 +1128,11 @@ async function createTask(projectId) {
 
         showToast('Task created successfully', 'success');
 
-        // Reload the project to show the new task
         await loadProject(projectId);
+        await loadProjectsForSidebar(projectId);
     } catch (error) {
-        console.error('Error creating task:', error);
         showToast('Error creating task: ' + error.message, 'error');
     } finally {
-        // Reset button state
         const createButton = document.querySelector('#createTaskModal .btn-primary');
         if (createButton) {
             createButton.innerHTML = 'Create Task';
@@ -1234,12 +1197,10 @@ async function showTaskDetails(taskId) {
 
 async function deleteTask(taskId, projectId) {
     try {
-        // Prepare headers
         const headers = {
             'Content-Type': 'application/json'
         };
 
-        // Add CSRF token to headers if it exists
         const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
         if (csrfToken) {
             headers['X-CSRF-TOKEN'] = csrfToken.value;
@@ -1254,7 +1215,6 @@ async function deleteTask(taskId, projectId) {
             throw new Error('Failed to delete task');
         }
 
-        // Close any open modals
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) modal.hide();
 
@@ -1263,24 +1223,21 @@ async function deleteTask(taskId, projectId) {
 
         showToast('Task deleted successfully', 'success');
 
-        // Reload the project to update the task list
         await loadProject(projectId);
+        await loadProjectsForSidebar(projectId);
     } catch (error) {
-        console.error('Error deleting task:', error);
         showToast('Error deleting task: ' + error.message, 'error');
     }
 }
 
 async function updateTask(taskId, projectId) {
     try {
-        // Get form values
         const taskTitle = document.getElementById('editTaskTitle').value.trim();
         const description = document.getElementById('editTaskDescription').value.trim();
         const dueDate = document.getElementById('editTaskDueDate').value;
         const priority = document.getElementById('editTaskPriority').value;
         const status = document.getElementById('editTaskStatus').value;
 
-        // Get selected users from the multi-select
         const assignedToSelect = document.getElementById('editTaskAssignedTo');
         const assignedUserIds = Array.from(assignedToSelect.selectedOptions).map(option => option.value);
 
@@ -1289,8 +1246,6 @@ async function updateTask(taskId, projectId) {
             return;
         }
 
-        // Create data object matching your TaskUpdateDto
-        // Include activityLogAdditions with additional data to prevent AdditionalData NULL errors
         const taskData = {
             taskTitle: taskTitle,
             description: description,
@@ -1305,9 +1260,6 @@ async function updateTask(taskId, projectId) {
             ]
         };
 
-        console.log('Updating task with data:', taskData);
-
-        // Set button to loading state
         const updateButton = document.querySelector('#taskDetailsModal .btn-primary');
         if (updateButton) {
             updateButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
@@ -1324,25 +1276,14 @@ async function updateTask(taskId, projectId) {
             body: JSON.stringify(taskData)
         });
 
-        // Try to get response text for better error handling
-        let responseText = '';
-        try {
-            responseText = await response.text();
-            console.log('Server response:', responseText);
-        } catch (e) {
-            console.error('Could not read response text:', e);
-        }
-
         if (!response.ok) {
             throw new Error('Failed to update task: ' + responseText);
         }
 
-        // Close modal and refresh tasks
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) {
             modal.hide();
         } else {
-            // Fallback if modal instance not found
             document.getElementById('taskDetailsModal').classList.remove('show');
             document.body.classList.remove('modal-open');
             document.querySelector('.modal-backdrop')?.remove();
@@ -1350,13 +1291,11 @@ async function updateTask(taskId, projectId) {
 
         showToast('Task updated successfully', 'success');
 
-        // Reload the project to show the updated task
         await loadProject(projectId);
+        await loadProjectsForSidebar(projectId);
     } catch (error) {
-        console.error('Error updating task:', error);
         showToast('Error updating task: ' + error.message, 'error');
     } finally {
-        // Reset button state
         const updateButton = document.querySelector('#taskDetailsModal .btn-primary');
         if (updateButton) {
             updateButton.innerHTML = 'Save Changes';
@@ -1413,6 +1352,7 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
 
         // Reload the project to show updated task status
         await loadProject(projectId);
+        await loadProjectsForSidebar(projectId);
         showToast(`Task marked as ${newStatus}`, 'success');
     } catch (error) {
         console.error('Error updating task status:', error);
