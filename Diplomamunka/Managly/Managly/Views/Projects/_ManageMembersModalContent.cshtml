@@ -1,0 +1,46 @@
+@model Managly.Models.ProjectMemberManagementViewModel
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Member</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model.Members)
+            {
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="@member.ProfilePicturePath" alt="Avatar" class="user-avatar">
+                            <span>@member.FullName</span>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="form-select role-select"
+                                data-user-id="@member.UserId"
+                                data-project-id="@Model.ProjectId"
+                                @(member.IsProjectLead ? "disabled" : "")>
+                            <option value="Member" selected="@(member.Role == "Member")">Member</option>
+                            <option value="Manager" selected="@(member.Role == "Manager")">Manager</option>
+                            <option value="Project Lead" selected="@(member.Role == "Project Lead")">Project Lead</option>
+                        </select>
+                    </td>
+                    <td>
+                        @if (!member.IsProjectLead)
+                        {
+                            <button class="btn btn-danger btn-sm remove-member-btn"
+                                    data-user-id="@member.UserId"
+                                    data-project-id="@Model.ProjectId">
+                                Remove
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

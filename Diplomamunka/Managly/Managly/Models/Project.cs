@@ -97,7 +97,8 @@ namespace Managly.Models
         
         [Required]
         public string Action { get; set; }
-        
+
+        public string? Type { get; set; }
         public string TargetType { get; set; } // "Task", "Project", "Member"
         
         public string TargetId { get; set; }

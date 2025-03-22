@@ -298,22 +298,6 @@ namespace Managly.Controllers.Api
                 if (statusChanged) allChanges.Add("status", new { oldValue = oldStatus, newValue = project.Status });
                 if (priorityChanged) allChanges.Add("priority", new { oldValue = oldPriority, newValue = project.Priority });
 
-                // Add a general project update activity with all changes
-                if (allChanges.Count > 0)
-                {
-                    var activity = new ActivityLog
-                    {
-                        ProjectId = project.Id,
-                        UserId = currentUser.Id,
-                        Action = "updated project details",
-                        TargetType = "Project",
-                        TargetId = project.Id.ToString(),
-                        TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(allChanges)
-                    };
-                    _context.ActivityLogs.Add(activity);
-                }
 
                 // Log activities for significant changes with detailed information
                 if (nameChanged)
@@ -332,18 +316,50 @@ namespace Managly.Controllers.Api
                     _context.ActivityLogs.Add(activity);
                 }
 
+                if (descriptionChanged)
+                {
+                    var activity = new ActivityLog
+                    {
+                        ProjectId = project.Id,
+                        UserId = currentUser.Id,
+                        Action = "changed project description",
+                        TargetType = "Project",
+                        TargetId = project.Id.ToString(),
+                        TargetName = project.Name,
+                        Timestamp = DateTime.UtcNow,
+                        AdditionalData = JsonSerializer.Serialize(new { oldDescription = oldDescription, newDescription = project.Description })
+                    };
+                    _context.ActivityLogs.Add(activity);
+                }
+
                 if (deadlineChanged)
                 {
                     var activity = new ActivityLog
                     {
                         ProjectId = project.Id,
                         UserId = currentUser.Id,
-                        Action = "updated project deadline",
+                        Action = $"updated project deadline from {oldDeadline} to {projectDto.Deadline}",
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
                         Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { oldDeadline = oldDeadline, newDeadline = projectDto.Deadline })
+                        AdditionalData = JsonSerializer.Serialize(new { oldDeadline = oldDeadline, newDeadLine = projectDto.Deadline })
+                    };
+                    _context.ActivityLogs.Add(activity);
+                }
+
+                if (startDateChanged)
+                {
+                    var activity = new ActivityLog
+                    {
+                        ProjectId = project.Id,
+                        UserId = currentUser.Id,
+                        Action = $"updated project start date from {oldStartDate} to {projectDto.StartDate}",
+                        TargetType = "Project",
+                        TargetId = project.Id.ToString(),
+                        TargetName = project.Name,
+                        Timestamp = DateTime.UtcNow,
+                        AdditionalData = JsonSerializer.Serialize(new { oldStartDate = oldStartDate, newStartDate = projectDto.StartDate })
                     };
                     _context.ActivityLogs.Add(activity);
                 }
@@ -808,6 +824,7 @@ namespace Managly.Controllers.Api
                     ProjectId = project.Id,
                     UserId = currentUser.Id,
                     Action = "created task",
+                    Type = "task_created",
                     TargetType = "Task",
                     TargetId = task.Id.ToString(),
                     TargetName = task.TaskTitle,

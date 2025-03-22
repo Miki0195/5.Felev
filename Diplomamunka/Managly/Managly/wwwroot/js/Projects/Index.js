@@ -1,4 +1,10 @@
-﻿// Everything for the sidebar
+﻿// IMPORTANT!!!!!!!!!!!!!! PUT THE EVENT LISTENER STUFF AND DOM STUFF TOGETHER BECAUSE WE HAVE LIKE 100 FROM THEM
+
+
+
+
+
+// Everything for the sidebar
 function searchProjects(searchTerm) {
     const activeFilter = document.querySelector('.filter-tab.active').getAttribute('data-filter');
 
@@ -415,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchProjects(this.value);
             }
         });
-    } else {
+        } else {
         console.error("Search input element not found. Looking for #project-search-input");
     }
 
@@ -425,15 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 //LOADING THE SELECTED PROJECTS
-
 async function loadProject(projectId) {
     const projectContent = document.querySelector('.projects-content');
     projectContent.innerHTML = `
         <div class="d-flex justify-content-center align-items-center" style="height: 100%">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
+                    </div>
+                </div>
     `;
     
     try {
@@ -522,36 +527,6 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
     }
 }
 
-async function refreshActivityFeed(projectId, showLoadingIndicator = true) {
-    try {
-        const activityFeedContainer = document.getElementById('activityFeedContainer');
-        if (!activityFeedContainer) {
-            return;
-        }
-
-        const response = await fetch(`/Projects/${projectId}/ActivityFeed`);
-        if (!response.ok) throw new Error(`Failed to refresh activity feed: ${response.status}`);
-
-        const html = await response.text();
-        activityFeedContainer.innerHTML = html;
-
-
-        const feedContent = document.querySelector('.activity-feed-content');
-        if (feedContent) {
-            feedContent.addEventListener('scroll', function() {
-                if (this.scrollTop > 10) {
-                    this.classList.add('scrolled-down');
-                } else {
-                    this.classList.remove('scrolled-down');
-                }
-            });
-        }
-
-    } catch (error) {
-        showToast("Error loadin activity feed: " + error, 'danger');
-    }
-}
-
 function showDeleteConfirmation(projectId) {
     const deleteButton = document.querySelector('#deleteConfirmationModal .btn-danger');
     deleteButton.setAttribute('onclick', `deleteProject(${projectId})`);
@@ -586,7 +561,7 @@ async function showEditProjectModal(projectId) {
 
         const response = await fetch(`/api/projectsapi/${projectId}`);
         if (!response.ok) throw new Error(`Failed to fetch project details: ${response.status} ${response.statusText}`);
-        
+
         const project = await response.json();
         
         const projectIdField = document.getElementById('editProjectId');
@@ -598,7 +573,7 @@ async function showEditProjectModal(projectId) {
         
         const startDate = new Date(project.startDate);
         const deadline = project.deadline ? new Date(project.deadline) : null;
-
+        
         document.getElementById('editProjectName').value = project.name;
         document.getElementById('editProjectDescription').value = project.description || '';
         document.getElementById('editProjectStartDate').value = startDate.toISOString().split('T')[0];
@@ -687,38 +662,28 @@ async function updateProject() {
         document.getElementById('updateProjectButton').disabled = false;
     }
 }
-
+// EVERYTHING FOR MANAGING MEMBERS
 function showAddMembersModal(projectId) {
     selectedUsers.clear();
 
-    // First create the modal
     const modal = new bootstrap.Modal(document.getElementById('addMembersModal'));
 
-    // Update the Add Members button to include the projectId
     const addButton = document.querySelector('#addMembersModal .btn-primary');
     addButton.setAttribute('onclick', `addProjectMembers(${projectId})`);
 
-    // Prepare the modal body
     const modalBody = document.querySelector('#addMembersModal .modal-body');
 
-    // Clear the current content
     modalBody.innerHTML = '';
 
-    // Create a container div with a unique ID for the user search
     const containerId = 'addMembersSearchContainer';
     const containerDiv = document.createElement('div');
     containerDiv.id = containerId;
     modalBody.appendChild(containerDiv);
 
-    // Show the modal
     modal.show();
 
-    // Initialize the user search after modal is shown
-    // This uses your existing functions to create the search container
     loadUserSearch(containerId).then(() => {
-        // After user search is loaded, load available users for this project
         loadAvailableUsers(projectId).then(() => {
-            // Initialize selected users display
             refreshSelectedUsersDisplay();
         });
     });
@@ -744,163 +709,275 @@ async function addProjectMembers(projectId) {
             throw new Error(errorData.error || 'Failed to add members');
         }
 
-        // Hide the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('addMembersModal'));
         modal.hide();
 
-        // Show success message
         showToast('Team members added successfully', 'success');
 
-        // Reload project details
         await loadProject(projectId);
     } catch (error) {
-        console.error('Error adding members:', error);
-        showToast(error.message, 'error');
+        showToast('There was an error adding members to the project!', 'error');
     }
 }
 
 async function showManageMembersModal(projectId) {
     try {
-        const response = await fetch(`/api/projectsapi/${projectId}`);
-        if (!response.ok) {
-            throw new Error('Failed to load project details');
-        }
-        const project = await response.json();
-
         const modalBody = document.querySelector('#manageMembersModal .modal-body');
-        modalBody.innerHTML = `
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Member</th>
-                                    <th>Role</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${project.projectMembers.map(member => `
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <img src="${member.user.profilePicturePath}" alt="Avatar" class="user-avatar">
-                                                <span>${member.user.name} ${member.user.lastName}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <select class="form-select" 
-                                                    onchange="updateMemberRole(${project.id}, '${member.user.id}', this.value)"
-                                                    ${member.role === 'Project Lead' ? 'disabled' : ''}>
-                                                <option value="Member" ${member.role === 'Member' ? 'selected' : ''}>Member</option>
-                                                <option value="Manager" ${member.role === 'Manager' ? 'selected' : ''}>Manager</option>
-                                                <option value="Project Lead" ${member.role === 'Project Lead' ? 'selected' : ''}>Project Lead</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            ${member.role !== 'Project Lead' ? `
-                                                <button class="btn btn-danger btn-sm" 
-                                                        onclick="removeMember(${project.id}, '${member.user.id}')">
-                                                    Remove
-                                                </button>
-                                            ` : ''}
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+        modalBody.innerHTML = `<div class="text-center py-4"><div class="spinner-border" role="status"></div><p class="mt-2">Loading team members...</p></div>`;
 
         const modal = new bootstrap.Modal(document.getElementById('manageMembersModal'));
         modal.show();
+
+        const response = await fetch(`/Projects/ManageMembers/${projectId}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            let errorMessage = `Error ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+        
+        const html = await response.text();
+        modalBody.innerHTML = html;
+        
+        attachMemberManagementEventListeners();
+        
     } catch (error) {
-        console.error('Error showing manage members modal:', error);
-        showToast(error.message, 'error');
+        showToast(`Failed to load team members!`, 'error');
+        
     }
+}
+
+function attachMemberManagementEventListeners() {
+    // Attach event listeners for role changes
+    document.querySelectorAll('.role-select').forEach(select => {
+        select.addEventListener('change', async function() {
+            const userId = this.dataset.userId;
+            const projectId = this.dataset.projectId;
+            const newRole = this.value;
+            
+            try {
+                await updateMemberRole(projectId, userId, newRole);
+            } catch (error) {
+                console.error('Error updating role:', error);
+                // Reset to original value on error
+                this.value = this.getAttribute('data-original-value') || 'Member';
+                showToast('Failed to update member role', 'error');
+            }
+        });
+        
+        // Store original value for reset on error
+        select.setAttribute('data-original-value', select.value);
+    });
+    
+    // Attach event listeners for member removal
+    document.querySelectorAll('.remove-member-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            const userId = this.dataset.userId;
+            const projectId = this.dataset.projectId;
+            
+            if (confirm('Are you sure you want to remove this team member from the project?')) {
+                try {
+                    await removeMember(projectId, userId);
+                    // Remove the row from the table
+                    this.closest('tr').remove();
+    } catch (error) {
+        console.error('Error removing member:', error);
+                    showToast('Failed to remove team member', 'error');
+                }
+            }
+        });
+    });
 }
 
 async function updateMemberRole(projectId, userId, newRole) {
     try {
+        const button = document.querySelector(`.role-select[data-user-id="${userId}"]`);
+        const originalValue = button?.getAttribute('data-original-value');
+        
         const response = await fetch(`/api/projectsapi/${projectId}/members/${userId}/role`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ role: newRole })
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to update member role');
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-
+        
         showToast('Member role updated successfully', 'success');
-
-        // First hide the current modal and remove the backdrop
-        const currentModal = bootstrap.Modal.getInstance(document.getElementById('manageMembersModal'));
-        if (currentModal) {
-            currentModal.hide();
-            // Remove modal backdrop
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
+        
+        if (button) {
+            button.setAttribute('data-original-value', newRole);
         }
 
-        // Then refresh the project content
+        refreshActivityFeed(projectId, false);
         await loadProject(projectId);
-
-        // Finally, show the modal again
-        setTimeout(() => {
-            showManageMembersModal(projectId);
-        }, 100);
     } catch (error) {
-        console.error('Error updating member role:', error);
-        showToast(error.message, 'error');
+        showToast('There was an error updating the role!');
+    } finally {
+        const button = document.querySelector(`.role-select[data-user-id="${userId}"]`);
     }
 }
 
 async function removeMember(projectId, userId) {
-    if (!confirm('Are you sure you want to remove this member from the project?')) {
-        return;
-    }
-
     try {
+        const button = document.querySelector(`.remove-member-btn[data-user-id="${userId}"]`);
+        
         const response = await fetch(`/api/projectsapi/${projectId}/members/${userId}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to remove member');
-        }
-
-        showToast('Member removed successfully', 'success');
-
-        // First hide the current modal and remove the backdrop
-        const currentModal = bootstrap.Modal.getInstance(document.getElementById('manageMembersModal'));
-        if (currentModal) {
-            currentModal.hide();
-            // Remove modal backdrop
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
             }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
+        
+        showToast('Team member removed successfully', 'success');
 
-        // Then refresh the project content
+        refreshActivityFeed(projectId, false);
         await loadProject(projectId);
-
-        // Finally, show the modal again
-        setTimeout(() => {
-            showManageMembersModal(projectId);
-        }, 100);
     } catch (error) {
-        console.error('Error removing member:', error);
-        showToast(error.message, 'error');
+        showToast('There was an error removing the member from the project!', 'error');
     }
 }
 
+/**
+ * Setup event listeners for project details page
+ * @param {number} projectId - The ID of the project
+ */
+function setupProjectEventListeners(projectId) {
+    // Task filter buttons
+    const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter') || this.textContent.trim().toLowerCase();
+            filterTasks(projectId, filter);
+        });
+    });
+    
+    // Activity feed refresh button
+    const refreshBtn = document.getElementById('refreshActivityBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => refreshActivityFeed(projectId, true));
+    }
+    
+    // Setup activity feed scroll event
+    const feedContent = document.querySelector('.activity-feed-content');
+    if (feedContent) {
+        feedContent.addEventListener('scroll', function() {
+            if (this.scrollTop > 10) {
+                this.classList.add('scrolled-down');
+        } else {
+                this.classList.remove('scrolled-down');
+            }
+        });
+    }
+    
+    // Other event listeners...
+    
+    // View all activities button
+    const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', () => showAllActivities(projectId));
+    }
+}
+
+
+async function refreshActivityFeed(projectId, showLoadingIndicator = true) {
+    const activityFeedContainer = document.getElementById('activityFeedContainer');
+    if (!activityFeedContainer) {
+        console.log("Activity feed container not found, skipping refresh");
+            return;
+        }
+        
+    if (showLoadingIndicator) {
+        activityFeedContainer.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="ms-2">Refreshing activity feed...</span>
+            </div>`;
+    }
+
+    let success = false;
+
+    try {
+        const response = await fetch(`/Projects/${projectId}/ActivityFeed`);
+
+        if (response.ok) {
+            const html = await response.text();
+            activityFeedContainer.innerHTML = html;
+            success = true;
+
+            const feedContent = document.querySelector('.activity-feed-content');
+            if (feedContent) {
+                feedContent.addEventListener('scroll', function () {
+                    if (this.scrollTop > 10) {
+                        this.classList.add('scrolled-down');
+                    } else {
+                        this.classList.remove('scrolled-down');
+                    }
+                });
+            }
+        } else {
+            console.warn(`Activity feed primary refresh failed: ${response.status} ${response.statusText}`);
+        }
+    } catch (error) {
+        console.warn("Primary activity feed refresh attempt failed:", error);
+    }
+}
+async function showAllActivities(projectId) {
+    const modal = new bootstrap.Modal(document.getElementById('allActivitiesModal'));
+    modal.show();
+
+    const modalBody = document.getElementById('allActivitiesModalBody');
+    modalBody.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading complete activity history...</p>
+        </div>`;
+
+    try {
+        const response = await fetch(`/Projects/${projectId}/AllActivities`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load activities: ${response.status}`);
+        }
+
+        const html = await response.text();
+        modalBody.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading activities:', error);
+        modalBody.innerHTML = `
+            <div class="text-center py-4 text-danger">
+                <i class="bi bi-exclamation-triangle fs-1"></i>
+                <p class="mt-3">Failed to load activity history: ${error.message}</p>
+                <button class="btn btn-outline-primary mt-2" onclick="showAllActivities(${projectId})">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
+    }
+}
+// EVERYTHING FOR TASKS
 async function showCreateTaskModal(projectId) {
     try {
         const modal = document.getElementById('createTaskModal');
@@ -926,7 +1003,7 @@ async function showCreateTaskModal(projectId) {
                 missingElements.push(id);
             }
         });
-        
+
         if (missingElements.length > 0) {
             console.error('Missing form elements:', missingElements.join(', '));
             showToast('Error: Some form elements are missing. Please reload the page.', 'error');
@@ -945,10 +1022,10 @@ async function showCreateTaskModal(projectId) {
         if (!assignedToSelect) {
             throw new Error('Cannot find the assigned users dropdown');
         }
-        
+
         // Clear previous options
         assignedToSelect.innerHTML = '';
-        
+
         // Add new options
         project.projectMembers.forEach(member => {
             const option = document.createElement('option');
@@ -991,7 +1068,7 @@ async function showCreateTaskModal(projectId) {
 async function createTask(projectId) {
     try {
         console.log('Creating task for project:', projectId);
-        
+
         // Get form elements with correct IDs
         const titleInput = document.getElementById('taskTitle');
         const descriptionInput = document.getElementById('taskDescription');
@@ -1018,7 +1095,7 @@ async function createTask(projectId) {
         const description = descriptionInput.value.trim();
         const dueDate = dueDateInput.value;
         const priority = priorityInput.value;
-        
+
         // Get selected users from the multi-select
         const assignedToId = assignedToInput.value;
 
@@ -1083,9 +1160,9 @@ async function createTask(projectId) {
                 document.querySelector('.modal-backdrop')?.remove();
             }
         }
-        
+
         showToast('Task created successfully', 'success');
-        
+
         // Reload the project to show the new task
         await loadProject(projectId);
     } catch (error) {
@@ -1161,31 +1238,31 @@ async function deleteTask(taskId, projectId) {
         const headers = {
             'Content-Type': 'application/json'
         };
-        
+
         // Add CSRF token to headers if it exists
         const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
         if (csrfToken) {
             headers['X-CSRF-TOKEN'] = csrfToken.value;
         }
-        
+
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`, {
             method: 'DELETE',
             headers: headers
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to delete task');
         }
-        
+
         // Close any open modals
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) modal.hide();
-        
+
         const confirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal'));
         if (confirmModal) confirmModal.hide();
-        
+
         showToast('Task deleted successfully', 'success');
-        
+
         // Reload the project to update the task list
         await loadProject(projectId);
     } catch (error) {
@@ -1202,16 +1279,16 @@ async function updateTask(taskId, projectId) {
         const dueDate = document.getElementById('editTaskDueDate').value;
         const priority = document.getElementById('editTaskPriority').value;
         const status = document.getElementById('editTaskStatus').value;
-        
+
         // Get selected users from the multi-select
         const assignedToSelect = document.getElementById('editTaskAssignedTo');
         const assignedUserIds = Array.from(assignedToSelect.selectedOptions).map(option => option.value);
-        
+
         if (!taskTitle || !dueDate || assignedUserIds.length === 0) {
             showToast('Please fill out all required fields and assign at least one user', 'error');
             return;
         }
-        
+
         // Create data object matching your TaskUpdateDto
         // Include activityLogAdditions with additional data to prevent AdditionalData NULL errors
         const taskData = {
@@ -1229,24 +1306,24 @@ async function updateTask(taskId, projectId) {
         };
 
         console.log('Updating task with data:', taskData);
-        
+
         // Set button to loading state
         const updateButton = document.querySelector('#taskDetailsModal .btn-primary');
         if (updateButton) {
             updateButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
             updateButton.disabled = true;
         }
-        
+
         const headers = {
             'Content-Type': 'application/json'
         };
-        
+
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(taskData)
         });
-        
+
         // Try to get response text for better error handling
         let responseText = '';
         try {
@@ -1255,11 +1332,11 @@ async function updateTask(taskId, projectId) {
         } catch (e) {
             console.error('Could not read response text:', e);
         }
-        
+
         if (!response.ok) {
             throw new Error('Failed to update task: ' + responseText);
         }
-        
+
         // Close modal and refresh tasks
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) {
@@ -1270,9 +1347,9 @@ async function updateTask(taskId, projectId) {
             document.body.classList.remove('modal-open');
             document.querySelector('.modal-backdrop')?.remove();
         }
-        
+
         showToast('Task updated successfully', 'success');
-        
+
         // Reload the project to show the updated task
         await loadProject(projectId);
     } catch (error) {
@@ -1288,495 +1365,62 @@ async function updateTask(taskId, projectId) {
     }
 }
 
-/**
- * Show the restore project modal
- * @param {number} projectId - The ID of the project to restore
- */
-function showRestoreProjectModal(projectId) {
-    // Set the project ID for restoration
-    document.getElementById('restoreProjectId').value = projectId;
-    
-    // Set default deadline to 2 weeks from now
-    const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-    
-    const formattedDate = twoWeeksFromNow.toISOString().split('T')[0];
-    document.getElementById('restoreProjectDeadline').value = formattedDate;
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('restoreProjectModal'));
-    modal.show();
-}
+async function updateTaskStatus(taskId, projectId, newStatus, event) {
+    // Prevent the click from propagating to parent elements
+    if (event) {
+        event.stopPropagation();
+    }
 
-/**
- * Restore an archived project to active status
- */
-async function restoreProject() {
     try {
-        // Get form values
-        const projectId = document.getElementById('restoreProjectId').value;
-        const newDeadline = document.getElementById('restoreProjectDeadline').value;
-        const newStatus = document.getElementById('restoreProjectStatus').value;
-        const newPriority = document.getElementById('restoreProjectPriority').value;
+        // Create a properly formatted additionalData JSON string
+        // This ensures it will never be null in the database
+        const additionalData = JSON.stringify({
+            taskId: taskId,
+            newStatus: newStatus,
+            timestamp: new Date().toISOString()
+        });
 
-        if (!projectId || !newDeadline) {
-            showToast('Please fill in all required fields', 'error');
-            return;
-        }
-
-        // Show loading state
-        const restoreBtn = document.getElementById('restoreProjectBtn');
-        if (restoreBtn) {
-            restoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Restoring...';
-            restoreBtn.disabled = true;
-        }
-
-        // First, fetch the existing project data
-        console.log('Fetching existing project data for ID:', projectId);
-        const projectResponse = await fetch(`/api/ProjectsApi/${projectId}`);
-
-        if (!projectResponse.ok) {
-            throw new Error(`Failed to fetch project data: ${projectResponse.status}`);
-        }
-
-        const projectData = await projectResponse.json();
-        console.log('Existing project data:', projectData);
-
-        // Format the date properly as an ISO string for JSON serialization
-        const deadlineDate = new Date(newDeadline);
-
-        // Create the update data object using existing data plus our changes
-        const updateData = {
-            // Required fields from existing project
-            name: projectData.name,
-            description: projectData.description || '',
-            startDate: projectData.startDate,
-
-            // New values for restoration
-            deadline: deadlineDate.toISOString(),
+        // Prepare status update data
+        const statusData = {
             status: newStatus,
-            priority: newPriority,
-
-            // Add activity log data to avoid nulls
-            activityLogAdditions: [
-                { action: "restored project", targetType: "Project", additionalData: "{}" }
-            ]
+            additionalData: additionalData
         };
 
-        console.log('Restore data being sent:', JSON.stringify(updateData));
+        // Prepare headers for the fetch request
+        const headers = {
+            'Content-Type': 'application/json'
+        };
 
-        // Use the API endpoint for project update
-        const response = await fetch(`/api/projectsapi/${projectId}/update`, {
+        console.log('Updating task status with data:', statusData);
+
+        const response = await fetch(`/api/projectsapi/tasks/${taskId}/status`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(updateData)
+            headers: headers,
+            body: JSON.stringify(statusData)
         });
 
-        console.log('Restore response status:', response.status);
-
-        // Try to read the response text for better error handling
-        let responseText = '';
-        try {
-            responseText = await response.text();
-            console.log('Server response:', responseText);
-        } catch (e) {
-            console.error('Could not read response text:', e);
-        }
-
         if (!response.ok) {
-            try {
-                // Try to parse JSON error response
-                if (responseText && responseText.trim().startsWith('{')) {
-                    const errorData = JSON.parse(responseText);
-                    if (errorData.errors) {
-                        const errorMessages = Object.entries(errorData.errors)
-                            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
-                            .join('; ');
-                        throw new Error(`Validation failed: ${errorMessages}`);
-                    } else {
-                        throw new Error(errorData.message || errorData.error || 'Failed to restore project');
-                    }
-                } else {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-            } catch (parseError) {
-                if (parseError.message.includes('Validation failed')) {
-                    throw parseError;
-                } else {
-                    throw new Error(`Failed to restore project: ${response.status}`);
-                }
+            const errorText = await response.text();
+            console.error('Error updating task status:', errorText);
+
+            // Reset checkbox state if updating fails
+            if (event && event.target && event.target.type === 'checkbox') {
+                event.target.checked = newStatus === 'Completed';
             }
+
+            throw new Error('Failed to update task status');
         }
 
-        // Hide the modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('restoreProjectModal'));
-        if (modal) {
-            modal.hide();
-        }
-
-        showToast(`Project restored successfully`, 'success');
-
-        // Refresh the sidebar
-        await loadProjectsForSidebar();
-
-        // Reload the project with the regular view
+        // Reload the project to show updated task status
         await loadProject(projectId);
+        showToast(`Task marked as ${newStatus}`, 'success');
     } catch (error) {
-        console.error('Error restoring project:', error);
-        showToast(error.message, 'error');
-    } finally {
-        // Reset button state
-        const restoreBtn = document.getElementById('restoreProjectBtn');
-        if (restoreBtn) {
-            restoreBtn.innerHTML = 'Restore Project';
-            restoreBtn.disabled = false;
+        console.error('Error updating task status:', error);
+        showToast('Error updating task status: ' + error.message, 'error');
+
+        // Reset checkbox state if updating fails
+        if (event && event.target && event.target.type === 'checkbox') {
+            event.target.checked = newStatus === 'Completed';
         }
     }
-}
-
-// Set up event listener for the restore button
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listener to the restore button in the modal
-    document.getElementById('restoreProjectBtn').addEventListener('click', restoreProject);
-});
-
-/**
- * Creates an HTML item for an activity
- * @param {Object} activity - The activity data
- * @returns {string} HTML string for the activity item
- */
-function createActivityItem(activity) {
-    const timeAgo = formatTimeAgo(new Date(activity.timestamp));
-    
-    let icon = '';
-    let content = '';
-    
-    // Always use the activity description when it exists
-    if (activity.description) {
-        switch (activity.type) {
-            case 'task_created':
-                icon = '<i class="bi bi-plus-circle activity-icon task-created"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'task_assigned':
-                icon = '<i class="bi bi-person-check activity-icon task-assigned"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'task_completed':
-                icon = '<i class="bi bi-check-circle activity-icon task-completed"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'task_updated':
-                icon = '<i class="bi bi-pencil activity-icon task-updated"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'member_joined':
-                icon = '<i class="bi bi-person-plus activity-icon member-joined"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'project_created':
-                icon = '<i class="bi bi-folder-plus activity-icon project-created"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            case 'project_updated':
-                icon = '<i class="bi bi-pencil-square activity-icon project-updated"></i>';
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-                break;
-            default:
-                // For any activity with a description but unknown type, still show the description
-                if (activity.targetType === 'Project') {
-                    icon = '<i class="bi bi-pencil-square activity-icon project-updated"></i>';
-                } else if (activity.targetType === 'Task') {
-                    icon = '<i class="bi bi-pencil activity-icon task-updated"></i>';
-                } else if (activity.targetType === 'Member') {
-                    icon = '<i class="bi bi-person-plus activity-icon member-joined"></i>';
-                } else {
-                    icon = '<i class="bi bi-info-circle activity-icon"></i>';
-                }
-                content = `<strong>${activity.userName}</strong> ${activity.description}`;
-        }
-    } else {
-        // Fallback for activities without a description
-        icon = '<i class="bi bi-info-circle activity-icon"></i>';
-        content = `<strong>${activity.userName}</strong> performed an activity`;
-    }
-    
-    return `
-        <div class="activity-item">
-            <div class="activity-avatar">
-                <img src="${activity.userAvatar}" alt="${activity.userName}" 
-                     onerror="this.onerror=null; this.src='/images/default-avatar.png';">
-            </div>
-            <div class="activity-content">
-                <div class="activity-icon-container">
-                    ${icon}
-                </div>
-                <div class="activity-text">
-                    <p>${content}</p>
-                    <small class="text-muted">${timeAgo}</small>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * Formats a date to a "time ago" string (e.g., "2 hours ago")
- * @param {Date} date - The date to format
- * @returns {string} Formatted "time ago" string
- */
-function formatTimeAgo(date) {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) {
-        return 'just now';
-    }
-    
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-        return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
-    }
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-        return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
-    }
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) {
-        return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
-    }
-    
-    const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) {
-        return `${diffInMonths} ${diffInMonths === 1 ? 'month' : 'months'} ago`;
-    }
-    
-    const diffInYears = Math.floor(diffInMonths / 12);
-    return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
-}
-
-
-// Error handler for source map errors (like signalr.min.js.map)
-window.addEventListener('error', function(event) {
-    // Only suppress source map errors
-    if (event.filename && event.filename.endsWith('.map')) {
-        // Prevent the error from appearing in console
-        event.preventDefault();
-        return true;
-    }
-    return false;
-}, true);
-
-/**
- * Setup event listeners for project details page
- * @param {number} projectId - The ID of the project
- */
-function setupProjectEventListeners(projectId) {
-    // Task filter buttons
-    const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            const filter = this.getAttribute('data-filter') || this.textContent.trim().toLowerCase();
-            filterTasks(projectId, filter);
-        });
-    });
-    
-    // Activity feed refresh button
-    const refreshBtn = document.getElementById('refreshActivityBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => refreshActivityFeed(projectId, true));
-    }
-    
-    // Setup activity feed scroll event
-    const feedContent = document.querySelector('.activity-feed-content');
-    if (feedContent) {
-        feedContent.addEventListener('scroll', function() {
-            if (this.scrollTop > 10) {
-                this.classList.add('scrolled-down');
-            } else {
-                this.classList.remove('scrolled-down');
-            }
-        });
-    }
-    
-    // Other event listeners...
-    
-    // View all activities button
-    const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
-    if (viewAllBtn) {
-        viewAllBtn.addEventListener('click', () => showAllActivities(projectId));
-    }
-}
-
-/**
- * Shows a modal with all activities for a project
- * @param {number} projectId - The ID of the project
- */
-async function showAllActivities(projectId) {
-    // Create the modal if it doesn't exist
-    if (!document.getElementById('allActivitiesModal')) {
-        const modalHtml = `
-            <div class="modal fade" id="allActivitiesModal" tabindex="-1" aria-labelledby="allActivitiesModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="allActivitiesModalLabel">
-                                <i class="bi bi-activity"></i> Project Activity History
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body" id="allActivitiesModalBody">
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-2">Loading complete activity history...</p>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('allActivitiesModal'));
-    modal.show();
-
-    try {
-        // Fetch all activities (use a larger limit)
-        const response = await fetch(`/api/projectsapi/${projectId}/activities?limit=100`);
-        
-        if (!response.ok) {
-            throw new Error(`Failed to load activities: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const modalBody = document.getElementById('allActivitiesModalBody');
-        
-        if (!data.success || !data.activities || data.activities.length === 0) {
-            modalBody.innerHTML = `
-                <div class="text-center py-4">
-                    <div class="empty-icon mx-auto mb-3">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                    <p>No activity history found for this project.</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Create a timeline view for all activities
-        let timelineHtml = '<div class="activity-timeline full-timeline">';
-        
-        data.activities.forEach(activity => {
-            timelineHtml += `
-                <div class="activity-item">
-                    <div class="activity-timeline-connector">
-                        <div class="activity-timeline-dot ${getActivityTypeClass(activity.type, activity.targetType)}"></div>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-user">
-                            <img src="${activity.userAvatar || '/images/default/default-profile.png'}" 
-                                 alt="${activity.userName}" 
-                                 class="activity-avatar"
-                                 onerror="this.onerror=null; this.src='/images/default/default-profile.png'">
-                            <div class="activity-user-info">
-                                <span class="activity-username">${activity.userName}</span>
-                                <span class="activity-time" title="${formatDate(activity.timestamp)}">${formatTimeAgo(new Date(activity.timestamp))}</span>
-                            </div>
-                        </div>
-                        <div class="activity-details">
-                            <div class="activity-message">
-                                ${activity.description}
-                                ${activity.targetName ? `<span class="activity-target">${activity.targetName}</span>` : ''}
-                            </div>
-                            <div class="activity-icon-badge ${getActivityTypeClass(activity.type, activity.targetType)}">
-                                <i class="bi ${getActivityIcon(activity.type, activity.targetType)}"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        timelineHtml += '</div>';
-        modalBody.innerHTML = timelineHtml;
-        
-    } catch (error) {
-        console.error('Error loading all activities:', error);
-        document.getElementById('allActivitiesModalBody').innerHTML = `
-            <div class="text-center py-4 text-danger">
-                <i class="bi bi-exclamation-triangle fs-1"></i>
-                <p class="mt-3">Failed to load activity history.</p>
-                <button class="btn btn-outline-primary mt-2" onclick="showAllActivities(${projectId})">
-                    <i class="bi bi-arrow-clockwise"></i> Try Again
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Helper functions for the activity modal
-function getActivityTypeClass(type, targetType) {
-    if (type) {
-        switch(type.toLowerCase()) {
-            case 'task_created': return 'activity-task-created';
-            case 'task_assigned': return 'activity-task-assigned';
-            case 'task_completed': return 'activity-task-completed';
-            case 'task_updated': return 'activity-task-updated';
-            case 'member_joined': return 'activity-member-joined';
-            case 'project_created': return 'activity-project-created';
-            case 'project_updated': return 'activity-project-updated';
-            default: return 'activity-default';
-        }
-    } else if (targetType) {
-        switch(targetType.toLowerCase()) {
-            case 'task': return 'activity-task-updated';
-            case 'project': return 'activity-project-updated';
-            case 'member': return 'activity-member-joined';
-            default: return 'activity-default';
-        }
-    }
-    return 'activity-default';
-}
-
-function getActivityIcon(type, targetType) {
-    if (type) {
-        switch(type.toLowerCase()) {
-            case 'task_created': return 'bi-plus-circle';
-            case 'task_assigned': return 'bi-person-check';
-            case 'task_completed': return 'bi-check-circle';
-            case 'task_updated': return 'bi-pencil';
-            case 'member_joined': return 'bi-person-plus';
-            case 'project_created': return 'bi-folder-plus';
-            case 'project_updated': return 'bi-pencil-square';
-            default: return 'bi-info-circle';
-        }
-    } else if (targetType) {
-        switch(targetType.toLowerCase()) {
-            case 'task': return 'bi-list-check';
-            case 'project': return 'bi-folder-symlink';
-            case 'member': return 'bi-people';
-            default: return 'bi-info-circle';
-        }
-    }
-    return 'bi-info-circle';
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleString();
 }

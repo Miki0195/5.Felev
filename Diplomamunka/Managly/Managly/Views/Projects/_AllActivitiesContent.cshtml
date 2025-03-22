@@ -1,0 +1,110 @@
+﻿@model List<ActivityViewModel>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-center py-4">
+        <div class="empty-icon mx-auto mb-3">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <p>No activity history found for this project.</p>
+    </div>
+}
+else
+{
+    <div class="activity-timeline full-timeline">
+        @foreach (var activity in Model)
+        {
+            <div class="activity-item">
+                <div class="activity-timeline-connector">
+                    <div class="activity-timeline-dot @GetActivityTypeClass(activity.Type, activity.TargetType)"></div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-user">
+                        <img src="@(string.IsNullOrEmpty(activity.UserAvatar) ? "/images/default/default-profile.png" : activity.UserAvatar)"
+                             alt="@activity.UserName"
+                             class="activity-avatar"
+                             onerror="this.onerror=null; this.src='/images/default/default-profile.png'">
+                        <div class="activity-user-info">
+                            <span class="activity-username">@activity.UserName</span>
+                            <span class="activity-time" title="@activity.TimeAgo">@activity.TimeAgo</span>
+                        </div>
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-message">
+                            @activity.Description
+                            @if (!string.IsNullOrEmpty(activity.TargetName))
+                            {
+                                <span class="activity-target">@activity.TargetName</span>
+                            }
+                        </div>
+                        <div class="activity-icon-badge @GetActivityTypeClass(activity.Type, activity.TargetType)">
+                            <i class="bi @GetActivityIcon(activity.Type, activity.TargetType)"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@functions {
+    private string GetActivityTypeClass(string type, string targetType)
+    {
+        Console.WriteLine(type);
+        if (!string.IsNullOrEmpty(type))
+        {
+            switch (type.ToLowerInvariant())
+            {
+                case "task_created": return "activity-task-created";
+                case "task_assigned": return "activity-task-assigned";
+                case "task_completed": return "activity-task-completed";
+                case "task_updated": return "activity-task-updated";
+                case "member_joined": return "activity-member-joined";
+                case "project_created": return "activity-project-created";
+                case "project_updated": return "activity-project-updated";
+                default: return "activity-default";
+            }
+        }
+        else if (!string.IsNullOrEmpty(targetType))
+        {
+            switch (targetType.ToLowerInvariant())
+            {
+                case "task": return "activity-task-updated";
+                case "project": return "activity-project-updated";
+                case "member": return "activity-member-joined";
+                default: return "activity-default";
+            }
+        }
+        return "activity-default";
+    }
+
+    private string GetActivityIcon(string type, string targetType)
+    {
+        Console.WriteLine(type);
+        if (!string.IsNullOrEmpty(type))
+        {
+            switch (type.ToLowerInvariant())
+            {
+                case "task_created": return "bi-plus-circle";
+                case "task_assigned": return "bi-person-check";
+                case "task_completed": return "bi-check-circle";
+                case "task_updated": return "bi-pencil";
+                case "member_joined": return "bi-person-plus";
+                case "project_created": return "bi-folder-plus";
+                case "project_updated": return "bi-pencil-square";
+                default: return "bi-info-circle";
+            }
+        }
+        else if (!string.IsNullOrEmpty(targetType))
+        {
+            switch (targetType.ToLowerInvariant())
+            {
+                case "task": return "bi-list-check";
+                case "project": return "bi-folder-symlink";
+                case "member": return "bi-people";
+                default: return "bi-info-circle";
+            }
+        }
+        return "bi-info-circle";
+    }
+}

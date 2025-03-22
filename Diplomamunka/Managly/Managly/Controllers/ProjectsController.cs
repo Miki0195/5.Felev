@@ -251,7 +251,7 @@ namespace Managly.Controllers
 
                     Activities = activities.Select(a => new ActivityViewModel
                     {
-                        Type = a.TargetType ?? string.Empty,
+                        Type = a.Type ?? string.Empty,
                         UserId = a.UserId ?? string.Empty,
                         UserName = a.User != null ? $"{a.User.Name} {a.User.LastName}" : "Unknown User",
                         UserAvatar = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png",
@@ -359,42 +359,73 @@ namespace Managly.Controllers
         [HttpGet("{id}/ActivityFeed")]
         public async Task<IActionResult> GetActivityFeed(int id)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            try
             {
-                return Unauthorized();
-            }
-
-            // Check if project exists and user has access
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            // Get recent activities
-            var activities = await _context.ActivityLogs
-                .Include(a => a.User)
-                .Where(a => a.ProjectId == id)
-                .OrderByDescending(a => a.Timestamp)
-                .Take(15)
-                .Select(a => new ActivityViewModel
+                _logger.LogInformation($"Activity feed requested for project ID: {id}");
+                
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
                 {
-                    Type = a.TargetType,
-                    UserId = a.UserId,
-                    UserName = $"{a.User.Name} {a.User.LastName}",
-                    UserAvatar = a.User.ProfilePicturePath ?? "/images/default/default-profile.png",
-                    TimeAgo = GetTimeAgo(a.Timestamp),
-                    Description = a.Action,
-                    TargetType = a.TargetType,
-                    TargetId = a.TargetId,
-                    TargetName = a.TargetName
-                })
-                .ToListAsync();
+                    _logger.LogWarning("Activity feed: No current user found");
+                    return Unauthorized();
+                }
 
-            return PartialView("_ActivityFeed", activities);
+                // Check if project exists and user has access
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Activity feed: Project with ID {id} not found or user {currentUser.Id} doesn't have access");
+                    return NotFound();
+                }
+
+                // Get recent activities - with error handling for each step
+                try
+                {
+                    _logger.LogDebug($"Fetching activities for project {id}");
+                    
+                    var activityQuery = _context.ActivityLogs
+                        .Include(a => a.User)
+                        .Where(a => a.ProjectId == id)
+                        .OrderByDescending(a => a.Timestamp)
+                        .Take(15);
+                        
+                    _logger.LogDebug("Activity query constructed");
+                    
+                    var activityList = await activityQuery.ToListAsync();
+                    _logger.LogDebug($"Retrieved {activityList.Count} activities");
+                    
+                    var viewModels = activityList.Select(a => new ActivityViewModel
+                    {
+                        Type = a.Type,
+                        UserId = a.UserId,
+                        UserName = a.User != null ? $"{a.User.Name} {a.User.LastName}" : "Unknown User",
+                        UserAvatar = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png",
+                        TimeAgo = GetTimeAgo(a.Timestamp),
+                        Description = a.Action,
+                        TargetType = a.TargetType,
+                        TargetId = a.TargetId,
+                        TargetName = a.TargetName
+                    }).ToList();
+                    
+                    _logger.LogInformation($"Successfully prepared {viewModels.Count} activity view models for project {id}");
+                    
+                    return PartialView("_ActivityFeed", viewModels);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error processing activities for project {id}");
+                    
+                    // Return an empty list rather than error - this is more user-friendly
+                    return PartialView("_ActivityFeed", new List<ActivityViewModel>());
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unhandled exception in GetActivityFeed for project {id}");
+                return StatusCode(500, $"An error occurred while loading activities: {ex.Message}");
+            }
         }
 
         [HttpGet("archived/{id}")]
@@ -487,7 +518,6 @@ namespace Managly.Controllers
             }
         }
 
-        // Helper methods for the controller
         private string GetStatusCssClass(string status)
         {
             return status?.ToLower() switch
@@ -561,12 +591,188 @@ namespace Managly.Controllers
             return Ok(new { success = true, message = "Project restored successfully" });
         }
 
-        // Model for project restoration
         public class RestoreProjectModel
         {
             public DateTime Deadline { get; set; }
             public string Status { get; set; }
             public string Priority { get; set; }
         }
+
+        [HttpGet("ManageMembers/{id}")]
+        public async Task<IActionResult> ManageMembers(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                _logger.LogInformation($"Loading members management for project ID: {id}");
+                
+                var project = await _context.Projects
+                    .Include(p => p.ProjectMembers)
+                        .ThenInclude(m => m.User)
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Project with ID {id} not found or user {currentUser.Id} doesn't have access");
+                    return NotFound();
+                }
+
+                // Check if current user is project lead
+                var isProjectLead = project.ProjectMembers
+                    .Any(m => m.UserId == currentUser.Id && m.Role == "Project Lead");
+                    
+                var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+
+                // If user is not a project lead or admin, forbid access
+                if (!isProjectLead && !isAdmin)
+                {
+                    return Forbid();
+                }
+
+                var viewModel = new ProjectMemberManagementViewModel
+                {
+                    ProjectId = project.Id,
+                    ProjectName = project.Name,
+                    IsCurrentUserAdmin = isAdmin,
+                    Members = project.ProjectMembers.Select(m => new MemberViewModel
+                    {
+                        UserId = m.User.Id,
+                        Name = m.User.Name,
+                        LastName = m.User.LastName,
+                        ProfilePicturePath = m.User.ProfilePicturePath ?? "/images/default/default-profile.png",
+                        Role = m.Role
+                    }).ToList()
+                };
+
+                _logger.LogInformation($"Successfully built view model for managing members of project {project.Name}");
+
+                // Return partial view for AJAX requests, full view otherwise
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return PartialView("_ManageMembersModalContent", viewModel);
+                }
+
+                return View("ManageMembers", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading members management for project with ID {id}");
+                return StatusCode(500, $"An error occurred while loading the members: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}/AllActivities")]
+        public async Task<IActionResult> GetAllActivities(int id, int limit = 100)
+        {
+            try
+            {
+                _logger.LogInformation($"All activities requested for project ID: {id}");
+                
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("No current user found");
+                    return Unauthorized();
+                }
+
+                _logger.LogInformation($"User {currentUser.Id} requesting activities for project {id}");
+
+                // Check if project exists and user has access
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Project with ID {id} not found or user {currentUser.Id} doesn't have access");
+                    return NotFound();
+                }
+
+                _logger.LogInformation($"Project {id} found, fetching activities");
+
+                // Get all activities with error handling
+                try
+                {
+                    // Do a basic count first to see if there are any activities at all
+                    var basicCount = await _context.ActivityLogs.CountAsync();
+                    _logger.LogInformation($"Total activity logs in database: {basicCount}");
+                    
+                    var projectActivityCount = await _context.ActivityLogs
+                        .Where(a => a.ProjectId == id)
+                        .CountAsync();
+                    _logger.LogInformation($"Activity logs for project {id}: {projectActivityCount}");
+                                        
+                    // Now try to fetch activities again
+                    var activities = await _context.ActivityLogs
+                        .Include(a => a.User)
+                        .Where(a => a.ProjectId == id)
+                        .OrderByDescending(a => a.Timestamp)
+                        .Take(limit)
+                        .ToListAsync();
+                    
+                    _logger.LogInformation($"Retrieved {activities.Count} activities after check");
+                    
+                    // Debug print the first few activities if any
+                    if (activities.Any())
+                    {
+                        foreach (var activity in activities.Take(3))
+                        {
+                            _logger.LogInformation($"Activity: {activity.Id}, Action: {activity.Action}, User: {activity.UserId}, Time: {activity.Timestamp}");
+                        }
+                    }
+                    
+                    var viewModels = activities.Select(a => new ActivityViewModel
+                    {
+                        Type = a.Type ?? string.Empty,
+                        UserId = a.UserId ?? string.Empty,
+                        UserName = a.User != null ? $"{a.User.Name} {a.User.LastName}" : "Unknown User",
+                        UserAvatar = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png",
+                        TimeAgo = GetTimeAgo(a.Timestamp),
+                        Description = a.Action ?? string.Empty,
+                        TargetType = a.TargetType ?? string.Empty,
+                        TargetId = a.TargetId ?? string.Empty,
+                        TargetName = a.TargetName ?? string.Empty
+                    }).ToList();
+                    
+                    _logger.LogInformation($"Created {viewModels.Count} view models");
+                    
+                    // Check if after mapping we have view models
+                    if (!viewModels.Any())
+                    {
+                        _logger.LogWarning("No view models created despite having activities");
+                    }
+                    
+                    // Return partial view for AJAX requests, full view otherwise
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return PartialView("_AllActivitiesContent", viewModels);
+                    }
+
+                    return View("_AllActivitiesContent", viewModels);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error processing all activities for project {id}");
+                    // Return an empty list rather than error - this is more user-friendly
+                    return PartialView("_AllActivitiesContent", new List<ActivityViewModel>());
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Unhandled exception in GetAllActivities for project {id}");
+                return StatusCode(500, $"An error occurred while loading activities: {ex.Message}");
+            }
+        }
+
+        [HttpGet("GetAllActivitiesModal")]
+        public IActionResult GetAllActivitiesModal()
+        {
+            return PartialView("_AllActivitiesModal");
+        }
+
     }
 }

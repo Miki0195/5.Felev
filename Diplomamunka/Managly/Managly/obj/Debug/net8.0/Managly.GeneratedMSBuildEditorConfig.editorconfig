@@ -82,6 +82,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FkZE1lbWJlcnNNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_AllActivitiesContent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FsbEFjdGl2aXRpZXNDb250ZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_AllActivitiesModal.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FsbEFjdGl2aXRpZXNNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -108,6 +112,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ManageMembersModal.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX01hbmFnZU1lbWJlcnNNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ManageMembersModalContent.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX01hbmFnZU1lbWJlcnNNb2RhbENvbnRlbnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ProjectDetails.cshtml]
