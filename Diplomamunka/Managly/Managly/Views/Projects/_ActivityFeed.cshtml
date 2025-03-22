@@ -1,15 +1,132 @@
+@model List<ActivityViewModel>
+
 <div class="activity-feed">
     <div class="activity-feed-header">
-        <h4>
-            <i class="bi bi-activity"></i> Activity Feed
-        </h4>
-    </div>
-    <div class="activity-feed-content" id="activityFeedContent">
-        <div class="text-center my-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading activity...</p>
+        <div class="d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-activity"></i> Recent Activity</h5>
+            @*<div class="activity-feed-actions">
+                <button class="btn btn-sm btn-outline-secondary" id="refreshActivityBtn" title="Refresh activity">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>*@
         </div>
     </div>
-</div> 
+    <div class="activity-feed-content">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="activity-empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <p>No activity recorded yet</p>
+                <small>Actions on this project will appear here</small>
+            </div>
+        }
+        else
+        {
+            <div class="activity-timeline">
+                @foreach (var activity in Model)
+                {
+                    <div class="activity-item">
+                        <div class="activity-timeline-connector">
+                            <div class="activity-timeline-dot @GetActivityTypeClass(activity.Type, activity.TargetType)"></div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-user">
+                                <img src="@(activity.UserAvatar ?? "/images/default/default-profile.png")" 
+                                     alt="@activity.UserName" 
+                                     class="activity-avatar"
+                                     onerror="this.onerror=null; this.src='/images/default/default-profile.png'">
+                                <div class="activity-user-info">
+                                    <span class="activity-username">@activity.UserName</span>
+                                    <span class="activity-time" title="@activity.TimeAgo">@activity.TimeAgo</span>
+                                </div>
+                            </div>
+                            <div class="activity-details">
+                                <div class="activity-message">
+                                    @activity.Description
+                                    @if (!string.IsNullOrEmpty(activity.TargetName))
+                                    {
+                                        <span class="activity-target">@activity.TargetName</span>
+                                    }
+                                </div>
+                                <div class="activity-icon-badge @GetActivityTypeClass(activity.Type, activity.TargetType)">
+                                    <i class="bi @GetActivityIcon(activity.Type, activity.TargetType)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (Model.Count > 4)
+            {
+                <div class="view-all-activities">
+                    <button type="button" class="btn btn-link" id="viewAllActivitiesBtn">
+                        <i class="bi bi-list"></i> View all activities
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    string GetActivityTypeClass(string type, string targetType)
+    {
+        if (!string.IsNullOrEmpty(type))
+        {
+            return type.ToLower() switch
+            {
+                "task_created" => "activity-task-created",
+                "task_assigned" => "activity-task-assigned",
+                "task_completed" => "activity-task-completed",
+                "task_updated" => "activity-task-updated",
+                "member_joined" => "activity-member-joined",
+                "project_created" => "activity-project-created",
+                "project_updated" => "activity-project-updated",
+                _ => "activity-default"
+            };
+        }
+        else if (!string.IsNullOrEmpty(targetType))
+        {
+            return targetType.ToLower() switch
+            {
+                "task" => "activity-task-updated",
+                "project" => "activity-project-updated",
+                "member" => "activity-member-joined",
+                _ => "activity-default"
+            };
+        }
+        return "activity-default";
+    }
+
+    string GetActivityIcon(string type, string targetType)
+    {
+        if (!string.IsNullOrEmpty(type))
+        {
+            return type.ToLower() switch
+            {
+                "task_created" => "bi-plus-circle",
+                "task_assigned" => "bi-person-check",
+                "task_completed" => "bi-check-circle",
+                "task_updated" => "bi-pencil",
+                "member_joined" => "bi-person-plus",
+                "project_created" => "bi-folder-plus",
+                "project_updated" => "bi-pencil-square",
+                _ => "bi-info-circle"
+            };
+        }
+        else if (!string.IsNullOrEmpty(targetType))
+        {
+            return targetType.ToLower() switch
+            {
+                "task" => "bi-list-check",
+                "project" => "bi-folder-symlink",
+                "member" => "bi-people",
+                _ => "bi-info-circle"
+            };
+        }
+        return "bi-info-circle";
+    }
+}

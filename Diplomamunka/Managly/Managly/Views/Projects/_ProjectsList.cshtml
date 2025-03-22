@@ -1,0 +1,46 @@
+﻿@model List<Managly.Models.Project>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state text-center p-4">
+        <i class="fas fa-folder-open fs-2 text-muted mb-3"></i>
+        <p class="mb-0">No projects found</p>
+    </div>
+}
+else
+{
+    @foreach (var project in Model)
+    {
+        var progressPercent = project.TotalTasks > 0
+            ? Math.Round((double)project.CompletedTasks / project.TotalTasks * 100)
+            : 0;
+
+        <div class="project-card"
+             data-project-id="@project.Id"
+             data-status="@project.Status.ToLower()">
+            <div class="project-card-header">
+                <h5 class="project-card-title">@project.Name</h5>
+                <div class="project-card-badges">
+                    <span class="badge status-@project.Status.ToLower().Replace(" ", "")">@project.Status</span>
+                    <span class="badge priority-@project.Priority.ToLower()">@project.Priority</span>
+                </div>
+            </div>
+            <div class="project-card-details">
+                <div class="project-card-detail">
+                    <span class="detail-label">Start:</span>
+                    <span class="detail-value">@project.StartDate.ToShortDateString()</span>
+                </div>
+                <div class="project-card-detail">
+                    <span class="detail-label">Deadline:</span>
+                    <span class="detail-value">@(project.Deadline.HasValue ? project.Deadline.Value.ToShortDateString() : "No deadline")</span>
+                </div>
+            </div>
+            <div class="project-card-progress">
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: @progressPercent%"></div>
+                </div>
+                <span class="progress-text">@progressPercent% Complete</span>
+            </div>
+        </div>
+    }
+}

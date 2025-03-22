@@ -26,21 +26,6 @@
     <PackageReference Include="SendGrid" Version="9.29.3" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Data\" />
-    <None Remove="Views\Account\" />
-    <None Remove="Views\Admin\" />
-    <None Remove="Services\" />
-    <None Remove="Authorization\" />
-    <None Remove="Helpers\" />
-    <None Remove="Views\Schedule\" />
-    <None Remove="Hubs\" />
-    <None Remove="Views\Chat\" />
-    <None Remove="Views\ClockIn\" />
-    <None Remove="Views\VideoConference\" />
-    <None Remove="Controllers\Api\" />
-    <None Remove="Models\DTOs\Schedule\" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="wwwroot\css\Home\" />
     <Folder Include="Views\Account\" />
@@ -69,29 +54,15 @@
     <Folder Include="Models\DTOs\Schedule\" />
     <Folder Include="wwwroot\js\Admin\" />
     <Folder Include="wwwroot\js\Projects\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Remove="wwwroot\css\Home\" />
-    <Content Remove="wwwroot\css\Account\" />
-    <Content Remove="wwwroot\js\Account\" />
-    <Content Remove="wwwroot\uploads\" />
-    <Content Remove="wwwroot\images\" />
-    <Content Remove="wwwroot\images\default\" />
-    <Content Remove="Views\Schedule\ManageSchedule.cshtml" />
-    <Content Remove="wwwroot\css\Schedule\" />
-    <Content Remove="wwwroot\css\Admin\" />
-    <Content Remove="wwwroot\js\Chat\" />
-    <Content Remove="wwwroot\css\Chat\" />
-    <Content Remove="wwwroot\css\ClockIn\" />
-    <Content Remove="wwwroot\css\VideoConference\" />
-    <Content Remove="wwwroot\js\Schedule\" />
-    <Content Remove="wwwroot\js\Admin\" />
-    <Content Remove="wwwroot\js\Projects\" />
+    <Folder Include="Models\DTOs\Projects\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Models\DTOs\Projects\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Schedule\namespace Managly.Models&#xA;{&#xA;    public class ScheduleEvent&#xA;    {&#xA;        public string Title { get%3B set%3B }&#xA;        public string Start { get%3B set%3B }&#xA;        public string WorkerId { get%3B set%3B }&#xA;    }&#xA;}&#xA;Manag">

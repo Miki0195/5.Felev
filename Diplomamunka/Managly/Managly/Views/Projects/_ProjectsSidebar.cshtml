@@ -1,38 +1,46 @@
+<!-- Projects Sidebar -->
 <div class="projects-sidebar">
+    <!-- Sidebar Header -->
     <div class="sidebar-header">
         <h3>Projects</h3>
         @if (ViewBag.IsAdmin)
         {
-            <button id="btn-create-project" class="btn btn-primary btn-create-project">
-                <i class="fas fa-plus"></i> New Project
+            <button id="btn-create-project" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus"></i> New Project
             </button>
         }
     </div>
 
+    <!-- Search Bar -->
     <div class="sidebar-search">
         <div class="input-group">
             <span class="input-group-text">
-                <i class="fas fa-search"></i>
+                <i class="bi bi-search"></i>
             </span>
-            <input type="text" id="project-search" class="form-control" placeholder="Search projects...">
+            <input type="text" class="form-control" placeholder="Search projects..." id="project-search-input">
         </div>
     </div>
 
+    <!-- Filter Tabs -->
     <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">All</button>
         <button class="filter-tab" data-filter="in progress">In Progress</button>
-        <button class="filter-tab" data-filter="completed">Completed</button>
         <button class="filter-tab" data-filter="not started">Not Started</button>
+        <button class="filter-tab" data-filter="completed">Completed</button>
     </div>
 
+    <!-- Projects Container -->
     <div class="projects-container-list">
+        <!-- Single unified projects list -->
         <div class="projects-section">
             <div class="section-header">
-                <h4>Active Projects</h4>
-                <span class="badge bg-primary" id="active-projects-count">@ViewBag.ActiveProjectsCount</span>
+                @*<h4>Projects <span class="badge bg-secondary" id="projects-count">0</span></h4>*@
+                <h4>Projects</h4>
             </div>
-            <div id="projects-list" class="projects-cards-container">
-                <!-- Projects will be loaded here dynamically -->
+            
+            <!-- Projects cards container -->
+            <div class="projects-cards-container" id="projects-list">
+                <!-- Loading state -->
                 <div class="loading-state">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -40,15 +48,13 @@
                     <p>Loading projects...</p>
                 </div>
             </div>
-        </div>
-
-        <div class="projects-section">
-            <div class="section-header">
-                <h4>Archived Projects</h4>
-                <span class="badge bg-secondary" id="archived-projects-count">@ViewBag.ArchivedProjectsCount</span>
-            </div>
-            <div id="archived-projects-list" class="projects-cards-container">
-                <!-- Archived projects will be loaded here dynamically -->
+            
+            <!-- Empty state -->
+            <div class="empty-state d-none" id="projects-empty-state">
+                <p class="text-muted text-center my-4">
+                    <i class="bi bi-folder-x me-2"></i>
+                    No projects found
+                </p>
             </div>
         </div>
     </div>

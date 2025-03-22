@@ -9,16 +9,17 @@
 
     <div class="projects-content" id="projectsContent">
         <div class="welcome-message">
-            <h2>Welcome to Projects</h2>
-            <p>Select a project from the sidebar or create a new one to get started.</p>
+            <i class="bi bi-folder-symlink display-1 mb-3"></i>
+            <h3>Welcome to Projects Management</h3>
+            <p class="text-muted">Select a project from the sidebar to view its details</p>
         </div>
     </div>
 </div>
 
-@if (ViewBag.IsAdmin)
+@*@if (ViewBag.IsAdmin)
 {
     @await Html.PartialAsync("_CreateProjectModal")
-}
+}*@
 
 @await Html.PartialAsync("_TaskDetailsModal")
 @await Html.PartialAsync("_CreateTaskModal")

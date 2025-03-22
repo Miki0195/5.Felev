@@ -1,32 +1,33 @@
-<div class="modal fade" id="restoreProjectModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="restoreProjectModal" tabindex="-1" aria-labelledby="restoreProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Restore Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="restoreProjectModalLabel">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restore Project
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>You're about to restore this project to active status. Please provide a new deadline and update the project status.</p>
-                
                 <form id="restoreProjectForm">
-                    <input type="hidden" id="restoreProjectId">
+                    <input type="hidden" id="restoreProjectId" name="projectId">
                     
                     <div class="mb-3">
-                        <label class="form-label">New Deadline</label>
-                        <input type="date" class="form-control" id="restoreProjectDeadline" required>
+                        <label for="restoreProjectDeadline" class="form-label">New Deadline</label>
+                        <input type="date" class="form-control" id="restoreProjectDeadline" name="deadline" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" id="restoreProjectStatus">
-                            <option value="In Progress" selected>In Progress</option>
+                        <label for="restoreProjectStatus" class="form-label">Status</label>
+                        <select class="form-select" id="restoreProjectStatus" name="status" required>
                             <option value="Not Started">Not Started</option>
+                            <option value="In Progress" selected>In Progress</option>
+                            <option value="On Hold">On Hold</option>
                         </select>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Priority</label>
-                        <select class="form-select" id="restoreProjectPriority">
+                        <label for="restoreProjectPriority" class="form-label">Priority</label>
+                        <select class="form-select" id="restoreProjectPriority" name="priority" required>
                             <option value="Low">Low</option>
                             <option value="Medium" selected>Medium</option>
                             <option value="High">High</option>
@@ -36,7 +37,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="restoreProject()">Restore Project</button>
+                <button type="button" class="btn btn-success" id="restoreProjectBtn">Restore Project</button>
             </div>
         </div>
     </div>

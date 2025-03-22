@@ -1,0 +1,40 @@
+@model Managly.Models.TaskViewModel
+@{
+    bool isAssignedToMe = Model.AssignedUsers.Any(u => u.Id == ViewBag.CurrentUserId);
+    bool isDone = Model.Status == "Completed";
+}
+
+<div class="task-card @Model.Priority.ToLower() @(isDone ? "completed" : "")"
+     data-task-id="@Model.Id" onclick="showTaskDetails(@Model.Id)">
+    <div class="task-header">
+        <h5 class="task-title">@Model.Title</h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge task-priority @Model.Priority.ToLower()">@Model.Priority</span>
+            @if (isAssignedToMe)
+            {
+                <div class="form-check form-switch" onclick="event.stopPropagation()">
+                    <input class="form-check-input" type="checkbox"
+                           @(isDone ? "checked" : "")
+                           onclick="updateTaskStatus(@Model.Id, @ViewBag.ProjectId, '@(isDone ? "Pending" : "Completed")', event)">
+                </div>
+            }
+        </div>
+    </div>
+    <p class="task-description">@(string.IsNullOrEmpty(Model.Description) ? "No description" : Model.Description)</p>
+    <div class="task-meta">
+        <div class="assigned-users">
+            <span class="assigned-label">Assigned to:</span>
+            <div class="assigned-users-list">
+                @foreach (var user in Model.AssignedUsers)
+                {
+                    <div class="assigned-user">
+                        <img src="@user.ProfilePicturePath" alt="@user.Name" class="user-avatar"
+                             onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                        <span class="user-name">@user.Name @user.LastName</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <span>Due: @Model.FormattedDueDate</span>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+@model List<Managly.Models.TaskViewModel>
+
+@if (Model.Any())
+{
+    @foreach (var task in Model)
+    {
+        <partial name="_TaskCard" model="@task" />
+    }
+}
+else
+{
+    <div class="no-tasks-message">
+        <i class="bi bi-info-circle"></i> No tasks found. Create a new task to get started.
+    </div>
+}

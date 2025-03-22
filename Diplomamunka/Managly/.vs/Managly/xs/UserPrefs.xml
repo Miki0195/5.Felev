@@ -1,136 +1,57 @@
 ﻿<Properties StartupConfiguration="{E04E5547-FD09-490D-B102-55B6442A62E8}|https">
-  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Views/Account/AccountDeleted.cshtml">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <Debugger.DebugSourceFolders />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/wwwroot/js/Projects/Index.js">
     <Files>
-      <File FileName="Managly/Models/User.cs" />
-      <File FileName="Managly/Models/Company.cs" />
-      <File FileName="Managly/Models/Schedule.cs" />
-      <File FileName="Managly/Models/Message.cs" />
-      <File FileName="Managly/Models/Attendance.cs" Line="1" Column="1" />
-      <File FileName="Managly/Models/Leave.cs" />
-      <File FileName="Managly/Data/ApplicationDbContext.cs" />
-      <File FileName="Managly/appsettings.json" />
-      <File FileName="Managly/Program.cs" />
+      <File FileName="Managly/wwwroot/css/Projects/Index.css" Line="273" Column="31" />
+      <File FileName="Managly/Controllers/Api/ProjectsApiController.cs" Line="277" Column="35" />
+      <File FileName="Managly/Models/Project.cs" Line="89" Column="21" />
       <File FileName="Managly/Managly.csproj" />
-      <File FileName="Managly/Controllers/HomeController.cs" />
-      <File FileName="Managly/Views/_ViewImports.cshtml" />
-      <File FileName="Managly/Views/_ViewStart.cshtml" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml.css" />
-      <File FileName="Managly/Views/Shared/_Layout.cshtml" />
-      <File FileName="Managly/Views/Home/Index.cshtml" />
-      <File FileName="Managly/Models/LicenseKey.cs" />
-      <File FileName="Managly/Views/Home/Login.cshtml" />
-      <File FileName="Managly/wwwroot/css/Home/Login.css" />
-      <File FileName="Managly/wwwroot/css/site.css" Line="1" Column="1" />
-      <File FileName="Managly/Models/Login.cs" />
-      <File FileName="Managly/Views/Home/Register.cshtml" />
-      <File FileName="Managly/Models/Register.cs" />
-      <File FileName="Managly/wwwroot/css/Home/Register.css" />
-      <File FileName="Managly/Models/ErrorViewModel.cs" />
-      <File FileName="Managly/Migrations/ApplicationDbContextModelSnapshot.cs" />
-      <File FileName="Managly/Controllers/AccountController.cs" />
-      <File FileName="Managly/Views/Account/ChangePassword.cshtml" />
-      <File FileName="Managly/Views/Admin/CreateProfile.cshtml" />
-      <File FileName="Managly/Models/CreateProfile.cs" />
-      <File FileName="Managly/Models/ChangePassword.cs" />
-      <File FileName="Managly/Properties/launchSettings.json" />
-      <File FileName="Managly/Views/Home/Privacy.cshtml" />
-      <File FileName="Managly/wwwroot/css/Account/ChangePassword.css" />
-      <File FileName="Managly/Services/EmailService.cs" />
-      <File FileName="Managly/Controllers/AdminController.cs" />
-      <File FileName="Managly/Authorization/PreGeneratedPasswordRequirement.cs" />
-      <File FileName="Managly/Authorization/PreGeneratedPasswordHandler.cs" />
-      <File FileName="Managly/Views/Account/AccessDenied.cshtml" />
-      <File FileName="Managly/Models/UserManagement.cs" />
-      <File FileName="Managly/Views/Admin/UserManagement.cshtml" />
-      <File FileName="Managly/wwwroot/css/Account/AccessDenied.css" />
-      <File FileName="Managly/Views/Account/AccountDeleted.cshtml" Line="27" Column="6" />
-      <File FileName="Managly/wwwroot/js/site.js" />
-      <File FileName="Managly/wwwroot/js/Account/PasswordVisibility.js" />
-      <File FileName="Managly/Models/UserProfile.cs" />
-      <File FileName="Managly/Views/Account/Profile.cshtml" />
-      <File FileName="Managly/Migrations/20250129192513_DatabaseSync.cs" />
-      <File FileName="Managly/Helpers/CountryCallingCodes.cs" />
-      <File FileName="Managly/wwwroot/css/Account/Profile.css" />
-      <File FileName="Managly/Controllers/ScheduleController.cs" Line="330" Column="1" />
-      <File FileName="Managly/Models/ScheduleDTO.cs" Line="2" Column="39" />
-      <File FileName="Managly/Views/Schedule/Manage.cshtml" Line="8" Column="1" />
-      <File FileName="Managly/Models/ScheduleUpdateDTO.cs" Line="6" Column="46" />
-      <File FileName="Managly/Views/Schedule/ViewSchedule.cshtml" />
-      <File FileName="Managly/wwwroot/css/Schedule/Manage.css" Line="769" Column="27" />
-      <File FileName="Managly/Models/LeaveUpdateDTO.cs" Line="1" Column="1" />
-      <File FileName="Managly/Views/Schedule/MergedSchedule.cshtml" />
-      <File FileName="Managly/wwwroot/css/Admin/UserManagement.css" />
-      <File FileName="Managly/Models/RoleUpdateViewModel.cs" />
-      <File FileName="Managly/Hubs/ChatHub.cs" />
-      <File FileName="Managly/Controllers/ChatController.cs" />
-      <File FileName="Managly/Views/Chat/Index.cshtml" />
-      <File FileName="Managly/wwwroot/js/Chat/chat.js" />
-      <File FileName="Managly/wwwroot/css/Chat/Index.css" />
-      <File FileName="Managly/Models/Notification.cs" />
-      <File FileName="Managly/Migrations/20250204181520_AddNotificationToDatabase.cs" />
-      <File FileName="Managly/Controllers/NotificationController.cs" />
-      <File FileName="Managly/Migrations/20250204231636_DatabaseCorrection.cs" />
-      <File FileName="Managly/Migrations/20250204232807_DatabaseUpdated.cs" />
-      <File FileName="Managly/Models/Tasks.cs" />
-      <File FileName="Managly/Controllers/ClockInController.cs" />
-      <File FileName="Managly/Views/ClockIn/Index.cshtml" />
-      <File FileName="Managly/wwwroot/css/ClockIn/Index.css" />
-      <File FileName="Managly/Controllers/VideoConferenceController.cs" />
-      <File FileName="Managly/Views/VideoConference/Index.cshtml" />
-      <File FileName="Managly/Models/VideoCallInvitation.cs" />
-      <File FileName="Managly/Hubs/VideoCallHub.cs" />
-      <File FileName="Managly/Views/Shared/_ValidationScriptsPartial.cshtml" />
-      <File FileName="Managly/Models/VideoConference.cs" />
-      <File FileName="Managly/Models/Project.cs" />
-      <File FileName="Managly/Controllers/ProjectsController.cs" />
-      <File FileName="Managly/Views/Projects/Index.cshtml" />
-      <File FileName="Managly/wwwroot/css/Projects/Index.css" />
-      <File FileName="Managly/Controllers/Api/ProjectsApiController.cs" />
-      <File FileName="Managly/Models/TaskAssignment.cs" />
-      <File FileName="Managly/Controllers/ReportsController.cs" />
-      <File FileName="Managly/Views/Reports/Index.cshtml" />
-      <File FileName="Managly/wwwroot/css/Reports/Index.css" />
-      <File FileName="Managly/wwwroot/js/Reports/Index.js" />
-      <File FileName="Managly/appsettings.Development.json" />
-      <File FileName="Managly/wwwroot/css/Admin/CreateProfile.css" />
-      <File FileName="Managly/Models/GroupChat.cs" />
-      <File FileName="Managly/Models/GroupMember.cs" />
-      <File FileName="Managly/Models/GroupMessage.cs" />
-      <File FileName="Managly/Models/CreateGroupDto.cs" />
-      <File FileName="Managly/Models/GroupMessageRead.cs" />
-      <File FileName="Managly/Models/DTOs/CreateGroupDto.cs" Line="1" Column="1" />
-      <File FileName="Managly/Models/DTOs/GroupMessageDto.cs" Line="1" Column="1" />
-      <File FileName="Managly/Views/Shared/Error.cshtml" />
-      <File FileName="Managly/wwwroot/css/Home/dashboard.css" />
-      <File FileName="Managly/Controllers/DashboardController.cs" />
-      <File FileName="Managly/wwwroot/css/VideoConference/Index.css" />
-      <File FileName="Managly/wwwroot/js/Schedule/Manage.js" />
-      <File FileName="Managly/wwwroot/js/Schedule/MergedSchedule.js" />
-      <File FileName="Managly/wwwroot/js/Schedule/ViewSchedule.js" Line="637" Column="36" />
-      <File FileName="Managly/Models/DTOs/Schedule/AvailabilityCheckDTO.cs" Line="9" Column="6" />
-      <File FileName="Managly/Models/DTOs/Schedule/LeaveRequestDTO.cs" Line="14" Column="1" />
+      <File FileName="Managly/Controllers/ProjectsController.cs" Line="408" Column="10" />
+      <File FileName="Managly/wwwroot/js/Projects/Index.js" Line="613" Column="2" />
+      <File FileName="Managly/Views/Projects/Index.cshtml" Line="21" Column="4" />
+      <File FileName="Managly/Views/Projects/_ProjectsSidebar.cshtml" Line="38" Column="29" />
+      <File FileName="Managly/Views/Projects/_ProjectsList.cshtml" Line="35" Column="118" />
+      <File FileName="Managly/Views/Projects/_CreateProjectModal.cshtml" Line="31" Column="30" />
+      <File FileName="Managly/Models/DTOs/Projects/ProjectCreateDto.cs" Line="21" Column="45" />
+      <File FileName="Managly/appsettings.json" Line="10" Column="93" />
+      <File FileName="Managly/Models/Tasks.cs" Line="1" Column="1" />
+      <File FileName="Managly/Models/TaskAssignment.cs" Line="1" Column="1" />
+      <File FileName="Managly/Models/User.cs" Line="1" Column="1" />
+      <File FileName="Managly/Models/ProjectViewModels.cs" Line="49" Column="71" />
+      <File FileName="Managly/Views/Projects/_ProjectDetails.cshtml" Line="94" Column="19" />
+      <File FileName="Managly/Views/Projects/_TasksList.cshtml" Line="15" Column="2" />
+      <File FileName="Managly/Views/Projects/_TaskDetailsModal.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Views/Projects/_TaskCard.cshtml" Line="11" Column="54" />
+      <File FileName="Managly/Views/Projects/_ActivityFeed.cshtml" Line="132" Column="2" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
-          <Node name="Managly">
+          <Node name="Managly" expanded="True">
             <Node name="Managly">
-              <Node name="Models">
+              <Node name="Controllers" expanded="True">
+                <Node name="Api" expanded="True" />
+              </Node>
+              <Node name="Models" expanded="True">
                 <Node name="DTOs" expanded="True">
-                  <Node name="Schedule" expanded="True" />
+                  <Node name="Projects" expanded="True" />
                 </Node>
               </Node>
-              <Node name="Views" expanded="True">
-                <Node name="Account" expanded="True">
-                  <Node name="AccountDeleted.cshtml" selected="True" />
-                </Node>
-                <Node name="Admin" expanded="True" />
-                <Node name="Schedule" expanded="True" />
+              <Node name="Views">
+                <Node name="Projects" expanded="True" />
               </Node>
-              <Node name="wwwroot">
+              <Node name="wwwroot" expanded="True">
+                <Node name="css" expanded="True">
+                  <Node name="Projects" expanded="True" />
+                </Node>
                 <Node name="js" expanded="True">
-                  <Node name="Schedule" expanded="True" />
+                  <Node name="Projects" expanded="True">
+                    <Node name="Index.js" selected="True" />
+                  </Node>
                 </Node>
               </Node>
             </Node>
@@ -141,9 +62,5 @@
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <Debugger.DebugSourceFolders />
+  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>

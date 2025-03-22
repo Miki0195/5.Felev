@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Managly.Data;
 using Managly.Models;
+using Managly.Models.DTOs.Projects;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -40,7 +41,7 @@ namespace Managly.Controllers.Api
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                
+
                 if (currentUser == null)
                 {
                     return Unauthorized(new { success = false, message = "User not found" });
@@ -48,8 +49,8 @@ namespace Managly.Controllers.Api
 
                 var projects = await _context.Projects
                     .Where(p => p.CompanyId == currentUser.CompanyId)
-                    .Select(p => new { 
-                        id = p.Id, 
+                    .Select(p => new {
+                        id = p.Id,
                         name = p.Name,
                         description = p.Description,
                         startDate = p.StartDate,
@@ -58,7 +59,7 @@ namespace Managly.Controllers.Api
                         status = p.Status
                     })
                     .ToListAsync();
-                
+
                 return Ok(projects);
             }
             catch (Exception ex)
@@ -161,7 +162,7 @@ namespace Managly.Controllers.Api
                     return BadRequest(new { error = "User or company information not found" });
                 }
 
-                // Parse dates with specific format
+                //Parse dates with specific format
                 if (!DateTime.TryParse(projectDto.StartDate, out DateTime startDate) ||
                     !DateTime.TryParse(projectDto.Deadline, out DateTime deadline))
                 {
@@ -178,7 +179,12 @@ namespace Managly.Controllers.Api
                     Priority = projectDto.Priority,
                     CreatedById = currentUser.Id,
                     CompanyId = currentUser.CompanyId.Value,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    ProjectMembers = new List<ProjectMember>(),
+                    Tasks = new List<Tasks>(),
+                    Activities = new List<ActivityLog>(),
+                    TotalTasks = 0,
+                    CompletedTasks = 0
                 };
 
                 _context.Projects.Add(project);
@@ -276,9 +282,10 @@ namespace Managly.Controllers.Api
                 project.Status = projectDto.Status;
                 project.Priority = projectDto.Priority;
                 project.UpdatedAt = DateTime.UtcNow;
-                
+
                 // Set CompletedAt when a project is marked as completed
-                if (statusChanged && project.Status == "Completed") {
+                if (statusChanged && project.Status == "Completed")
+                {
                     project.CompletedAt = DateTime.UtcNow;
                 }
 
@@ -495,9 +502,10 @@ namespace Managly.Controllers.Api
                                 TargetId = memberId,
                                 TargetName = $"{user.Name} {user.LastName}",
                                 Timestamp = DateTime.UtcNow,
-                                AdditionalData = JsonSerializer.Serialize(new { 
-                                    memberId = memberId, 
-                                    memberName = $"{user.Name} {user.LastName}", 
+                                AdditionalData = JsonSerializer.Serialize(new
+                                {
+                                    memberId = memberId,
+                                    memberName = $"{user.Name} {user.LastName}",
                                     role = "Member",
                                     addedBy = $"{currentUser.Name} {currentUser.LastName}",
                                     addedById = currentUser.Id
@@ -559,10 +567,10 @@ namespace Managly.Controllers.Api
 
                 // Store the old role for logging
                 string oldRole = projectMember.Role;
-                
+
                 // Update the role
                 projectMember.Role = roleDto.Role;
-                
+
                 // Log role change
                 var activity = new ActivityLog
                 {
@@ -573,9 +581,10 @@ namespace Managly.Controllers.Api
                     TargetId = userId,
                     TargetName = $"{projectMember.User.Name} {projectMember.User.LastName}",
                     Timestamp = DateTime.UtcNow,
-                    AdditionalData = JsonSerializer.Serialize(new { 
-                        memberId = userId, 
-                        memberName = $"{projectMember.User.Name} {projectMember.User.LastName}", 
+                    AdditionalData = JsonSerializer.Serialize(new
+                    {
+                        memberId = userId,
+                        memberName = $"{projectMember.User.Name} {projectMember.User.LastName}",
                         oldRole = oldRole,
                         newRole = roleDto.Role,
                         changedBy = $"{currentUser.Name} {currentUser.LastName}",
@@ -583,7 +592,7 @@ namespace Managly.Controllers.Api
                     })
                 };
                 _context.ActivityLogs.Add(activity);
-                
+
                 // Add notification for the user
                 var notification = new Notification
                 {
@@ -637,7 +646,7 @@ namespace Managly.Controllers.Api
                 // Store member details for logging
                 string memberName = $"{projectMember.User.Name} {projectMember.User.LastName}";
                 string memberRole = projectMember.Role;
-                
+
                 // Log member removal
                 var activity = new ActivityLog
                 {
@@ -648,9 +657,10 @@ namespace Managly.Controllers.Api
                     TargetId = userId,
                     TargetName = memberName,
                     Timestamp = DateTime.UtcNow,
-                    AdditionalData = JsonSerializer.Serialize(new { 
-                        memberId = userId, 
-                        memberName = memberName, 
+                    AdditionalData = JsonSerializer.Serialize(new
+                    {
+                        memberId = userId,
+                        memberName = memberName,
                         role = memberRole,
                         removedBy = $"{currentUser.Name} {currentUser.LastName}",
                         removedById = currentUser.Id,
@@ -658,7 +668,7 @@ namespace Managly.Controllers.Api
                     })
                 };
                 _context.ActivityLogs.Add(activity);
-                
+
                 // Add notification for the user
                 var notification = new Notification
                 {
@@ -671,7 +681,7 @@ namespace Managly.Controllers.Api
 
                 // Remove the member
                 _context.ProjectMembers.Remove(projectMember);
-                
+
                 await _context.SaveChangesAsync();
 
                 return NoContent();
@@ -682,27 +692,7 @@ namespace Managly.Controllers.Api
             }
         }
 
-        public class ProjectCreateDto
-        {
-            [Required]
-            public string Name { get; set; }
-
-            public string Description { get; set; }
-
-            [Required]
-            public string StartDate { get; set; }
-
-            [Required]
-            public string Deadline { get; set; }
-
-            [Required]
-            public string Status { get; set; }
-
-            [Required]
-            public string Priority { get; set; }
-
-            public List<string> TeamMemberIds { get; set; } = new List<string>();
-        }
+        
 
         public class ProjectUpdateDto
         {
@@ -774,7 +764,7 @@ namespace Managly.Controllers.Api
                 // Get assigned user details
                 var assignedUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.Id == taskDto.AssignedToId);
-                
+
                 if (assignedUser == null)
                     return BadRequest(new { error = "Assigned user not found" });
 
@@ -822,7 +812,8 @@ namespace Managly.Controllers.Api
                     TargetId = task.Id.ToString(),
                     TargetName = task.TaskTitle,
                     Timestamp = DateTime.UtcNow,
-                    AdditionalData = JsonSerializer.Serialize(new { 
+                    AdditionalData = JsonSerializer.Serialize(new
+                    {
                         taskId = task.Id,
                         taskTitle = task.TaskTitle,
                         description = task.Description,
@@ -836,7 +827,7 @@ namespace Managly.Controllers.Api
                     })
                 };
                 _context.ActivityLogs.Add(createActivity);
-                
+
                 // Log task assignment activity with detailed information
                 var assignActivity = new ActivityLog
                 {
@@ -847,7 +838,8 @@ namespace Managly.Controllers.Api
                     TargetId = task.Id.ToString(),
                     TargetName = task.TaskTitle,
                     Timestamp = DateTime.UtcNow,
-                    AdditionalData = JsonSerializer.Serialize(new {
+                    AdditionalData = JsonSerializer.Serialize(new
+                    {
                         taskId = task.Id,
                         taskTitle = task.TaskTitle,
                         assignedTo = assignedUser.Id,
@@ -1059,9 +1051,9 @@ namespace Managly.Controllers.Api
                 if (dueDateChanged) changes.Add("dueDate", new { oldValue = oldDueDate.ToString("yyyy-MM-dd"), newValue = task.DueDate?.ToString("yyyy-MM-dd") });
                 if (priorityChanged) changes.Add("priority", new { oldValue = oldPriority, newValue = task.Priority });
                 if (statusChanged) changes.Add("status", new { oldValue = oldStatus, newValue = task.Status });
-                if (assignmentsChanged) 
+                if (assignmentsChanged)
                 {
-                    var assignmentChanges = new 
+                    var assignmentChanges = new
                     {
                         added = newAssignments,
                         removed = removedAssignments
@@ -1106,7 +1098,7 @@ namespace Managly.Controllers.Api
                 // Update task assignments
                 _context.TaskAssignments.RemoveRange(task.Assignments);
                 task.Assignments.Clear();
-                
+
                 // Get user details for logging
                 var userDetails = await _context.Users
                     .Where(u => taskDto.AssignedUserIds.Contains(u.Id) || removedAssignments.Contains(u.Id))
@@ -1135,7 +1127,7 @@ namespace Managly.Controllers.Api
                             IsRead = false
                         };
                         _context.Notifications.Add(notification);
-                        
+
                         // Log assignment activity with detailed information
                         var userName = userDetails.ContainsKey(userId) ? userDetails[userId] : "Unknown User";
                         var assignActivity = new ActivityLog
@@ -1147,7 +1139,8 @@ namespace Managly.Controllers.Api
                             TargetId = task.Id.ToString(),
                             TargetName = task.TaskTitle,
                             Timestamp = DateTime.UtcNow,
-                            AdditionalData = JsonSerializer.Serialize(new { 
+                            AdditionalData = JsonSerializer.Serialize(new
+                            {
                                 assignedTo = userId,
                                 assignedToName = userName,
                                 assignedBy = currentUser.Id,
@@ -1171,7 +1164,8 @@ namespace Managly.Controllers.Api
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
                         Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { 
+                        AdditionalData = JsonSerializer.Serialize(new
+                        {
                             removedUser = userId,
                             removedUserName = userName,
                             removedBy = currentUser.Id,
@@ -1282,7 +1276,7 @@ namespace Managly.Controllers.Api
                 if (oldStatus != "Completed" && statusDto.Status == "Completed")
                 {
                     task.Project.CompletedTasks++;
-                    
+
                     // Log task completion activity with detailed information
                     var activity = new ActivityLog
                     {
@@ -1293,7 +1287,8 @@ namespace Managly.Controllers.Api
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
                         Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { 
+                        AdditionalData = JsonSerializer.Serialize(new
+                        {
                             taskId = task.Id,
                             taskTitle = task.TaskTitle,
                             oldStatus = oldStatus,
@@ -1308,7 +1303,7 @@ namespace Managly.Controllers.Api
                 else if (oldStatus == "Completed" && statusDto.Status != "Completed")
                 {
                     task.Project.CompletedTasks--;
-                    
+
                     // Log task status update with detailed information
                     var activity = new ActivityLog
                     {
@@ -1319,7 +1314,8 @@ namespace Managly.Controllers.Api
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
                         Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { 
+                        AdditionalData = JsonSerializer.Serialize(new
+                        {
                             taskId = task.Id,
                             taskTitle = task.TaskTitle,
                             oldStatus = oldStatus,
@@ -1331,7 +1327,8 @@ namespace Managly.Controllers.Api
                     };
                     _context.ActivityLogs.Add(activity);
                 }
-                else if (oldStatus != statusDto.Status) {
+                else if (oldStatus != statusDto.Status)
+                {
                     // Log other status changes with detailed information
                     var activity = new ActivityLog
                     {
@@ -1342,7 +1339,8 @@ namespace Managly.Controllers.Api
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
                         Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { 
+                        AdditionalData = JsonSerializer.Serialize(new
+                        {
                             taskId = task.Id,
                             taskTitle = task.TaskTitle,
                             oldStatus = oldStatus,
@@ -1422,17 +1420,17 @@ namespace Managly.Controllers.Api
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                
+
                 if (currentUser == null)
                 {
                     return Unauthorized(new { success = false, message = "User not found" });
                 }
 
                 var projects = await _context.Projects
-                    .Where(p => p.CompanyId == currentUser.CompanyId && 
+                    .Where(p => p.CompanyId == currentUser.CompanyId &&
                               p.Status == "Completed")
-                    .Select(p => new { 
-                        id = p.Id, 
+                    .Select(p => new {
+                        id = p.Id,
                         name = p.Name,
                         description = p.Description,
                         startDate = p.StartDate,
@@ -1440,7 +1438,7 @@ namespace Managly.Controllers.Api
                         priority = p.Priority
                     })
                     .ToListAsync();
-                
+
                 return Ok(projects);
             }
             catch (Exception ex)
@@ -1455,7 +1453,7 @@ namespace Managly.Controllers.Api
             try
             {
                 var currentUser = await _userManager.GetUserAsync(User);
-                
+
                 if (currentUser == null)
                 {
                     return Unauthorized(new { success = false, message = "User not found" });
@@ -1464,12 +1462,13 @@ namespace Managly.Controllers.Api
                 var activeCount = await _context.Projects
                     .Where(p => p.CompanyId == currentUser.CompanyId && p.Status != "Completed")
                     .CountAsync();
-                    
+
                 var archivedCount = await _context.Projects
                     .Where(p => p.CompanyId == currentUser.CompanyId && p.Status == "Completed")
                     .CountAsync();
-                
-                return Ok(new { 
+
+                return Ok(new
+                {
                     active = activeCount,
                     archived = archivedCount,
                     total = activeCount + archivedCount
@@ -1497,7 +1496,7 @@ namespace Managly.Controllers.Api
                 var project = await _context.Projects
                     .Include(p => p.CreatedBy)
                     .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
-                
+
                 if (project == null)
                 {
                     return NotFound(new { success = false, message = "Project not found" });
@@ -1519,7 +1518,7 @@ namespace Managly.Controllers.Api
                     foreach (var log in activityLogs)
                     {
                         string activityType = "default";
-                        
+
                         if (log.TargetType == "Task")
                         {
                             if (log.Action.Contains("created"))
@@ -1542,8 +1541,9 @@ namespace Managly.Controllers.Api
                         {
                             activityType = "member_joined";
                         }
-                        
-                        activities.Add(new {
+
+                        activities.Add(new
+                        {
                             type = activityType,
                             userId = log.UserId,
                             userName = $"{log.User.Name} {log.User.LastName}",
@@ -1568,11 +1568,12 @@ namespace Managly.Controllers.Api
                         .OrderByDescending(t => t.AssignedDate)
                         .Take(5)
                         .ToListAsync();
-                    
+
                     foreach (var task in tasks)
                     {
                         // Task creation activity
-                        activities.Add(new {
+                        activities.Add(new
+                        {
                             type = "task_created",
                             taskId = task.Id,
                             taskTitle = task.TaskTitle,
@@ -1580,13 +1581,14 @@ namespace Managly.Controllers.Api
                             userName = $"{task.CreatedBy.Name} {task.CreatedBy.LastName}",
                             userAvatar = task.CreatedBy.ProfilePicturePath,
                             timestamp = task.AssignedDate,
-                            description = $"created task \"{task.TaskTitle}\"" 
+                            description = $"created task \"{task.TaskTitle}\""
                         });
-                        
+
                         // Task assignment activities
                         foreach (var assignment in task.Assignments)
                         {
-                            activities.Add(new {
+                            activities.Add(new
+                            {
                                 type = "task_assigned",
                                 taskId = task.Id,
                                 taskTitle = task.TaskTitle,
@@ -1601,30 +1603,32 @@ namespace Managly.Controllers.Api
                             });
                         }
                     }
-                    
+
                     // Add project member activities
                     var members = await _context.ProjectMembers
                         .Include(m => m.User)
                         .Where(m => m.ProjectId == id)
                         .ToListAsync();
-                    
+
                     foreach (var member in members)
                     {
-                        activities.Add(new {
+                        activities.Add(new
+                        {
                             type = "member_joined",
                             userId = member.UserId,
                             userName = $"{member.User.Name} {member.User.LastName}",
                             userAvatar = member.User.ProfilePicturePath,
                             role = member.Role,
                             timestamp = member.JoinedAt,
-                            description = member.Role == "Project Lead" 
-                                ? $"became Project Lead" 
+                            description = member.Role == "Project Lead"
+                                ? $"became Project Lead"
                                 : $"joined the project team"
                         });
                     }
-                    
+
                     // Add project creation activity
-                    activities.Add(new {
+                    activities.Add(new
+                    {
                         type = "project_created",
                         userId = project.CreatedById,
                         userName = $"{project.CreatedBy.Name} {project.CreatedBy.LastName}",
@@ -1633,13 +1637,13 @@ namespace Managly.Controllers.Api
                         description = $"created this project"
                     });
                 }
-                
+
                 // Sort by timestamp and take the requested number of records
                 var sortedActivities = activities
                     .OrderByDescending(a => ((dynamic)a).timestamp)
                     .Take(limit)
                     .ToList();
-                
+
                 return Ok(new { success = true, activities = sortedActivities });
             }
             catch (Exception ex)
@@ -1647,5 +1651,51 @@ namespace Managly.Controllers.Api
                 return StatusCode(500, new { success = false, message = "Error fetching project activities: " + ex.Message });
             }
         }
+
+        // ===================== OWN CODE ================ //
+        [HttpGet("sidebar")]
+        public async Task<IActionResult> GetProjectsForSidebar()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                if (currentUser == null)
+                {
+                    return Unauthorized(new { success = false, message = "User not found" });
+                }
+
+                var projects = await _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId)
+                    .Select(p => new {
+                        id = p.Id,
+                        name = p.Name,
+                        description = p.Description,
+                        startDate = p.StartDate,
+                        deadline = p.Deadline,
+                        priority = p.Priority,
+                        status = p.Status,
+                        totalTasks = p.TotalTasks,
+                        completedTasks = p.CompletedTasks
+                    })
+                    .ToListAsync();
+
+                // Sort projects on the server side
+                var sortedProjects = projects
+                    .OrderBy(p => p.status == "In Progress" ? 0 :
+                                  p.status == "Not Started" ? 1 :
+                                  p.status == "Completed" ? 2 : 3)
+                    .ToList();
+
+                return Ok(sortedProjects);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error fetching projects: " + ex.Message });
+            }
+        }
+
+
+        
     }
 }

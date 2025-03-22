@@ -5,12 +5,13 @@ using Managly.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Managly.Data;
+using Org.BouncyCastle.Asn1.Ocsp;
+using SendGrid.Helpers.Mail;
 
 namespace Managly.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
-    [ApiController]
+    [Route("[controller]")]
     public class ProjectsController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -81,31 +82,491 @@ namespace Managly.Controllers
             }
         }
 
-        //[HttpGet("RenderPartial/{partialName}")]
-        //public IActionResult RenderPartial(string partialName)
-        //{
-        //    if (string.IsNullOrEmpty(partialName))
-        //    {
-        //        return BadRequest("Partial name is required");
-        //    }
+        // ============= OWN CODE
+        [HttpGet("sidebarPartial")]
+        public async Task<IActionResult> GetSidebarPartial([FromQuery] string filter = "all", [FromQuery] string search = "")
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                if (currentUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                // Base query to get projects for the current user's company
+                var query = _context.Projects
+                    .Where(p => p.CompanyId == currentUser.CompanyId);
+
+                // Apply filter
+                if (filter != "all")
+                {
+                    switch (filter.ToLower())
+                    {
+                        case "in progress":
+                            query = query.Where(p => p.Status == "In Progress");
+                            break;
+                        case "not started":
+                            query = query.Where(p => p.Status == "Not Started");
+                            break;
+                        case "completed":
+                            query = query.Where(p => p.Status == "Completed");
+                            break;
+                            // Add other status filters as needed
+                    }
+                }
+
+                // Apply search
+                if (!string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(p => p.Name.ToLower().Contains(search.ToLower()));
+                }
+
+                // Order projects
+                var projects = await query
+                    .OrderBy(p => p.Status == "In Progress" ? 0 :
+                                  p.Status == "Not Started" ? 1 :
+                                  p.Status == "Completed" ? 2 : 3)
+                    .ToListAsync();
+
+                _logger.LogInformation($"Found {projects.Count} projects for sidebar with filter={filter}, search={search}");
+
+                // Pass the projects to a partial view
+                return PartialView("_ProjectsList", projects);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rendering projects sidebar partial");
+                return StatusCode(500, $"Error rendering sidebar: {ex.Message}");
+            }
+        }
+
+        [HttpGet("createModal")]
+        public IActionResult GetCreateProjectModal()
+        {
+            // Return the partial view
+            return PartialView("_CreateProjectModal");
+        }
+
+        [HttpGet("{id}")]
+        [HttpGet("Details")]
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                _logger.LogInformation($"Loading project details for project ID: {id}");
+
+                var project = await _context.Projects
+                    .Include(p => p.ProjectMembers)
+                        .ThenInclude(m => m.User)
+                    .Include(p => p.CreatedBy)
+                    .Include(p => p.Tasks)
+                        .ThenInclude(t => t.Assignments)
+                            .ThenInclude(a => a.User)
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Project with ID {id} not found or user {currentUser.Id} doesn't have access");
+                    return NotFound();
+                }
+
+                _logger.LogInformation($"Project {project.Name} found. Status: {project.Status}");
+
+                // Check if project is archived
+                if (project.Status == "Completed")
+                {
+                    return RedirectToAction("ArchivedDetails", new { id = project.Id });
+                }
+
+                // Check if current user is project lead
+                var isProjectLead = project.ProjectMembers
+                    .Any(m => m.UserId == currentUser.Id && m.Role == "Project Lead");
+
+                // Calculate progress percentage
+                int progressPercentage = project.TotalTasks > 0
+                    ? (int)Math.Round((double)project.CompletedTasks / project.TotalTasks * 100)
+                    : 0;
+
+                // Get recent activities
+                var activities = await _context.ActivityLogs
+                    .Include(a => a.User)
+                    .Where(a => a.ProjectId == id)
+                    .OrderByDescending(a => a.Timestamp)
+                    .Take(15)
+                    .ToListAsync();
+
+                // Create the view model
+                var viewModel = new ProjectDetailsViewModel
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    Description = project.Description ?? string.Empty,
+                    FormattedStartDate = project.StartDate.ToString("MMM dd, yyyy"),
+                    FormattedDeadline = project.Deadline?.ToString("MMM dd, yyyy") ?? "No deadline set",
+                    Status = project.Status ?? "Unknown",
+                    StatusCssClass = GetStatusCssClass(project.Status),
+                    Priority = project.Priority ?? "Medium",
+                    PriorityCssClass = GetPriorityCssClass(project.Priority),
+                    IsProjectLead = isProjectLead,
+                    TotalTasks = project.TotalTasks,
+                    CompletedTasks = project.CompletedTasks,
+                    ProgressPercentage = progressPercentage,
+                    CurrentUserId = currentUser.Id,
+
+                    TeamMembers = project.ProjectMembers?.Select(m => new ProjectMemberViewModel
+                    {
+                        UserId = m.User?.Id ?? string.Empty,
+                        Name = m.User?.Name ?? string.Empty,
+                        LastName = m.User?.LastName ?? string.Empty,
+                        Role = m.Role ?? "Member",
+                        ProfilePicturePath = m.User?.ProfilePicturePath ?? "/images/default/default-profile.png"
+                    }).ToList() ?? new List<ProjectMemberViewModel>(),
+
+                    Tasks = project.Tasks?.Select(t => new TaskViewModel
+                    {
+                        Id = t.Id,
+                        Title = t.TaskTitle ?? "Untitled Task",
+                        Description = t.Description ?? "No description",
+                        FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                        Priority = t.Priority ?? "Medium",
+                        PriorityCssClass = GetPriorityCssClass(t.Priority),
+                        Status = t.Status ?? "Not Started",
+                        StatusCssClass = GetStatusCssClass(t.Status),
+                        AssignedUsers = t.Assignments?.Select(a => new AssignedUserViewModel
+                        {
+                            Id = a.User?.Id ?? string.Empty,
+                            Name = a.User?.Name ?? string.Empty,
+                            LastName = a.User?.LastName ?? string.Empty,
+                            ProfilePicturePath = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png"
+                        }).ToList() ?? new List<AssignedUserViewModel>()
+                    }).ToList() ?? new List<TaskViewModel>(),
+
+                    Activities = activities.Select(a => new ActivityViewModel
+                    {
+                        Type = a.TargetType ?? string.Empty,
+                        UserId = a.UserId ?? string.Empty,
+                        UserName = a.User != null ? $"{a.User.Name} {a.User.LastName}" : "Unknown User",
+                        UserAvatar = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png",
+                        TimeAgo = GetTimeAgo(a.Timestamp),
+                        Description = a.Action ?? string.Empty,
+                        TargetType = a.TargetType ?? string.Empty,
+                        TargetId = a.TargetId ?? string.Empty,
+                        TargetName = a.TargetName ?? string.Empty
+                    }).ToList()
+                };
+
+                ViewBag.CurrentUserId = currentUser.Id;
+                ViewBag.ProjectId = id;
+
+                _logger.LogInformation($"Successfully built view model for project {project.Name}");
+
+                // Return partial view for AJAX requests, full view otherwise
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return PartialView("_ProjectDetails", viewModel);
+                }
+
+                return View("ProjectDetails", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading project with ID {id}");
+                return StatusCode(500, $"An error occurred while loading the project: {ex.Message}");
+            }
+        }
+        
+
+        private string GetTimeAgo(DateTime timestamp)
+        {
+            var difference = DateTime.UtcNow - timestamp;
+
+            if (difference.TotalSeconds < 60)
+                return "just now";
+            if (difference.TotalMinutes < 60)
+                return $"{(int)difference.TotalMinutes} minutes ago";
+            if (difference.TotalHours < 24)
+                return $"{(int)difference.TotalHours} hours ago";
+            if (difference.TotalDays < 7)
+                return $"{(int)difference.TotalDays} days ago";
+
+            return timestamp.ToString("MMM dd, yyyy");
+        }
+
+        // API endpoint for task filtering (to be used by client-side code)
+        [HttpGet("api/tasks/{projectId}")]
+        public async Task<IActionResult> GetFilteredTasks(int projectId, string filter = "all")
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var query = _context.Tasks
+                .Include(t => t.Assignments)
+                    .ThenInclude(a => a.User)
+                .Where(t => t.ProjectId == projectId);
+
+            // Apply filter
+            switch (filter.ToLower())
+            {
+                case "my":
+                    query = query.Where(t => t.Assignments.Any(a => a.UserId == currentUser.Id));
+                    break;
+                case "pending":
+                    query = query.Where(t => t.Status != "Completed");
+                    break;
+                case "completed":
+                    query = query.Where(t => t.Status == "Completed");
+                    break;
+            }
+
+            var tasks = await query.ToListAsync();
+
+            var taskViewModels = tasks.Select(t => new TaskViewModel
+            {
+                Id = t.Id,
+                Title = t.TaskTitle,
+                Description = t.Description ?? "No description",
+                FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                Priority = t.Priority,
+                PriorityCssClass = GetPriorityCssClass(t.Priority),
+                Status = t.Status,
+                StatusCssClass = GetStatusCssClass(t.Status),
+                AssignedUsers = t.Assignments.Select(a => new AssignedUserViewModel
+                {
+                    Id = a.User.Id,
+                    Name = a.User.Name,
+                    LastName = a.User.LastName,
+                    ProfilePicturePath = a.User.ProfilePicturePath ?? "/images/default/default-profile.png"
+                }).ToList()
+            }).ToList();
+
+            ViewBag.CurrentUserId = currentUser.Id; // This is crucial for the isAssignedToMe check
+            ViewBag.ProjectId = projectId;
+
+            return PartialView("_TasksList", taskViewModels);
+        }
+
+        [HttpGet("{id}/ActivityFeed")]
+        public async Task<IActionResult> GetActivityFeed(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            // Check if project exists and user has access
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            // Get recent activities
+            var activities = await _context.ActivityLogs
+                .Include(a => a.User)
+                .Where(a => a.ProjectId == id)
+                .OrderByDescending(a => a.Timestamp)
+                .Take(15)
+                .Select(a => new ActivityViewModel
+                {
+                    Type = a.TargetType,
+                    UserId = a.UserId,
+                    UserName = $"{a.User.Name} {a.User.LastName}",
+                    UserAvatar = a.User.ProfilePicturePath ?? "/images/default/default-profile.png",
+                    TimeAgo = GetTimeAgo(a.Timestamp),
+                    Description = a.Action,
+                    TargetType = a.TargetType,
+                    TargetId = a.TargetId,
+                    TargetName = a.TargetName
+                })
+                .ToListAsync();
+
+            return PartialView("_ActivityFeed", activities);
+        }
+
+        [HttpGet("archived/{id}")]
+        public async Task<IActionResult> ArchivedDetails(int id)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Unauthorized();
+                }
+
+                _logger.LogInformation($"Loading archived project details for project ID: {id}");
+
+                var project = await _context.Projects
+                    .Include(p => p.ProjectMembers)
+                        .ThenInclude(m => m.User)
+                    .Include(p => p.CreatedBy)
+                    .Include(p => p.Tasks)
+                        .ThenInclude(t => t.Assignments)
+                            .ThenInclude(a => a.User)
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Project with ID {id} not found or user {currentUser.Id} doesn't have access");
+                    return NotFound();
+                }
+
+                // Create the view model for archived project
+                var viewModel = new ArchivedProjectViewModel
+                {
+                    Id = project.Id,
+                    Name = project.Name ?? "Untitled Project",
+                    Description = project.Description ?? string.Empty,
+                    FormattedStartDate = project.StartDate.ToString("MMM dd, yyyy"),
+                    FormattedDeadline = project.Deadline?.ToString("MMM dd, yyyy") ?? "No deadline set",
+                    FormattedCompletionDate = project.CompletedAt?.ToString("MMM dd, yyyy") ?? project.UpdatedAt?.ToString("MMM dd, yyyy") ?? "Unknown",
+                    Priority = project.Priority ?? "Medium",
+                    PriorityCssClass = GetPriorityCssClass(project.Priority),
+                    CreatorName = project.CreatedBy != null ? $"{project.CreatedBy.Name} {project.CreatedBy.LastName}" : 
+                        (project.ProjectMembers?.FirstOrDefault(m => m.Role == "Project Lead")?.User != null ? 
+                         $"{project.ProjectMembers.First(m => m.Role == "Project Lead").User.Name} {project.ProjectMembers.First(m => m.Role == "Project Lead").User.LastName}" : 
+                         "Unknown"),
+
+                    TeamMembers = project.ProjectMembers?.Select(m => new ProjectMemberViewModel
+                    {
+                        UserId = m.User?.Id ?? string.Empty,
+                        Name = m.User?.Name ?? string.Empty,
+                        LastName = m.User?.LastName ?? string.Empty,
+                        Role = m.Role ?? "Member",
+                        ProfilePicturePath = m.User?.ProfilePicturePath ?? "/images/default/default-profile.png"
+                    }).ToList() ?? new List<ProjectMemberViewModel>(),
+
+                    Tasks = project.Tasks?.Select(t => new TaskViewModel
+                    {
+                        Id = t.Id,
+                        Title = t.TaskTitle ?? "Untitled Task",
+                        Description = t.Description ?? "No description",
+                        FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                        Priority = t.Priority ?? "Medium",
+                        PriorityCssClass = GetPriorityCssClass(t.Priority),
+                        Status = t.Status ?? "Not Started",
+                        StatusCssClass = GetStatusCssClass(t.Status),
+                        AssignedUsers = t.Assignments?.Select(a => new AssignedUserViewModel
+                        {
+                            Id = a.User?.Id ?? string.Empty,
+                            Name = a.User?.Name ?? string.Empty,
+                            LastName = a.User?.LastName ?? string.Empty,
+                            ProfilePicturePath = a.User?.ProfilePicturePath ?? "/images/default/default-profile.png"
+                        }).ToList() ?? new List<AssignedUserViewModel>()
+                    }).ToList() ?? new List<TaskViewModel>()
+                };
+
+                _logger.LogInformation($"Successfully built view model for archived project {project.Name}");
+
+                // Return partial view for AJAX requests, full view otherwise
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return PartialView("_ArchivedProjectDetails", viewModel);
+                }
+
+                return View("ArchivedProjectDetails", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading archived project with ID {id}");
+                return StatusCode(500, $"An error occurred while loading the archived project: {ex.Message}");
+            }
+        }
+
+        // Helper methods for the controller
+        private string GetStatusCssClass(string status)
+        {
+            return status?.ToLower() switch
+            {
+                "completed" => "success",
+                "active" => "primary",
+                "in progress" => "info",
+                "on hold" => "warning",
+                "cancelled" => "danger",
+                _ => "secondary"
+            };
+        }
+
+        private string GetPriorityCssClass(string priority)
+        {
+            return priority?.ToLower() switch
+            {
+                "high" => "danger",
+                "medium" => "warning",
+                "low" => "info",
+                _ => "secondary"
+            };
+        }
+
+        [HttpPost("restore/{id}")]
+        public async Task<IActionResult> RestoreProject(int id, [FromBody] RestoreProjectModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
             
-        //    // Ensure the partialName starts with underscore only if it doesn't already
-        //    if (!partialName.StartsWith("_"))
-        //    {
-        //        partialName = "_" + partialName;
-        //    }
+            // Check if user is admin or has appropriate permissions
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin"))
+            {
+                return Forbid();
+            }
+
+            // Find the project
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            // Update project properties
+            project.Status = model.Status;
+            project.Priority = model.Priority;
+            project.Deadline = model.Deadline;
+            project.CompletedAt = null; // Clear completion date
+            project.UpdatedAt = DateTime.UtcNow;
+
+            // Log activity
+            var activity = new ActivityLog
+            {
+                ProjectId = project.Id,
+                UserId = currentUser.Id,
+                Action = $"restored project and set status to {model.Status}",
+                TargetType = "Project",
+                TargetId = project.Id.ToString(),
+                TargetName = project.Name,
+                Timestamp = DateTime.UtcNow
+            };
             
-        //    // Check if the partial view exists before trying to render it
-        //    try
-        //    {
-        //        // This will render the partial view with the given name
-        //        return PartialView(partialName);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, $"Error rendering partial view '{partialName}'");
-        //        return NotFound($"Partial view '{partialName}' not found.");
-        //    }
-        //}
+            _context.ActivityLogs.Add(activity);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Project restored successfully" });
+        }
+
+        // Model for project restoration
+        public class RestoreProjectModel
+        {
+            public DateTime Deadline { get; set; }
+            public string Status { get; set; }
+            public string Priority { get; set; }
+        }
     }
 }

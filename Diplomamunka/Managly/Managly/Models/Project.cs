@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Managly.Models
 {
@@ -62,6 +63,7 @@ namespace Managly.Models
         public int ProjectId { get; set; }
         
         [ForeignKey("ProjectId")]
+        [JsonIgnore]
         public Project Project { get; set; }
 
         public string UserId { get; set; }
@@ -84,6 +86,7 @@ namespace Managly.Models
         public int ProjectId { get; set; }
         
         [ForeignKey("ProjectId")]
+        [JsonIgnore]
         public Project Project { get; set; }
         
         [Required]

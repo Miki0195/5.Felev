@@ -1,3 +1,5 @@
+@model ArchivedProjectViewModel
+
 <div class="project-details archived-project">
     <div class="archived-overlay">
         <span>ARCHIVED</span>
@@ -5,9 +7,9 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center gap-3">
-            <h2 id="archivedProjectName"></h2>
+            <h2>@Model.Name</h2>
         </div>
-        <button class="btn btn-success" onclick="showRestoreProjectModal()">
+        <button class="btn btn-success" onclick="showRestoreProjectModal(@Model.Id)">
             <i class="bi bi-arrow-counterclockwise"></i> Restore Project
         </button>
     </div>
@@ -15,31 +17,94 @@
     <div class="project-info mt-4">
         <div class="row">
             <div class="col-md-8">
-                <p class="description" id="archivedProjectDescription"></p>
+                <p class="description">@(string.IsNullOrEmpty(Model.Description) ? "No description provided" : Model.Description)</p>
             </div>
             <div class="col-md-4">
                 <div class="info-card">
                     <p><strong>Status:</strong> Completed</p>
-                    <p><strong>Priority:</strong> <span id="archivedProjectPriority"></span></p>
-                    <p><strong>Start Date:</strong> <span id="archivedProjectStartDate"></span></p>
-                    <p><strong>Completion Date:</strong> <span id="archivedProjectEndDate"></span></p>
-                    <p><strong>Created By:</strong> <span id="archivedProjectCreatedBy"></span></p>
+                    <p><strong>Priority:</strong> <span class="badge bg-@Model.PriorityCssClass">@Model.Priority</span></p>
+                    <p><strong>Start Date:</strong> @Model.FormattedStartDate</p>
+                    <p><strong>Original Deadline:</strong> @Model.FormattedDeadline</p>
+                    <p><strong>Completion Date:</strong> @Model.FormattedCompletionDate</p>
+                    <p><strong>Created By:</strong> @Model.CreatorName</p>
                 </div>
             </div>
         </div>
     </div>
     
     <div class="team-members mt-4">
-        <h5>Team Members</h5>
-        <div class="members-list" id="archivedProjectMembers">
-            <!-- Member cards will be inserted here -->
+        <h5><i class="bi bi-people"></i> Team Members</h5>
+        <div class="members-list">
+            @if (Model.TeamMembers != null && Model.TeamMembers.Any())
+            {
+                foreach (var member in Model.TeamMembers)
+                {
+                    <div class="member-card">
+                        <img src="@member.ProfilePicturePath" 
+                             alt="@member.FullName" 
+                             class="member-avatar"
+                             onerror="this.onerror=null; this.src='/images/default/default-profile.png';">
+                        <div class="member-info">
+                            <h6 class="member-name">@member.FullName</h6>
+                            <p class="member-role">@member.Role</p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">No team members</p>
+            }
         </div>
     </div>
     
     <div class="tasks-container mt-4">
-        <h5>Tasks</h5>
-        <div id="archivedProjectTasks">
-            <!-- Tasks will be inserted here -->
+        <h5><i class="bi bi-list-check"></i> Tasks</h5>
+        <div>
+            @if (Model.Tasks != null && Model.Tasks.Any())
+            {
+                @foreach (var task in Model.Tasks)
+                {
+                    <div class="task-card @task.PriorityCssClass @(task.Status == "Completed" ? "completed" : "")">
+                        <div class="task-header">
+                            <h5 class="task-title">@task.Title</h5>
+                            <span class="task-priority badge @task.Priority.ToLower()">@task.Priority</span>
+                        </div>
+                        <p class="task-description">@task.Description</p>
+                        <div class="task-meta">
+                            <div>
+                                <small>Due: @task.FormattedDueDate</small>
+                            </div>
+                            <div class="assigned-to">
+                                <small>Assigned to:</small>
+                                <div class="assigned-users">
+                                    @if (task.AssignedUsers != null && task.AssignedUsers.Any())
+                                    {
+                                        @foreach (var user in task.AssignedUsers)
+                                        {
+                                            <div class="assigned-user">
+                                                <img src="@user.ProfilePicturePath" 
+                                                     alt="@(user.Name + " " + user.LastName)" 
+                                                     class="user-avatar"
+                                                     onerror="this.onerror=null; this.src='/images/default/default-profile.png';">
+                                                <span class="user-name">@(user.Name + " " + user.LastName)</span>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Unassigned</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted">No tasks</p>
+            }
         </div>
     </div>
 </div> 

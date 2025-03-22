@@ -1,59 +1,61 @@
-<div class="modal fade" id="createProjectModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Create New Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="create-project-form p-4 bg-white rounded shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Create New Project</h2>
+    </div>
+
+    <form id="createProjectForm" class="mt-4">
+        <div class="mb-3">
+            <label for="projectName" class="form-label">Project Name</label>
+            <input type="text" class="form-control" id="projectName" required>
+            <div class="invalid-feedback">Project name is required.</div>
+        </div>
+        <div class="mb-3">
+            <label for="projectDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="startDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="startDate" required
+                       value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                <div class="invalid-feedback">Start date is required.</div>
             </div>
-            <div class="modal-body">
-                <form id="createProjectForm">
-                    <div class="mb-3">
-                        <label class="form-label">Project Name</label>
-                        <input type="text" class="form-control" id="projectName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="startDate" required>
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Deadline</label>
-                            <input type="date" class="form-control" id="deadline" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Priority</label>
-                            <select class="form-select" id="priority">
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label">Team Members</label>
-                        <div id="createProjectSearchContainer">
-                            <div class="user-search-container">
-                                <input type="text" 
-                                       class="user-search-input" 
-                                       placeholder="Search users..."
-                                       oninput="handleUserSearch(this.value, 'createProjectSearchResults')">
-                                <div id="createProjectSearchResults" class="user-search-results"></div>
-                            </div>
-                            <div id="createProjectSelectedUsers" class="selected-users-container"></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="createProject()">Create Project</button>
+            <div class="col">
+                <label for="deadline" class="form-label">Deadline</label>
+                <input type="date" class="form-control" id="deadline" required
+                       value="@DateTime.Today.AddDays(7).ToString("yyyy-MM-dd")">
+                <div class="invalid-feedback">Deadline is required.</div>
             </div>
         </div>
-    </div>
-</div> 
+        <div class="row mb-3">
+            <div class="col">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status">
+                    <option value="Not Started" selected>Not Started</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="On Hold">On Hold</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Team Members</label>
+            <div id="createProjectSearchContainer">
+                <!-- User search will be loaded here -->
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button class="btn btn-outline-secondary" onclick="showWelcomeMessage()">
+                <i class="bi bi-x"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Create Project</button>
+        </div>
+    </form>
+</div>

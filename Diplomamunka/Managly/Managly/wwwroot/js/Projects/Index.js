@@ -1,334 +1,89 @@
-﻿// Add these functions near the beginning of the file, before any existing functions
+﻿// Everything for the sidebar
+function searchProjects(searchTerm) {
+    const activeFilter = document.querySelector('.filter-tab.active').getAttribute('data-filter');
 
-// Create a project card for the sidebar
-function createProjectCardForSidebar(project) {
-    // Make sure we handle null or undefined values safely
-    if (!project) return "";
-    
-    // Calculate progress if project has tasks
-    const totalTasks = project.totalTasks || 0;
-    const completedTasks = project.completedTasks || 0;
-    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    
-    // Format dates or provide defaults
-    const startDate = project.startDate ? formatDate(project.startDate) : 'Not set';
-    const deadline = project.deadline ? formatDate(project.deadline) : 'No deadline';
-    
-    // Ensure status and priority have default values and proper formatting
-    const status = project.status || 'Active';
-    const priority = project.priority || 'Medium';
-    
-    // Get status and priority classes
-    const statusClass = getStatusClass(status);
-    const priorityClass = getPriorityClass(priority);
-    
-    // Create project card HTML
-    const card = `
-        <div class="project-card" data-project-id="${project.id}" data-status="${status.toLowerCase()}">
-            <div class="project-card-header">
-                <h3 class="project-card-title">${project.name || 'Unnamed Project'}</h3>
-                <div class="project-card-badges">
-                    <span class="badge ${statusClass}">${status}</span>
-                    <span class="badge ${priorityClass}">${priority}</span>
-                </div>
-            </div>
-            <div class="project-card-details">
-                <div class="project-card-detail">
-                    <span class="detail-label">Start:</span>
-                    <span class="detail-value">${startDate}</span>
-                </div>
-                <div class="project-card-detail">
-                    <span class="detail-label">Deadline:</span>
-                    <span class="detail-value">${deadline}</span>
-                </div>
-            </div>
-            <div class="project-card-progress">
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <span class="progress-text">${progress}% complete</span>
-            </div>
-        </div>
-    `;
-    
-    return card;
+    loadProjectsForSidebar(activeFilter, searchTerm);
 }
 
-// Helper function to get status CSS class
-function getStatusClass(status) {
-    status = (status || '').toLowerCase();
-    switch (status) {
-        case 'active':
-            return 'status-active';
-        case 'completed':
-            return 'status-completed';
-        case 'on hold':
-        case 'onhold':
-            return 'status-onhold';
-        case 'cancelled':
-            return 'status-cancelled';
-        default:
-            return 'status-active';
+function filterProjectsInSidebar(filter) {
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        if (tab.getAttribute('data-filter') === filter) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    const searchTerm = document.getElementById('project-search-input').value;
+
+    loadProjectsForSidebar(filter, searchTerm);
+}
+
+async function loadProjectsForSidebar(filter = 'all', searchTerm = '') {
+    const projectsContainer = document.getElementById('projects-list');
+    const emptyState = document.getElementById('projects-empty-state');
+
+    if (!projectsContainer) {
+        console.error("Projects container not found");
+        return;
     }
-}
 
-// Helper function to get priority CSS class
-function getPriorityClass(priority) {
-    priority = (priority || '').toLowerCase();
-    switch (priority) {
-        case 'low':
-            return 'priority-low';
-        case 'medium':
-            return 'priority-medium';
-        case 'high':
-            return 'priority-high';
-        default:
-            return 'priority-medium';
-    }
-}
-
-// Simple date formatter function 
-function formatDate(dateString) {
-    if (!dateString) return 'Not set';
-    
     try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return 'Invalid date';
-        
-        // Format as MM/DD/YYYY
-        return date.toLocaleDateString();
-    } catch (error) {
-        console.error('Error formatting date:', error);
-        return 'Invalid date';
-    }
-}
-
-// Load projects for sidebar
-async function loadProjectsForSidebar() {
-    try {
-        // Show loading state
-        $("#projects-list").html(`
+        projectsContainer.innerHTML = `
             <div class="loading-state">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
                 <p>Loading projects...</p>
-            </div>
-        `);
-        
-        // Use the correct API endpoint that exists in your backend
-        const response = await fetch('/api/ProjectsApi');
-        
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-        }
-        
-        const projects = await response.json();
-        
-        if (!projects || projects.length === 0) {
-            $("#projects-list").html('<p class="text-muted text-center p-3">No projects found</p>');
-            return;
-        }
-        
-        // Clear loading state and prepare container
-        $("#projects-list").empty();
-        
-        // Separate active and completed projects
-        const activeProjects = projects.filter(p => p.status !== "Completed");
-        const completedProjects = projects.filter(p => p.status === "Completed");
-        
-        // Update counters in the UI
-        $("#active-projects-count").text(activeProjects.length);
-        $("#archived-projects-count").text(completedProjects.length);
-        
-        // Render active projects
-        activeProjects.forEach(project => {
-            const card = createProjectCardForSidebar(project);
-            $("#projects-list").append(card);
-        });
-        
-        // Render completed/archived projects
-        $("#archived-projects-list").empty();
-        if (completedProjects.length > 0) {
-            completedProjects.forEach(project => {
-                const card = createProjectCardForSidebar(project);
-                $("#archived-projects-list").append(card);
+            </div>`;
+
+        if (emptyState) emptyState.classList.add('d-none');
+
+        const response = await fetch(`/Projects/sidebarPartial?filter=${filter}&search=${searchTerm}`);
+        if (!response.ok) throw new Error(`API returned ${response.status}: ${await response.text()}`);
+        const html = await response.text();
+
+        if (html.trim() === '' || html.includes('No projects found')) {
+            projectsContainer.innerHTML = ''; 
+
+            if (emptyState) {
+                emptyState.classList.remove('d-none');
+                if (searchTerm) {
+                    emptyState.querySelector('p').innerHTML = `
+                        <i class="bi bi-search me-2"></i>
+                        No projects found matching "${searchTerm}"
+                    `;
+                } else {
+                    emptyState.querySelector('p').innerHTML = `
+                        <i class="bi bi-folder-x me-2"></i>
+                        No projects found
+                    `;
+                }
+            }
+        } else {
+            projectsContainer.innerHTML = html;
+
+            if (emptyState) emptyState.classList.add('d-none');
+
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('click', () => loadProject(card.dataset.projectId));
             });
-        } else {
-            $("#archived-projects-list").html('<p class="text-muted text-center p-3">No archived projects</p>');
         }
-        
-        // Add click event to project cards
-        $(".project-card").on("click", function() {
-            const projectId = $(this).data("project-id");
-            
-            // Remove active class from all projects
-            $(".project-card").removeClass("active");
-            
-            // Add active class to clicked project
-            $(this).addClass("active");
-            
-            // Load the project
-            loadProject(projectId);
-        });
     } catch (error) {
-        console.error("Error loading projects for sidebar:", error);
-        $("#projects-list").html(`
-            <div class="alert alert-danger m-3">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                Error loading projects: ${error.message}
-                <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadProjectsForSidebar()">
-                    <i class="fas fa-sync-alt me-1"></i> Retry
-                </button>
-            </div>
-        `);
+        console.error('Error loading projects:', error);
+        projectsContainer.innerHTML = `
+            <div class="error-message">
+                <p>Error loading projects: ${error.message}</p>
+                <button class="btn btn-sm btn-primary" onclick="loadProjectsForSidebar('${filter}', '${searchTerm}')">Retry</button>
+            </div>`;
     }
 }
 
-// Filter projects in sidebar based on filter tab
-function filterProjectsInSidebar(filter) {
-    // Remove active class from all tabs and add to clicked tab
-    $('.filter-tab').removeClass('active');
-    $(`.filter-tab[data-filter="${filter}"]`).addClass('active');
-    
-    // Show/hide project sections based on filter
-    if (filter === 'all') {
-        // Show all projects
-        $('.project-card').show();
-    } else if (filter === 'completed') {
-        // For completed filter, focus on archived projects section
-        // First hide all projects
-        $('.project-card').hide();
-        // Then show only completed ones
-        $(`.project-card[data-status="completed"]`).show();
-    } else {
-        // For other filters (active, onhold)
-        // Hide all projects first
-        $('.project-card').hide();
-        // Then show only those matching the filter
-        $(`.project-card[data-status="${filter}"]`).show();
-    }
-    
-    // Show empty message if no projects visible in a section
-    $('.projects-section').each(function() {
-        const section = $(this);
-        const container = section.find('.projects-cards-container');
-        const visibleCards = container.find('.project-card:visible').length;
-        
-        // Remove any existing empty messages
-        container.find('.empty-filter-message').remove();
-        
-        // If no visible cards, show empty message
-        if (visibleCards === 0 && !container.find('.loading-state').length) {
-            container.append(`
-                <p class="text-muted text-center p-3 empty-filter-message">
-                    No ${filter === 'all' ? '' : filter} projects found
-                </p>
-            `);
-        }
-    });
-}
+let selectedUsers = new Set(); 
+let currentProjectMembers = new Set(); 
+let allUsers = [];
 
-// Filter projects by search term
-function searchProjects(searchTerm) {
-    // Get current active filter
-    const currentFilter = $('.filter-tab.active').data('filter');
-    
-    // If search is empty, just apply the current filter
-    if (!searchTerm || searchTerm.trim() === '') {
-        filterProjectsInSidebar(currentFilter);
-        return;
-    }
-    
-    searchTerm = searchTerm.toLowerCase().trim();
-    
-    // Apply both search and filter
-    $('.project-card').each(function() {
-        const card = $(this);
-        const projectTitle = card.find('.project-card-title').text().toLowerCase();
-        const status = card.data('status');
-        
-        // Check if matches search term
-        const matchesSearch = projectTitle.includes(searchTerm);
-        
-        // Check if matches current filter
-        const matchesFilter = (currentFilter === 'all' || status === currentFilter);
-        
-        // Show only if both conditions are met
-        if (matchesSearch && matchesFilter) {
-            card.show();
-        } else {
-            card.hide();
-        }
-    });
-    
-    // Show empty message if no results
-    $('.projects-section').each(function() {
-        const section = $(this);
-        const container = section.find('.projects-cards-container');
-        const visibleCards = container.find('.project-card:visible').length;
-        
-        // Remove any existing empty messages
-        container.find('.empty-filter-message, .empty-search-message').remove();
-        
-        // If no visible cards, show empty message
-        if (visibleCards === 0 && !container.find('.loading-state').length) {
-            container.append(`
-                <p class="text-muted text-center p-3 empty-search-message">
-                    No projects found matching "${searchTerm}"
-                </p>
-            `);
-        }
-    });
-}
-
-// Add event listeners for new sidebar elements
-$(document).ready(function() {
-    console.log("Projects page initializing...");
-    
-    // Debug API endpoints to help identify issues
-    debugApiEndpoint('/api/ProjectsApi');
-    
-    // Initialize the sidebar
-    loadProjectsForSidebar();
-    
-    // Filter tabs click event
-    $(".filter-tab").on("click", function() {
-        $(".filter-tab").removeClass("active");
-        $(this).addClass("active");
-        const filter = $(this).data("filter");
-        filterProjectsInSidebar(filter);
-    });
-    
-    // Search input event
-    $("#project-search").on("input", function() {
-        const searchTerm = $(this).val().toLowerCase();
-        searchProjects(searchTerm);
-    });
-    
-    // Create project button (if it doesn't already have an event handler)
-    if (!$('#btn-create-project').data('has-event')) {
-        $('#btn-create-project').on('click', function() {
-            openCreateProjectModal();
-        }).data('has-event', true);
-    }
-});
-
-// Find the existing loadProjects function and modify/wrap it
-const originalLoadProjects = loadProjects;
-loadProjects = async function() {
-    // Call both the original and the new sidebar loader
-    if (originalLoadProjects) {
-        await originalLoadProjects();
-    }
-    
-    // Also load the sidebar projects
-    await loadProjectsForSidebar();
-};
-
-let selectedUsers = new Set(); // Store selected user IDs
-let currentProjectMembers = new Set(); // Store current project members
-
+// Searching for users, this should be used when assigning users to tasks!!!!!!
 function createUserSearchContainer(containerId, resultsId, selectedId) {
     return `
                 <div class="user-search-container">
@@ -366,8 +121,6 @@ function createSelectedUserItem(user) {
             `;
 }
 
-let allUsers = []; // Store all users for filtering
-
 async function loadUserSearch(containerId) {
     try {
         const response = await fetch('/api/projectsapi/company-users');
@@ -380,7 +133,6 @@ async function loadUserSearch(containerId) {
             `${containerId}-selected`
         );
     } catch (error) {
-        console.error('Error loading users:', error);
         showToast('Error loading users', 'error');
     }
 }
@@ -390,7 +142,6 @@ async function loadAvailableUsers(projectId = null) {
         const response = await fetch('/api/projectsapi/company-users');
         allUsers = await response.json();
 
-        // If projectId is provided, load current project members
         if (projectId) {
             const projectResponse = await fetch(`/api/projectsapi/${projectId}`);
             const project = await projectResponse.json();
@@ -399,7 +150,6 @@ async function loadAvailableUsers(projectId = null) {
             currentProjectMembers.clear();
         }
     } catch (error) {
-        console.error('Error loading users:', error);
         showToast('Error loading users', 'error');
     }
 }
@@ -408,7 +158,6 @@ function handleUserSearch(searchTerm, resultsId) {
     const resultsContainer = document.getElementById(resultsId);
     if (!resultsContainer) return;
 
-    // If no search term, clear results and return
     if (!searchTerm) {
         resultsContainer.innerHTML = '';
         resultsContainer.classList.remove('active');
@@ -416,8 +165,8 @@ function handleUserSearch(searchTerm, resultsId) {
     }
 
     const filteredUsers = allUsers.filter(user =>
-        !selectedUsers.has(user.id) && // Exclude selected users
-        !currentProjectMembers.has(user.id) && // Exclude existing project members
+        !selectedUsers.has(user.id) && 
+        !currentProjectMembers.has(user.id) && 
         (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.lastName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -441,23 +190,33 @@ function selectUser(user) {
     if (!selectedUsers.has(user.id)) {
         selectedUsers.add(user.id);
 
-        // Clear search results and input immediately
-        const resultsContainer = document.getElementById('createProjectSearchResults') ||
-            document.getElementById('addMembersSearchResults');
-        const searchInput = document.querySelector('.user-search-input');
+        const possibleContainers = [
+            'createProjectSearchResults',
+            'addMembersSearchResults',
+            'createProjectSearchContainer-results',
+            'addMembersSearchContainer-results'
+        ];
 
-        // Clear search results
+        let resultsContainer = null;
+        for (const containerId of possibleContainers) {
+            const container = document.getElementById(containerId);
+            if (container && container.classList.contains('active')) {
+                resultsContainer = container;
+                break;
+            }
+        }
+
         if (resultsContainer) {
             resultsContainer.innerHTML = '';
             resultsContainer.classList.remove('active');
         }
 
-        // Clear search input
+        
+        const searchInput = document.querySelector('.user-search-input');
         if (searchInput) {
             searchInput.value = '';
         }
 
-        // Refresh the display of selected users
         refreshSelectedUsersDisplay();
     }
 }
@@ -467,81 +226,151 @@ function removeSelectedUser(userId) {
     refreshSelectedUsersDisplay();
 }
 
-function openCreateProjectModal() {
-    const today = new Date().toISOString().split('T')[0];
-    selectedUsers.clear(); // Clear previously selected users
+function refreshSelectedUsersDisplay() {
+    const possibleContainers = [
+        'createProjectSearchContainer-selected',
+        'addMembersSearchContainer-selected'
+    ];
 
+    let selectedContainer = null;
+    for (const containerId of possibleContainers) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            selectedContainer = container;
+            break;
+        }
+    }
+
+    if (!selectedContainer) return;
+
+    if (selectedUsers.size === 0) {
+        selectedContainer.innerHTML = '<div class="no-users-selected">No team members selected</div>';
+        return;
+    }
+
+    const selectedUsersHTML = Array.from(selectedUsers)
+        .map(userId => {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return '';
+
+            return createSelectedUserItem(user);
+        })
+        .join('');
+
+    selectedContainer.innerHTML = selectedUsersHTML;
+}
+
+// For creating projects
+async function openCreateProjectModal() {
     const contentArea = document.getElementById('projectsContent');
+    if (!contentArea) return;
+
+    try {
     contentArea.innerHTML = `
-                <div class="create-project-form">
-                    <h2>Create New Project</h2>
-                    <form id="createProjectForm" class="mt-4">
-                        <div class="mb-3">
-                            <label class="form-label">Project Name</label>
-                            <input type="text" class="form-control" id="projectName" required>
+            <div class="loading-indicator text-center p-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" id="projectDescription" rows="3"></textarea>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label">Start Date</label>
-                                <input type="date" 
-                                       class="form-control" 
-                                       id="startDate" 
-                                       required
-                                       min="${today}"
-                                       value="${today}">
-                            </div>
-                            <div class="col">
-                                <label class="form-label">Deadline</label>
-                                <input type="date" 
-                                       class="form-control" 
-                                       id="deadline" 
-                                       required
-                                       min="${today}">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label">Priority</label>
-                                <select class="form-select" id="priority">
-                                    <option value="Low">Low</option>
-                                    <option value="Medium" selected>Medium</option>
-                                    <option value="High">High</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Team Members</label>
-                            <div id="createProjectSearchContainer">
-                                <div class="user-search-container">
-                                    <input type="text" 
-                                           class="user-search-input" 
-                                           placeholder="Search users..."
-                                           oninput="handleUserSearch(this.value, 'createProjectSearchResults')">
-                                    <div id="createProjectSearchResults" class="user-search-results"></div>
-                                </div>
-                                <div id="createProjectSelectedUsers" class="selected-users-container"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary" onclick="showWelcomeMessage()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Create Project</button>
-                        </div>
-                    </form>
+                <p class="mt-2">Loading form...</p>
                 </div>
             `;
 
-    // Add event listener to ensure deadline is after start date
-    document.getElementById('startDate').addEventListener('change', function () {
-        document.getElementById('deadline').min = this.value;
-    });
+        selectedUsers.clear();
 
-    // Load users after setting up the containers
-    loadAvailableUsers();
-    document.getElementById('createProjectForm').addEventListener('submit', handleCreateProject);
+        const response = await fetch('/Projects/createModal');
+        if (!response.ok) throw new Error('Failed to load create project form');
+
+        const html = await response.text();
+
+        contentArea.innerHTML = html;
+
+        const startDateInput = document.getElementById('startDate');
+        const deadlineInput = document.getElementById('deadline');
+
+        if (startDateInput && deadlineInput) {
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.min = today;
+            deadlineInput.min = today;
+
+            startDateInput.addEventListener('change', function () {
+                deadlineInput.min = this.value;
+                if (deadlineInput.value && deadlineInput.value < this.value) {
+                    deadlineInput.value = this.value;
+                }
+            });
+        }
+
+        const searchContainer = document.getElementById('createProjectSearchContainer');
+        if (searchContainer) {
+            await loadUserSearch('createProjectSearchContainer');
+            await loadAvailableUsers(); 
+        }
+
+        const form = document.getElementById('createProjectForm');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+    e.preventDefault();
+                handleCreateProject();
+            });
+        }
+    } catch (error) {
+        showToast('Error loading create project form', 'error');
+    }
+}
+
+async function handleCreateProject() {
+    const form = document.getElementById('createProjectForm');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
+    try {
+        const projectData = {
+            name: document.getElementById('projectName').value,
+            description: document.getElementById('projectDescription').value || '',
+            startDate: document.getElementById('startDate').value,
+            deadline: document.getElementById('deadline').value,
+            priority: document.getElementById('priority').value,
+            status: document.getElementById('status').value,
+            teamMemberIds: Array.from(selectedUsers)
+        };
+
+        const response = await fetch('/api/projectsapi/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(projectData)
+        });
+
+        let project;
+        try {
+            project = await response.json();
+        } catch (parseError) {
+            showToast('There was an error creating the project!', 'warning');
+        }
+
+        showToast('Project created successfully!', 'success');
+
+        loadProjectsForSidebar();
+
+        if (project && project.id) {
+            loadProject(project.id);
+        } else {
+        showWelcomeMessage();
+        }
+    } catch (error) {
+        showToast(error.message || 'Error creating project', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
 }
 
 function showWelcomeMessage() {
@@ -553,371 +382,93 @@ function showWelcomeMessage() {
                 </div>
             `;
 }
-
-async function handleCreateProject(e) {
-    e.preventDefault();
-
-    try {
-        // Format dates to match expected pattern (yyyy-MM-dd)
-        const startDate = new Date(document.getElementById('startDate').value);
-        const deadline = new Date(document.getElementById('deadline').value);
-
-        const projectData = {
-            name: document.getElementById('projectName').value,
-            description: document.getElementById('projectDescription').value || '',
-            startDate: startDate.toISOString().split('T')[0],  // Format as yyyy-MM-dd
-            deadline: deadline.toISOString().split('T')[0],    // Format as yyyy-MM-dd
-            priority: document.getElementById('priority').value,
-            status: 'Not Started',
-            teamMemberIds: Array.from(selectedUsers)
-        };
-
-        console.log('Creating project with data:', projectData); // For debugging
-
-        const response = await fetch('/api/projectsapi/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(projectData)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Server response:', errorData);
-            throw new Error(errorData.error || 'Failed to create project');
-        }
-
-        showToast('Project created successfully!', 'success');
-        await loadProjects();
-        showWelcomeMessage();
-    } catch (error) {
-        console.error('Error creating project:', error);
-        showToast(error.message, 'error');
-    }
-}
-
-function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-
-    toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-
-    toastContainer.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
-}
-
 // Load projects on page load
 document.addEventListener('DOMContentLoaded', () => {
-    loadProjects();
-    
-    // Also load archived projects during initial page load
-    const archivedList = document.getElementById('archivedProjectsList');
-    if (archivedList && archivedList.children.length === 0) {
-        loadArchivedProjects();
-    }
-    
-    // Update the project count badges
-    updateProjectCountBadges();
-});
+    loadProjectsForSidebar();
 
-async function loadProjects() {
-    try {
-        // Note: This function is now primarily used by the original codebase
-        // Our sidebar now uses loadProjectsForSidebar() instead
-        
-        const response = await fetch('/api/ProjectsApi');
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error loading projects');
-        }
-        
-        const data = await response.json();
-        
-        // Check if the old projectsList element exists before trying to update it
-        const projectsList = document.getElementById('projectsList');
-        if (projectsList) {
-            projectsList.innerHTML = '';
-            
-            if (data.length === 0) {
-                projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
-                return;
-            }
-            
-            // Filter out completed projects
-            const activeProjects = data.filter(project => project.status !== "Completed");
-            
-            if (activeProjects.length === 0) {
-                projectsList.innerHTML = '<div class="project-item text-muted">No active projects</div>';
-                return;
-            }
-            
-            activeProjects.forEach(project => {
-                const projectItem = document.createElement('div');
-                projectItem.className = 'project-item';
-                projectItem.innerHTML = `
-                    <div onclick="loadProject(${project.id})" style="cursor: pointer;">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>${project.name}</span>
-                    </div>
-                `;
-                projectsList.appendChild(projectItem);
+    const filterTabsContainer = document.querySelector('.filter-tabs');
+    if (filterTabsContainer) {
+        filterTabsContainer.addEventListener('click', (event) => {
+            const filterTab = event.target.closest('.filter-tab');
+            if (!filterTab) return;
+
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
             });
-        } else {
-            console.log('Original projectsList element not found - this is expected with the new sidebar.');
-        }
-        
-        console.log('Projects data loaded successfully');
-    } catch (error) {
-        console.error('Failed to load projects:', error);
-        showToast('Failed to load projects: ' + error.message, 'error');
-    }
-}
+            filterTab.classList.add('active');
 
-function toggleProjectsList() {
-    const projectsList = document.getElementById('projectsList');
-    const icon = event.currentTarget.querySelector('.bi-chevron-down, .bi-chevron-up');
-    
-    projectsList.classList.toggle('active');
-    
-    // Toggle icon
-    if (icon) {
-        if (icon.classList.contains('bi-chevron-down')) {
-            icon.classList.remove('bi-chevron-down');
-            icon.classList.add('bi-chevron-up');
-        } else {
-            icon.classList.remove('bi-chevron-up');
-            icon.classList.add('bi-chevron-down');
-        }
+            const filter = filterTab.dataset.filter;
+            filterProjectsInSidebar(filter);
+        });
     }
-}
+
+    const searchInput = document.getElementById('project-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            searchProjects(this.value);
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                console.log(`Search input Enter pressed: "${this.value}"`);
+                searchProjects(this.value);
+            }
+        });
+    } else {
+        console.error("Search input element not found. Looking for #project-search-input");
+    }
+
+    const createButton = document.getElementById('btn-create-project');
+    if (createButton) {
+        createButton.addEventListener('click', openCreateProjectModal, { once: false });
+    }
+});
+//LOADING THE SELECTED PROJECTS
 
 async function loadProject(projectId) {
-    // Highlight the selected project in the sidebar
-    $('.project-card').removeClass('active');
-    $(`.project-card[data-project-id="${projectId}"]`).addClass('active');
+    const projectContent = document.querySelector('.projects-content');
+    projectContent.innerHTML = `
+        <div class="d-flex justify-content-center align-items-center" style="height: 100%">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
     
     try {
-        const response = await fetch(`/api/projectsapi/${projectId}`);
-        if (!response.ok) throw new Error('Failed to load project');
-        
-        const project = await response.json();
-        
-        const projectsContent = document.getElementById('projectsContent');
-        
-        // Check if the project is completed (archived)
-        if (project.status === 'Completed') {
-            loadArchivedProjectView(project);
-            return;
+        const projectCards = document.querySelectorAll('.project-card');
+        projectCards.forEach(card => card.classList.remove('active', 'selected'));
+        const selectedCard = document.querySelector(`.project-card[data-project-id="${projectId}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('active', 'selected');
         }
         
-        // Calculate progress percentage
-        const progressPercent = project.totalTasks > 0 
-            ? Math.round((project.completedTasks / project.totalTasks) * 100) 
-            : 0;
+        const checkResponse = await fetch(`/api/ProjectsApi/${projectId}`);
         
-        // Determine status badge color
-        const statusBadgeClass = getStatusBadgeColor(project.status);
-        const priorityBadgeClass = getPriorityBadgeColor(project.priority);
+        if (!checkResponse.ok) throw new Error(`Failed to check project: ${checkResponse.status}`);
         
-        // Format dates for display
-        const startDateFormatted = formatDate(project.startDate);
-        const deadlineFormatted = formatDate(project.deadline);
+        const projectData = await checkResponse.json();
         
-        // Template for project details
-        let html = `
-            <div class="project-details">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>${project.name}</h2>
-                    <div class="btn-group">
-                        ${project.isProjectLead ? `
-                            <button class="btn btn-outline-primary" onclick="showEditProjectModal(${project.id})">
-                                <i class="bi bi-pencil"></i> Edit
-                            </button>
-                            <button class="btn btn-outline-danger" onclick="showDeleteConfirmation(${project.id})">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <!-- New description card with better styling -->
-                        <div class="card project-description-card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="bi bi-file-text"></i> Project Details
-                                </h5>
-                                
-                                <div class="project-description-content">
-                                    ${project.description ? 
-                                        `<p class="description-text">${project.description}</p>` : 
-                                        '<p class="text-muted fst-italic">No description provided.</p>'
-                                    }
-                                </div>
-                                
-                                <div class="row g-3 mt-3">
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="detail-item">
-                                            <span class="detail-label"><i class="bi bi-calendar-check"></i> Started:</span>
-                                            <span class="detail-value">${startDateFormatted}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="detail-item">
-                                            <span class="detail-label"><i class="bi bi-calendar-event"></i> Deadline:</span>
-                                            <span class="detail-value">${deadlineFormatted}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="detail-item">
-                                            <span class="detail-label"><i class="bi bi-info-circle"></i> Status:</span>
-                                            <span class="badge bg-${statusBadgeClass}">${project.status}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="detail-item">
-                                            <span class="detail-label"><i class="bi bi-flag"></i> Priority:</span>
-                                            <span class="badge bg-${priorityBadgeClass}">${project.priority}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Project progress card -->
-                        <div class="card project-progress-card">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="bi bi-graph-up"></i> Progress
-                                </h5>
-                                
-                                <div class="progress mb-2" style="height: 20px;">
-                                    <div class="progress-bar bg-success" role="progressbar" 
-                                         style="width: ${progressPercent}%" 
-                                         aria-valuenow="${progressPercent}" 
-                                         aria-valuemin="0" 
-                                         aria-valuemax="100">
-                                        ${progressPercent}%
-                                    </div>
-                                </div>
-                                <p class="text-center text-muted">
-                                    <strong>${project.completedTasks}</strong> of <strong>${project.totalTasks}</strong> tasks completed
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <!-- Activity Feed will be loaded here -->
-                        <div id="activityFeedContainer"></div>
-                    </div>
-                </div>
-                
-                <div class="team-members mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4><i class="bi bi-people"></i> Team Members</h4>
-                        ${project.isProjectLead ? `
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary" onclick="showAddMembersModal(${project.id})">
-                                    <i class="bi bi-person-plus"></i> Add Members
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="showManageMembersModal(${project.id})">
-                                    <i class="bi bi-gear"></i> Manage
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="members-list">
-                        ${project.projectMembers.map(member => `
-                            <div class="member-card">
-                                <img src="${member.user.profilePicturePath}" 
-                                     alt="${member.user.name}" 
-                                     class="member-avatar"
-                                     onerror="this.onerror=null; this.src='/images/default-avatar.png';">
-                                <div class="member-info">
-                                    <h6 class="member-name">${member.user.name} ${member.user.lastName}</h6>
-                                    <p class="member-role">${member.role}</p>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                
-                <div class="tasks-container">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4><i class="bi bi-list-check"></i> Tasks</h4>
-                        ${project.isProjectLead ? `
-                            <button class="btn btn-sm btn-primary" onclick="showCreateTaskModal(${project.id})">
-                                <i class="bi bi-plus-lg"></i> Add Task
-                            </button>
-                        ` : ''}
-                    </div>
-                    <div class="tasks-filters mb-3">
-                        <div class="btn-group" role="group" aria-label="Task filters">
-                            <button type="button" class="btn btn-outline-secondary active" onclick="filterTasks(${project.id}, 'all')">All</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'my')">My Tasks</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'pending')">Pending</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="filterTasks(${project.id}, 'completed')">Completed</button>
-                        </div>
-                    </div>
-                    <div id="tasksDisplay">
-                        ${project.tasks.length > 0 ? 
-                            project.tasks.map(task => createTaskCard(task, project.currentUserId, project.id)).join('') : 
-                            '<div class="no-tasks-message"><i class="bi bi-info-circle"></i> No tasks found. Create a new task to get started.</div>'
-                        }
-                    </div>
-                </div>
-            </div>
-        `;
+        let endpoint = `/Projects/${projectId}`;
+        if (projectData.status === "Completed") {
+            endpoint = `/Projects/archived/${projectId}`;
+        }
         
-        projectsContent.innerHTML = html;
-        
-        // Load the activity feed
-        const activityFeedContainer = document.getElementById('activityFeedContainer');
-        activityFeedContainer.innerHTML = '<div id="activityFeed"></div>';
-        
-        // Use a simplified version if loadActivityFeed is not defined
-        if (typeof loadActivityFeed === 'function') {
-            loadActivityFeed(projectId);
-        } else {
-            console.log('loadActivityFeed function not available, using simplified activity feed');
-            const activityFeed = document.getElementById('activityFeed');
-            if (activityFeed) {
-                activityFeed.innerHTML = `
-                    <div class="activity-feed">
-                        <div class="activity-feed-header">
-                            <h5><i class="bi bi-activity"></i> Recent Activity</h5>
-                        </div>
-                        <div class="activity-feed-content">
-                            <div class="text-center text-muted py-3">
-                                <i class="bi bi-info-circle"></i> Activity feed is loading...
-                            </div>
-                        </div>
-                    </div>
-                `;
+        const projectHtml = await fetch(endpoint, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  
             }
-        }
+        });
         
-        // Initialize filter buttons
-        const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
+        if (!projectHtml.ok) throw new Error(`Failed to load project: ${projectHtml.status}${errorText ? " - " + errorText : ""}`);
+        
+        const html = await projectHtml.text();
+        projectContent.innerHTML = html;
+        
+        history.pushState({projectId}, "", `/Projects#${projectId}`);
+        
+        const filterButtons = document.querySelectorAll('.tasks-filters .btn');
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -925,136 +476,83 @@ async function loadProject(projectId) {
             });
         });
         
+        setupProjectEventListeners(projectId);
     } catch (error) {
-        console.error('Error loading project:', error);
-        showToast('Failed to load project details: ' + error.message, 'danger');
+        showToast('There was an error loading the project.', 'danger')
     }
 }
 
-/**
- * Loads the activity feed for a project
- * @param {number} projectId - The ID of the project
- */
-async function loadActivityFeed(projectId) {
+async function filterTasks(projectId, filter) {
     try {
-        const activityFeed = document.getElementById('activityFeed');
-        if (!activityFeed) {
-            console.error('Activity feed container not found');
-            return;
-        }
-        
-        activityFeed.innerHTML = `
-            <div class="activity-feed">
-                <div class="activity-feed-header">
-                    <h5><i class="bi bi-activity"></i> Recent Activity</h5>
-                </div>
-                <div class="activity-feed-content" id="activityFeedContent">
-                    <div class="text-center my-3">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Check if the API endpoint exists
-        const response = await fetch(`/api/projectsapi/${projectId}/activities?limit=15`);
-        if (!response.ok) {
-            console.warn(`Activity feed API returned ${response.status}: ${response.statusText}`);
-            
-            // Show a placeholder instead of an error
-            const activityFeedContent = document.getElementById('activityFeedContent');
-            if (activityFeedContent) {
-                activityFeedContent.innerHTML = `
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-info-circle"></i> No recent activity found.
-                    </div>
-                `;
-            }
-            return;
-        }
-        
-        const data = await response.json();
-        
-        if (!data.success || !data.activities || data.activities.length === 0) {
-            const activityFeedContent = document.getElementById('activityFeedContent');
-            if (activityFeedContent) {
-                activityFeedContent.innerHTML = `
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-info-circle"></i> No activity found for this project.
-                    </div>
-                `;
-            }
-            return;
-        }
-        
-        const activities = data.activities;
-        const activityFeedContent = document.getElementById('activityFeedContent');
-        
-        if (activityFeedContent) {
-            activityFeedContent.innerHTML = `
-                <div class="activity-list">
-                    ${activities.map(activity => createActivityItem(activity)).join('')}
-                </div>
-            `;
-        }
+        const tasksDisplay = document.getElementById('tasksDisplay');
+
+        const response = await fetch(`/Projects/api/tasks/${projectId}?filter=${filter}`);
+        if (!response.ok) throw new Error('Failed to filter tasks');
+
+        const html = await response.text();
+        tasksDisplay.innerHTML = html;
+
     } catch (error) {
-        console.error('Error loading activity feed:', error);
-        const activityFeedContent = document.getElementById('activityFeedContent');
-        if (activityFeedContent) {
-            activityFeedContent.innerHTML = `
-                <div class="text-center text-muted py-3">
-                    <i class="bi bi-info-circle"></i> Activity feed could not be loaded.
-                </div>
-            `;
-        }
+        showToast('Failed to load tasks: ' + error.message, 'danger');
     }
 }
 
-function createTaskCard(task, currentUserId, projectId) {
-    const isAssignedToMe = task.assignedUsers.some(u => u.id === currentUserId);
-    const isDone = task.status === 'Completed';
+async function updateTaskStatus(taskId, projectId, newStatus, event) {
+    event.stopPropagation();
 
-    return `
-                <div class="task-card ${task.priority.toLowerCase()} ${isDone ? 'completed' : ''}" 
-                     onclick="showTaskDetails(${task.id})">
-                    <div class="task-header">
-                        <h5 class="task-title">${task.taskTitle}</h5>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge task-priority ${task.priority.toLowerCase()}">${task.priority}</span>
-                            ${isAssignedToMe ? `
-                                <div class="form-check form-switch" onclick="event.stopPropagation()">
-                                    <input class="form-check-input" type="checkbox" 
-                                           ${isDone ? 'checked' : ''}
-                                           onclick="updateTaskStatus(${task.id}, ${projectId}, '${isDone ? 'Pending' : 'Completed'}', event)"
-                                           ${!isAssignedToMe ? 'disabled' : ''}>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <p class="task-description">${task.description || 'No description'}</p>
-                    <div class="task-meta">
-                        <div class="assigned-users">
-                            <span class="assigned-label">Assigned to:</span>
-                            <div class="assigned-users-list">
-                                ${task.assignedUsers.map(user => `
-                                    <div class="assigned-user">
-                                        <img src="${user.profilePicturePath}" alt="${user.name}" class="user-avatar"
-                                             onerror="this.onerror=null; this.src='/images/default-avatar.png';">
-                                        <span class="user-name">${user.name} ${user.lastName}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
-                    </div>
-                </div>
-            `;
+    try {
+        const response = await fetch(`/api/projectsapi/tasks/${taskId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!response.ok) throw new Error('Failed to update task status');
+
+        const activeFilterButton = document.querySelector('.tasks-filters .btn-group .btn.active');
+        const filter = activeFilterButton ? activeFilterButton.textContent.trim().toLowerCase() : 'all';
+
+        filterTasks(projectId, filter);
+
+    } catch (error) {
+        showToast('Failed to update task status: ' + error.message, 'danger');
+        event.target.checked = (newStatus === 'Completed');
+    }
+}
+
+async function refreshActivityFeed(projectId, showLoadingIndicator = true) {
+    try {
+        const activityFeedContainer = document.getElementById('activityFeedContainer');
+        if (!activityFeedContainer) {
+            return;
+        }
+
+        const response = await fetch(`/Projects/${projectId}/ActivityFeed`);
+        if (!response.ok) throw new Error(`Failed to refresh activity feed: ${response.status}`);
+
+        const html = await response.text();
+        activityFeedContainer.innerHTML = html;
+
+
+        const feedContent = document.querySelector('.activity-feed-content');
+        if (feedContent) {
+            feedContent.addEventListener('scroll', function() {
+                if (this.scrollTop > 10) {
+                    this.classList.add('scrolled-down');
+                } else {
+                    this.classList.remove('scrolled-down');
+                }
+            });
+        }
+
+    } catch (error) {
+        showToast("Error loadin activity feed: " + error, 'danger');
+    }
 }
 
 function showDeleteConfirmation(projectId) {
-    // Update the Delete button to include the projectId
     const deleteButton = document.querySelector('#deleteConfirmationModal .btn-danger');
     deleteButton.setAttribute('onclick', `deleteProject(${projectId})`);
 
@@ -1068,141 +566,59 @@ async function deleteProject(projectId) {
             method: 'DELETE'
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to delete project');
-        }
+        if (!response.ok) throw new Error('Failed to delete project');
 
-        // Hide the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal'));
         modal.hide();
 
-        // Show success message
         showToast('Project deleted successfully', 'success');
 
-        // Refresh projects list and show welcome message
-        await loadProjects();
+        loadProjectsForSidebar();
         showWelcomeMessage();
     } catch (error) {
-        console.error('Error deleting project:', error);
-        showToast(error.message, 'error');
+        showToast('Failed to delete project!', 'error');
     }
 }
 
 async function showEditProjectModal(projectId) {
     try {
-        // Make sure the modal exists before proceeding
         const editModal = document.getElementById('editProjectModal');
-        if (!editModal) {
-            throw new Error('Edit project modal not found in the DOM');
-        }
 
-        // Fetch project details
         const response = await fetch(`/api/projectsapi/${projectId}`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch project details: ${response.status} ${response.statusText}`);
-        }
-
+        if (!response.ok) throw new Error(`Failed to fetch project details: ${response.status} ${response.statusText}`);
+        
         const project = await response.json();
         
-        // Store project ID in a data attribute on the modal itself if the hidden field doesn't exist
         const projectIdField = document.getElementById('editProjectId');
         if (projectIdField) {
             projectIdField.value = project.id;
         } else {
-            // Store the ID on the modal element as a data attribute
             editModal.setAttribute('data-project-id', project.id);
-            console.warn('Hidden field editProjectId not found, storing ID on modal data attribute');
         }
         
-        // Check if form elements exist and log errors if they don't
-        const elements = {
-            name: document.getElementById('editProjectName'),
-            description: document.getElementById('editProjectDescription'),
-            startDate: document.getElementById('editProjectStartDate'),
-            deadline: document.getElementById('editProjectDeadline'),
-            status: document.getElementById('editProjectStatus'),
-            priority: document.getElementById('editProjectPriority')
-        };
-        
-        // Verify all elements exist
-        let missingElements = [];
-        for (const [key, element] of Object.entries(elements)) {
-            if (!element) {
-                missingElements.push(`editProject${key.charAt(0).toUpperCase() + key.slice(1)}`);
-            }
-        }
-        
-        if (missingElements.length > 0) {
-            throw new Error(`Missing form elements: ${missingElements.join(', ')}`);
-        }
-        
-        // Set form field values
-        elements.name.value = project.name;
-        elements.description.value = project.description || '';
-        
-        // Parse dates correctly
         const startDate = new Date(project.startDate);
         const deadline = project.deadline ? new Date(project.deadline) : null;
+
+        document.getElementById('editProjectName').value = project.name;
+        document.getElementById('editProjectDescription').value = project.description || '';
+        document.getElementById('editProjectStartDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('editProjectDeadline').value = deadline ? deadline.toISOString().split('T')[0] : '';
+        document.getElementById('editProjectStatus').value = project.status;
+        document.getElementById('editProjectPriority').value = project.priority;
         
-        // Format dates in YYYY-MM-DD format for input fields
-        elements.startDate.value = startDate.toISOString().split('T')[0];
-        elements.deadline.value = deadline ? deadline.toISOString().split('T')[0] : '';
-        
-        // Set select elements
-        elements.status.value = project.status;
-        elements.priority.value = project.priority;
-        
-        // Show the modal
         const bootstrapModal = new bootstrap.Modal(editModal);
         bootstrapModal.show();
     } catch (error) {
-        console.error('Error showing edit project modal:', error);
-        showToast(`Error showing edit project modal: ${error.message}`, 'danger');
+        showToast('Error editing the project details!', 'danger');
     }
-}
-
-// Make sure to add the verifyEditProjectElements function
-function verifyEditProjectElements() {
-    const elements = [
-        'editProjectName',
-        'editProjectDescription', 
-        'editProjectStartDate', 
-        'editProjectDeadline',
-        'editProjectStatus',
-        'editProjectPriority'
-    ];
-    
-    let allFound = true;
-    elements.forEach(id => {
-        const element = document.getElementById(id);
-        if (!element) {
-            console.error(`Element with ID ${id} not found in the DOM`);
-            allFound = false;
-        }
-    });
-    
-    if (!allFound) {
-        showToast('Some form elements could not be found. Please reload the page and try again.', 'warning');
-    }
-    
-    return allFound;
 }
 
 async function updateProject() {
     try {
-        // Get project ID from hidden field or data attribute
         const editProjectId = document.getElementById('editProjectId') ? 
             document.getElementById('editProjectId').value : 
             document.getElementById('editProjectModal').getAttribute('data-project-id');
             
-        if (!editProjectId) {
-            console.error('Project ID not found');
-            showToast('Error: Project ID not found', 'danger');
-            return;
-        }
-
-        // Get form elements
         const nameInput = document.getElementById('editProjectName');
         const descriptionInput = document.getElementById('editProjectDescription');
         const startDateInput = document.getElementById('editProjectStartDate');
@@ -1210,27 +626,11 @@ async function updateProject() {
         const priorityInput = document.getElementById('editProjectPriority');
         const statusInput = document.getElementById('editProjectStatus');
 
-        // Validate form elements exist
-        if (!nameInput || !startDateInput || !deadlineInput || !priorityInput || !statusInput) {
-            let missingElements = [];
-            if (!nameInput) missingElements.push('Project Name');
-            if (!startDateInput) missingElements.push('Start Date');
-            if (!deadlineInput) missingElements.push('Deadline');
-            if (!priorityInput) missingElements.push('Priority');
-            if (!statusInput) missingElements.push('Status');
-            
-            console.error(`Missing form elements: ${missingElements.join(', ')}`);
-            showToast(`Error: Form is incomplete. Missing: ${missingElements.join(', ')}`, 'danger');
-            return;
-        }
-
-        // Validate required fields
         if (!nameInput.value.trim() || !startDateInput.value.trim() || !deadlineInput.value.trim()) {
             showToast('Please fill all required fields', 'warning');
             return;
         }
 
-        // Create object with form data WITH AdditionalData included to prevent NULL issues
         const projectData = {
             name: nameInput.value.trim(),
             description: descriptionInput ? descriptionInput.value.trim() : '',
@@ -1246,11 +646,9 @@ async function updateProject() {
             ]
         };
 
-        // Show loading message
         document.getElementById('updateProjectButton').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
         document.getElementById('updateProjectButton').disabled = true;
 
-        // Get CSRF token if available
         const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
         const headers = {
             'Content-Type': 'application/json',
@@ -1261,79 +659,37 @@ async function updateProject() {
             headers['RequestVerificationToken'] = csrfTokenMeta.content;
         }
 
-        console.log('Sending project update:', JSON.stringify(projectData));
-
-        // Use normal update without any query parameters
         const response = await fetch(`/api/projectsapi/${editProjectId}/update`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(projectData)
         });
 
-        console.log('Server response status:', response.status);
-        
-        // Attempt to get the response text for better error reporting
-        let responseText = '';
-        try {
-            responseText = await response.text();
-            console.log('Server response:', responseText);
-        } catch (e) {
-            console.error('Could not read response text:', e);
-        }
-
         if (response.ok) {
             showToast('Project updated successfully', 'success');
             
-            // Close modal
             const modalElement = document.getElementById('editProjectModal');
             const modal = bootstrap.Modal.getInstance(modalElement);
             if (modal) {
                 modal.hide();
-            } else {
-                // Fallback if modal instance not found
-                modalElement.classList.remove('show');
-                modalElement.style.display = 'none';
-                document.body.classList.remove('modal-open');
-                document.querySelector('.modal-backdrop')?.remove();
-            }
-            
-            // Reload project to show changes
+            } 
+         
             await loadProject(editProjectId);
         } else {
-            // Handle different error responses
-            let errorMessage = 'Failed to update project';
-            
-            try {
-                if (responseText) {
-                    const errorData = JSON.parse(responseText);
-                    if (errorData.error) {
-                        errorMessage = `Error: ${errorData.error}`;
-                    }
-                }
-            } catch (e) {
-                console.error('Error parsing error response:', e);
-                errorMessage = `Server error: ${response.status}`;
-                
-                if (responseText) {
-                    errorMessage += ` - ${responseText}`;
-                }
-            }
-            
-            console.error('Update project error:', errorMessage);
-            showToast(errorMessage, 'danger');
+            showToast('There was an error updating the project!', 'error');
         }
+
+        await loadProjectsForSidebar();
     } catch (error) {
-        console.error('Error in updateProject:', error);
-        showToast('An unexpected error occurred', 'danger');
+        showToast('An unexpected error occurred', 'error');
     } finally {
-        // Reset button
         document.getElementById('updateProjectButton').innerHTML = 'Save Changes';
         document.getElementById('updateProjectButton').disabled = false;
     }
 }
 
 function showAddMembersModal(projectId) {
-    selectedUsers.clear(); // Clear previously selected users
+    selectedUsers.clear();
 
     // First create the modal
     const modal = new bootstrap.Modal(document.getElementById('addMembersModal'));
@@ -1342,40 +698,29 @@ function showAddMembersModal(projectId) {
     const addButton = document.querySelector('#addMembersModal .btn-primary');
     addButton.setAttribute('onclick', `addProjectMembers(${projectId})`);
 
+    // Prepare the modal body
+    const modalBody = document.querySelector('#addMembersModal .modal-body');
+
+    // Clear the current content
+    modalBody.innerHTML = '';
+
+    // Create a container div with a unique ID for the user search
+    const containerId = 'addMembersSearchContainer';
+    const containerDiv = document.createElement('div');
+    containerDiv.id = containerId;
+    modalBody.appendChild(containerDiv);
+
+    // Show the modal
     modal.show();
 
-    // After modal is shown, initialize the user search
-    const searchContainer = document.querySelector('#addMembersModal .modal-body');
-    searchContainer.innerHTML = `
-                <div class="user-search-container">
-                    <input type="text" 
-                           class="user-search-input" 
-                           placeholder="Search users..."
-                           oninput="handleUserSearch(this.value, 'addMembersSearchResults')">
-                    <div id="addMembersSearchResults" class="user-search-results"></div>
-                </div>
-                <div id="addMembersSelectedUsers" class="selected-users-container"></div>
-            `;
-
-    // Load users after setting up the containers, passing the project ID
-    loadAvailableUsers(projectId);
-}
-
-// Add this new function to refresh the selected users display
-function refreshSelectedUsersDisplay() {
-    const selectedContainer = document.getElementById('addMembersSelectedUsers') ||
-        document.getElementById('createProjectSelectedUsers');
-    if (!selectedContainer) return;
-
-    // Clear the container
-    selectedContainer.innerHTML = '';
-
-    // Add all selected users to the display
-    selectedUsers.forEach(userId => {
-        const user = allUsers.find(u => u.id === userId);
-        if (user) {
-            selectedContainer.insertAdjacentHTML('beforeend', createSelectedUserItem(user));
-        }
+    // Initialize the user search after modal is shown
+    // This uses your existing functions to create the search container
+    loadUserSearch(containerId).then(() => {
+        // After user search is loaded, load available users for this project
+        loadAvailableUsers(projectId).then(() => {
+            // Initialize selected users display
+            refreshSelectedUsersDisplay();
+        });
     });
 }
 
@@ -1756,74 +1101,6 @@ async function createTask(projectId) {
     }
 }
 
-// Add this function to handle task filtering
-async function filterTasks(projectId, filter) {
-    try {
-        const response = await fetch(`/api/projectsapi/${projectId}`);
-        if (!response.ok) {
-            throw new Error('Failed to load project details');
-        }
-        const project = await response.json();
-
-        // Correct element ID - tasksDisplay instead of non-existent tasksList
-        const tasksDisplay = document.getElementById('tasksDisplay');
-        if (!tasksDisplay) {
-            throw new Error('Tasks display container not found');
-        }
-        
-        const currentUserId = project.currentUserId;
-
-        // Update button states
-        const buttons = document.querySelectorAll('.tasks-filters .btn-group .btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        const activeButton = document.querySelector(`.tasks-filters .btn:nth-child(${getButtonIndex(filter)})`);
-        if (activeButton) {
-            activeButton.classList.add('active');
-        }
-
-        // Filter tasks
-        let filteredTasks = project.tasks || [];
-
-        switch (filter) {
-            case 'my':
-                filteredTasks = filteredTasks.filter(task =>
-                    task.assignedUsers.some(u => u.id === currentUserId)
-                );
-                break;
-            case 'pending':
-                filteredTasks = filteredTasks.filter(task =>
-                    task.status !== 'Completed'
-                );
-                break;
-            case 'completed':
-                filteredTasks = filteredTasks.filter(task =>
-                    task.status === 'Completed'
-                );
-                break;
-            // 'all' case will use all tasks by default
-        }
-
-        // Update tasks display
-        tasksDisplay.innerHTML = filteredTasks.length > 0
-            ? filteredTasks.map(task => createTaskCard(task, currentUserId, project.id)).join('')
-            : '<div class="no-tasks-message"><i class="bi bi-info-circle"></i> No tasks found for this filter.</div>';
-    } catch (error) {
-        console.error('Error filtering tasks:', error);
-        showToast('Failed to filter tasks: ' + error.message, 'danger');
-    }
-}
-
-// Helper function to get the correct button index
-function getButtonIndex(filter) {
-    switch (filter) {
-        case 'all': return 1;
-        case 'my': return 2;
-        case 'active': return 3;
-        case 'completed': return 4;
-        default: return 1;
-    }
-}
-
 async function showTaskDetails(taskId) {
     try {
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`);
@@ -2011,306 +1288,14 @@ async function updateTask(taskId, projectId) {
     }
 }
 
-async function updateTaskStatus(taskId, projectId, newStatus, event) {
-    // Prevent the click from propagating to parent elements
-    if (event) {
-        event.stopPropagation();
-    }
-    
-    try {
-        // Create a properly formatted additionalData JSON string
-        // This ensures it will never be null in the database
-        const additionalData = JSON.stringify({
-            taskId: taskId,
-            newStatus: newStatus,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Prepare status update data
-        const statusData = {
-            status: newStatus,
-            additionalData: additionalData
-        };
-        
-        // Prepare headers for the fetch request
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-
-        console.log('Updating task status with data:', statusData);
-
-        const response = await fetch(`/api/projectsapi/tasks/${taskId}/status`, {
-            method: 'PUT',
-            headers: headers,
-            body: JSON.stringify(statusData)
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error updating task status:', errorText);
-            
-            // Reset checkbox state if updating fails
-            if (event && event.target && event.target.type === 'checkbox') {
-                event.target.checked = newStatus === 'Completed';
-            }
-            
-            throw new Error('Failed to update task status');
-        }
-
-        // Reload the project to show updated task status
-        await loadProject(projectId);
-        showToast(`Task marked as ${newStatus}`, 'success');
-    } catch (error) {
-        console.error('Error updating task status:', error);
-        showToast('Error updating task status: ' + error.message, 'error');
-        
-        // Reset checkbox state if updating fails
-        if (event && event.target && event.target.type === 'checkbox') {
-            event.target.checked = newStatus === 'Completed';
-        }
-    }
-}
-
-function toggleArchivedProjectsList() {
-    const archivedProjectsList = document.getElementById('archivedProjectsList');
-    const icon = event.currentTarget.querySelector('.bi-chevron-down, .bi-chevron-up');
-    
-    archivedProjectsList.classList.toggle('active');
-    
-    // Toggle icon
-    if (icon) {
-        if (icon.classList.contains('bi-chevron-down')) {
-            icon.classList.remove('bi-chevron-down');
-            icon.classList.add('bi-chevron-up');
-        } else {
-            icon.classList.remove('bi-chevron-up');
-            icon.classList.add('bi-chevron-down');
-        }
-    }
-}
-
-async function loadArchivedProjects() {
-    try {
-        console.log('Loading archived projects...');
-        const response = await fetch('/api/ProjectsApi/archived');
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error loading archived projects');
-        }
-        
-        const projects = await response.json();
-        const archivedProjectsList = document.getElementById('archivedProjectsList');
-        archivedProjectsList.innerHTML = '';
-        
-        if (projects.length === 0) {
-            archivedProjectsList.innerHTML = '<div class="project-item text-muted">No archived projects</div>';
-            return;
-        }
-        
-        projects.forEach(project => {
-            const projectItem = document.createElement('div');
-            projectItem.className = 'project-item';
-            projectItem.innerHTML = `
-                <div onclick="loadProject(${project.id})" style="cursor: pointer;">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>${project.name}</span>
-                </div>
-            `;
-            archivedProjectsList.appendChild(projectItem);
-        });
-        
-        console.log('Archived projects loaded successfully:', projects.length);
-    } catch (error) {
-        console.error('Failed to load archived projects:', error);
-        showToast('Failed to load archived projects: ' + error.message, 'error');
-    }
-}
-
-/**
- * Loads the archived project view with watermark and restricted functionality
- * @param {Object} project - The project data
- */
-async function loadArchivedProjectView(project) {
-    try {
-        // Use a more appropriate approach to handle the archived view
-        const projectContent = document.querySelector('.projects-content');
-        
-        // Get creator name - properly handle the case when createdBy might be missing
-        let creatorName = 'Unknown';
-        if (project.createdBy && project.createdBy.name) {
-            creatorName = `${project.createdBy.name} ${project.createdBy.lastName || ''}`;
-        } else if (project.projectMembers && project.projectMembers.length > 0) {
-            // Try to find the project lead from members if creator is not available
-            const projectLead = project.projectMembers.find(m => m.role === 'Project Lead');
-            if (projectLead && projectLead.user) {
-                creatorName = `${projectLead.user.name} ${projectLead.user.lastName || ''}`;
-            }
-        }
-        
-        // Use the current date as completion date since we don't have the actual date when it was completed
-        // In a real app, you would store this in the database when the project is marked as completed
-        const completionDate = project.updatedAt ? formatDate(project.updatedAt) : formatDate(new Date());
-        
-        projectContent.innerHTML = `
-            <div class="project-details archived-project">
-                <div class="archived-overlay">
-                    <span>ARCHIVED</span>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <h2>${project.name}</h2>
-                    </div>
-                    <button class="btn btn-success" onclick="showRestoreProjectModal()">
-                        <i class="bi bi-arrow-counterclockwise"></i> Restore Project
-                    </button>
-                </div>
-                
-                <div class="project-info mt-4">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <p class="description">${project.description || 'No description provided'}</p>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="info-card">
-                                <p><strong>Status:</strong> Completed</p>
-                                <p><strong>Priority:</strong> ${project.priority}</p>
-                                <p><strong>Start Date:</strong> ${formatDate(project.startDate)}</p>
-                                <p><strong>Original Deadline:</strong> ${formatDate(project.deadline)}</p>
-                                <p><strong>Completion Date:</strong> ${completionDate}</p>
-                                <p><strong>Created By:</strong> ${creatorName}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="team-members mt-4">
-                    <h5>Team Members</h5>
-                    <div class="members-list" id="archivedProjectMembers">
-                        <!-- Member cards will be inserted here -->
-                    </div>
-                </div>
-                
-                <div class="tasks-container mt-4">
-                    <h5>Tasks</h5>
-                    <div id="archivedProjectTasks">
-                        <!-- Tasks will be inserted here -->
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Set the project ID for restoration
-        document.getElementById('restoreProjectId').value = project.id;
-        
-        // Populate team members
-        const membersContainer = document.getElementById('archivedProjectMembers');
-        membersContainer.innerHTML = '';
-        
-        if (project.projectMembers && project.projectMembers.length > 0) {
-            project.projectMembers.forEach(member => {
-                const memberCard = document.createElement('div');
-                memberCard.className = 'member-card';
-                
-                // Handle potential missing data
-                const userProfilePic = member.user && member.user.profilePicturePath ? 
-                    member.user.profilePicturePath : '/images/default/default-profile.png';
-                const userName = member.user ? 
-                    `${member.user.name || ''} ${member.user.lastName || ''}` : 'Unknown User';
-                
-                memberCard.innerHTML = `
-                    <img src="${userProfilePic}" alt="${userName}" class="member-avatar" onerror="this.src='/images/default/default-profile.png'">
-                    <div class="member-info">
-                        <p class="member-name">${userName}</p>
-                        <p class="member-role">${member.role || 'Member'}</p>
-                    </div>
-                `;
-                membersContainer.appendChild(memberCard);
-            });
-        } else {
-            membersContainer.innerHTML = '<p class="text-muted">No team members</p>';
-        }
-        
-        // Populate tasks
-        const tasksContainer = document.getElementById('archivedProjectTasks');
-        tasksContainer.innerHTML = '';
-        
-        if (project.tasks && project.tasks.length > 0) {
-            project.tasks.forEach(task => {
-                const taskCard = document.createElement('div');
-                taskCard.className = `task-card ${task.priority ? task.priority.toLowerCase() : 'medium'} ${task.status === 'Completed' ? 'completed' : ''}`;
-                
-                // Generate assigned users HTML
-                let assignedUsersHtml = '';
-                if (task.assignments && task.assignments.length > 0) {
-                    assignedUsersHtml = `
-                        <div class="assigned-users">
-                            ${task.assignments.map(assignment => {
-                                const userName = assignment.user ? assignment.user.name : 'Unknown';
-                                const userPic = assignment.user && assignment.user.profilePicturePath ? 
-                                    assignment.user.profilePicturePath : '/images/default/default-profile.png';
-                                
-                                return `
-                                <div class="assigned-user">
-                                    <img src="${userPic}" 
-                                         alt="${userName}" 
-                                         class="user-avatar"
-                                         onerror="this.src='/images/default/default-profile.png'">
-                                    <span class="user-name">${userName}</span>
-                                </div>
-                            `}).join('')}
-                        </div>
-                    `;
-                } else {
-                    assignedUsersHtml = '<span class="text-muted">Unassigned</span>';
-                }
-                
-                // Handle task titles - they could be in different properties depending on the API
-                const taskTitle = task.title || task.taskTitle || 'Untitled Task';
-                
-                taskCard.innerHTML = `
-                    <div class="task-header">
-                        <h5 class="task-title">${taskTitle}</h5>
-                        <span class="task-priority badge ${task.priority ? task.priority.toLowerCase() : 'medium'}">${task.priority || 'Medium'}</span>
-                    </div>
-                    <p class="task-description">${task.description || 'No description'}</p>
-                    <div class="task-meta">
-                        <div>
-                            <small>Due: ${formatDate(task.dueDate)}</small>
-                        </div>
-                        <div class="assigned-to">
-                            <small>Assigned to:</small>
-                            ${assignedUsersHtml}
-                        </div>
-                    </div>
-                `;
-                
-                tasksContainer.appendChild(taskCard);
-            });
-        } else {
-            tasksContainer.innerHTML = '<p class="text-muted">No tasks</p>';
-        }
-    } catch (error) {
-        console.error('Error loading archived project view:', error);
-        showToast('Failed to load archived project: ' + error.message, 'error');
-    }
-}
-
-/**
- * Format date to a readable string
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date
- */
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-}
-
 /**
  * Show the restore project modal
+ * @param {number} projectId - The ID of the project to restore
  */
-function showRestoreProjectModal() {
+function showRestoreProjectModal(projectId) {
+    // Set the project ID for restoration
+    document.getElementById('restoreProjectId').value = projectId;
+    
     // Set default deadline to 2 weeks from now
     const twoWeeksFromNow = new Date();
     twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
@@ -2328,32 +1313,59 @@ function showRestoreProjectModal() {
  */
 async function restoreProject() {
     try {
+        // Get form values
         const projectId = document.getElementById('restoreProjectId').value;
         const newDeadline = document.getElementById('restoreProjectDeadline').value;
         const newStatus = document.getElementById('restoreProjectStatus').value;
         const newPriority = document.getElementById('restoreProjectPriority').value;
-        
+
         if (!projectId || !newDeadline) {
             showToast('Please fill in all required fields', 'error');
             return;
         }
-        
-        const projectResponse = await fetch(`/api/projectsapi/${projectId}`);
-        if (!projectResponse.ok) {
-            throw new Error('Failed to load project details');
+
+        // Show loading state
+        const restoreBtn = document.getElementById('restoreProjectBtn');
+        if (restoreBtn) {
+            restoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Restoring...';
+            restoreBtn.disabled = true;
         }
-        const currentProject = await projectResponse.json();
-        
-        // Update project with new data
+
+        // First, fetch the existing project data
+        console.log('Fetching existing project data for ID:', projectId);
+        const projectResponse = await fetch(`/api/ProjectsApi/${projectId}`);
+
+        if (!projectResponse.ok) {
+            throw new Error(`Failed to fetch project data: ${projectResponse.status}`);
+        }
+
+        const projectData = await projectResponse.json();
+        console.log('Existing project data:', projectData);
+
+        // Format the date properly as an ISO string for JSON serialization
+        const deadlineDate = new Date(newDeadline);
+
+        // Create the update data object using existing data plus our changes
         const updateData = {
-            name: currentProject.name,
-            description: currentProject.description,
-            startDate: currentProject.startDate,
-            deadline: newDeadline,
+            // Required fields from existing project
+            name: projectData.name,
+            description: projectData.description || '',
+            startDate: projectData.startDate,
+
+            // New values for restoration
+            deadline: deadlineDate.toISOString(),
             status: newStatus,
-            priority: newPriority
+            priority: newPriority,
+
+            // Add activity log data to avoid nulls
+            activityLogAdditions: [
+                { action: "restored project", targetType: "Project", additionalData: "{}" }
+            ]
         };
-        
+
+        console.log('Restore data being sent:', JSON.stringify(updateData));
+
+        // Use the API endpoint for project update
         const response = await fetch(`/api/projectsapi/${projectId}/update`, {
             method: 'PUT',
             headers: {
@@ -2362,74 +1374,74 @@ async function restoreProject() {
             },
             body: JSON.stringify(updateData)
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.title || 'Failed to restore project');
+
+        console.log('Restore response status:', response.status);
+
+        // Try to read the response text for better error handling
+        let responseText = '';
+        try {
+            responseText = await response.text();
+            console.log('Server response:', responseText);
+        } catch (e) {
+            console.error('Could not read response text:', e);
         }
-        
+
+        if (!response.ok) {
+            try {
+                // Try to parse JSON error response
+                if (responseText && responseText.trim().startsWith('{')) {
+                    const errorData = JSON.parse(responseText);
+                    if (errorData.errors) {
+                        const errorMessages = Object.entries(errorData.errors)
+                            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+                            .join('; ');
+                        throw new Error(`Validation failed: ${errorMessages}`);
+                    } else {
+                        throw new Error(errorData.message || errorData.error || 'Failed to restore project');
+                    }
+                } else {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+            } catch (parseError) {
+                if (parseError.message.includes('Validation failed')) {
+                    throw parseError;
+                } else {
+                    throw new Error(`Failed to restore project: ${response.status}`);
+                }
+            }
+        }
+
         // Hide the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('restoreProjectModal'));
         if (modal) {
             modal.hide();
         }
-        
-        showToast(`Project restored with new deadline: ${formatDate(newDeadline)}`, 'success');
-        
-        // Refresh both project lists and reload project view
-        await loadProjects();
-        await loadArchivedProjects();
-        
-        // Update project count badges
-        await updateProjectCountBadges();
-        
+
+        showToast(`Project restored successfully`, 'success');
+
+        // Refresh the sidebar
+        await loadProjectsForSidebar();
+
+        // Reload the project with the regular view
         await loadProject(projectId);
     } catch (error) {
         console.error('Error restoring project:', error);
         showToast(error.message, 'error');
+    } finally {
+        // Reset button state
+        const restoreBtn = document.getElementById('restoreProjectBtn');
+        if (restoreBtn) {
+            restoreBtn.innerHTML = 'Restore Project';
+            restoreBtn.disabled = false;
+        }
     }
 }
 
-/**
- * Updates the project count badges in the sidebar
- */
-async function updateProjectCountBadges() {
-    try {
-        // Get the current counts from the server
-        const response = await fetch('/api/ProjectsApi/counts');
-        if (!response.ok) {
-            throw new Error('Failed to get project counts');
-        }
-        
-        const counts = await response.json();
-        
-        // Update the badges in the new sidebar
-        const activeBadge = document.getElementById('active-projects-count');
-        const archivedBadge = document.getElementById('archived-projects-count');
-        
-        // Update active projects count if element exists
-        if (activeBadge) {
-            activeBadge.textContent = counts.active || 0;
-        }
-        
-        // Update archived projects count if element exists
-        if (archivedBadge) {
-            archivedBadge.textContent = counts.archived || 0;
-        }
-        
-        console.log('Project count badges updated:', counts);
-    } catch (error) {
-        console.error('Error loading activity feed:', error);
-        const activityFeedContent = document.getElementById('activityFeedContent');
-        if (activityFeedContent) {
-            activityFeedContent.innerHTML = `
-                <div class="text-center text-danger py-3">
-                    <i class="bi bi-exclamation-triangle"></i> Failed to load activity feed.
-                </div>
-            `;
-        }
-    }
-}
+// Set up event listener for the restore button
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener to the restore button in the modal
+    document.getElementById('restoreProjectBtn').addEventListener('click', restoreProject);
+});
 
 /**
  * Creates an HTML item for an activity
@@ -2548,57 +1560,6 @@ function formatTimeAgo(date) {
     return `${diffInYears} ${diffInYears === 1 ? 'year' : 'years'} ago`;
 }
 
-/**
- * Gets the appropriate badge color for a project status
- * @param {string} status - The project status
- * @returns {string} The badge color class name
- */
-function getStatusBadgeColor(status) {
-    switch (status) {
-        case 'Active': return 'success';
-        case 'On Hold': return 'warning';
-        case 'Completed': return 'secondary';
-        case 'Cancelled': return 'danger';
-        default: return 'primary';
-    }
-}
-
-/**
- * Gets the appropriate badge color for a priority level
- * @param {string} priority - The priority level
- * @returns {string} The badge color class name
- */
-function getPriorityBadgeColor(priority) {
-    switch (priority) {
-        case 'Low': return 'success';
-        case 'Medium': return 'info';
-        case 'High': return 'warning';
-        case 'Urgent': return 'danger';
-        default: return 'secondary';
-    }
-}
-
-// Add debug helper function
-function debugApiEndpoint(endpoint) {
-    console.log(`Testing API endpoint: ${endpoint}`);
-    fetch(endpoint)
-        .then(response => {
-            console.log(`Response status for ${endpoint}: ${response.status} ${response.statusText}`);
-            if (!response.ok) {
-                console.error(`Error with endpoint ${endpoint}: ${response.status} ${response.statusText}`);
-                return null;
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data) {
-                console.log(`Data received from ${endpoint}:`, data);
-            }
-        })
-        .catch(error => {
-            console.error(`Fetch error with ${endpoint}:`, error);
-        });
-}
 
 // Error handler for source map errors (like signalr.min.js.map)
 window.addEventListener('error', function(event) {
@@ -2610,3 +1571,212 @@ window.addEventListener('error', function(event) {
     }
     return false;
 }, true);
+
+/**
+ * Setup event listeners for project details page
+ * @param {number} projectId - The ID of the project
+ */
+function setupProjectEventListeners(projectId) {
+    // Task filter buttons
+    const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter') || this.textContent.trim().toLowerCase();
+            filterTasks(projectId, filter);
+        });
+    });
+    
+    // Activity feed refresh button
+    const refreshBtn = document.getElementById('refreshActivityBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => refreshActivityFeed(projectId, true));
+    }
+    
+    // Setup activity feed scroll event
+    const feedContent = document.querySelector('.activity-feed-content');
+    if (feedContent) {
+        feedContent.addEventListener('scroll', function() {
+            if (this.scrollTop > 10) {
+                this.classList.add('scrolled-down');
+            } else {
+                this.classList.remove('scrolled-down');
+            }
+        });
+    }
+    
+    // Other event listeners...
+    
+    // View all activities button
+    const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', () => showAllActivities(projectId));
+    }
+}
+
+/**
+ * Shows a modal with all activities for a project
+ * @param {number} projectId - The ID of the project
+ */
+async function showAllActivities(projectId) {
+    // Create the modal if it doesn't exist
+    if (!document.getElementById('allActivitiesModal')) {
+        const modalHtml = `
+            <div class="modal fade" id="allActivitiesModal" tabindex="-1" aria-labelledby="allActivitiesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="allActivitiesModalLabel">
+                                <i class="bi bi-activity"></i> Project Activity History
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="allActivitiesModalBody">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading complete activity history...</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('allActivitiesModal'));
+    modal.show();
+
+    try {
+        // Fetch all activities (use a larger limit)
+        const response = await fetch(`/api/projectsapi/${projectId}/activities?limit=100`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load activities: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const modalBody = document.getElementById('allActivitiesModalBody');
+        
+        if (!data.success || !data.activities || data.activities.length === 0) {
+            modalBody.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="empty-icon mx-auto mb-3">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <p>No activity history found for this project.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Create a timeline view for all activities
+        let timelineHtml = '<div class="activity-timeline full-timeline">';
+        
+        data.activities.forEach(activity => {
+            timelineHtml += `
+                <div class="activity-item">
+                    <div class="activity-timeline-connector">
+                        <div class="activity-timeline-dot ${getActivityTypeClass(activity.type, activity.targetType)}"></div>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-user">
+                            <img src="${activity.userAvatar || '/images/default/default-profile.png'}" 
+                                 alt="${activity.userName}" 
+                                 class="activity-avatar"
+                                 onerror="this.onerror=null; this.src='/images/default/default-profile.png'">
+                            <div class="activity-user-info">
+                                <span class="activity-username">${activity.userName}</span>
+                                <span class="activity-time" title="${formatDate(activity.timestamp)}">${formatTimeAgo(new Date(activity.timestamp))}</span>
+                            </div>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-message">
+                                ${activity.description}
+                                ${activity.targetName ? `<span class="activity-target">${activity.targetName}</span>` : ''}
+                            </div>
+                            <div class="activity-icon-badge ${getActivityTypeClass(activity.type, activity.targetType)}">
+                                <i class="bi ${getActivityIcon(activity.type, activity.targetType)}"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        timelineHtml += '</div>';
+        modalBody.innerHTML = timelineHtml;
+        
+    } catch (error) {
+        console.error('Error loading all activities:', error);
+        document.getElementById('allActivitiesModalBody').innerHTML = `
+            <div class="text-center py-4 text-danger">
+                <i class="bi bi-exclamation-triangle fs-1"></i>
+                <p class="mt-3">Failed to load activity history.</p>
+                <button class="btn btn-outline-primary mt-2" onclick="showAllActivities(${projectId})">
+                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for the activity modal
+function getActivityTypeClass(type, targetType) {
+    if (type) {
+        switch(type.toLowerCase()) {
+            case 'task_created': return 'activity-task-created';
+            case 'task_assigned': return 'activity-task-assigned';
+            case 'task_completed': return 'activity-task-completed';
+            case 'task_updated': return 'activity-task-updated';
+            case 'member_joined': return 'activity-member-joined';
+            case 'project_created': return 'activity-project-created';
+            case 'project_updated': return 'activity-project-updated';
+            default: return 'activity-default';
+        }
+    } else if (targetType) {
+        switch(targetType.toLowerCase()) {
+            case 'task': return 'activity-task-updated';
+            case 'project': return 'activity-project-updated';
+            case 'member': return 'activity-member-joined';
+            default: return 'activity-default';
+        }
+    }
+    return 'activity-default';
+}
+
+function getActivityIcon(type, targetType) {
+    if (type) {
+        switch(type.toLowerCase()) {
+            case 'task_created': return 'bi-plus-circle';
+            case 'task_assigned': return 'bi-person-check';
+            case 'task_completed': return 'bi-check-circle';
+            case 'task_updated': return 'bi-pencil';
+            case 'member_joined': return 'bi-person-plus';
+            case 'project_created': return 'bi-folder-plus';
+            case 'project_updated': return 'bi-pencil-square';
+            default: return 'bi-info-circle';
+        }
+    } else if (targetType) {
+        switch(targetType.toLowerCase()) {
+            case 'task': return 'bi-list-check';
+            case 'project': return 'bi-folder-symlink';
+            case 'member': return 'bi-people';
+            default: return 'bi-info-circle';
+        }
+    }
+    return 'bi-info-circle';
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}

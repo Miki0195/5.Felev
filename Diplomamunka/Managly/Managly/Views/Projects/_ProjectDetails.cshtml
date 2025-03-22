@@ -1,0 +1,169 @@
+﻿@model Managly.Models.ProjectDetailsViewModel
+
+<div class="project-details">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@Model.Name</h2>
+        <div class="btn-group">
+            @if (Model.IsProjectLead)
+            {
+                <button class="btn btn-outline-primary" onclick="showEditProjectModal(@Model.Id)">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-outline-danger" onclick="showDeleteConfirmation(@Model.Id)">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <!-- Project description card -->
+            <div class="card project-description-card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-file-text"></i> Project Details
+                    </h5>
+
+                    <div class="project-description-content">
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <p class="description-text">@Model.Description</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted fst-italic">No description provided.</p>
+                        }
+                    </div>
+
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-calendar-check"></i> Started:</span>
+                                <span class="detail-value">@Model.FormattedStartDate</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-calendar-event"></i> Deadline:</span>
+                                <span class="detail-value">@Model.FormattedDeadline</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-info-circle"></i> Status:</span>
+                                <span class="badge bg-@Model.StatusCssClass">@Model.Status</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="bi bi-flag"></i> Priority:</span>
+                                <span class="badge bg-@Model.PriorityCssClass">@Model.Priority</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project progress card -->
+            <div class="card project-progress-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-graph-up"></i> Progress
+                    </h5>
+
+                    <div class="progress mb-2" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: @Model.ProgressPercentage%"
+                             aria-valuenow="@Model.ProgressPercentage"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            @Model.ProgressPercentage%
+                        </div>
+                    </div>
+                    <p class="text-center text-muted">
+                        <strong>@Model.CompletedTasks</strong> of <strong>@Model.TotalTasks</strong> tasks completed
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <!-- Activity Feed -->
+            <div class="project-activity-feed" id="activityFeedContainer">
+                @await Html.PartialAsync("_ActivityFeed", Model.Activities)
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Members section -->
+    <div class="team-members mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-people"></i> Team Members</h4>
+            @if (Model.IsProjectLead)
+            {
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="showAddMembersModal(@Model.Id)">
+                        <i class="bi bi-person-plus"></i> Add Members
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="showManageMembersModal(@Model.Id)">
+                        <i class="bi bi-gear"></i> Manage
+                    </button>
+                </div>
+            }
+        </div>
+        <div class="members-list">
+            @foreach (var member in Model.TeamMembers)
+            {
+                <div class="member-card">
+                    <img src="@member.ProfilePicturePath"
+                         alt="@member.FullName"
+                         class="member-avatar"
+                         onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                    <div class="member-info">
+                        <h6 class="member-name">@member.FullName</h6>
+                        <p class="member-role">@member.Role</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Tasks section -->
+    <div class="tasks-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-list-check"></i> Tasks</h4>
+            @if (Model.IsProjectLead)
+            {
+                <button class="btn btn-sm btn-primary" onclick="showCreateTaskModal(@Model.Id)">
+                    <i class="bi bi-plus-lg"></i> Add Task
+                </button>
+            }
+        </div>
+
+        <div class="tasks-filters mb-3">
+            <div class="btn-group" role="group" aria-label="Task filters">
+                <button type="button" class="btn btn-outline-secondary active"
+                        onclick="filterTasks(@Model.Id, 'all')">
+                    All
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="filterTasks(@Model.Id, 'my')">
+                    My Tasks
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="filterTasks(@Model.Id, 'pending')">
+                    Pending
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="filterTasks(@Model.Id, 'completed')">
+                    Completed
+                </button>
+            </div>
+        </div>
+
+        <div id="tasksDisplay">
+            <partial name="_TasksList" model="@Model.Tasks" />
+        </div>
+    </div>
+</div>
