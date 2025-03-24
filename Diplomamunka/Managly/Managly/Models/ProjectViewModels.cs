@@ -42,6 +42,8 @@ namespace Managly.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public string FormattedDueDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public bool IsOverdue { get; set; }
         public string Priority { get; set; }
         public string PriorityCssClass { get; set; }
         public string Status { get; set; }

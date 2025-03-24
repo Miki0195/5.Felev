@@ -538,6 +538,21 @@ select[multiple] {
             color: #868e96;
         }
 
+.task-card.overdue {
+    border-left: 4px solid #dc3545 !important;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.overdue-badge {
+    font-size: 0.7rem;
+    padding: 0.25em 0.5em;
+}
+
+.task-card.overdue .task-meta span.text-danger {
+    color: #dc3545;
+    font-weight: bold;
+}
+
 .task-header {
     display: flex;
     justify-content: space-between;

@@ -1,8 +1,125 @@
-﻿// IMPORTANT!!!!!!!!!!!!!! PUT THE EVENT LISTENER STUFF AND DOM STUFF TOGETHER BECAUSE WE HAVE LIKE 100 FROM THEM
+﻿function setupEventListeners() {
+    const projectIdFromUrl = window.location.hash ? window.location.hash.substring(1) : null;
+    const isProjectDetailsPage = !!document.querySelector('.projects-content .project-details');
+    const isMembersModalOpen = !!document.querySelector('#manageMembersModal.show');
 
+    loadProjectsForSidebar();
 
+    // ========== SIDEBAR NAVIGATION EVENTS ==========
+    const filterTabsContainer = document.querySelector('.filter-tabs');
+    if (filterTabsContainer) {
+        filterTabsContainer.addEventListener('click', (event) => {
+            const filterTab = event.target.closest('.filter-tab');
+            if (!filterTab) return;
 
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            filterTab.classList.add('active');
 
+            const filter = filterTab.dataset.filter;
+            filterProjectsInSidebar(filter);
+        });
+    }
+
+    const searchInput = document.getElementById('project-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            searchProjects(this.value);
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchProjects(this.value);
+            }
+        });
+    }
+
+    const createButton = document.getElementById('btn-create-project');
+    if (createButton) {
+        createButton.addEventListener('click', openCreateProjectModal);
+    }
+
+    // ========== PROJECT DETAILS PAGE EVENTS ==========
+    if (isProjectDetailsPage && projectIdFromUrl) {
+        const projectId = parseInt(projectIdFromUrl);
+
+        const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.getAttribute('data-filter') || this.textContent.trim().toLowerCase();
+                filterTasks(projectId, filter);
+            });
+        });
+
+        const feedContent = document.querySelector('.activity-feed-content');
+        if (feedContent) {
+            feedContent.addEventListener('scroll', function () {
+                if (this.scrollTop > 10) {
+                    this.classList.add('scrolled-down');
+                } else {
+                    this.classList.remove('scrolled-down');
+                }
+            });
+        }
+
+        const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
+        if (viewAllBtn) {
+            viewAllBtn.addEventListener('click', () => showAllActivities(projectId));
+        }
+
+    }
+
+    // ========== MEMBERS MANAGEMENT MODAL EVENTS ==========
+    if (isMembersModalOpen || document.getElementById('manageMembersModal')) {
+        document.querySelectorAll('.role-select').forEach(select => {
+            const oldSelect = select.cloneNode(true);
+            select.parentNode.replaceChild(oldSelect, select);
+            select = oldSelect;
+
+            select.addEventListener('change', async function () {
+                const userId = this.dataset.userId;
+                const projectId = this.dataset.projectId;
+                const newRole = this.value;
+
+                try {
+                    await updateMemberRole(projectId, userId, newRole);
+                } catch (error) {
+                    this.value = this.getAttribute('data-original-value') || 'Member';
+                    showToast('Failed to update member role', 'error');
+                }
+            });
+
+            select.setAttribute('data-original-value', select.value);
+        });
+
+        document.querySelectorAll('.remove-member-btn').forEach(button => {
+            const oldButton = button.cloneNode(true);
+            button.parentNode.replaceChild(oldButton, button);
+            button = oldButton;
+
+            button.addEventListener('click', async function () {
+                const userId = this.dataset.userId;
+                const projectId = this.dataset.projectId;
+
+                if (confirm('Are you sure you want to remove this team member from the project?')) {
+                    try {
+                        await removeMember(projectId, userId);
+                        this.closest('tr').remove();
+                    } catch (error) {
+                        showToast('Failed to remove team member', 'error');
+                    }
+                }
+            });
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', setupEventListeners);
 
 // Everything for the sidebar
 function searchProjects(searchTerm) {
@@ -388,48 +505,7 @@ function showWelcomeMessage() {
                 </div>
             `;
 }
-// Load projects on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadProjectsForSidebar();
 
-    const filterTabsContainer = document.querySelector('.filter-tabs');
-    if (filterTabsContainer) {
-        filterTabsContainer.addEventListener('click', (event) => {
-            const filterTab = event.target.closest('.filter-tab');
-            if (!filterTab) return;
-
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            filterTab.classList.add('active');
-
-            const filter = filterTab.dataset.filter;
-            filterProjectsInSidebar(filter);
-        });
-    }
-
-    const searchInput = document.getElementById('project-search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            searchProjects(this.value);
-        });
-
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                console.log(`Search input Enter pressed: "${this.value}"`);
-                searchProjects(this.value);
-            }
-        });
-        } else {
-        console.error("Search input element not found. Looking for #project-search-input");
-    }
-
-    const createButton = document.getElementById('btn-create-project');
-    if (createButton) {
-        createButton.addEventListener('click', openCreateProjectModal, { once: false });
-    }
-});
 //LOADING THE SELECTED PROJECTS
 async function loadProject(projectId) {
     const projectContent = document.querySelector('.projects-content');
@@ -480,8 +556,8 @@ async function loadProject(projectId) {
                 this.classList.add('active');
             });
         });
-        
-        setupProjectEventListeners(projectId);
+
+        setupEventListeners();
     } catch (error) {
         showToast('There was an error loading the project.', 'danger')
     }
@@ -741,55 +817,12 @@ async function showManageMembersModal(projectId) {
         
         const html = await response.text();
         modalBody.innerHTML = html;
-        
-        attachMemberManagementEventListeners();
-        
+
+        setupEventListeners();
     } catch (error) {
         showToast(`Failed to load team members!`, 'error');
         
     }
-}
-
-function attachMemberManagementEventListeners() {
-    // Attach event listeners for role changes
-    document.querySelectorAll('.role-select').forEach(select => {
-        select.addEventListener('change', async function() {
-            const userId = this.dataset.userId;
-            const projectId = this.dataset.projectId;
-            const newRole = this.value;
-            
-            try {
-                await updateMemberRole(projectId, userId, newRole);
-            } catch (error) {
-                console.error('Error updating role:', error);
-                // Reset to original value on error
-                this.value = this.getAttribute('data-original-value') || 'Member';
-                showToast('Failed to update member role', 'error');
-            }
-        });
-        
-        // Store original value for reset on error
-        select.setAttribute('data-original-value', select.value);
-    });
-    
-    // Attach event listeners for member removal
-    document.querySelectorAll('.remove-member-btn').forEach(button => {
-        button.addEventListener('click', async function() {
-            const userId = this.dataset.userId;
-            const projectId = this.dataset.projectId;
-            
-            if (confirm('Are you sure you want to remove this team member from the project?')) {
-                try {
-                    await removeMember(projectId, userId);
-                    // Remove the row from the table
-                    this.closest('tr').remove();
-    } catch (error) {
-        console.error('Error removing member:', error);
-                    showToast('Failed to remove team member', 'error');
-                }
-            }
-        });
-    });
 }
 
 async function updateMemberRole(projectId, userId, newRole) {
@@ -849,57 +882,8 @@ async function removeMember(projectId, userId) {
     }
 }
 
-/**
- * Setup event listeners for project details page
- * @param {number} projectId - The ID of the project
- */
-function setupProjectEventListeners(projectId) {
-    // Task filter buttons
-    const filterButtons = document.querySelectorAll('.tasks-filters .btn-group .btn');
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            const filter = this.getAttribute('data-filter') || this.textContent.trim().toLowerCase();
-            filterTasks(projectId, filter);
-        });
-    });
-    
-    // Activity feed refresh button
-    const refreshBtn = document.getElementById('refreshActivityBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => refreshActivityFeed(projectId, true));
-    }
-    
-    // Setup activity feed scroll event
-    const feedContent = document.querySelector('.activity-feed-content');
-    if (feedContent) {
-        feedContent.addEventListener('scroll', function() {
-            if (this.scrollTop > 10) {
-                this.classList.add('scrolled-down');
-        } else {
-                this.classList.remove('scrolled-down');
-            }
-        });
-    }
-    
-    // Other event listeners...
-    
-    // View all activities button
-    const viewAllBtn = document.getElementById('viewAllActivitiesBtn');
-    if (viewAllBtn) {
-        viewAllBtn.addEventListener('click', () => showAllActivities(projectId));
-    }
-}
-
-
 async function refreshActivityFeed(projectId, showLoadingIndicator = true) {
     const activityFeedContainer = document.getElementById('activityFeedContainer');
-    if (!activityFeedContainer) {
-        console.log("Activity feed container not found, skipping refresh");
-            return;
-        }
         
     if (showLoadingIndicator) {
         activityFeedContainer.innerHTML = `
@@ -938,6 +922,7 @@ async function refreshActivityFeed(projectId, showLoadingIndicator = true) {
         console.warn("Primary activity feed refresh attempt failed:", error);
     }
 }
+
 async function showAllActivities(projectId) {
     const modal = new bootstrap.Modal(document.getElementById('allActivitiesModal'));
     modal.show();
@@ -982,12 +967,10 @@ async function showCreateTaskModal(projectId) {
     try {
         const modal = document.getElementById('createTaskModal');
         if (!modal) {
-            console.error('Create task modal not found in the DOM');
             showToast('Error: Modal not found. Please reload the page.', 'error');
             return;
         }
 
-        // Check if form elements exist
         const formElements = {
             'taskTitle': document.getElementById('taskTitle'),
             'taskDescription': document.getElementById('taskDescription'),
@@ -996,37 +979,19 @@ async function showCreateTaskModal(projectId) {
             'taskAssignedTo': document.getElementById('taskAssignedTo')
         };
 
-        const missingElements = [];
-        Object.entries(formElements).forEach(([id, element]) => {
-            if (!element) {
-                console.error(`Form element #${id} not found`);
-                missingElements.push(id);
-            }
-        });
-
-        if (missingElements.length > 0) {
-            console.error('Missing form elements:', missingElements.join(', '));
-            showToast('Error: Some form elements are missing. Please reload the page.', 'error');
-            return;
-        }
-
-        // Get project members for the select dropdown
         const response = await fetch(`/api/projectsapi/${projectId}`);
         if (!response.ok) {
             throw new Error('Failed to load project details');
         }
         const project = await response.json();
 
-        // Update assigned users dropdown
         const assignedToSelect = document.getElementById('taskAssignedTo');
         if (!assignedToSelect) {
             throw new Error('Cannot find the assigned users dropdown');
         }
 
-        // Clear previous options
         assignedToSelect.innerHTML = '';
 
-        // Add new options
         project.projectMembers.forEach(member => {
             const option = document.createElement('option');
             option.value = member.user.id;
@@ -1034,7 +999,6 @@ async function showCreateTaskModal(projectId) {
             assignedToSelect.appendChild(option);
         });
 
-        // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         const dueDateInput = document.getElementById('taskDueDate');
         if (dueDateInput) {
@@ -1042,25 +1006,18 @@ async function showCreateTaskModal(projectId) {
             dueDateInput.value = today;
         }
 
-        // Reset other form values
         formElements.taskTitle.value = '';
         formElements.taskDescription.value = '';
         formElements.taskPriority.value = 'Medium';
 
-        // Update Create Task button to include projectId
         const createTaskBtn = modal.querySelector('.modal-footer .btn-primary');
         if (createTaskBtn) {
             createTaskBtn.setAttribute('onclick', `createTask(${projectId})`);
-        } else {
-            console.error('Create task button not found');
-        }
+        } 
 
-        // Show the modal
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
-        console.log('Create task modal displayed successfully');
     } catch (error) {
-        console.error('Error showing create task modal:', error);
         showToast('Failed to load task creation form. Please try again.', 'error');
     }
 }
@@ -1144,20 +1101,16 @@ async function createTask(projectId) {
 async function showTaskDetails(taskId) {
     try {
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`);
-        if (!response.ok) {
-            throw new Error('Failed to load task details');
-        }
+        if (!response.ok) throw new Error('Failed to load task details');
 
         const task = await response.json();
 
-        // Get project members for the select dropdown
         const projectResponse = await fetch(`/api/projectsapi/${task.projectId}`);
         if (!projectResponse.ok) {
             throw new Error('Failed to load project details');
         }
         const project = await projectResponse.json();
 
-        // Update assigned users dropdown
         const assignedToSelect = document.getElementById('editTaskAssignedTo');
         assignedToSelect.innerHTML = project.projectMembers.map(member => `
                     <option value="${member.user.id}">
@@ -1165,20 +1118,17 @@ async function showTaskDetails(taskId) {
                     </option>
                 `).join('');
 
-        // Populate form fields
         document.getElementById('editTaskTitle').value = task.taskTitle;
         document.getElementById('editTaskDescription').value = task.description || '';
         document.getElementById('editTaskDueDate').value = new Date(task.dueDate).toISOString().split('T')[0];
         document.getElementById('editTaskPriority').value = task.priority;
         document.getElementById('editTaskStatus').value = task.status;
 
-        // Set multiple selected users
         const assignedUserIds = task.assignedUsers.map(u => u.id);
         Array.from(assignedToSelect.options).forEach(option => {
             option.selected = assignedUserIds.includes(option.value);
         });
 
-        // Update modal footer
         const modalFooter = document.getElementById('taskModalFooter');
         modalFooter.innerHTML = `
                     <button type="button" class="btn btn-danger me-auto" onclick="deleteTask(${task.id}, ${task.projectId})">Delete Task</button>
@@ -1186,11 +1136,9 @@ async function showTaskDetails(taskId) {
                     <button type="button" class="btn btn-primary" onclick="updateTask(${task.id}, ${task.projectId})">Save Changes</button>
                 `;
 
-        // Show the modal
         const modal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
         modal.show();
     } catch (error) {
-        console.error('Error loading task details:', error);
         showToast(error.message, 'error');
     }
 }
@@ -1305,32 +1253,25 @@ async function updateTask(taskId, projectId) {
 }
 
 async function updateTaskStatus(taskId, projectId, newStatus, event) {
-    // Prevent the click from propagating to parent elements
     if (event) {
         event.stopPropagation();
     }
 
     try {
-        // Create a properly formatted additionalData JSON string
-        // This ensures it will never be null in the database
         const additionalData = JSON.stringify({
             taskId: taskId,
             newStatus: newStatus,
             timestamp: new Date().toISOString()
         });
 
-        // Prepare status update data
         const statusData = {
             status: newStatus,
             additionalData: additionalData
         };
 
-        // Prepare headers for the fetch request
         const headers = {
             'Content-Type': 'application/json'
         };
-
-        console.log('Updating task status with data:', statusData);
 
         const response = await fetch(`/api/projectsapi/tasks/${taskId}/status`, {
             method: 'PUT',
@@ -1340,9 +1281,7 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Error updating task status:', errorText);
 
-            // Reset checkbox state if updating fails
             if (event && event.target && event.target.type === 'checkbox') {
                 event.target.checked = newStatus === 'Completed';
             }
@@ -1350,7 +1289,6 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
             throw new Error('Failed to update task status');
         }
 
-        // Reload the project to show updated task status
         await loadProject(projectId);
         await loadProjectsForSidebar(projectId);
         showToast(`Task marked as ${newStatus}`, 'success');
@@ -1358,7 +1296,6 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
         console.error('Error updating task status:', error);
         showToast('Error updating task status: ' + error.message, 'error');
 
-        // Reset checkbox state if updating fails
         if (event && event.target && event.target.type === 'checkbox') {
             event.target.checked = newStatus === 'Completed';
         }

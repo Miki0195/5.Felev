@@ -236,6 +236,8 @@ namespace Managly.Controllers
                         Title = t.TaskTitle ?? "Untitled Task",
                         Description = t.Description ?? "No description",
                         FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                        DueDate = (DateTime)t.DueDate,
+                        IsOverdue = t.DueDate.HasValue && t.DueDate.Value < DateTime.Today && t.Status != "Completed",
                         Priority = t.Priority ?? "Medium",
                         PriorityCssClass = GetPriorityCssClass(t.Priority),
                         Status = t.Status ?? "Not Started",
@@ -337,6 +339,8 @@ namespace Managly.Controllers
                 Title = t.TaskTitle,
                 Description = t.Description ?? "No description",
                 FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                DueDate = (DateTime)t.DueDate,
+                IsOverdue = t.DueDate.HasValue && t.DueDate.Value < DateTime.Today && t.Status != "Completed", // Check if overdue
                 Priority = t.Priority,
                 PriorityCssClass = GetPriorityCssClass(t.Priority),
                 Status = t.Status,
@@ -522,11 +526,9 @@ namespace Managly.Controllers
         {
             return status?.ToLower() switch
             {
-                "completed" => "success",
-                "active" => "primary",
-                "in progress" => "info",
-                "on hold" => "warning",
-                "cancelled" => "danger",
+                "completed" => "status-inprogress",
+                "in progress" => "status-inprogress",
+                "not started" => "status-notstarted",
                 _ => "secondary"
             };
         }
@@ -535,9 +537,9 @@ namespace Managly.Controllers
         {
             return priority?.ToLower() switch
             {
-                "high" => "danger",
-                "medium" => "warning",
-                "low" => "info",
+                "high" => "priority-high",
+                "medium" => "priority-medium",
+                "low" => "priority-low",
                 _ => "secondary"
             };
         }

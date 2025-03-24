@@ -35,6 +35,6 @@
                 }
             </div>
         </div>
-        <span>Due: @Model.FormattedDueDate</span>
+        <span class="@(Model.IsOverdue && !isDone ? "text-danger fw-bold" : "")">Due: @Model.FormattedDueDate</span>
     </div>
 </div>
