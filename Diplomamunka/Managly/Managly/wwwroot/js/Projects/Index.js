@@ -515,8 +515,8 @@ async function loadProject(projectId) {
                 <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-    `;
-    
+            `;
+
     try {
         const projectCards = document.querySelectorAll('.project-card');
         projectCards.forEach(card => card.classList.remove('active', 'selected'));
@@ -596,7 +596,7 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
         const filter = activeFilterButton ? activeFilterButton.textContent.trim().toLowerCase() : 'all';
 
         filterTasks(projectId, filter);
-
+        
     } catch (error) {
         showToast('Failed to update task status: ' + error.message, 'danger');
         event.target.checked = (newStatus === 'Completed');
@@ -941,9 +941,9 @@ async function updateMemberRole(projectId, userId, newRole) {
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-        
+
         showToast('Member role updated successfully', 'success');
-        
+
         if (button) {
             button.setAttribute('data-original-value', newRole);
         }
@@ -967,7 +967,7 @@ async function removeMember(projectId, userId) {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
@@ -1088,9 +1088,9 @@ async function showCreateTaskModal(projectId) {
         if (!assignedToSelect) {
             throw new Error('Cannot find the assigned users dropdown');
         }
-
+        
         assignedToSelect.innerHTML = '';
-
+        
         project.projectMembers.forEach(member => {
             const option = document.createElement('option');
             option.value = member.user.id;
@@ -1112,7 +1112,7 @@ async function showCreateTaskModal(projectId) {
         const createTaskBtn = modal.querySelector('.modal-footer .btn-primary');
         if (createTaskBtn) {
             createTaskBtn.setAttribute('onclick', `createTask(${projectId})`);
-        } 
+        }
 
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
@@ -1181,9 +1181,9 @@ async function createTask(projectId) {
                 document.querySelector('.modal-backdrop')?.remove();
             }
         }
-
+        
         showToast('Task created successfully', 'success');
-
+        
         await loadProject(projectId);
         await loadProjectsForSidebar(projectId);
     } catch (error) {
@@ -1247,29 +1247,29 @@ async function deleteTask(taskId, projectId) {
         const headers = {
             'Content-Type': 'application/json'
         };
-
+        
         const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]');
         if (csrfToken) {
             headers['X-CSRF-TOKEN'] = csrfToken.value;
         }
-
+        
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`, {
             method: 'DELETE',
             headers: headers
         });
-
+        
         if (!response.ok) {
             throw new Error('Failed to delete task');
         }
-
+        
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) modal.hide();
-
+        
         const confirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmationModal'));
         if (confirmModal) confirmModal.hide();
-
+        
         showToast('Task deleted successfully', 'success');
-
+        
         await loadProject(projectId);
         await loadProjectsForSidebar(projectId);
     } catch (error) {
@@ -1284,15 +1284,15 @@ async function updateTask(taskId, projectId) {
         const dueDate = document.getElementById('editTaskDueDate').value;
         const priority = document.getElementById('editTaskPriority').value;
         const status = document.getElementById('editTaskStatus').value;
-
+        
         const assignedToSelect = document.getElementById('editTaskAssignedTo');
         const assignedUserIds = Array.from(assignedToSelect.selectedOptions).map(option => option.value);
-
+        
         if (!taskTitle || !dueDate || assignedUserIds.length === 0) {
             showToast('Please fill out all required fields and assign at least one user', 'error');
             return;
         }
-
+        
         const taskData = {
             taskTitle: taskTitle,
             description: description,
@@ -1312,21 +1312,21 @@ async function updateTask(taskId, projectId) {
             updateButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
             updateButton.disabled = true;
         }
-
+        
         const headers = {
             'Content-Type': 'application/json'
         };
-
+        
         const response = await fetch(`/api/projectsapi/tasks/${taskId}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(taskData)
         });
-
+        
         if (!response.ok) {
             throw new Error('Failed to update task: ' + responseText);
         }
-
+        
         const modal = bootstrap.Modal.getInstance(document.getElementById('taskDetailsModal'));
         if (modal) {
             modal.hide();
@@ -1335,9 +1335,9 @@ async function updateTask(taskId, projectId) {
             document.body.classList.remove('modal-open');
             document.querySelector('.modal-backdrop')?.remove();
         }
-
+        
         showToast('Task updated successfully', 'success');
-
+        
         await loadProject(projectId);
         await loadProjectsForSidebar(projectId);
     } catch (error) {
@@ -1355,19 +1355,19 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
     if (event) {
         event.stopPropagation();
     }
-
+    
     try {
         const additionalData = JSON.stringify({
             taskId: taskId,
             newStatus: newStatus,
             timestamp: new Date().toISOString()
         });
-
+        
         const statusData = {
             status: newStatus,
             additionalData: additionalData
         };
-
+        
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -1380,11 +1380,11 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
 
         if (!response.ok) {
             const errorText = await response.text();
-
+            
             if (event && event.target && event.target.type === 'checkbox') {
                 event.target.checked = newStatus === 'Completed';
             }
-
+            
             throw new Error('Failed to update task status');
         }
 
@@ -1394,7 +1394,7 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
     } catch (error) {
         console.error('Error updating task status:', error);
         showToast('Error updating task status: ' + error.message, 'error');
-
+        
         if (event && event.target && event.target.type === 'checkbox') {
             event.target.checked = newStatus === 'Completed';
         }

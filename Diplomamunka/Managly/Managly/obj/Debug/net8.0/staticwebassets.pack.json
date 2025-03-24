@@ -77,6 +77,10 @@
       "PackagePath": "staticwebassets/js/Account/PasswordVisibility.js"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/Account/Profile.js",
+      "PackagePath": "staticwebassets/js/Account/Profile.js"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/Admin/CreateProfile.js",
       "PackagePath": "staticwebassets/js/Admin/CreateProfile.js"
     },
@@ -347,6 +351,10 @@
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg",
       "PackagePath": "staticwebassets/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.jpg"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.png",
+      "PackagePath": "staticwebassets/uploads/d58c4e69-c166-4598-b36c-dc0144a3f613.png"
     },
     {
       "Id": "obj/Debug/net8.0/staticwebassets/msbuild.Managly.Microsoft.AspNetCore.StaticWebAssets.props",

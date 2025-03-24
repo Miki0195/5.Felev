@@ -1,127 +1,185 @@
 ﻿@model Managly.Models.UserProfile
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="~/css/Account/Profile.css"> <!-- Custom CSS -->
+<link rel="stylesheet" href="~/css/Account/Profile.css">
+
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"
+     data-success-message="@ViewBag.SuccessMessage"
+     data-error-message="@ViewBag.ErrorMessage">
+</div>
 
 <div class="container mt-5">
     <div class="card shadow-lg border-0 p-4">
-        <h2 class="text-center mb-4 fw-bold">My Account</h2>
-
-        @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
-        {
-            <div class="alert alert-success">@ViewBag.SuccessMessage</div>
-        }
-
-        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
-        {
-            <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
-        }
-
-    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+        <h2 class="text-center mb-3 fw-bold">My Account</h2>
+        
         <div class="text-center mb-3">
-            <div class="profile-picture-container">
-                <img id="profileImg" src="@($"{Model.ProfilePicturePath}?t={DateTime.Now.Ticks}")" class="rounded-circle profile-img">
-            </div>
-            <label class="btn btn-outline-primary mt-2">
-                Change Profile Picture
-                <input type="file" name="ProfilePicture" class="d-none" id="profileUpload">
-            </label>
-            <span asp-validation-for="ProfilePicture" class="text-danger d-block"></span>
+            <span class="rank-badge @(Model.Rank.ToLower() == "administrator" ? "rank-admin" : 
+                                      Model.Rank.ToLower() == "project manager" ? "rank-manager" : "rank-member")">
+                @Model.Rank
+            </span>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 form-floating mb-3">
-                <input asp-for="Name" class="form-control" placeholder=" " value="@Model.Name">
-                <label asp-for="Name">First Name</label>
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <form asp-action="Profile" method="post" enctype="multipart/form-data" id="profileForm">
+            <input type="hidden" asp-for="ProfilePicturePath" />
+            <div class="text-center mb-3">
+                <div class="profile-picture-container">
+                    <img id="profileImg" src="@($"{Model.ProfilePicturePath}?t={DateTime.Now.Ticks}")" class="rounded-circle profile-img">
+                </div>
+                <label class="btn btn-outline-primary mt-2">
+                    Change Profile Picture
+                    <input type="file" name="ProfilePicture" class="d-none" id="profileUpload">
+                </label>
+                <span asp-validation-for="ProfilePicture" class="text-danger d-block"></span>
             </div>
 
-            <div class="col-md-6 form-floating mb-3">
-                <input asp-for="LastName" class="form-control" placeholder="Last Name">
-                <label asp-for="LastName">Last Name</label>
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-        </div>
+            <div class="row">
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="Name" class="form-control" placeholder=" " value="@Model.Name" data-val="true" data-val-required="Please enter your first name">
+                    <label asp-for="Name">First Name</label>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
 
-        <div class="row">
-            <div class="col-md-6 form-floating mb-3">
-                <input asp-for="DateOfBirth" type="date" class="form-control">
-                <label asp-for="DateOfBirth">Date of Birth</label>
-                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="LastName" class="form-control" placeholder="Last Name" data-val="true" data-val-required="Please enter your last name">
+                    <label asp-for="LastName">Last Name</label>
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-6 form-floating mb-3">
-                <select asp-for="Gender" class="form-select">
-                    @foreach (var gender in Model.GenderOptions)
-                    {
-                        <option value="@gender">@gender</option>
-                    }
-                </select>
-                <label for="Gender">Gender</label>
-                <span asp-validation-for="Gender" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="form-floating mb-3">
-                <input asp-for="Email" class="form-control" readonly>
-                <label asp-for="Email">Email</label>
-            </div>
-        <div/>
+            <div class="row">
+                <div class="col-md-6 form-floating mb-3">
+                    <input asp-for="DateOfBirth" type="date" class="form-control" data-val="true" data-val-required="Please enter your date of birth">
+                    <label asp-for="DateOfBirth">Date of Birth</label>
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
 
-        <div class="mb-3">
-            @*<label class="form-label fw-semibold">Phone Number</label>*@
-            <div class="d-flex align-items-stretch">
-                <div class="form-floating flex-shrink-0" style="width: 30%;">
-                    <select asp-for="SelectedCountryCode" class="form-select country-code">
-                        @foreach (var country in Model.CountryCodes)
+                <div class="col-md-6 form-floating mb-3">
+                    <select asp-for="Gender" class="form-select">
+                        @foreach (var gender in Model.GenderOptions)
                         {
-                            <option value="@country.Code">@country.Code - @country.Name</option>
+                            <option value="@gender">@gender</option>
                         }
                     </select>
-                    <label class="custom-label" for="SelectedCountryCode">Area Code</label>
-                </div>
-
-                <div class="form-floating flex-grow-1 ms-2">
-                    <input asp-for="PhoneNumber" class="form-control" placeholder=" " inputmode="numeric" pattern="[0-9]*" maxlength="15">
-                    <label class="custom-label" for="PhoneNumber">Number</label>
+                    <label for="Gender">Gender</label>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
                 </div>
             </div>
-            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-        </div>
+            <div class="row">
+                <div class="form-floating mb-3">
+                    <input asp-for="Email" class="form-control" readonly>
+                    <label asp-for="Email">Email</label>
+                </div>
+                <div />
 
-        <div class="row">
-            <div class="col-md-6 form-floating mb-3">
-                <input asp-for="Country" class="form-control" placeholder="Country">
-                <label asp-for="Country">Country</label>
-                <span asp-validation-for="Country" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <div class="d-flex align-items-stretch">
+                        <div class="form-floating flex-shrink-0" style="width: 30%;">
+                            <select asp-for="SelectedCountryCode" class="form-select country-code">
+                                @foreach (var country in Model.CountryCodes)
+                                {
+                                    <option value="@country.Code">@country.Code - @country.Name</option>
+                                }
+                            </select>
+                            <label class="custom-label" for="SelectedCountryCode">Area Code</label>
+                        </div>
 
-            <div class="col-md-6 form-floating mb-3">
-                <input asp-for="City" class="form-control" placeholder="City">
-                <label asp-for="City">City</label>
-                <span asp-validation-for="City" class="text-danger"></span>
-            </div>
-        </div>
+                        <div class="form-floating flex-grow-1 ms-2">
+                            <input asp-for="PhoneNumber" class="form-control" placeholder=" " inputmode="numeric" pattern="[0-9]*" maxlength="15" data-val="true" data-val-required="Please enter your phone number">
+                            <label class="custom-label" for="PhoneNumber">Number</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
 
-        <div class="row">
-            <div class="form-floating mb-3">
-                <input asp-for="Address" class="form-control" placeholder="Address">
-                <label asp-for="Address">Address</label>
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
+                <div class="row">
+                    <div class="col-md-6 form-floating mb-3">
+                        <input asp-for="Country" class="form-control" placeholder="Country" data-val="true" data-val-required="Please enter your country">
+                        <label asp-for="Country">Country</label>
+                        <span asp-validation-for="Country" class="text-danger"></span>
+                    </div>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg w-100">Update Profile</button>
+                    <div class="col-md-6 form-floating mb-3">
+                        <input asp-for="City" class="form-control" placeholder="City" data-val="true" data-val-required="Please enter your city">
+                        <label asp-for="City">City</label>
+                        <span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Address" class="form-control" placeholder="Address" data-val="true" data-val-required="Please enter your address">
+                        <label asp-for="Address">Address</label>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="projects-section">
+                    <h4 class="mb-4">My Projects</h4>
+                    
+                    @if(Model.EnrolledProjects != null && Model.EnrolledProjects.Any())
+                    {
+                        foreach(var project in Model.EnrolledProjects)
+                        {
+                            <div class="project-card">
+                                <div class="project-header">
+                                    <h6>@project.Name</h6>
+                                    <span class="project-role">@project.Role</span>
+                                </div>
+                                <div>
+                                    <span class="project-badge @project.StatusClass">@project.Status</span>
+                                    <span class="project-badge @project.PriorityClass">@project.Priority Priority</span>
+                                </div>
+                                
+                                <div class="project-progress">
+                                    @{ 
+                                        // Ensure progress is always within valid range, but now using the pre-calculated value
+                                        var progress = Math.Max(0, Math.Min(100, project.ProgressPercentage));
+                                        var progressClass = progress < 30 ? "progress-low" : progress < 70 ? "progress-medium" : "progress-high";
+                                    }
+                                    <div class="progress @progressClass">
+                                        <div class="progress-bar" role="progressbar" style="width: @(progress)%;" 
+                                             aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>Progress</span>
+                                        <span>@progress%</span>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>Tasks</span>
+                                        <span>@project.CompletedTasks / @project.TotalTasks</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-2">
+                                    <a href="/Projects#@project.Id" class="btn btn-sm btn-link ps-0">View Project</a>
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="text-center mt-3">
+                            <a href="/Projects" class="btn btn-outline-primary">See all projects</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-projects">
+                            <p>You're not enrolled in any projects yet.</p>
+                            <a href="/Projects" class="btn btn-sm btn-outline-primary">Browse Projects</a>
+                        </div>
+                    }
+                </div>
+
+                <div class="text-center mt-4">
+                    <button id="updateProfile" type="submit" class="btn btn-primary btn-lg w-100">Update Profile</button>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
     </div>
 </div>
 
-<script>document.addEventListener("DOMContentLoaded", function() {
-    const phoneInput = document.querySelector("#PhoneNumber");
-
-    phoneInput.addEventListener("input", function(e) {
-        this.value = this.value.replace(/\D/g, ''); // Remove non-numeric characters
-    });
-});</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/js/Account/Profile.js"></script>

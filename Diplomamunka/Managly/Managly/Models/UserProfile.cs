@@ -46,6 +46,23 @@ namespace Managly.Models
         public List<(string Code, string Name)> CountryCodes { get; set; } = CountryCallingCodes.GetCountryCodes();
 
         public List<string> GenderOptions { get; set; } = new List<string> { "Male", "Female", "Other" };
+
+        public string Rank { get; set; } = "Member"; // Default rank
+        public List<ProjectViewModel> EnrolledProjects { get; set; } = new List<ProjectViewModel>();
+    }
+
+    public class ProjectViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Priority { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string PriorityClass { get; set; } = string.Empty;
+        public string StatusClass { get; set; } = string.Empty;
+        public int CompletedTasks { get; set; }
+        public int TotalTasks { get; set; }
+        public int ProgressPercentage { get; set; }
     }
 }
 

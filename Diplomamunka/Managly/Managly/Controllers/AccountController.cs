@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using Managly.Models;
+using Managly.Data;
 using System.Security.Claims;
 using Managly.Helpers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Managly.Controllers
 {
@@ -12,10 +15,12 @@ namespace Managly.Controllers
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public AccountController(UserManager<User> userManager)
+        public AccountController(UserManager<User> userManager, ApplicationDbContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -83,8 +88,57 @@ namespace Managly.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
+            
+            string rank = "";
+            if (await _userManager.IsInRoleAsync(user, "Member"))
+            {
+                rank = "Member";
+            }
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                rank = "Admin";
+            }
+            else if (await _userManager.IsInRoleAsync(user, "Manager"))
+            {
+                rank = "Project Manager";
+            }
+            
+            var userProjects = await _context.ProjectMembers
+                .Where(pm => pm.UserId == userId && pm.Project.Status == "In Progress")
+                .Include(pm => pm.Project)
+                .Select(pm => new 
+                {
+                    ProjectId = pm.Project.Id,
+                    ProjectName = pm.Project.Name ?? "Untitled Project",
+                    ProjectStatus = pm.Project.Status ?? "Not Started",
+                    ProjectPriority = pm.Project.Priority ?? "Medium",
+                    MemberRole = pm.Role ?? "Member",
+                    CompletedTasks = pm.Project.CompletedTasks,
+                    TotalTasks = pm.Project.TotalTasks > 0 ? pm.Project.TotalTasks : 1
+                })
+                .ToListAsync();
+            
+            var enrolledProjects = userProjects.Select(p => 
+            {
+                int progressPercentage = (int)Math.Round((double)p.CompletedTasks / p.TotalTasks * 100);
+                
+                return new ProjectViewModel
+                {
+                    Id = p.ProjectId,
+                    Name = p.ProjectName,
+                    Status = p.ProjectStatus,
+                    Priority = p.ProjectPriority,
+                    Role = p.MemberRole,
+                    PriorityClass = GetPriorityClass(p.ProjectPriority),
+                    StatusClass = GetStatusClass(p.ProjectStatus),
+                    CompletedTasks = p.CompletedTasks,
+                    TotalTasks = p.TotalTasks,
+                    ProgressPercentage = progressPercentage
+                };
+            }).ToList();
+
             string fullPhoneNumber = await _userManager.GetPhoneNumberAsync(user) ?? "";
-            string selectedCountryCode = "+36"; 
+            string selectedCountryCode = "+36"; // Default
             string phoneNumberWithoutCode = fullPhoneNumber;
 
             foreach (var country in CountryCallingCodes.GetCountryCodes())
@@ -110,20 +164,40 @@ namespace Managly.Controllers
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender ?? "",
                 ProfilePicturePath = user.ProfilePicturePath ?? "/images/default/default-profile.png", 
-                GenderOptions = new List<string> { "Male", "Female", "Other" } 
+                GenderOptions = new List<string> { "Male", "Female", "Other" },
+                Rank = rank,
+                EnrolledProjects = enrolledProjects
             };
 
             return View(model);
         }
 
+        private string GetPriorityClass(string priority)
+        {
+            return priority?.ToLower() switch
+            {
+                "high" => "priority-high",
+                "medium" => "priority-medium",
+                "low" => "priority-low",
+                _ => "priority-medium"
+            };
+        }
+
+        private string GetStatusClass(string status)
+        {
+            return status?.ToLower() switch
+            {
+                "completed" => "status-completed",
+                "in progress" => "status-inprogress",
+                "not started" => "status-notstarted",
+                "on hold" => "status-onhold",
+                _ => "status-notstarted"
+            };
+        }
+
         [HttpPost]
         public async Task<IActionResult> Profile(UserProfile model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -132,55 +206,93 @@ namespace Managly.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
-            user.Name = model.Name;
-            user.LastName = model.LastName;
-            user.Country = model.Country;
-            user.City = model.City;
-            user.Address = model.Address;
-            user.DateOfBirth = model.DateOfBirth;
-            user.Gender = model.Gender;
-
-            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            if (!ModelState.IsValid)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = user.Id + Path.GetExtension(model.ProfilePicture.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.ProfilePicture.CopyToAsync(stream);
-                }
-
-                user.ProfilePicturePath = "/uploads/" + uniqueFileName;
-            }
-            //else
-            //{
-            //    model.ProfilePicturePath = user.ProfilePicturePath;
-            //}
-
-            var fullPhoneNumber = model.SelectedCountryCode + model.PhoneNumber;
-            var phoneResult = await _userManager.SetPhoneNumberAsync(user, fullPhoneNumber);
-            if (!phoneResult.Succeeded)
-            {
-                ViewBag.ErrorMessage = "Failed to update phone number.";
+                model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                model.CountryCodes = CountryCallingCodes.GetCountryCodes();
                 return View(model);
             }
 
-            var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
+            try
             {
-                model.ProfilePicturePath = user.ProfilePicturePath;
-                ViewBag.SuccessMessage = "Your profile has been updated successfully!";
-            }
-            else
-            {
-                ViewBag.ErrorMessage = "Failed to update profile.";
-            }
+                user.Name = model.Name;
+                user.LastName = model.LastName;
+                user.Country = model.Country;
+                user.City = model.City;
+                user.Address = model.Address;
+                user.DateOfBirth = model.DateOfBirth;
+                user.Gender = model.Gender;
+                
+                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                {
+                    var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                    if (!allowedTypes.Contains(model.ProfilePicture.ContentType))
+                    {
+                        ModelState.AddModelError("ProfilePicture", "Only image files (jpg, png, gif) are allowed");
+                        model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                        model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                        return View(model);
+                    }
 
-            return View(model);
+                    if (model.ProfilePicture.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("ProfilePicture", "File size should be less than 5MB");
+                        model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                        model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                        return View(model);
+                    }
+
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var uniqueFileName = user.Id + Path.GetExtension(model.ProfilePicture.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ProfilePicture.CopyToAsync(stream);
+                    }
+
+                    user.ProfilePicturePath = "/uploads/" + uniqueFileName;
+                }
+
+                var fullPhoneNumber = model.SelectedCountryCode + model.PhoneNumber;
+                var phoneResult = await _userManager.SetPhoneNumberAsync(user, fullPhoneNumber);
+                if (!phoneResult.Succeeded)
+                {
+                    ModelState.AddModelError("PhoneNumber", "Failed to update phone number");
+                    model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                    model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                    return View(model);
+                }
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (result.Succeeded)
+                {
+                    model.ProfilePicturePath = user.ProfilePicturePath;
+                    ViewBag.SuccessMessage = "Your profile has been updated successfully!";
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                    model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                    return View(model);
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred: " + ex.Message);
+                model.GenderOptions = new List<string> { "Male", "Female", "Other" };
+                model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                return View(model);
+            }
         }
 
 

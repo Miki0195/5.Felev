@@ -63,3 +63,159 @@ h2 {
     transition: all 0.2s ease-out;
 }
 
+/* User rank styling */
+.rank-badge {
+    display: inline-block;
+    padding: 6px 15px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.rank-admin {
+    background-color: #4a6cf7;
+    color: white;
+}
+
+.rank-manager {
+    background-color: #6c47ff;
+    color: white;
+}
+
+.rank-member {
+    background-color: #0ea5e9;
+    color: white;
+}
+
+/* Projects section styling */
+.projects-section {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 25px;
+}
+
+.project-card {
+    border-radius: 10px;
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.project-card h6 {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.project-role {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 15px;
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.project-badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+}
+
+/* Badge status colors */
+.status-inprogress {
+    background-color: #28a745;
+}
+
+.status-completed {
+    background-color: #6c757d;
+}
+
+.status-notstarted {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+
+/* Badge priority colors */
+.priority-low {
+    background-color: #20c997;
+}
+
+.priority-medium {
+    background-color: #fd7e14;
+}
+
+.priority-high {
+    background-color: #dc3545;
+}
+
+.no-projects {
+    text-align: center;
+    padding: 25px;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.see-all-projects {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Progress bar styling */
+.project-progress {
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Progress bar colors based on completion */
+.progress-low .progress-bar {
+    background-color: #dc3545; /* Red for low progress */
+}
+
+.progress-medium .progress-bar {
+    background-color: #ffc107; /* Yellow for medium progress */
+}
+
+.progress-high .progress-bar {
+    background-color: #28a745; /* Green for high progress */
+}
+
