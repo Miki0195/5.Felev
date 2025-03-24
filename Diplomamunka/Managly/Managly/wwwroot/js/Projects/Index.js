@@ -738,6 +738,105 @@ async function updateProject() {
         document.getElementById('updateProjectButton').disabled = false;
     }
 }
+
+async function showRestoreProjectModal(projectId) {
+    try {
+        const response = await fetch(`/api/projectsapi/${projectId}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch project details: ${response.status}`);
+        }
+
+        const project = await response.json();
+
+        document.getElementById('restoreProjectId').value = projectId;
+
+        const today = new Date();
+        const oneMonthLater = new Date(today);
+        oneMonthLater.setMonth(today.getMonth() + 1);
+
+        const formattedDate = oneMonthLater.toISOString().split('T')[0];
+        document.getElementById('restoreProjectDeadline').value = formattedDate;
+        document.getElementById('restoreProjectDeadline').min = today.toISOString().split('T')[0];
+
+        document.getElementById('restoreProjectStatus').value = "In Progress";
+        document.getElementById('restoreProjectPriority').value = project.priority || "Medium";
+
+        const restoreBtn = document.getElementById('restoreProjectBtn');
+        if (restoreBtn) {
+            const newBtn = restoreBtn.cloneNode(true);
+            restoreBtn.parentNode.replaceChild(newBtn, restoreBtn);
+
+            newBtn.addEventListener('click', () => restoreProject(projectId));
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('restoreProjectModal'));
+        modal.show();
+    } catch (error) {
+        showToast('Failed to prepare project restoration. Please try again.', 'error');
+    }
+}
+
+async function restoreProject(projectId) {
+    try {
+        const deadlineInput = document.getElementById('restoreProjectDeadline');
+        const statusInput = document.getElementById('restoreProjectStatus');
+        const priorityInput = document.getElementById('restoreProjectPriority');
+        
+        if (!deadlineInput.value) {
+            showToast('Please select a deadline', 'warning');
+            return;
+        }
+        
+        const restoreBtn = document.getElementById('restoreProjectBtn');
+        restoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Restoring...';
+        restoreBtn.disabled = true;
+        
+        const deadline = new Date(deadlineInput.value);
+        
+        const restoreData = {
+            deadline: deadline.toISOString(), 
+            status: statusInput.value,
+            priority: priorityInput.value
+        };
+
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (csrfTokenMeta) {
+            headers['RequestVerificationToken'] = csrfTokenMeta.content;
+        }
+        
+        const response = await fetch(`/Projects/restore/${projectId}`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(restoreData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to restore project: ${response.status}`);
+        }
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('restoreProjectModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        showToast('Project restored successfully', 'success');
+        
+        await loadProjectsForSidebar();
+        await loadProject(projectId);
+    } catch (error) {
+        showToast(`Failed to restore project: ${error.message}`, 'error');
+    } finally {
+        const restoreBtn = document.getElementById('restoreProjectBtn');
+        if (restoreBtn) {
+            restoreBtn.innerHTML = 'Restore Project';
+            restoreBtn.disabled = false;
+        }
+    }
+}
 // EVERYTHING FOR MANAGING MEMBERS
 function showAddMembersModal(projectId) {
     selectedUsers.clear();

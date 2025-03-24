@@ -108,6 +108,7 @@ namespace Managly.Models
         [Required]
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
-        public string AdditionalData { get; set; } // JSON string for any extra data
+        // Set default value to empty JSON object
+        public string AdditionalData { get; set; } = "{}";
     }
 } 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Managly.Data;
 using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid.Helpers.Mail;
+using System.Text.Json;
 
 namespace Managly.Controllers
 {
@@ -547,50 +548,85 @@ namespace Managly.Controllers
         [HttpPost("restore/{id}")]
         public async Task<IActionResult> RestoreProject(int id, [FromBody] RestoreProjectModel model)
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            try
             {
-                return Unauthorized();
+                _logger.LogInformation($"Attempting to restore project {id} with status: {model?.Status}, priority: {model?.Priority}, deadline: {model?.Deadline}");
+                
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning($"Restore project {id}: User not authenticated");
+                    return Unauthorized();
+                }
+                
+                // Check if user is admin or has appropriate permissions
+                if (!await _userManager.IsInRoleAsync(currentUser, "Admin"))
+                {
+                    _logger.LogWarning($"Restore project {id}: User {currentUser.Id} is not an admin");
+                    return Forbid();
+                }
+
+                // Find the project
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
+
+                if (project == null)
+                {
+                    _logger.LogWarning($"Restore project {id}: Project not found or access denied");
+                    return NotFound();
+                }
+
+                _logger.LogInformation($"Restoring project {id} '{project.Name}' from status '{project.Status}' to '{model.Status}'");
+
+                // Update project properties
+                project.Status = model.Status;
+                project.Priority = model.Priority;
+                project.Deadline = model.Deadline;
+                project.CompletedAt = null; // Clear completion date
+                project.UpdatedAt = DateTime.UtcNow;
+
+                // Create additional data JSON for the activity log
+                string additionalDataJson = "{}"; // Default empty JSON object
+                try
+                {
+                    additionalDataJson = JsonSerializer.Serialize(new { 
+                        PreviousStatus = "Completed", 
+                        NewStatus = model.Status,
+                        NewDeadline = model.Deadline,
+                        RestoredAt = DateTime.UtcNow
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Failed to create additional data JSON: {ex.Message}");
+                    // Continue with empty JSON
+                }
+
+                // Log activity
+                var activity = new ActivityLog
+                {
+                    ProjectId = project.Id,
+                    UserId = currentUser.Id,
+                    Action = $"restored project and set status to {model.Status}",
+                    TargetType = "Project",
+                    TargetId = project.Id.ToString(),
+                    TargetName = project.Name,
+                    Timestamp = DateTime.UtcNow,
+                    AdditionalData = additionalDataJson, // Set AdditionalData to non-null value
+                    Type = "ProjectRestore" // Consider adding a type for better filtering
+                };
+                
+                _context.ActivityLogs.Add(activity);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Project {id} '{project.Name}' restored successfully");
+                return Ok(new { success = true, message = "Project restored successfully" });
             }
-            
-            // Check if user is admin or has appropriate permissions
-            if (!await _userManager.IsInRoleAsync(currentUser, "Admin"))
+            catch (Exception ex)
             {
-                return Forbid();
+                _logger.LogError(ex, $"Error restoring project {id}");
+                return StatusCode(500, $"An error occurred while restoring the project: {ex.Message}");
             }
-
-            // Find the project
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == id && p.CompanyId == currentUser.CompanyId);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            // Update project properties
-            project.Status = model.Status;
-            project.Priority = model.Priority;
-            project.Deadline = model.Deadline;
-            project.CompletedAt = null; // Clear completion date
-            project.UpdatedAt = DateTime.UtcNow;
-
-            // Log activity
-            var activity = new ActivityLog
-            {
-                ProjectId = project.Id,
-                UserId = currentUser.Id,
-                Action = $"restored project and set status to {model.Status}",
-                TargetType = "Project",
-                TargetId = project.Id.ToString(),
-                TargetName = project.Name,
-                Timestamp = DateTime.UtcNow
-            };
-            
-            _context.ActivityLogs.Add(activity);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, message = "Project restored successfully" });
         }
 
         public class RestoreProjectModel
