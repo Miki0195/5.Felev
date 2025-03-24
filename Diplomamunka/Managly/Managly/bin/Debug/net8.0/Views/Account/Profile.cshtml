@@ -132,7 +132,6 @@
                                 
                                 <div class="project-progress">
                                     @{ 
-                                        // Ensure progress is always within valid range, but now using the pre-calculated value
                                         var progress = Math.Max(0, Math.Min(100, project.ProgressPercentage));
                                         var progressClass = progress < 30 ? "progress-low" : progress < 70 ? "progress-medium" : "progress-high";
                                     }
@@ -149,10 +148,6 @@
                                         <span>Tasks</span>
                                         <span>@project.CompletedTasks / @project.TotalTasks</span>
                                     </div>
-                                </div>
-                                
-                                <div class="mt-2">
-                                    <a href="/Projects#@project.Id" class="btn btn-sm btn-link ps-0">View Project</a>
                                 </div>
                             </div>
                         }

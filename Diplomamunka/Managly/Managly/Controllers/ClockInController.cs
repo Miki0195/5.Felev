@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Managly.Data;
 using Managly.Models;
+using Managly.Models.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace Managly.Controllers
 {
@@ -18,7 +21,9 @@ namespace Managly.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
 
-        public ClockInController(ApplicationDbContext context, UserManager<User> userManager)
+        public ClockInController(
+            ApplicationDbContext context, 
+            UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -34,44 +39,43 @@ namespace Managly.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return Unauthorized(new { success = false, error = "User not found" });
-
-                // Check if already clocked in
-                var existingAttendance = await _context.Attendances
-                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
-                    .FirstOrDefaultAsync();
-
-                if (existingAttendance != null)
+                var userId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return BadRequest(new { 
-                        success = false, 
-                        error = "You are already clocked in" 
+                    return Unauthorized(new ApiResponseDto { Success = false, Error = "User not found" });
+                }
+
+                bool alreadyClockedIn = await _context.Attendances
+                    .AnyAsync(a => a.UserId == userId && a.CheckOutTime == null);
+
+                if (alreadyClockedIn)
+                {
+                    return BadRequest(new ApiResponseDto { 
+                        Success = false, 
+                        Error = "You are already clocked in" 
                     });
                 }
 
                 var now = DateTime.UtcNow;
                 var attendance = new Attendance
                 {
-                    UserId = user.Id,
+                    UserId = userId,
                     CheckInTime = now
                 };
 
                 _context.Attendances.Add(attendance);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { 
-                    success = true, 
-                    checkInTime = attendance.CheckInTime 
+                return Ok(new ClockInResponseDto { 
+                    Success = true, 
+                    CheckInTime = attendance.CheckInTime 
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { 
-                    success = false, 
-                    error = "An error occurred while clocking in",
-                    details = ex.Message 
+                return StatusCode(500, new ApiResponseDto { 
+                    Success = false, 
+                    Error = "An error occurred while clocking in"
                 });
             }
         }
@@ -81,38 +85,46 @@ namespace Managly.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return Unauthorized(new { success = false, error = "User not found" });
+                var userId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new ApiResponseDto { Success = false, Error = "User not found" });
+                }
 
                 var attendance = await _context.Attendances
-                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
+                    .Where(a => a.UserId == userId && a.CheckOutTime == null)
                     .OrderByDescending(a => a.CheckInTime)
                     .FirstOrDefaultAsync();
 
                 if (attendance == null)
                 {
-                    return BadRequest(new { 
-                        success = false, 
-                        error = "No active session found" 
+                    return BadRequest(new ApiResponseDto { 
+                        Success = false, 
+                        Error = "No active session found" 
                     });
                 }
 
-                attendance.CheckOutTime = DateTime.UtcNow;
+                var now = DateTime.UtcNow;
+                attendance.CheckOutTime = now;
+                
+                // Only update the changed property
+                _context.Entry(attendance).Property(a => a.CheckOutTime).IsModified = true;
                 await _context.SaveChangesAsync();
 
-                return Ok(new { 
-                    success = true, 
-                    checkOutTime = attendance.CheckOutTime,
-                    duration = (attendance.CheckOutTime - attendance.CheckInTime).Value.TotalHours
+                // Calculate duration immediately without requerying
+                var duration = (now - attendance.CheckInTime).TotalHours;
+
+                return Ok(new ClockOutResponseDto { 
+                    Success = true, 
+                    CheckOutTime = now,
+                    Duration = Math.Round(duration, 2)
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { 
-                    success = false, 
-                    error = "An error occurred while clocking out",
-                    details = ex.Message 
+                return StatusCode(500, new ApiResponseDto { 
+                    Success = false, 
+                    Error = "An error occurred while clocking out"
                 });
             }
         }
@@ -122,33 +134,38 @@ namespace Managly.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return Unauthorized(new { success = false, error = "User not found" });
-
-                var attendance = await _context.Attendances
-                    .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
-                    .OrderByDescending(a => a.CheckInTime)
-                    .FirstOrDefaultAsync();
-
-                if (attendance == null)
+                var userId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Ok(new { active = false });
+                    return Unauthorized(new ApiResponseDto { Success = false, Error = "User not found" });
                 }
 
-                return Ok(new
+                // Optimized query with only necessary fields
+                var activeSession = await _context.Attendances
+                    .Where(a => a.UserId == userId && a.CheckOutTime == null)
+                    .OrderByDescending(a => a.CheckInTime)
+                    .Select(a => new { a.CheckInTime })
+                    .FirstOrDefaultAsync();
+
+                if (activeSession == null)
                 {
-                    active = true,
-                    checkInTime = attendance.CheckInTime,
-                    elapsedTime = (DateTime.UtcNow - attendance.CheckInTime).TotalSeconds
+                    return Ok(new SessionStatusDto { Active = false });
+                }
+
+                var elapsedTime = (DateTime.UtcNow - activeSession.CheckInTime).TotalSeconds;
+
+                return Ok(new SessionStatusDto
+                {
+                    Active = true,
+                    CheckInTime = activeSession.CheckInTime,
+                    ElapsedTime = Math.Round(elapsedTime, 1)
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { 
-                    success = false, 
-                    error = "An error occurred while checking session status",
-                    details = ex.Message 
+                return StatusCode(500, new ApiResponseDto { 
+                    Success = false, 
+                    Error = "An error occurred while checking session status"
                 });
             }
         }
@@ -156,28 +173,62 @@ namespace Managly.Controllers
         [HttpGet("work-history")]
         public async Task<IActionResult> GetWorkHistory()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var history = await _context.Attendances
-                .Where(a => a.UserId == user.Id)
-                .OrderByDescending(a => a.CheckInTime)
-                .Take(5)
-                .ToListAsync();
-
-            if (!history.Any()) return Ok(new { message = "No records found." });
-
-            return Ok(history.Select(a => new
+            try
             {
-                checkInTime = a.CheckInTime,
-                checkOutTime = a.CheckOutTime,
-                duration = a.CheckOutTime.HasValue
-                    ? $"{(int)((a.CheckOutTime.Value - a.CheckInTime).TotalHours):D2}:" +
-                      $"{(int)((a.CheckOutTime.Value - a.CheckInTime).TotalMinutes % 60):D2}:" +
-                      $"{(int)((a.CheckOutTime.Value - a.CheckInTime).TotalSeconds % 60):D2}"
-                    : "Ongoing"
-            }));
+                var userId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new ApiResponseDto { Success = false, Error = "User not found" });
+                }
+
+                // Optimized query with projection directly to DTO-compatible format
+                var history = await _context.Attendances
+                    .Where(a => a.UserId == userId)
+                    .OrderByDescending(a => a.CheckInTime)
+                    .Take(5)
+                    .Select(a => new { 
+                        a.CheckInTime, 
+                        a.CheckOutTime
+                    })
+                    .ToListAsync();
+
+                if (!history.Any())
+                {
+                    return Ok(new { message = "No records found." });
+                }
+
+                var historyDtos = new List<WorkHistoryEntryDto>();
+                
+                foreach (var entry in history)
+                {
+                    string duration;
+                    if (entry.CheckOutTime.HasValue)
+                    {
+                        var diff = entry.CheckOutTime.Value - entry.CheckInTime;
+                        duration = $"{(int)diff.TotalHours:D2}:{diff.Minutes:D2}:{diff.Seconds:D2}";
+                    }
+                    else
+                    {
+                        duration = "Ongoing";
+                    }
+                    
+                    historyDtos.Add(new WorkHistoryEntryDto
+                    {
+                        CheckInTime = entry.CheckInTime,
+                        CheckOutTime = entry.CheckOutTime,
+                        Duration = duration
+                    });
+                }
+
+                return Ok(historyDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponseDto { 
+                    Success = false, 
+                    Error = "An error occurred while fetching work history"
+                });
+            }
         }
 
         [HttpGet("weekly-hours")]
@@ -185,31 +236,51 @@ namespace Managly.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return Unauthorized();
+                var userId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new ApiResponseDto { Success = false, Error = "User not found" });
+                }
 
-                var startOfWeek = DateTime.UtcNow.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
-
-                // Fetch all records first
+                var startOfWeek = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
+                
+                // Fetch raw data without trying to perform calculations in the query
                 var attendanceRecords = await _context.Attendances
-                    .Where(a => a.UserId == user.Id && a.CheckInTime >= startOfWeek && a.CheckOutTime.HasValue)
+                    .Where(a => a.UserId == userId && 
+                           a.CheckInTime >= startOfWeek && 
+                           a.CheckOutTime != null)
                     .ToListAsync();
 
-                // Compute total minutes manually
-                double totalMinutes = attendanceRecords
-                    .Sum(a => (a.CheckOutTime.Value - a.CheckInTime).TotalMinutes);
-
-                return Ok(new
+                // Manual calculation to avoid EF Core translation issues
+                double totalMinutes = 0;
+                foreach (var record in attendanceRecords)
                 {
-                    totalHours = Math.Floor(totalMinutes / 60),
-                    totalMinutes = Math.Round(totalMinutes % 60)
+                    if (record.CheckOutTime.HasValue)
+                    {
+                        var duration = record.CheckOutTime.Value - record.CheckInTime;
+                        totalMinutes += duration.TotalMinutes;
+                    }
+                }
+                
+                var hours = Math.Floor(totalMinutes / 60);
+                var minutes = Math.Round(totalMinutes % 60);
+                
+                return Ok(new WeeklyHoursDto
+                {
+                    TotalHours = hours,
+                    TotalMinutes = minutes
                 });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR in GetWeeklyHours(): {ex.Message}");
-                return StatusCode(500, new { error = "An error occurred while fetching weekly hours.", details = ex.Message });
+                // Enhanced error logging
+                Console.WriteLine($"Weekly hours error at {DateTime.UtcNow}: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new ApiResponseDto { 
+                    Success = false, 
+                    Error = "An error occurred while calculating weekly hours"
+                });
             }
         }
     }

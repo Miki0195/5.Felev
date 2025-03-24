@@ -55,6 +55,10 @@
     <Folder Include="wwwroot\js\Admin\" />
     <Folder Include="wwwroot\js\Projects\" />
     <Folder Include="Models\DTOs\Projects\" />
+    <Folder Include="wwwroot\js\ClockIn\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="wwwroot\js\ClockIn\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">

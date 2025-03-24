@@ -90,9 +90,9 @@ namespace Managly.Controllers
 
             
             string rank = "";
-            if (await _userManager.IsInRoleAsync(user, "Member"))
+            if (await _userManager.IsInRoleAsync(user, "Employee"))
             {
-                rank = "Member";
+                rank = "Employee";
             }
             if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
@@ -100,7 +100,7 @@ namespace Managly.Controllers
             }
             else if (await _userManager.IsInRoleAsync(user, "Manager"))
             {
-                rank = "Project Manager";
+                rank = "Manager";
             }
             
             var userProjects = await _context.ProjectMembers
