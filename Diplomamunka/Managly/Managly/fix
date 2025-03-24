@@ -1,0 +1,95 @@
+function renderWeeklySummary(weeklySummary) {
+    const container = document.getElementById('weeklySummary');
+    container.innerHTML = '';
+    
+    if (!weeklySummary || weeklySummary.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <p>No weekly data available</p>
+            </div>`;
+        return;
+    }
+    
+    // Create a wrapping container with grid layout
+    const summaryContainer = document.createElement('div');
+    summaryContainer.className = 'weekly-summary-container';
+    
+    weeklySummary.forEach(week => {
+        const weekStart = new Date(week.weekStart).toLocaleDateString();
+        const weekEnd = new Date(week.weekEnd).toLocaleDateString();
+        
+        // Calculate completion percentage
+        const completionPercentage = Math.min(Math.round(week.totalHours / 40 * 100), 100);
+        
+        // Determine status class
+        let statusClass = 'status-low';
+        let chartClass = 'status-low-chart';
+        let statusIcon = 'bi-exclamation-circle';
+        let statusText = 'Under Target';
+        
+        if (week.totalHours >= 38 && week.totalHours < 40) {
+            statusClass = 'status-near';
+            chartClass = 'status-near-chart';
+            statusIcon = 'bi-check-circle';
+            statusText = 'Near Target';
+        } else if (week.totalHours >= 40 && week.totalHours < 45) {
+            statusClass = 'status-complete';
+            chartClass = 'status-complete-chart';
+            statusIcon = 'bi-check-circle-fill';
+            statusText = 'Complete';
+        } else if (week.totalHours >= 45) {
+            statusClass = 'status-overtime';
+            chartClass = 'status-overtime-chart';
+            statusIcon = 'bi-alarm';
+            statusText = 'Significant Overtime';
+        }
+        
+        // Create week card with donut chart
+        const weekCard = document.createElement('div');
+        weekCard.className = 'weekly-card';
+        weekCard.innerHTML = `
+            <div class="weekly-card-header">
+                <div class="week-dates">
+                    <span class="date-range">${weekStart} - ${weekEnd}</span>
+                </div>
+                <div class="week-status ${statusClass}">
+                    <i class="bi ${statusIcon}"></i>
+                    <span>${statusText}</span>
+                </div>
+            </div>
+            
+            <div class="weekly-card-body">
+                <div class="donut-chart-container" style="--percentage: ${completionPercentage}">
+                    <div class="donut-chart ${chartClass}">
+                        <div class="donut-center">
+                            <div class="donut-hours">${week.totalHours}h</div>
+                            <div class="donut-target">of 40h</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hours-details">
+                    <div class="hours-detail-item">
+                        <span class="detail-label">Weekly Target</span>
+                        <span class="detail-value">40h</span>
+                    </div>
+                    <div class="hours-detail-item">
+                        <span class="detail-label">Completion</span>
+                        <span class="detail-value">${completionPercentage}%</span>
+                    </div>
+                    ${week.overtime > 0 ? `
+                    <div class="hours-detail-item overtime">
+                        <span class="detail-label">Overtime</span>
+                        <span class="detail-value">+${week.overtime}h</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        summaryContainer.appendChild(weekCard);
+    });
+    
+    container.appendChild(summaryContainer);
+} 

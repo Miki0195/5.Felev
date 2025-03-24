@@ -9,42 +9,129 @@
 
 <div class="page-container">
     <div class="clock-container">
-        <div class="form-header text-center">
-            <div class="header-icon">
-                <i class="bi bi-clock"></i>
-            </div>
-            <h1>Work Time Tracker</h1>
-            <p>Track your daily work hours</p>
+        <!-- Tab Navigation -->
+        <div class="clock-tabs">
+            <button class="tab-btn active" data-tab="personal">My Time</button>
+            <button class="tab-btn" data-tab="team" id="teamViewTab">Team Overview</button>
         </div>
-
-        <h4 id="workTimer" style="color: #42a5f5">00:00:00</h4>
-
-        <div class="button-group">
-            <button id="clockInBtn" class="btn btn-primary btn-modern">Clock In</button>
-            <button id="clockOutBtn" class="btn btn-danger btn-modern d-none">Clock Out</button>
-        </div>
-
-        <h3 class="mt-4">Recent Work Sessions</h3>
-        <table class="table table-modern">
-            <thead>
-                <tr>
-                    <th>Clock-In</th>
-                    <th>Clock-Out</th>
-                    <th>Duration</th>
-                </tr>
-            </thead>
-            <tbody id="workHistory">
-                <tr><td colspan="3">Loading...</td></tr>
-            </tbody>
-        </table>
-
-        <div class="progress-container">
-            <h3>Weekly Work Progress</h3>
-            <div class="progress">
-                <div id="workProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        
+        <!-- Personal Time Tab (Your existing content) -->
+        <div class="tab-content active" id="personal-tab">
+            <div class="form-header text-center">
+                <div class="header-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <h1>Work Time Tracker</h1>
+                <p>Track your daily work hours</p>
             </div>
-            <p id="weeklyHoursText">Loading...</p>
+            
+            <!-- Your existing personal time tracking content -->
+            <h4 id="workTimer" style="color: #42a5f5">00:00:00</h4>
+            
+            <div class="button-group">
+                <button id="clockInBtn" class="btn btn-primary btn-modern">Clock In</button>
+                <button id="clockOutBtn" class="btn btn-danger btn-modern d-none">Clock Out</button>
+            </div>
+            
+            <h3 class="mt-4">Recent Work Sessions</h3>
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>Clock-In</th>
+                        <th>Clock-Out</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="workHistory">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+            
+            <div class="progress-container">
+                <h3>Weekly Work Progress</h3>
+                <div class="progress">
+                    <div id="workProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <p id="weeklyHoursText">Loading...</p>
+            </div>
+        </div>
+        
+        <!-- Team Overview Tab (New content) -->
+        <div class="tab-content" id="team-tab">
+            <div class="form-header text-center">
+                <div class="header-icon team-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h1>Team Time Management</h1>
+                <p>Monitor your team's attendance and hours</p>
+            </div>
+            
+            <!-- Team filters -->
+            <div class="team-filters">
+                <div class="search-container">
+                    <input type="text" id="teamSearch" class="form-control" placeholder="Search team members...">
+                    <i class="bi bi-search search-icon"></i>
+                </div>
+                <div class="filter-container">
+                    <select id="statusFilter" class="form-select">
+                        <option value="all">All Statuses</option>
+                        <option value="active">Currently Active</option>
+                        <option value="inactive">Not Working</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Team stats summary -->
+            <div class="team-stats">
+                <div class="stat-card">
+                    <div class="stat-icon online-icon">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="activeCount">0</h4>
+                        <p>Currently Working</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon time-icon">
+                        <i class="bi bi-calendar-week"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="weeklyAvg">0h</h4>
+                        <p>Avg. Weekly Hours</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon overtime-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4 id="overtimeCount">0h</h4>
+                        <p>Total Overtime</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team members table -->
+            <div class="team-table-container">
+                <table class="table table-modern team-table">
+                    <thead>
+                        <tr>
+                            <th>Team Member</th>
+                            <th>Status</th>
+                            <th>Current Session</th>
+                            <th>Weekly Hours</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamTableBody">
+                        <tr><td colspan="5" class="text-center">Loading team data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+
 <script src="~/js/ClockIn/ClockIn.js"></script>

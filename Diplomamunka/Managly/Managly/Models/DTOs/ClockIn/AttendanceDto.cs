@@ -1,6 +1,6 @@
 using System;
 
-namespace Managly.Models.DTOs
+namespace Managly.Models.DTOs.ClockIn
 {
     // Base DTO for common responses
     public class ApiResponseDto
@@ -43,5 +43,14 @@ namespace Managly.Models.DTOs
     {
         public double TotalHours { get; set; }
         public double TotalMinutes { get; set; }
+    }
+
+    public class UpdateTimeRequestDto
+    {
+        public string RecordId { get; set; }
+        public string UserId { get; set; }
+        public string CheckInTime { get; set; }
+        public string CheckOutTime { get; set; }
+        public string AdminNotes { get; set; }
     }
 } 

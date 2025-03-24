@@ -56,6 +56,7 @@
     <Folder Include="wwwroot\js\Projects\" />
     <Folder Include="Models\DTOs\Projects\" />
     <Folder Include="wwwroot\js\ClockIn\" />
+    <Folder Include="Models\DTOs\ClockIn\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\js\ClockIn\" />
@@ -67,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Models\DTOs\Projects\" />
+    <None Remove="Models\DTOs\ClockIn\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Views\Schedule\namespace Managly.Models&#xA;{&#xA;    public class ScheduleEvent&#xA;    {&#xA;        public string Title { get%3B set%3B }&#xA;        public string Start { get%3B set%3B }&#xA;        public string WorkerId { get%3B set%3B }&#xA;    }&#xA;}&#xA;Manag">
