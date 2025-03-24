@@ -1,60 +1,58 @@
 ﻿<Properties StartupConfiguration="{E04E5547-FD09-490D-B102-55B6442A62E8}|https">
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <Debugger.DebugSourceFolders />
+  <MonoDevelop.Ide.ItemProperties.ManaglyTest FirstBuild="True" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/wwwroot/js/Projects/Index.js">
+  <MonoDevelop.Ide.Workbench ActiveDocument="ManaglyTest/Integration/ClockInIntegrationTests.cs">
     <Files>
-      <File FileName="Managly/wwwroot/css/Projects/Index.css" Line="273" Column="31" />
-      <File FileName="Managly/Controllers/Api/ProjectsApiController.cs" Line="277" Column="35" />
-      <File FileName="Managly/Models/Project.cs" Line="89" Column="21" />
-      <File FileName="Managly/Managly.csproj" />
-      <File FileName="Managly/Controllers/ProjectsController.cs" Line="408" Column="10" />
-      <File FileName="Managly/wwwroot/js/Projects/Index.js" Line="613" Column="2" />
-      <File FileName="Managly/Views/Projects/Index.cshtml" Line="21" Column="4" />
-      <File FileName="Managly/Views/Projects/_ProjectsSidebar.cshtml" Line="38" Column="29" />
-      <File FileName="Managly/Views/Projects/_ProjectsList.cshtml" Line="35" Column="118" />
-      <File FileName="Managly/Views/Projects/_CreateProjectModal.cshtml" Line="31" Column="30" />
-      <File FileName="Managly/Models/DTOs/Projects/ProjectCreateDto.cs" Line="21" Column="45" />
-      <File FileName="Managly/appsettings.json" Line="10" Column="93" />
-      <File FileName="Managly/Models/Tasks.cs" Line="1" Column="1" />
-      <File FileName="Managly/Models/TaskAssignment.cs" Line="1" Column="1" />
-      <File FileName="Managly/Models/User.cs" Line="1" Column="1" />
-      <File FileName="Managly/Models/ProjectViewModels.cs" Line="49" Column="71" />
-      <File FileName="Managly/Views/Projects/_ProjectDetails.cshtml" Line="94" Column="19" />
-      <File FileName="Managly/Views/Projects/_TasksList.cshtml" Line="15" Column="2" />
+      <File FileName="Managly/Views/Projects/_ProjectsList.cshtml" Line="24" Column="47" />
+      <File FileName="Managly/wwwroot/css/Projects/Index.css" Line="181" Column="9" />
+      <File FileName="Managly/Controllers/ProjectsController.cs" Line="561" Column="17" />
+      <File FileName="Managly/Views/Projects/_TaskCard.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/Views/Projects/_ProjectDetails.cshtml" Line="62" Column="35" />
+      <File FileName="Managly/Views/Projects/_TasksList.cshtml" Line="1" Column="1" />
       <File FileName="Managly/Views/Projects/_TaskDetailsModal.cshtml" Line="1" Column="1" />
-      <File FileName="Managly/Views/Projects/_TaskCard.cshtml" Line="11" Column="54" />
-      <File FileName="Managly/Views/Projects/_ActivityFeed.cshtml" Line="132" Column="2" />
+      <File FileName="Managly/Views/Projects/_RestoreProjectModal.cshtml" Line="1" Column="48" />
+      <File FileName="Managly/Views/Projects/_ArchivedProjectDetails.cshtml" Line="25" Column="70" />
+      <File FileName="Managly/wwwroot/js/Projects/Index.js" Line="121" Column="26" />
+      <File FileName="Managly/wwwroot/css/Account/Profile.css" Line="138" Column="23" />
+      <File FileName="Managly/Views/Account/Profile.cshtml" Line="151" Column="39" />
+      <File FileName="Managly/Views/Projects/Index.cshtml" Line="33" Column="1" />
+      <File FileName="Managly/Controllers/AccountController.cs" Line="103" Column="25" />
+      <File FileName="Managly/Models/UserProfile.cs" Line="64" Column="44" />
+      <File FileName="Managly/wwwroot/js/Account/Profile.js" Line="59" Column="6" />
+      <File FileName="Managly/Controllers/AdminController.cs" Line="26" Column="46" />
+      <File FileName="Managly/Models/Project.cs" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/ClockInController.cs" Line="10" Column="22" />
+      <File FileName="Managly/Models/Attendance.cs" Line="1" Column="1" />
+      <File FileName="Managly/Views/ClockIn/Index.cshtml" Line="137" Column="1" />
+      <File FileName="Managly/Models/DTOs/AttendanceDto.cs" Line="11" Column="1" />
+      <File FileName="Managly/wwwroot/js/ClockIn/EmptyJSFile.js" Line="474" Column="2" />
+      <File FileName="Managly/Data/ApplicationDbContext.cs" Line="27" Column="67" />
+      <File FileName="Managly/Models/AttendanceAuditLog.cs" Line="7" Column="36" />
+      <File FileName="Managly/Views/ClockIn/EmployeeDetails.cshtml" Line="9" Column="55" />
+      <File FileName="Managly/wwwroot/css/ClockIn/Index.css" Line="26" Column="22" />
+      <File FileName="Managly/wwwroot/js/ClockIn/EmployeeDetails.js" Line="34" Column="44" />
+      <File FileName="Managly/TestUtils/TestDbContextFactory.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/UnitTest1.cs" Line="1" Column="1" />
+      <File FileName="Managly/Models/DTOs/CreateGroupDto.cs" Line="1" Column="1" />
+      <File FileName="Managly/Managlytest/Controllers/ClockInControllerTests.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Controllers/ClockInControllerTests.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Helpers/MockUserManagerFactory.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Helpers/TestDbContextFactory.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Helpers/TestWebApplicationFactory.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Integration/ClockInIntegrationTests.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Managly" expanded="True">
             <Node name="Managly">
-              <Node name="Controllers" expanded="True">
-                <Node name="Api" expanded="True" />
-              </Node>
-              <Node name="Models" expanded="True">
-                <Node name="DTOs" expanded="True">
-                  <Node name="Projects" expanded="True" />
-                </Node>
-              </Node>
-              <Node name="Views">
-                <Node name="Projects" expanded="True" />
-              </Node>
-              <Node name="wwwroot" expanded="True">
-                <Node name="css" expanded="True">
-                  <Node name="Projects" expanded="True" />
-                </Node>
-                <Node name="js" expanded="True">
-                  <Node name="Projects" expanded="True">
-                    <Node name="Index.js" selected="True" />
-                  </Node>
-                </Node>
-              </Node>
+              <Node name="Data" expanded="True" />
             </Node>
+            <Node name="ManaglyTest" selected="True" />
           </Node>
         </State>
       </Pad>

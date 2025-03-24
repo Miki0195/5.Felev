@@ -3,8 +3,6 @@
     const isProjectDetailsPage = !!document.querySelector('.projects-content .project-details');
     const isMembersModalOpen = !!document.querySelector('#manageMembersModal.show');
 
-    loadProjectsForSidebar();
-
     // ========== SIDEBAR NAVIGATION EVENTS ==========
     const filterTabsContainer = document.querySelector('.filter-tabs');
     if (filterTabsContainer) {
@@ -120,7 +118,7 @@
 }
 
 document.addEventListener('DOMContentLoaded', setupEventListeners);
-
+loadProjectsForSidebar();
 // Everything for the sidebar
 function searchProjects(searchTerm) {
     const activeFilter = document.querySelector('.filter-tab.active').getAttribute('data-filter');
@@ -193,7 +191,6 @@ async function loadProjectsForSidebar(filter = 'all', searchTerm = '') {
             });
         }
     } catch (error) {
-        console.error('Error loading projects:', error);
         projectsContainer.innerHTML = `
             <div class="error-message">
                 <p>Error loading projects: ${error.message}</p>
@@ -1392,7 +1389,6 @@ async function updateTaskStatus(taskId, projectId, newStatus, event) {
         await loadProjectsForSidebar(projectId);
         showToast(`Task marked as ${newStatus}`, 'success');
     } catch (error) {
-        console.error('Error updating task status:', error);
         showToast('Error updating task status: ' + error.message, 'error');
         
         if (event && event.target && event.target.type === 'checkbox') {

@@ -9,183 +9,183 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Managly
 build_property.RootNamespace = Managly
-build_property.ProjectDir = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/
+build_property.ProjectDir = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly
+build_property.MSBuildProjectDirectory = /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly
 build_property._RazorSourceGeneratorDebug = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Account/AccessDenied.cshtml]
-build_metadata.AdditionalFiles.TargetPath = QWNjZXNzRGVuaWVkLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9BY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Account/AccountDeleted.cshtml]
-build_metadata.AdditionalFiles.TargetPath = QWNjb3VudERlbGV0ZWQuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9BY2NvdW50RGVsZXRlZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Account/ChangePassword.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Q2hhbmdlUGFzc3dvcmQuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9DaGFuZ2VQYXNzd29yZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Account/Profile.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UHJvZmlsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Qcm9maWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Admin/CreateProfile.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Q3JlYXRlUHJvZmlsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQ3JlYXRlUHJvZmlsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Admin/UserManagement.cshtml]
-build_metadata.AdditionalFiles.TargetPath = VXNlck1hbmFnZW1lbnQuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vVXNlck1hbmFnZW1lbnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/archived/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvYXJjaGl2ZWQvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Chat/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2hhdC9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/ClockIn/EmployeeDetails.cshtml]
-build_metadata.AdditionalFiles.TargetPath = RW1wbG95ZWVEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xvY2tJbi9FbXBsb3llZURldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/ClockIn/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xvY2tJbi9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Home/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Home/Login.cshtml]
-build_metadata.AdditionalFiles.TargetPath = TG9naW4uY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Home/Privacy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UHJpdmFjeS5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Home/Register.cshtml]
-build_metadata.AdditionalFiles.TargetPath = UmVnaXN0ZXIuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ActivityFeed.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0FjdGl2aXR5RmVlZC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FjdGl2aXR5RmVlZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_AddMembersModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0FkZE1lbWJlcnNNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FkZE1lbWJlcnNNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_AllActivitiesContent.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0FsbEFjdGl2aXRpZXNDb250ZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FsbEFjdGl2aXRpZXNDb250ZW50LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_AllActivitiesModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0FsbEFjdGl2aXRpZXNNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FsbEFjdGl2aXRpZXNNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ArchivedProjectDetails.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0FyY2hpdmVkUHJvamVjdERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0FyY2hpdmVkUHJvamVjdERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_CreateProjectModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0NyZWF0ZVByb2plY3RNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0NyZWF0ZVByb2plY3RNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_CreateTaskModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0NyZWF0ZVRhc2tNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0NyZWF0ZVRhc2tNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_DeleteConfirmationModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0RlbGV0ZUNvbmZpcm1hdGlvbk1vZGFsLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0RlbGV0ZUNvbmZpcm1hdGlvbk1vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_EditProjectModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0VkaXRQcm9qZWN0TW9kYWwuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX0VkaXRQcm9qZWN0TW9kYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ManageMembersModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X01hbmFnZU1lbWJlcnNNb2RhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX01hbmFnZU1lbWJlcnNNb2RhbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ManageMembersModalContent.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X01hbmFnZU1lbWJlcnNNb2RhbENvbnRlbnQuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX01hbmFnZU1lbWJlcnNNb2RhbENvbnRlbnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ProjectDetails.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Byb2plY3REZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Byb2plY3REZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ProjectsList.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Byb2plY3RzTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Byb2plY3RzTGlzdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_ProjectsSidebar.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Byb2plY3RzU2lkZWJhci5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Byb2plY3RzU2lkZWJhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_RestoreProjectModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Jlc3RvcmVQcm9qZWN0TW9kYWwuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Jlc3RvcmVQcm9qZWN0TW9kYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_TaskCard.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Rhc2tDYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Rhc2tDYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_TaskDetailsModal.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Rhc2tEZXRhaWxzTW9kYWwuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Rhc2tEZXRhaWxzTW9kYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Projects/_TasksList.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1Rhc2tzTGlzdC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvamVjdHMvX1Rhc2tzTGlzdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Reports/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Schedule/Manage.cshtml]
-build_metadata.AdditionalFiles.TargetPath = TWFuYWdlLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2NoZWR1bGUvTWFuYWdlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Schedule/MergedSchedule.cshtml]
-build_metadata.AdditionalFiles.TargetPath = TWVyZ2VkU2NoZWR1bGUuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2NoZWR1bGUvTWVyZ2VkU2NoZWR1bGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Schedule/ViewSchedule.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld1NjaGVkdWxlLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2NoZWR1bGUvVmlld1NjaGVkdWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Shared/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = RXJyb3IuY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Shared/_ValidationScriptsPartial.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/VideoConference/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = SW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmlkZW9Db25mZXJlbmNlL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/_ViewImports.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/_ViewStart.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = X0xheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-bfxsm06m3j
