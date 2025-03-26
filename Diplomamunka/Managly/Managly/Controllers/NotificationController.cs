@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Managly.Data;
 using Managly.Models;
+using Managly.Models.DTOs.Notification;
+using Managly.Models.Enums;
+using System.Text.Json;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,15 +27,27 @@ namespace Managly.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNotification([FromBody] Notification model)
+        public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationDto dto)
         {
-            if (model == null || string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.Message))
+            if (dto == null || string.IsNullOrEmpty(dto.UserId) || string.IsNullOrEmpty(dto.Message))
             {
                 return BadRequest(new { error = "Invalid notification data." });
             }
 
-            model.Timestamp = DateTime.UtcNow;
-            _context.Notifications.Add(model);
+            var notification = new Notification
+            {
+                UserId = dto.UserId,
+                Message = dto.Message,
+                Link = dto.Link,
+                Type = dto.Type,
+                Timestamp = DateTime.UtcNow,
+                ProjectId = dto.ProjectId,
+                TaskId = dto.TaskId,
+                RelatedUserId = dto.RelatedUserId,
+                MetaData = dto.MetaData != null ? JsonSerializer.Serialize(dto.MetaData) : null
+            };
+
+            _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true });
@@ -43,21 +58,59 @@ namespace Managly.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
+            // First get the notifications
             var notifications = await _context.Notifications
                 .Where(n => n.UserId == userId && !n.IsRead)
                 .OrderByDescending(n => n.Timestamp)
                 .ToListAsync();
 
-            return Ok(notifications);
+            // Then map them to DTOs in memory
+            var notificationDtos = notifications.Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                Message = n.Message,
+                Link = n.Link,
+                Timestamp = n.Timestamp,
+                Type = n.Type,
+                RelatedUserId = n.RelatedUserId,
+                MetaData = string.IsNullOrEmpty(n.MetaData) 
+                    ? new Dictionary<string, string>()
+                    : JsonSerializer.Deserialize<Dictionary<string, string>>(n.MetaData)
+            }).ToList();
+
+            // Group by type first
+            var groupedNotifications = notificationDtos
+                .GroupBy(n => n.Type)
+                .Select(typeGroup => new NotificationGroupDto
+                {
+                    Type = typeGroup.Key,
+                    GroupTitle = GetGroupTitle(typeGroup.Key),
+                    // Group by RelatedUserId within each type
+                    SenderGroups = typeGroup
+                        .GroupBy(n => n.RelatedUserId)
+                        .Select(senderGroup => new NotificationSenderGroupDto
+                        {
+                            SenderId = senderGroup.Key ?? "system",
+                            SenderName = senderGroup.First().MetaData.GetValueOrDefault("senderName", "System"),
+                            Notifications = senderGroup.ToList(),
+                            UnreadCount = senderGroup.Count()
+                        })
+                        .ToList(),
+                    UnreadCount = typeGroup.Count()
+                })
+                .OrderByDescending(g => g.SenderGroups.SelectMany(sg => sg.Notifications).Max(n => n.Timestamp))
+                .ToList();
+
+            return Ok(groupedNotifications);
         }
 
-        [HttpPost("mark-as-read/{senderId}")]
-        public async Task<IActionResult> MarkNotificationsAsRead(string senderId)
+        [HttpPost("mark-as-read/{notificationType}")]
+        public async Task<IActionResult> MarkNotificationsAsRead(NotificationType notificationType)
         {
             var userId = _userManager.GetUserId(User);
 
             var notifications = await _context.Notifications
-                .Where(n => n.UserId == userId && n.Link.Contains($"userId={senderId}") && !n.IsRead)
+                .Where(n => n.UserId == userId && n.Type == notificationType && !n.IsRead)
                 .ToListAsync();
 
             if (!notifications.Any())
@@ -73,29 +126,7 @@ namespace Managly.Controllers
             return Ok(new { success = true });
         }
 
-        [HttpPost("mark-all-as-read")]
-        public async Task<IActionResult> MarkAllNotificationsAsRead()
-        {
-
-            var userId = _userManager.GetUserId(User);
-
-            var unreadNotifications = await _context.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead)
-                .ToListAsync();
-
-            if (!unreadNotifications.Any()) return Ok(new { success = false, message = "No unread notifications" });
-
-            foreach (var notification in unreadNotifications)
-            {
-                notification.IsRead = true;
-            }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true });
-        }
-
-        [HttpPost("mark-as-read/project_{projectId}")]
+        [HttpPost("mark-project-notifications/{projectId}")]
         public async Task<IActionResult> MarkProjectNotificationsAsRead(int projectId)
         {
             try
@@ -104,8 +135,8 @@ namespace Managly.Controllers
 
                 var notifications = await _context.Notifications
                     .Where(n => n.UserId == userId && 
-                               n.Link.Contains($"projectId={projectId}") && 
-                               !n.IsRead)
+                           n.ProjectId == projectId && 
+                           !n.IsRead)
                     .ToListAsync();
 
                 if (!notifications.Any())
@@ -126,19 +157,40 @@ namespace Managly.Controllers
             }
         }
 
-        //[HttpPost("video-call")]
-        //public async Task<IActionResult> SendVideoCallInvitation([FromBody] Notification model)
-        //{
-        //    if (model == null || string.IsNullOrEmpty(model.UserId))
-        //        return BadRequest(new { error = "Invalid data." });
+        [HttpPost("mark-all-as-read")]
+        public async Task<IActionResult> MarkAllNotificationsAsRead()
+        {
+            var userId = _userManager.GetUserId(User);
 
-        //    model.Message = "You have been invited to a video call.";
-        //    model.Timestamp = DateTime.UtcNow;
-        //    _context.Notifications.Add(model);
-        //    await _context.SaveChangesAsync();
+            var unreadNotifications = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
 
-        //    return Ok(new { success = true });
-        //}
+            if (!unreadNotifications.Any()) 
+                return Ok(new { success = false, message = "No unread notifications" });
 
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        private string GetGroupTitle(NotificationType type)
+        {
+            return type switch
+            {
+                NotificationType.Message => "Messages",
+                NotificationType.VideoInvite => "Video Call Invitations",
+                NotificationType.ProjectCreation => "New Projects",
+                NotificationType.ProjectMemberAdded => "Project Memberships",
+                NotificationType.TaskAssigned => "Task Assignments",
+                NotificationType.TaskUpdated => "Task Updates",
+                _ => "Other Notifications"
+            };
+        }
     }
 }

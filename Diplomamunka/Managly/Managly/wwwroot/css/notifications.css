@@ -1,0 +1,228 @@
+/* Modern Notification Styles */
+.notification-dropdown {
+    width: 380px;
+    max-height: 80vh;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: none;
+    padding: 0;
+    margin-top: 10px;
+    overflow: hidden; /* Prevents double scrollbar */
+}
+
+/* Header styling */
+.notification-dropdown .dropdown-header {
+    background: #2563eb; /* Fresh blue */
+    color: white;
+    padding: 16px;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Clear all button */
+#deleteAllNotifications {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+#deleteAllNotifications:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Notification list container */
+#notificationList {
+    max-height: calc(80vh - 53px); /* Subtracting header height */
+    overflow-y: auto;
+    padding: 8px;
+    background: #f8fafc;
+}
+
+/* Custom scrollbar */
+#notificationList::-webkit-scrollbar {
+    width: 4px;
+}
+
+#notificationList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#notificationList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Type groups */
+.notification-type-group {
+    margin-bottom: 8px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.notification-group-header {
+    padding: 12px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.notification-group-header:hover {
+    background: #f8fafc;
+}
+
+.notification-group-header .group-icon {
+    color: #2563eb;
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+/* Sender groups */
+.notification-sender-group {
+    margin: 4px 0;
+    padding: 0 8px;
+}
+
+.sender-group-header {
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+}
+
+.sender-group-header:hover {
+    background: #f1f5f9;
+}
+
+.sender-group-header small {
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Individual notifications */
+.notification-item {
+    padding: 10px 12px;
+    margin: 4px 0;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    text-decoration: none;
+    color: inherit;
+}
+
+.notification-item:hover {
+    background: #f8fafc;
+    transform: translateX(2px);
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notification-message {
+    color: #334155;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Message preview */
+.notification-content small.text-muted {
+    color: #64748b !important;
+    font-size: 0.8rem;
+}
+
+/* Type-specific colors */
+.notification-type-Message {
+    border-left: 3px solid #2563eb;
+}
+
+.notification-type-VideoInvite {
+    border-left: 3px solid #059669;
+}
+
+.notification-type-ProjectCreation {
+    border-left: 3px solid #d97706;
+}
+
+.notification-type-TaskAssigned {
+    border-left: 3px solid #dc2626;
+}
+
+/* Badge styling */
+.notification-badge {
+    background: #dc2626;
+    color: white;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Bell icon styling */
+#notificationBell {
+    position: relative;
+}
+
+#notificationBell i {
+    font-size: 1.2rem;
+    color: #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+#notificationBell i.has-notifications {
+    color: #dc2626;
+    animation: bell-shake 0.5s ease;
+}
+
+/* Animation for bell icon */
+@keyframes bell-shake {
+    0% { transform: rotate(0); }
+    15% { transform: rotate(5deg); }
+    30% { transform: rotate(-5deg); }
+    45% { transform: rotate(4deg); }
+    60% { transform: rotate(-4deg); }
+    75% { transform: rotate(2deg); }
+    85% { transform: rotate(-2deg); }
+    92% { transform: rotate(1deg); }
+    100% { transform: rotate(0); }
+}
+
+/* Empty state styling */
+.notification-empty {
+    text-align: center;
+    padding: 24px 16px;
+    color: #94a3b8;
+    background: #ffffff;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.notification-empty i {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+/* Collapse transition */
+.collapse {
+    transition: height 0.2s ease;
+} 

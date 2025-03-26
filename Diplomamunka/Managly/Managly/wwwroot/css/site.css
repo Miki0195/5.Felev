@@ -142,3 +142,194 @@
     border-radius: 10px;
     margin-left: 5px;
 }
+
+/* Updated Notification Styles */
+.notification-dropdown {
+    width: 350px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.notification-item:hover {
+    background-color: rgba(0,0,0,.05);
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.notification-message {
+    margin-bottom: 0.25rem;
+}
+
+.notification-type-group {
+    padding: 0.5rem 0;
+}
+
+.notification-sender-group {
+    padding: 0.25rem 0;
+}
+
+.dropdown-header {
+    padding: 0.5rem 1rem;
+    margin-bottom: 0;
+    background-color: rgba(0,0,0,.03);
+}
+
+.notifications-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Scrollbar styling */
+.notification-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+/* Badge styling */
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Type-specific styles */
+.notification-type-Message {
+    border-left: 3px solid #007bff;
+}
+
+.notification-type-VideoInvite {
+    border-left: 3px solid #28a745;
+}
+
+.notification-type-ProjectCreation {
+    border-left: 3px solid #ffc107;
+}
+
+.notification-type-TaskAssigned {
+    border-left: 3px solid #dc3545;
+}
+
+.notification-group-header {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.notification-group-header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.notification-group-header .group-icon {
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+}
+
+.notification-group-content {
+    padding: 0.5rem 0;
+}
+
+.notification-sender-group {
+    padding-left: 1rem;
+}
+
+.dropdown-header {
+    padding: 0.5rem 1rem;
+    margin-bottom: 0;
+}
+
+.notification-item {
+    padding-left: 2rem;
+}
+
+/* Ensure the notification dropdown has a max height and scrolls */
+#notificationList {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Add a subtle border between groups */
+.notification-type-group {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.notification-type-group:last-child {
+    border-bottom: none;
+}
+
+.sender-group-header {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+}
+
+.sender-group-header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sender-group-header .sender-icon {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+}
+
+.sender-group-content {
+    padding-left: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Remove the existing padding-left from notification items inside groups */
+.sender-group-content .notification-item {
+    padding-left: 1rem;
+}
+
+/* Add some spacing between sender groups */
+.notification-sender-group {
+    margin-bottom: 0.5rem;
+}
+
+/* Style the sender name */
+.sender-group-header small {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.collapse {
+    transition: height 0.3s ease;
+}

@@ -8,6 +8,9 @@ using Managly.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Concurrent;
+using Managly.Models.Enums;
+using Org.BouncyCastle.Cms;
+using System.Text.Json;
 
 namespace Managly.Hubs
 {
@@ -86,47 +89,93 @@ namespace Managly.Hubs
         {
             Console.WriteLine("✅ SendMessage method called");
 
-            var sender = await _context.Users.FindAsync(senderId);
-            var receiver = await _context.Users.FindAsync(receiverId);
-
-            if (sender == null || receiver == null)
-            {
-                Console.WriteLine("❌ Sender or Receiver is null!");
-                return;
-            }
-
-            Console.WriteLine($"📩 Creating notification for {receiver.Name} ({receiverId})");
-
-            var notification = new Notification
-            {
-                UserId = receiverId,
-                Message = $"{sender.Name} sent you a new message",
-                Link = $"/chat?userId={senderId}",
-                Timestamp = DateTime.UtcNow,
-                IsRead = false
-            };
-
             try
             {
+                var sender = await _context.Users.FindAsync(senderId);
+                var receiver = await _context.Users.FindAsync(receiverId);
+
+                if (sender == null || receiver == null)
+                {
+                    Console.WriteLine("❌ Sender or Receiver is null!");
+                    return;
+                }
+
+                Console.WriteLine($"📩 Creating notification for {receiver.Name} ({receiverId})");
+
+                // Create message preview (assuming you have this logic)
+                var messagePreview = message.Length > 30 ? message.Substring(0, 27) + "..." : message;
+
+                // Create the notification with the new structure
+                var notification = new Notification
+                {
+                    UserId = receiverId,
+                    Message = $"New message from {sender.Name}",
+                    Link = $"/chat?userId={senderId}",
+                    Type = NotificationType.Message,
+                    RelatedUserId = senderId,
+                    Timestamp = DateTime.Now,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "senderName", sender.Name },
+                        { "messagePreview", messagePreview },
+                        { "senderId", senderId },
+                        { "senderProfilePicture", sender.ProfilePicturePath ?? "" }
+                    })
+                };
+
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
-                int unreadCount = await _context.Notifications
-                    .Where(n => n.UserId == receiverId && !n.IsRead)
-                    .CountAsync();
+                // Get notification counts for the specific type
+                var unreadCounts = await GetUnreadCounts(receiverId, senderId);
 
-                int senderUnreadCount = await _context.Notifications
-                    .Where(n => n.UserId == receiverId && !n.IsRead && n.Link.Contains($"userId={senderId}"))
-                    .CountAsync();
+                // Create notification payload for SignalR
+                var notificationPayload = new
+                {
+                    id = notification.Id,
+                    message = notification.Message,
+                    link = notification.Link,
+                    type = notification.Type,
+                    timestamp = notification.Timestamp,
+                    metaData = JsonSerializer.Deserialize<Dictionary<string, string>>(notification.MetaData),
+                    unreadCount = unreadCounts.totalUnread,
+                    typeUnreadCount = unreadCounts.typeUnread,
+                    senderUnreadCount = unreadCounts.senderUnread
+                };
 
-                Console.WriteLine($"🔔 Sending real-time notification with unread count: {unreadCount}");
+                Console.WriteLine($"🔔 Sending real-time notification with unread count: {unreadCounts.totalUnread}");
 
-                await Clients.User(receiverId).SendAsync("ReceiveNotification", notification.Message, notification.Link, unreadCount, senderUnreadCount, notification.Timestamp);
+                // Send the notification through SignalR
+                await Clients.User(receiverId).SendAsync("ReceiveNotification", notificationPayload);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Database Save Error: {ex.Message}");
+                Console.WriteLine($"❌ Error in SendMessage: {ex.Message}");
+                // Consider throwing the exception or handling it according to your error handling strategy
             }
+        }
+
+        // Helper method to get various unread counts
+        private async Task<(int totalUnread, int typeUnread, int senderUnread)> GetUnreadCounts(string userId, string senderId)
+        {
+            var totalUnread = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .CountAsync();
+
+            var typeUnread = await _context.Notifications
+                .Where(n => n.UserId == userId &&
+                           !n.IsRead &&
+                           n.Type == NotificationType.Message)
+                .CountAsync();
+
+            var senderUnread = await _context.Notifications
+                .Where(n => n.UserId == userId &&
+                           !n.IsRead &&
+                           n.Type == NotificationType.Message &&
+                           n.RelatedUserId == senderId)
+                .CountAsync();
+
+            return (totalUnread, typeUnread, senderUnread);
         }
 
         public async Task MessageDeleted(string messageId)

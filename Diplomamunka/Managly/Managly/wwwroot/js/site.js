@@ -45,83 +45,273 @@ function toggleNotifications() {
 function loadNotifications() {
     fetch("/api/notifications")
         .then(response => response.json())
-        .then(notifications => {
-            let notificationList = document.getElementById("notificationList");
-            let notificationCount = document.getElementById("notificationCount");
-            let notificationBell = document.getElementById("notificationBell").querySelector("i");
-            let deleteAllButton = document.getElementById("deleteAllNotifications");
-
+        .then(groupedNotifications => {
+            console.log("Received notifications:", groupedNotifications);
+            
+            const notificationList = document.getElementById("notificationList");
+            let totalUnread = 0;
             notificationList.innerHTML = "";
 
-            if (notifications.length === 0) {
-                notificationList.innerHTML = "<p class='text-muted text-center'>No new notifications</p>";
-                notificationCount.classList.add("d-none");
-                notificationBell.classList.remove("has-notifications");
-                deleteAllButton.classList.add("d-none"); 
+            if (!groupedNotifications || groupedNotifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <p class="mb-0">No new notifications</p>
+                    </div>
+                `;
+                updateNotificationIndicators(0);
                 return;
             }
 
-            let groupedNotifications = {};
-            let totalUnread = 0;
+            // Create a container for all notifications
+            const notificationsContainer = document.createElement("div");
+            notificationsContainer.className = "notifications-container";
 
-            notifications.forEach(notification => {
-                let senderId = new URLSearchParams(notification.link.split("?")[1]).get("userId");
-                let serverTime = new Date(notification.timestamp);
-                let localTime = new Date(serverTime.getTime() - serverTime.getTimezoneOffset() * 60000);
-                let formattedTimestamp = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            groupedNotifications.forEach((typeGroup, index) => {
+                totalUnread += typeGroup.unreadCount;
 
-                if (!groupedNotifications[senderId]) {
-                    groupedNotifications[senderId] = { messages: [], link: notification.link, isRead: notification.isRead, latestTimestamp: formattedTimestamp };
-                }
-                groupedNotifications[senderId].messages.push(notification.message);
-                let currentLatest = new Date(groupedNotifications[senderId].latestTimestamp);
-                if (serverTime > currentLatest) {
-                    groupedNotifications[senderId].latestTimestamp = formattedTimestamp;
-                }
-            });
-
-            Object.keys(groupedNotifications).forEach(senderId => {
-                let notificationData = groupedNotifications[senderId];
-
-                let item = document.createElement("li");
-                item.classList.add("notification-item");
-                item.setAttribute("data-sender-id", senderId);
-
-                if (!notificationData.isRead) {
-                    item.classList.add("unread-notification");
-                    totalUnread += notificationData.messages.length;
-                } else {
-                    item.classList.add("read-notification");
-                }
-
-                item.innerHTML = `
-                    <div class="notification-content">
-                        <strong>${notificationData.messages[0]}</strong>
-                        <div class="notification-timestamp text-muted small">${notificationData.latestTimestamp}</div>
-                        ${notificationData.messages.length > 1 ? `<span class="message-count badge bg-danger">(${notificationData.messages.length} messages)</span>` : ""}
+                // Create type group container
+                const typeContainer = document.createElement("div");
+                typeContainer.className = "notification-type-group";
+                
+                // Create unique ID for this group
+                const groupId = `notification-group-${index}`;
+                
+                // Add collapsible type header
+                typeContainer.innerHTML = `
+                    <div class="dropdown-header d-flex justify-content-between align-items-center notification-group-header" 
+                         data-bs-toggle="collapse" 
+                         data-bs-target="#${groupId}" 
+                         role="button"
+                         aria-expanded="false">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chevron-right me-2 group-icon"></i>
+                            <span>${typeGroup.groupTitle}</span>
+                        </div>
+                        <span class="badge bg-secondary">${typeGroup.unreadCount}</span>
+                    </div>
+                    <div class="collapse" id="${groupId}">
+                        <div class="notification-group-content"></div>
                     </div>
                 `;
 
-                item.onclick = function () {
-                    markNotificationsAsRead(senderId, notificationData.link);
-                };
+                const groupContent = typeContainer.querySelector('.notification-group-content');
 
-                notificationList.appendChild(item);
+                if (typeGroup.senderGroups && typeGroup.senderGroups.length > 0) {
+                    typeGroup.senderGroups.forEach(senderGroup => {
+                        const senderContainer = createSenderGroupContainer(senderGroup, typeGroup.type);
+                        groupContent.appendChild(senderContainer);
+                    });
+                } else if (typeGroup.notifications && typeGroup.notifications.length > 0) {
+                    // Old structure with direct notifications
+                    const senderContainer = document.createElement("div");
+                    senderContainer.className = "notification-sender-group";
+                    
+                    typeGroup.notifications.forEach(notification => {
+                        const notificationItem = createNotificationItem(notification, typeGroup.type);
+                        senderContainer.appendChild(notificationItem);
+                    });
+                    
+                    groupContent.appendChild(senderContainer);
+                }
+
+                notificationsContainer.appendChild(typeContainer);
             });
 
-            deleteAllButton.classList.remove("d-none");
+            notificationList.appendChild(notificationsContainer);
+            updateNotificationIndicators(totalUnread);
 
-            notificationCount.textContent = totalUnread;
-            notificationCount.classList.toggle("d-none", totalUnread === 0);
-            notificationBell.classList.toggle("has-notifications", totalUnread > 0);
+            // Add click handlers for group headers
+            document.querySelectorAll('.notification-group-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    const icon = this.querySelector('.group-icon');
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    
+                    // Rotate icon based on collapse state
+                    icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                });
+            });
         })
-        .catch(err => console.error("❌ Error loading notifications: ", err));
+        .catch(err => {
+            console.error("❌ Error loading notifications: ", err);
+            const notificationList = document.getElementById("notificationList");
+            notificationList.innerHTML = '<p class="text-muted text-center py-3 mb-0">Error loading notifications</p>';
+            updateNotificationIndicators(0);
+        });
 }
 
+function createSenderGroupContainer(senderGroup, type) {
+    const senderContainer = document.createElement("div");
+    senderContainer.className = "notification-sender-group";
+
+    // Add collapsible sender header if there are multiple messages
+    if (senderGroup.unreadCount > 1) {
+        const groupId = `sender-group-${senderGroup.senderId}-${Date.now()}`;
+        
+        senderContainer.innerHTML = `
+            <div class="dropdown-header d-flex justify-content-between align-items-center sender-group-header" 
+                 role="button"
+                 aria-expanded="false">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-chevron-right me-2 sender-icon"></i>
+                    <small class="text-muted">
+                        ${senderGroup.senderName} (${senderGroup.unreadCount})
+                    </small>
+                </div>
+            </div>
+            <div class="collapse" id="${groupId}">
+                <div class="sender-group-content"></div>
+            </div>
+        `;
+
+        const groupContent = senderContainer.querySelector('.sender-group-content');
+        const header = senderContainer.querySelector('.sender-group-header');
+        const collapseElement = senderContainer.querySelector('.collapse');
+        
+        // Add notifications for this sender
+        senderGroup.notifications.forEach(notification => {
+            const notificationItem = createNotificationItem(notification, type);
+            groupContent.appendChild(notificationItem);
+        });
+
+        // Initialize Bootstrap collapse
+        const collapse = new bootstrap.Collapse(collapseElement, {
+            toggle: false
+        });
+
+        // Add click handler for the header
+        header.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const icon = this.querySelector('.sender-icon');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                collapse.hide();
+                icon.style.transform = 'rotate(0deg)';
+                this.setAttribute('aria-expanded', 'false');
+            } else {
+                collapse.show();
+                icon.style.transform = 'rotate(90deg)';
+                this.setAttribute('aria-expanded', 'true');
+            }
+        });
+    } else {
+        // Single notification, no grouping needed
+        const notificationItem = createNotificationItem(senderGroup.notifications[0], type);
+        senderContainer.appendChild(notificationItem);
+    }
+
+    return senderContainer;
+}
+
+function createNotificationItem(notification, type) {
+    const item = document.createElement("a");
+    item.className = `dropdown-item notification-item notification-type-${type}`;
+    item.href = notification.link;
+    
+    const timestamp = new Date(notification.timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    item.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-message">${notification.message}</div>
+            ${notification.metaData?.messagePreview ? 
+                `<small class="text-muted">${notification.metaData.messagePreview}</small>` : 
+                ''}
+            <small class="text-muted">${timestamp}</small>
+        </div>
+    `;
+
+    item.onclick = (e) => {
+        e.preventDefault();
+        handleNotificationClick(type, notification.link, notification.relatedUserId);
+    };
+
+    return item;
+}
+
+function handleNotificationClick(type, link, senderId) {
+    markNotificationAsRead(type, link);
+}
+
+function updateNotificationIndicators(count) {
+    const notificationCount = document.getElementById("notificationCount");
+    const notificationBell = document.getElementById("notificationBell").querySelector("i");
+    const deleteAllButton = document.getElementById("deleteAllNotifications");
+
+    notificationCount.textContent = count;
+    notificationCount.classList.toggle("d-none", count === 0);
+    notificationBell.classList.toggle("has-notifications", count > 0);
+    deleteAllButton.classList.toggle("d-none", count === 0);
+}
+
+// SignalR notification handler
+if (typeof connection !== "undefined") {
+    connection.on("ReceiveNotification", function (notification) {
+        console.log("🔔 New real-time notification received:", notification);
+
+        // Check if we're on a page where we should auto-mark as read
+        const currentPage = window.location.pathname;
+        const shouldAutoMarkRead = (
+            (currentPage.startsWith("/chat") && notification.type === "Message") ||
+            (currentPage.startsWith("/projects") && notification.type.startsWith("Project")) ||
+            (currentPage.startsWith("/videoconference") && notification.type === "VideoInvite")
+        );
+
+        if (shouldAutoMarkRead) {
+            markNotificationAsRead(notification.type, notification.link);
+        } else {
+            // Refresh notifications to show the new one
+            loadNotifications();
+        }
+    });
+}
+
+function markNotificationAsRead(type, link) {
+    fetch(`/api/notifications/mark-as-read/${type}`, {
+        method: "POST"
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Remove notifications of this type
+                document.querySelectorAll(`[data-notification-type="${type}"]`)
+                    .forEach(item => {
+                        const group = item.closest('.notification-group');
+                        item.remove();
+                        
+                        // If group is empty, remove it
+                        if (group && !group.querySelector('.notification-item')) {
+                            group.remove();
+                        }
+                    });
+
+                // Update counts and check if all notifications are gone
+                const remainingItems = document.querySelectorAll('.notification-item');
+                if (remainingItems.length === 0) {
+                    document.getElementById("notificationList").innerHTML = 
+                        '<p class="text-muted text-center py-3 mb-0">No new notifications</p>';
+                }
+
+                updateNotificationIndicators(remainingItems.length);
+
+                // Navigate to the link if provided
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        })
+        .catch(err => console.error("❌ Error marking notifications as read:", err));
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     loadNotifications();
-    setInterval(loadNotifications, 2000); // Fetch every 2 seconds
+    //setInterval(loadNotifications, 2000); // Fetch every 2 seconds
 
     let isMessagesPage = window.location.pathname.startsWith("/chat");
     let isProjectsPage = window.location.pathname.startsWith("/projects");

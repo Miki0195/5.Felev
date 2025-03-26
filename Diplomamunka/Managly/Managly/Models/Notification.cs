@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Managly.Models.Enums;
 
 namespace Managly.Models
 {
@@ -23,5 +24,15 @@ namespace Managly.Models
         public string Link { get; set; } 
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public NotificationType Type { get; set; }
+
+        public int? ProjectId { get; set; }
+        public int? TaskId { get; set; }
+        public string RelatedUserId { get; set; }  // For user-related notifications
+
+
+        public string MetaData { get; set; }
     }
 }
