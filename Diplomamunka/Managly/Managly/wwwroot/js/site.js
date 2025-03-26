@@ -210,6 +210,16 @@ function createSenderGroupContainer(senderGroup, type) {
 function createNotificationItem(notification, type) {
     const item = document.createElement("a");
     item.className = `dropdown-item notification-item notification-type-${type}`;
+    
+    // Add specific classes for video call notifications (type 1 is VideoInvite)
+    if (type === 1) {
+        if (notification.message.toLowerCase().includes('missed')) {
+            item.classList.add('missed-call');
+        } else if (notification.message.toLowerCase().includes('calling')) {
+            item.classList.add('active-call');
+        }
+    }
+    
     item.href = notification.link;
     
     const timestamp = new Date(notification.timestamp).toLocaleTimeString([], {
@@ -217,13 +227,27 @@ function createNotificationItem(notification, type) {
         minute: '2-digit'
     });
 
+    // Add appropriate icons based on notification type
+    let icon = '';
+    if (type === 1) { // VideoInvite
+        if (notification.message.toLowerCase().includes('missed')) {
+            icon = '<i class="fas fa-phone-slash call-status-icon"></i>';
+        } else if (notification.message.toLowerCase().includes('calling')) {
+            icon = '<i class="fas fa-phone-volume call-status-icon"></i>';
+        } else {
+            icon = '<i class="fas fa-video call-status-icon"></i>';
+        }
+    }
+
     item.innerHTML = `
         <div class="notification-content">
-            <div class="notification-message">${notification.message}</div>
+            <div class="notification-message">
+                ${icon}${notification.message}
+            </div>
             ${notification.metaData?.messagePreview ? 
-                `<small class="text-muted">${notification.metaData.messagePreview}</small>` : 
+                `<div class="message-preview">${notification.metaData.messagePreview}</div>` : 
                 ''}
-            <small class="text-muted">${timestamp}</small>
+            <small class="notification-timestamp">${timestamp}</small>
         </div>
     `;
 

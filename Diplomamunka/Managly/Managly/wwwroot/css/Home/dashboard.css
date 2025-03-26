@@ -350,10 +350,6 @@
     transition: all 0.2s;
 }
 
-.notification-item:hover {
-    background: #f1f5f9;
-}
-
 .notification-link {
     text-decoration: none;
     color: inherit;

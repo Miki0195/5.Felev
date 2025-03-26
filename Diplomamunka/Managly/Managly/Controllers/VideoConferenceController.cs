@@ -6,11 +6,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Managly.Data;
 using Managly.Models;
+using Managly.Models.Enums;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.IO;
 using Managly.Hubs;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Managly.Controllers
 {
@@ -110,17 +112,39 @@ namespace Managly.Controllers
                 var notification = new Notification
                 {
                     UserId = model.ReceiverId,
-                    Message = $"{sender.Name} {sender.LastName} invited you to a video call.",
+                    Message = $"{sender.Name} {sender.LastName} is calling you!",
                     Link = "/videoconference",
+                    Type = NotificationType.VideoInvite,
                     IsRead = false,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.UtcNow,
+                    RelatedUserId = sender.Id,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "senderName", $"{sender.Name} {sender.LastName}" }
+                    })
                 };
 
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
+                var unreadCount = await _context.Notifications
+                    .Where(n => n.UserId == model.ReceiverId && !n.IsRead)
+                    .CountAsync();
+
                 await _hubContext.Clients.User(model.ReceiverId).SendAsync("ReceiveNotification",
-                    notification.Message, notification.Link, 1, 1, notification.Timestamp);
+                    new
+                    {
+                        message = notification.Message,
+                        link = notification.Link,
+                        type = notification.Type,
+                        relatedUserId = notification.RelatedUserId,
+                        metaData = new Dictionary<string, string>
+                        {
+                            { "senderName", $"{sender.Name} {sender.LastName}" }
+                        },
+                        timestamp = notification.Timestamp
+                        
+                    });
 
                 return Ok(new { success = true, callId = newCall.CallId });
             }
@@ -235,17 +259,38 @@ namespace Managly.Controllers
                         var missedCallNotification = new Notification
                         {
                             UserId = receiver.Id,
-                            Message = $"You have a missed call from {caller.Name} {caller.LastName}.",
+                            Message = $"Missed call from {caller.Name} {caller.LastName}.",
                             Link = "/videoconference",
+                            Type = NotificationType.VideoInvite,
                             IsRead = false,
-                            Timestamp = DateTime.UtcNow
+                            Timestamp = DateTime.Now,
+                            RelatedUserId = caller.Id,
+                            MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                            {
+                                { "senderName", $"{caller.Name} {caller.LastName}" }
+                            })
                         };
 
+
                         _context.Notifications.Add(missedCallNotification);
-                        
+                        await _context.SaveChangesAsync();
+
+
                         await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
-                            missedCallNotification.Message, missedCallNotification.Link, 1, 1, missedCallNotification.Timestamp);
-                    }
+                            new
+                            {
+                                message = missedCallNotification.Message,
+                                link = missedCallNotification.Link,
+                                type = missedCallNotification.Type,
+                                relatedUserId = missedCallNotification.RelatedUserId,
+                                metaData = new Dictionary<string, string>
+                                {
+                                    { "senderName", $"{caller.Name} {caller.LastName}" }
+                                },
+                                timestamp = missedCallNotification.Timestamp
+
+                            });
+                        }
                 }
                 else
                 {
@@ -379,17 +424,35 @@ namespace Managly.Controllers
                 var missedCallNotification = new Notification
                 {
                     UserId = receiver.Id,
-                    Message = $"You have a missed call from {caller.Name} {caller.LastName}.",
+                    Message = $"Missed call from {caller.Name} {caller.LastName}.",
                     Link = "/videoconference",
+                    Type = NotificationType.VideoInvite,
                     IsRead = false,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTime.Now,
+                    RelatedUserId = caller.Id,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "senderName", $"{caller.Name} {caller.LastName}" }
+                    })
                 };
 
                 _context.Notifications.Add(missedCallNotification);
                 await _context.SaveChangesAsync();
 
                 await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
-                    missedCallNotification.Message, missedCallNotification.Link, 1, 1, missedCallNotification.Timestamp);
+                    new
+                    {
+                        message = missedCallNotification.Message,
+                        link = missedCallNotification.Link,
+                        type = missedCallNotification.Type,
+                        relatedUserId = missedCallNotification.RelatedUserId,
+                        metaData = new Dictionary<string, string>
+                        {
+                            { "senderName", $"{caller.Name} {caller.LastName}" }
+                        },
+                        timestamp = missedCallNotification.Timestamp
+
+                    });
             }
 
             await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, "Missed Call");

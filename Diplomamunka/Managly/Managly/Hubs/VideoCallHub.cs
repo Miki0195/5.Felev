@@ -7,6 +7,8 @@ using Managly.Models;
 using Microsoft.AspNetCore.Identity;
 using Managly.Data;
 using Microsoft.EntityFrameworkCore;
+using Managly.Models.Enums;
+using System.Text.Json;
 
 namespace Managly.Hubs
 {
@@ -71,34 +73,51 @@ namespace Managly.Hubs
                 await Clients.Client(connectionId).SendAsync("ReceiveCallRequest", sender.Id, senderName, existingCall.CallId);
             }
 
-            try
-            {
-                var newNotification = new Notification
-                {
-                    UserId = receiverId,
-                    Message = $"{senderName} invited you to a video call.",
-                    Link = "/videoconference",
-                    IsRead = false,
-                    Timestamp = DateTime.UtcNow
-                };
+            //try
+            //{
+            //    var newNotification = new Notification
+            //    {
+            //        UserId = receiverId,
+            //        Message = $"{senderName} invited you to a video call.",
+            //        Link = "/videoconference",
+            //        Type = NotificationType.VideoInvite,  // Add this
+            //        IsRead = false,
+            //        Timestamp = DateTime.Now,
+            //        RelatedUserId = sender.Id,  // Add this
+            //        MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+            //        {
+            //            { "senderName", senderName }
+            //        })  // Add this
+            //    };
 
-                _context.Notifications.Add(newNotification);
-                await _context.SaveChangesAsync();
+            //    _context.Notifications.Add(newNotification);
+            //    await _context.SaveChangesAsync();
 
-                int unreadCount = await _context.Notifications
-                    .Where(n => n.UserId == receiverId && !n.IsRead)
-                    .CountAsync();
+            //    int unreadCount = await _context.Notifications
+            //        .Where(n => n.UserId == receiverId && !n.IsRead)
+            //        .CountAsync();
 
-                if (connectedUsers.TryGetValue(receiverId, out string notifyConnectionId))
-                {
-                    await Clients.Client(notifyConnectionId).SendAsync("ReceiveNotification",
-                        newNotification.Message, newNotification.Link, unreadCount, 1, newNotification.Timestamp);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Database Save Error: {ex.Message}");
-            }
+            //    if (connectedUsers.TryGetValue(receiverId, out string notifyConnectionId))
+            //    {
+            //        await Clients.Client(notifyConnectionId).SendAsync("ReceiveNotification",
+            //            new
+            //            {
+            //                message = newNotification.Message,
+            //                link = newNotification.Link,
+            //                type = newNotification.Type,
+            //                relatedUserId = newNotification.RelatedUserId,
+            //                metaData = new Dictionary<string, string>
+            //                {
+            //                    { "senderName", senderName }
+            //                },
+            //                timestamp = newNotification.Timestamp
+            //            });
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"❌ Database Save Error: {ex.Message}");
+            //}
         }
 
 
@@ -210,3 +229,5 @@ namespace Managly.Hubs
         }
     }
 }
+
+
