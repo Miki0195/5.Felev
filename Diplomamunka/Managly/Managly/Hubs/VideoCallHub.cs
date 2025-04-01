@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Managly.Data;
 using Microsoft.EntityFrameworkCore;
 using Managly.Models.Enums;
+using System.Text.Json;
 
 namespace Managly.Hubs
 {
@@ -92,27 +93,44 @@ namespace Managly.Hubs
             }
         }
 
-        public async Task<bool> SendSignal(string receiverId, string signalData)
+        public async Task SendSignal(string receiverId, string signalData)
         {
             try
             {
                 if (string.IsNullOrEmpty(receiverId) || string.IsNullOrEmpty(signalData))
                 {
-                    throw new ArgumentException("ReceiverId and signalData cannot be null or empty");
+                    throw new ArgumentException("Receiver ID and signal data are required.");
                 }
 
-                if (ConnectedUsers.TryGetValue(receiverId, out string? connectionId))
+                if (Context.User == null || Context.UserIdentifier == null)
                 {
-                    await Clients.Client(connectionId).SendAsync("ReceiveSignal", Context.UserIdentifier, signalData);
-                    return true;
+                    throw new InvalidOperationException("User not authenticated.");
                 }
 
-                return false;
+                var signal = JsonSerializer.Deserialize<SignalData>(signalData);
+                if (signal == null)
+                {
+                    throw new ArgumentException("Invalid signal data format.");
+                }
+
+                if (signal.Type == "screen-share-start" || signal.Type == "screen-share-stop")
+                {
+                    if (ConnectedUsers.TryGetValue(receiverId, out string? connectionId))
+                    {
+                        await Clients.Client(connectionId).SendAsync("ReceiveScreenShareSignal", Context.UserIdentifier, signalData);
+                    }
+                    return;
+                }
+
+                if (ConnectedUsers.TryGetValue(receiverId, out string? receiverConnectionId))
+                {
+                    await Clients.Client(receiverConnectionId).SendAsync("ReceiveSignal", Context.UserIdentifier, signalData);
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in SendSignal: {ex.Message}");
-                return false;
+                throw;
             }
         }
 
