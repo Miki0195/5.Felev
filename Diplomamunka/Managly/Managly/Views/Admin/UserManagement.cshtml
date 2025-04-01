@@ -8,15 +8,14 @@
 @{
     ViewData["Title"] = "User Management";
     var availableRoles = (IEnumerable<string>)ViewData["AvailableRoles"];
+    var currentUserRole = ViewData["UserRole"] as string;
 }
 
-<!-- Include Custom CSS -->
 <link rel="stylesheet" href="~/css/Admin/UserManagement.css">
-
-<!-- Include Bootstrap Icons for UI Enhancements -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="user-management-container">
+    <input type="hidden" id="currentUserRole" value="@currentUserRole" />
     <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
     <div class="form-header text-center">
@@ -25,13 +24,15 @@
         </div>
         <h1>User Management</h1>
         <p>Manage your company's team members</p>
-        <a href="/Admin/CreateProfile" class="create-profile-btn">
-            <i class="fas fa-user-plus"></i>
-            Create New Profile
-        </a>
+        @if (currentUserRole == "Admin")
+        {
+            <a href="/Admin/CreateProfile" class="create-profile-btn">
+                <i class="fas fa-user-plus"></i>
+                Create New Profile
+            </a>
+        }
     </div>
 
-    <!-- Enhanced Search and Filter Section -->
     <div class="filters-section">
         <div class="search-wrapper">
             <div class="search-container">
@@ -61,7 +62,6 @@
         </div>
     </div>
 
-    <!-- Modern Table -->
     <div class="table-responsive user-table">
         <table class="table">
             <thead>
@@ -139,11 +139,10 @@
                             </form>
                         </td>
                         <td>
-                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.UserId">
+                            <button id="delete" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.UserId">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
 
-                            <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal-@user.UserId" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -168,7 +167,6 @@
                         </td>
                     </tr>
 
-                    <!-- User Details Modal - Move it here, inside the foreach loop -->
                     <div class="modal fade" id="userModal-@user.UserId" tabindex="-1" aria-labelledby="userModalLabel-@user.UserId" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -241,7 +239,6 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Vacation Days Management Section -->
                                             <div class="row mt-4">
                                                 <div class="col-12">
                                                     <h6 class="detail-heading">Vacation Days</h6>
@@ -251,7 +248,7 @@
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
                                                                         <label for="totalVacationDays-@user.UserId">Total Days</label>
-                                                                        <input type="number" class="form-control" id="totalVacationDays-@user.UserId" 
+                                                                        <input type="number" class="form-control" id="totalVacationDays-@user.UserId"
                                                                                value="@user.TotalVacationDays" min="20">
                                                                     </div>
                                                                 </div>
@@ -269,18 +266,18 @@
                                                                 </div>
                                                             </div>
                                                             <div class="progress mt-3" style="height: 20px;">
-                                                                @{ 
-                                                                    var usedPercentage = user.TotalVacationDays > 0 ? 
+                                                                @{
+                                                                    var usedPercentage = user.TotalVacationDays > 0 ?
                                                                         (user.UsedVacationDays * 100) / user.TotalVacationDays : 0;
                                                                 }
-                                                                <div class="progress-bar bg-success" role="progressbar" 
-                                                                     style="width: @usedPercentage%;" 
+                                                                <div class="progress-bar bg-success" role="progressbar"
+                                                                     style="width: @usedPercentage%;"
                                                                      aria-valuenow="@usedPercentage" aria-valuemin="0" aria-valuemax="100">
                                                                     @usedPercentage%
                                                                 </div>
                                                             </div>
                                                             <div class="mt-3">
-                                                                <button type="button" class="btn btn-primary save-vacation-days" 
+                                                                <button type="button" class="btn btn-primary save-vacation-days"
                                                                         data-user-id="@user.UserId">
                                                                     <i class="fas fa-save"></i> Save Changes
                                                                 </button>
@@ -321,7 +318,6 @@
     </div>
 </div>
 
-<!-- Add this modal to the bottom of your page -->
 <div class="modal fade" id="confirmRoleChangeModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

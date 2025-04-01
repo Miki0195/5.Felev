@@ -15,7 +15,7 @@ namespace Managly.Controllers
     /// <summary>
     /// Controller responsible for administrative functions including user management and profiles
     /// </summary>
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class AdminController : Controller
     {
         #region Private Members
@@ -49,95 +49,134 @@ namespace Managly.Controllers
         /// Displays the form to create a new user profile
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateProfile()
         {
             return View();
         }
 
-        /// <summary>
-        /// Processes the creation of a new user profile
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProfile(CreateProfile model)
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Please fill in all required fields correctly.";
                 return View(model);
             }
 
-            var normalizedEmail = _userManager.NormalizeEmail(model.Email);
-            var existingUser = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
-                
-            if (existingUser != null)
+            try
             {
-                ModelState.AddModelError("Email", "This email address is already registered.");
-                return View(model);
-            }
+                var normalizedEmail = _userManager.NormalizeEmail(model.Email);
+                var existingUser = await _userManager.FindByEmailAsync(normalizedEmail);
 
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var adminUser = await _userManager.FindByIdAsync(adminUserId);
-
-            if (adminUser == null)
-            {
-                return RedirectToAction("Login", "Home");
-            }
-
-            var company = await _context.Companies
-                .FirstOrDefaultAsync(c => c.Id == adminUser.CompanyId);
-                
-            var senderName = company?.Name ?? "Unknown Company";
-            var randomPassword = GenerateRandomPassword();
-
-            var newUser = new User
-            {
-                Name = model.Name,
-                LastName = model.LastName,
-                Email = model.Email,
-                UserName = model.Email,
-                CompanyId = adminUser.CompanyId,
-                IsUsingPreGeneratedPassword = true,
-                Country = "",
-                City = "",
-                Address = "",
-                DateOfBirth = new DateTime(2000, 1, 1),
-                Gender = "Other",
-                ProfilePicturePath = "/images/default/default-profile.png",
-                TotalVacationDays = 20, 
-                UsedVacationDays = 0,
-                VacationYear = DateTime.Now.Year
-            };
-
-            var result = await _userManager.CreateAsync(newUser, randomPassword);
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(newUser, model.Role);
-
-                await SendEmailAsync(
-                    toEmail: model.Email,
-                    subject: "Your Account Has Been Created",
-                    body: $"Welcome to {senderName}! Your temporary password is: {randomPassword}",
-                    senderEmail: adminUser.Email,
-                    senderName: senderName
-                );
-
-                TempData["SuccessMessage"] = $"User {model.Email} has been successfully created!";
-                ModelState.Clear();
-                return View(new CreateProfile());
-            }
-            else
-            {
-                foreach (var error in result.Errors)
+                if (existingUser != null)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError("Email", "This email address is already registered.");
+                    TempData["ErrorMessage"] = "This email address is already registered.";
+                    return View(model);
                 }
-                TempData["ErrorMessage"] = "Failed to create the user.";
-            }
 
-            return View(model);
+                var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var adminUser = await _userManager.FindByIdAsync(adminUserId);
+
+                if (adminUser == null)
+                {
+                    TempData["ErrorMessage"] = "Admin user not found.";
+                    return RedirectToAction("Login", "Home");
+                }
+
+                var company = await _context.Companies
+                    .FirstOrDefaultAsync(c => c.Id == adminUser.CompanyId);
+
+                var senderName = company?.Name ?? "Unknown Company";
+                var randomPassword = GenerateRandomPassword();
+
+                var newUser = new User
+                {
+                    Name = model.Name,
+                    LastName = model.LastName,
+                    Email = model.Email,
+                    UserName = model.Email,
+                    CompanyId = adminUser.CompanyId,
+                    IsUsingPreGeneratedPassword = true,
+                    Country = "",
+                    City = "",
+                    Address = "",
+                    DateOfBirth = new DateTime(2000, 1, 1),
+                    Gender = "Other",
+                    ProfilePicturePath = "/images/default/default-profile.png",
+                    TotalVacationDays = 20,
+                    UsedVacationDays = 0,
+                    VacationYear = DateTime.Now.Year,
+                    EmailConfirmed = true 
+                };
+
+                var result = await _userManager.CreateAsync(newUser, randomPassword);
+
+                if (result.Succeeded)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(newUser, model.Role);
+
+                    if (!roleResult.Succeeded)
+                    {
+                        var errorMessage = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+
+                        await _userManager.DeleteAsync(newUser);
+
+                        TempData["ErrorMessage"] = $"User created but role assignment failed: {errorMessage}";
+                        return View(model);
+                    }
+
+                    try
+                    {
+                        await SendEmailAsync(
+                            toEmail: model.Email,
+                            subject: "Your Account Has Been Created",
+                            body: $"Welcome to {senderName}! Your temporary password is: {randomPassword}",
+                            senderEmail: adminUser.Email ?? "",
+                            senderName: senderName
+                        );
+
+                        TempData["SuccessMessage"] = $"User {model.Email} has been successfully created!";
+                        ModelState.Clear();
+                        return View(new CreateProfile());
+                    }
+                    catch (Exception emailEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Email sending failed: {emailEx.Message}");
+                        TempData["SuccessMessage"] = $"User {model.Email} created successfully but email notification failed.";
+                        ModelState.Clear();
+                        return View(new CreateProfile());
+                    }
+                }
+                else
+                {
+                    var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    TempData["ErrorMessage"] = $"Failed to create the user: {errorMessage}";
+                    return View(model);
+                }
+            }
+            catch (DbUpdateConcurrencyException concurrencyEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"Concurrency exception: {concurrencyEx.Message}");
+                TempData["ErrorMessage"] = "A database concurrency issue occurred. Please try again.";
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception in CreateProfile: {ex.Message}");
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}";
+                return View(model);
+            }
         }
+
 
         #endregion
 
@@ -147,12 +186,13 @@ namespace Managly.Controllers
         /// Displays the user management dashboard
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UserManagement()
         {
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var adminUser = await _userManager.FindByIdAsync(adminUserId);
+            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("AdminUserId was not found!");
+            var adminUser = await _userManager.FindByIdAsync(adminUserId) ?? throw new Exception("AdminUser was not found!");
 
-            if (adminUser == null || adminUser.CompanyId == null)
+            if (adminUserId == null || adminUser.CompanyId == null)
             {
                 return RedirectToAction("Login", "Home");
             }
@@ -163,7 +203,8 @@ namespace Managly.Controllers
 
             var userRoles = new List<UserManagement>();
             var availableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
-
+            var userRole = await _userManager.GetRolesAsync(adminUser);
+            var currentUserRole = userRole.FirstOrDefault() ?? "Employee";
             await CheckAndResetVacationDaysForNewYear(usersInCompany);
 
             foreach (var user in usersInCompany)
@@ -189,10 +230,10 @@ namespace Managly.Controllers
                     UserId = user.Id,
                     Name = user.Name,
                     LastName = user.LastName,
-                    Email = user.Email,
+                    Email = user.Email ?? "default@default.com",
                     Roles = role,
                     AssignedProjects = projects,
-                    PhoneNumber = user.PhoneNumber,
+                    PhoneNumber = user.PhoneNumber ?? "301234567",
                     Country = user.Country,
                     City = user.City,
                     Address = user.Address,
@@ -206,8 +247,10 @@ namespace Managly.Controllers
                 });
             }
 
+            ViewData["UserRole"] = currentUserRole;
             ViewData["AvailableRoles"] = availableRoles;
             ViewData["CurrentYear"] = DateTime.Now.Year;
+
             return View(userRoles);
         }
 
@@ -215,6 +258,7 @@ namespace Managly.Controllers
         /// Retrieves user details for editing
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> GetUserDetails(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -228,7 +272,7 @@ namespace Managly.Controllers
                 return NotFound(new { success = false, message = "User not found" });
             }
 
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("AdminUserId was not found!");
             var adminUser = await _userManager.FindByIdAsync(adminUserId);
 
             if (adminUser == null || adminUser.CompanyId != user.CompanyId)
@@ -265,6 +309,7 @@ namespace Managly.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -272,7 +317,7 @@ namespace Managly.Controllers
                 return BadRequest(new { success = false, message = "User ID is required" });
             }
 
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("AdminUserId was not found!");
             var adminUser = await _userManager.FindByIdAsync(adminUserId);
 
             if (adminUser == null || adminUser.CompanyId == null)
@@ -336,6 +381,7 @@ namespace Managly.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateUserRole(string userId, string role)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
@@ -349,7 +395,7 @@ namespace Managly.Controllers
                 return NotFound(new { success = false, message = "User not found." });
             }
 
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("AdminUserId was not found!");
             var adminUser = await _userManager.FindByIdAsync(adminUserId);
 
             if (adminUser == null || adminUser.CompanyId != user.CompanyId)
@@ -365,19 +411,24 @@ namespace Managly.Controllers
             try
             {
                 var currentRoles = await _userManager.GetRolesAsync(user);
-                var availableRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
-                var rolesToRemove = currentRoles.Intersect(availableRoles).ToList();
-
-                if (rolesToRemove.Any())
+                if (currentRoles.Any())
                 {
-                    await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
                 }
 
                 var result = await _userManager.AddToRoleAsync(user, role);
 
                 if (result.Succeeded)
                 {
-                    return Ok(new { success = true, message = $"Role for {user.Name} has been updated to {role}." });
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = $"Role for {user.Name} has been updated to {role}.",
+                        userId = userId,
+                        newRole = role
+                    });
                 }
                 else
                 {
@@ -396,6 +447,7 @@ namespace Managly.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateVacationDays(string userId, int totalVacationDays)
         {
             if (string.IsNullOrEmpty(userId))
@@ -414,7 +466,7 @@ namespace Managly.Controllers
                 return NotFound(new { success = false, message = "User not found." });
             }
 
-            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var adminUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("AdminUserId was not found!");
             var adminUser = await _userManager.FindByIdAsync(adminUserId);
 
             if (adminUser == null || adminUser.CompanyId != user.CompanyId)

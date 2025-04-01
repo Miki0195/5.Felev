@@ -36,7 +36,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Displays the schedule management page for admins
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Manage()
         {
             var adminUser = await _userManager.GetUserAsync(User);
@@ -52,7 +52,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Gets the schedule for a specific worker
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         [Route("api/schedule/{workerId}")]
         public async Task<IActionResult> GetSchedule(string workerId)
@@ -75,7 +75,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Saves a new schedule entry
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [Route("api/schedule")]
         public async Task<IActionResult> SaveSchedule([FromBody] ScheduleDTO model)
@@ -109,7 +109,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Deletes a schedule entry
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpDelete]
         [Route("api/schedule/delete/{id}")]
         public async Task<IActionResult> DeleteSchedule(int id)
@@ -129,7 +129,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Updates an existing schedule entry
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPut]
         [Route("api/schedule/update/{id}")]
         public async Task<IActionResult> UpdateSchedule(int id, [FromBody] ScheduleUpdateDTO model)
@@ -187,7 +187,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Displays the merged schedule view for all workers
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public IActionResult MergedSchedule()
         {
             return View();
@@ -196,7 +196,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Gets schedules for all workers
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         [Route("api/schedule/all")]
         public async Task<IActionResult> GetAllSchedules()
@@ -230,7 +230,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Searches for workers based on a query string
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         [Route("api/schedule/search-workers")]
         public async Task<IActionResult> SearchWorkers(string query)
@@ -257,7 +257,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Saves multiple schedule entries at once
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [Route("api/schedule/bulk")]
         public async Task<IActionResult> SaveBulkSchedule([FromBody] List<ScheduleDTO> shifts)
@@ -290,7 +290,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Checks if a worker is available on specific dates
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [Route("api/schedule/{userId}/check-availability")]
         public async Task<IActionResult> CheckAvailability(string userId, [FromBody] AvailabilityCheckDTO data)
@@ -580,7 +580,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Gets a specific user's leave requests (admin only)
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet]
         [Route("api/leave/{workerId}")]
         public async Task<IActionResult> GetUserLeaveRequests(string workerId)
@@ -603,7 +603,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Updates the status of a leave request (admin only)
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPut]
         [Route("api/leave/{id}/status")]
         public async Task<IActionResult> UpdateLeaveStatus(int id, [FromBody] string status)
@@ -656,7 +656,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Moves a vacation to a different date (admin only)
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPut]
         [Route("api/leave/{id}/move")]
         public async Task<IActionResult> MoveVacation(int id, [FromBody] string newDate)
@@ -681,7 +681,7 @@ namespace Managly.Controllers
         /// <summary>
         /// Deletes a leave request (admin only)
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpDelete]
         [Route("api/leave/delete/{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)

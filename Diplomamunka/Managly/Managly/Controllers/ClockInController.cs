@@ -22,7 +22,7 @@ namespace Managly.Controllers
         private readonly UserManager<User> _userManager;
 
         public ClockInController(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             UserManager<User> userManager)
         {
             _context = context;
@@ -52,9 +52,10 @@ namespace Managly.Controllers
 
                 if (alreadyClockedIn)
                 {
-                    return BadRequest(new ApiResponseDto { 
-                        Success = false, 
-                        Error = "You are already clocked in" 
+                    return BadRequest(new ApiResponseDto
+                    {
+                        Success = false,
+                        Error = "You are already clocked in"
                     });
                 }
 
@@ -68,15 +69,17 @@ namespace Managly.Controllers
                 _context.Attendances.Add(attendance);
                 await _context.SaveChangesAsync();
 
-                return Ok(new ClockInResponseDto { 
-                    Success = true, 
-                    CheckInTime = attendance.CheckInTime 
+                return Ok(new ClockInResponseDto
+                {
+                    Success = true,
+                    CheckInTime = attendance.CheckInTime
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponseDto { 
-                    Success = false, 
+                return StatusCode(500, new ApiResponseDto
+                {
+                    Success = false,
                     Error = "An error occurred while clocking in"
                 });
             }
@@ -100,30 +103,33 @@ namespace Managly.Controllers
 
                 if (attendance == null)
                 {
-                    return BadRequest(new ApiResponseDto { 
-                        Success = false, 
-                        Error = "No active session found" 
+                    return BadRequest(new ApiResponseDto
+                    {
+                        Success = false,
+                        Error = "No active session found"
                     });
                 }
 
                 var now = DateTime.Now;
                 attendance.CheckOutTime = now;
-                
+
                 _context.Entry(attendance).Property(a => a.CheckOutTime).IsModified = true;
                 await _context.SaveChangesAsync();
 
                 var duration = (now - attendance.CheckInTime).TotalHours;
 
-                return Ok(new ClockOutResponseDto { 
-                    Success = true, 
+                return Ok(new ClockOutResponseDto
+                {
+                    Success = true,
                     CheckOutTime = now,
                     Duration = Math.Round(duration, 2)
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponseDto { 
-                    Success = false, 
+                return StatusCode(500, new ApiResponseDto
+                {
+                    Success = false,
                     Error = "An error occurred while clocking out"
                 });
             }
@@ -162,8 +168,9 @@ namespace Managly.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponseDto { 
-                    Success = false, 
+                return StatusCode(500, new ApiResponseDto
+                {
+                    Success = false,
                     Error = "An error occurred while checking session status"
                 });
             }
@@ -184,8 +191,8 @@ namespace Managly.Controllers
                     .Where(a => a.UserId == userId)
                     .OrderByDescending(a => a.CheckInTime)
                     .Take(5)
-                    .Select(a => new { 
-                        a.CheckInTime, 
+                    .Select(a => new {
+                        a.CheckInTime,
                         a.CheckOutTime
                     })
                     .ToListAsync();
@@ -196,7 +203,7 @@ namespace Managly.Controllers
                 }
 
                 var historyDtos = new List<WorkHistoryEntryDto>();
-                
+
                 foreach (var entry in history)
                 {
                     string duration;
@@ -209,7 +216,7 @@ namespace Managly.Controllers
                     {
                         duration = "Ongoing";
                     }
-                    
+
                     historyDtos.Add(new WorkHistoryEntryDto
                     {
                         CheckInTime = entry.CheckInTime,
@@ -222,8 +229,9 @@ namespace Managly.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponseDto { 
-                    Success = false, 
+                return StatusCode(500, new ApiResponseDto
+                {
+                    Success = false,
                     Error = "An error occurred while fetching work history"
                 });
             }
@@ -241,10 +249,10 @@ namespace Managly.Controllers
                 }
 
                 var startOfWeek = DateTime.Now.Date.AddDays(-(int)DateTime.Now.DayOfWeek);
-                
+
                 var attendanceRecords = await _context.Attendances
-                    .Where(a => a.UserId == userId && 
-                           a.CheckInTime >= startOfWeek && 
+                    .Where(a => a.UserId == userId &&
+                           a.CheckInTime >= startOfWeek &&
                            a.CheckOutTime != null)
                     .ToListAsync();
 
@@ -257,10 +265,10 @@ namespace Managly.Controllers
                         totalMinutes += duration.TotalMinutes;
                     }
                 }
-                
+
                 var hours = Math.Floor(totalMinutes / 60);
                 var minutes = Math.Round(totalMinutes % 60);
-                
+
                 return Ok(new WeeklyHoursDto
                 {
                     TotalHours = hours,
@@ -269,8 +277,9 @@ namespace Managly.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ApiResponseDto { 
-                    Success = false, 
+                return StatusCode(500, new ApiResponseDto
+                {
+                    Success = false,
                     Error = "An error occurred while calculating weekly hours"
                 });
             }
@@ -283,7 +292,7 @@ namespace Managly.Controllers
             if (user == null)
                 return Unauthorized(new { isAdmin = false });
 
-            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin") || 
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin") ||
                           await _userManager.IsInRoleAsync(user, "Manager");
 
             return Ok(new { isAdmin });
@@ -438,7 +447,7 @@ namespace Managly.Controllers
                     return BadRequest(new { success = false, error = "Invalid check-in time" });
                 }
 
-                if (!string.IsNullOrEmpty(request.CheckOutTime) && 
+                if (!string.IsNullOrEmpty(request.CheckOutTime) &&
                     DateTime.TryParse(request.CheckOutTime, out DateTime checkOutTime))
                 {
                     record.CheckOutTime = checkOutTime;
@@ -502,7 +511,7 @@ namespace Managly.Controllers
                 {
                     return NotFound(new { success = false, error = "User not found" });
                 }
-                
+
                 var roles = await _userManager.GetRolesAsync(user);
                 var position = roles.FirstOrDefault() ?? "Employee";
 
@@ -516,11 +525,10 @@ namespace Managly.Controllers
                     .FirstOrDefaultAsync();
 
                 var fromDate = DateTime.Now.Date.AddDays(-14);
-                
+
                 var attendanceHistory = await _context.Attendances
                     .Where(a => a.UserId == userId && a.CheckInTime >= fromDate)
                     .OrderByDescending(a => a.CheckInTime)
-                    .Take(5)
                     .Select(a => new
                     {
                         Id = a.Id,
@@ -536,8 +544,8 @@ namespace Managly.Controllers
                     a.Date,
                     a.CheckInTime,
                     a.CheckOutTime,
-                    Duration = a.CheckOutTime.HasValue 
-                        ? (a.CheckOutTime.Value - a.CheckInTime).TotalHours 
+                    Duration = a.CheckOutTime.HasValue
+                        ? (a.CheckOutTime.Value - a.CheckInTime).TotalHours
                         : (DateTime.Now - a.CheckInTime).TotalHours
                 }).ToList();
 
@@ -557,15 +565,15 @@ namespace Managly.Controllers
                 var currentDay = DateTime.Now.Date;
                 var startDate = currentDay.AddDays(-(int)currentDay.DayOfWeek);
 
-                for (int i = 0; i < 4; i++) 
+                for (int i = 0; i < 4; i++)
                 {
                     var weekStart = startDate.AddDays(-7 * i);
                     var weekEnd = weekStart.AddDays(7).AddSeconds(-1);
-                        
+
                     var weekHours = processedHistory
                         .Where(a => a.Date >= weekStart && a.Date <= weekEnd)
                         .Sum(a => a.Duration);
-                        
+
                     weeklySummary.Add(new
                     {
                         WeekStart = weekStart,
@@ -589,7 +597,7 @@ namespace Managly.Controllers
                     },
                     IsActive = activeSession != null,
                     CurrentSessionStart = activeSession?.CheckInTime,
-                    AttendanceHistory = processedHistory,
+                    AttendanceHistory = processedHistory.Take(5),
                     DailySummary = dailySummary,
                     WeeklySummary = weeklySummary
                 };
@@ -611,15 +619,15 @@ namespace Managly.Controllers
                 var requester = await _userManager.GetUserAsync(User);
                 if (requester == null)
                     return RedirectToAction("Login", "Account");
-            
-                bool isAdmin = await _userManager.IsInRoleAsync(requester, "Admin") || 
+
+                bool isAdmin = await _userManager.IsInRoleAsync(requester, "Admin") ||
                                await _userManager.IsInRoleAsync(requester, "Manager");
-            
+
                 if (!isAdmin && requester.Id != userId)
                     return Forbid();
-            
+
                 ViewBag.UserId = userId;
-            
+
                 var employee = await _context.Users
                     .Where(u => u.Id == userId && u.CompanyId == requester.CompanyId)
                     .Select(u => new
@@ -632,12 +640,12 @@ namespace Managly.Controllers
                         ProfilePicture = u.ProfilePicturePath
                     })
                     .FirstOrDefaultAsync();
-            
+
                 if (employee == null)
                     return NotFound();
-            
+
                 ViewBag.Employee = employee;
-            
+
                 return View();
             }
             catch (Exception ex)
@@ -655,7 +663,7 @@ namespace Managly.Controllers
                 var requester = await _userManager.GetUserAsync(User);
                 if (requester == null)
                     return Unauthorized(new { success = false, error = "Not authorized" });
-            
+
                 var record = await _context.Attendances
                     .Where(a => a.Id == recordId)
                     .Select(a => new
@@ -666,15 +674,15 @@ namespace Managly.Controllers
                         CheckOutTime = a.CheckOutTime
                     })
                     .FirstOrDefaultAsync();
-            
+
                 if (record == null)
                     return NotFound(new { success = false, error = "Record not found" });
-            
+
                 var recordUser = await _context.Users.FindAsync(record.UserId);
-            
+
                 if (recordUser == null)
                     return NotFound(new { success = false, error = "User not found" });
-            
+
                 return Ok(record);
             }
             catch (Exception ex)
@@ -720,8 +728,8 @@ namespace Managly.Controllers
             try
             {
                 var completedSessions = await _context.Attendances
-                    .Where(a => a.UserId == userId && 
-                           a.CheckInTime >= startOfWeek && 
+                    .Where(a => a.UserId == userId &&
+                           a.CheckInTime >= startOfWeek &&
                            a.CheckOutTime.HasValue)
                     .ToListAsync();
 

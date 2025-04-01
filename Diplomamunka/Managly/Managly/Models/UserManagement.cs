@@ -4,22 +4,22 @@ namespace Managly.Models
 {
     public class UserManagement
     {
-        public string UserId { get; set; }
-        public string Name { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Roles { get; set; }
+        public required string UserId { get; set; }
+        public required string Name { get; set; }
+        public required string LastName { get; set; }
+        public required string Email { get; set; }
+        public required string Roles { get; set; }
         public List<ProjectInfo> AssignedProjects { get; set; } = new List<ProjectInfo>();
-        
+
         // Additional profile information
-        public string PhoneNumber { get; set; }
-        public string Country { get; set; }
-        public string City { get; set; }
-        public string Address { get; set; }
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
         public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; }
-        public string ProfilePicturePath { get; set; }
-        
+        public string Gender { get; set; } = string.Empty;
+        public string ProfilePicturePath { get; set; } = string.Empty;
+
         // Vacation days tracking
         public int TotalVacationDays { get; set; }
         public int UsedVacationDays { get; set; }
@@ -30,8 +30,8 @@ namespace Managly.Models
     public class ProjectInfo
     {
         public int ProjectId { get; set; }
-        public string ProjectName { get; set; }
-        public string Role { get; set; }
+        public required string ProjectName { get; set; }
+        public required string Role { get; set; }
     }
 }
 

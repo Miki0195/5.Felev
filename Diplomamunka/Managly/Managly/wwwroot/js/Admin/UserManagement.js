@@ -37,6 +37,14 @@
      * Cache all DOM elements for better performance
      */
     function cacheElements() {
+        const userRoleContainer = document.querySelector('.user-management-container');
+        const hiddenRoleInput = document.getElementById('currentUserRole');
+        const currentUserRole = (hiddenRoleInput ? hiddenRoleInput.value : 'Employee');
+
+        elements.currentUserRole = currentUserRole;
+        elements.isAdmin = currentUserRole === 'Admin';
+        elements.isManager = currentUserRole === 'Admin' || currentUserRole === 'Manager';
+
         elements.searchInput = document.getElementById('userSearch');
         elements.roleFilter = document.getElementById('roleFilter');
         elements.clearFiltersBtn = document.getElementById('clearFilters');
@@ -44,6 +52,8 @@
         elements.userTableBody = document.querySelector('#userTableBody');
         elements.sortHeaders = document.querySelectorAll('th div[data-sort]');
         elements.roleSelects = document.querySelectorAll('.role-select');
+
+        elements.deleteButton = document.querySelectorAll('#delete');
         elements.deleteButtons = document.querySelectorAll('.delete-confirm');
         elements.saveVacationButtons = document.querySelectorAll('.save-vacation-days');
         elements.vacationDaysInputs = document.querySelectorAll('input[id^="totalVacationDays-"]');
@@ -59,24 +69,43 @@
      * Set up all event listeners
      */
     function setupEventListeners() {
-        // Search and filter
         elements.searchInput.addEventListener('input', filterRows);
         elements.roleFilter.addEventListener('change', filterRows);
         elements.clearFiltersBtn.addEventListener('click', clearFilters);
-        
-        // Role management
-        elements.roleSelects.forEach(select => setupRoleSelect(select));
-        elements.confirmRoleChangeBtn.addEventListener('click', confirmRoleChange);
-        elements.confirmRoleChangeModal.addEventListener('hidden.bs.modal', handleRoleChangeModalDismiss);
-        
-        // User management
-        elements.deleteButtons.forEach(button => button.addEventListener('click', deleteUser));
-        
-        // Vacation days
+        if (elements.isAdmin) {
+            elements.roleSelects.forEach(select => setupRoleSelect(select));
+            elements.confirmRoleChangeBtn.addEventListener('click', confirmRoleChange);
+            elements.confirmRoleChangeModal.addEventListener('hidden.bs.modal', handleRoleChangeModalDismiss);
+        } else {
+            elements.roleSelects.forEach(select => {
+                select.disabled = true;
+                select.title = "Only administrators can change user roles";
+                select.addEventListener('click', () => showToast("You don't have permission to change user roles.", "warning"));
+            });
+        }
+
+        if (elements.isAdmin) {
+            elements.deleteButtons.forEach(button => button.addEventListener('click', deleteUser));
+        } else {
+            elements.deleteButton.forEach(button => {
+                button.disabled = true;
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showToast("Only administrators can delete users.", "warning");
+                });
+            });
+            elements.deleteButtons.forEach(button => {
+                button.disabled = true; 
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showToast("Only administrators can delete users.", "warning");
+                });
+            });
+        }
+
         elements.saveVacationButtons.forEach(button => button.addEventListener('click', saveVacationDays));
         elements.vacationDaysInputs.forEach(input => input.addEventListener('change', validateVacationDays));
-        
-        // Sorting
+
         elements.sortHeaders.forEach(header => header.addEventListener('click', handleSortClick));
     }
     
@@ -185,35 +214,37 @@
      */
     function confirmRoleChange() {
         if (!roleChangeState.activeForm) return;
-        
+
         const formData = new FormData(roleChangeState.activeForm);
         const userId = formData.get('userId');
         const newRole = formData.get('role');
-        
+
         fetch(roleChangeState.activeForm.action, {
             method: 'POST',
             body: formData
         })
-        .then(handleApiResponse)
-        .then(data => {
-            const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
-            modal.hide();
-            
-            if (data.success) {
-                updateRoleUI(userId, newRole, roleChangeState.activeForm);
-                showToast(data.message, 'success');
-            } else {
-                showToast(data.message, 'error');
+            .then(handleApiResponse)
+            .then(data => {
+                const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
+                modal.hide();
+
+                if (data.success) {
+                    updateRoleUI(userId, newRole, roleChangeState.activeForm);
+                    showToast(data.message, 'success');
+
+                    roleChangeState.originalValue = newRole; 
+                } else {
+                    showToast(data.message, 'error');
+                    revertRoleSelect(roleChangeState.activeForm);
+                }
+            })
+            .catch(error => {
+                showToast(error.message || 'An error occurred while updating the role.', 'error');
                 revertRoleSelect(roleChangeState.activeForm);
-            }
-        })
-        .catch(error => {
-            showToast(error.message || 'An error occurred while updating the role.', 'error');
-            revertRoleSelect(roleChangeState.activeForm);
-            
-            const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
-            modal.hide();
-        });
+
+                const modal = bootstrap.Modal.getInstance(elements.confirmRoleChangeModal);
+                modal.hide();
+            });
     }
     
     /**

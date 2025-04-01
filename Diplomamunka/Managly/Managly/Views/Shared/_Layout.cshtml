@@ -37,7 +37,7 @@
                                     Schedule
                                 </a>
                                 <ul class="dropdown-menu">
-                                    @if (User.IsInRole("Admin"))
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                     {
                                         <li><a class="dropdown-item" asp-controller="Schedule" asp-action="Manage">Manage Schedule</a></li>
                                         <li><a class="dropdown-item" asp-controller="Schedule" asp-action="MergedSchedule">Merged Schedule</a></li>
@@ -46,7 +46,7 @@
                                 </ul>
                             </li>
                         }
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                         {
                             @*<li class="nav-item">
                                     <a class="nav-link" asp-controller="Admin" asp-action="CreateProfile">Create Profile</a>
