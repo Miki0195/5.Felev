@@ -103,7 +103,7 @@ namespace Managly.Controllers
                     CallerId = sender.Id,
                     ReceiverId = model.ReceiverId,
                     StartTime = DateTime.Now,
-                    Status = CallStatus.Pending,  
+                    Status = CallStatus.Pending,
                     IsEnded = false
                 };
 
@@ -144,7 +144,7 @@ namespace Managly.Controllers
                             { "senderName", $"{sender.Name} {sender.LastName}" }
                         },
                         timestamp = notification.Timestamp
-                        
+
                     });
 
                 return Ok(new { success = true, callId = newCall.CallId });
@@ -263,7 +263,7 @@ namespace Managly.Controllers
                 if (call.Status == CallStatus.Pending)
                 {
                     call.Status = CallStatus.Missed;
-                    
+
                     var caller = await _context.Users.FindAsync(call.CallerId);
                     var receiver = await _context.Users.FindAsync(call.ReceiverId);
 
@@ -387,14 +387,14 @@ namespace Managly.Controllers
                 call.IsEnded = true;
                 call.EndTime = DateTime.Now;
                 await _context.SaveChangesAsync();
-                
+
                 var callingNotifications = await _context.Notifications
-                    .Where(n => n.UserId == call.ReceiverId && 
-                           n.RelatedUserId == call.CallerId && 
-                           n.Type == NotificationType.VideoInvite && 
+                    .Where(n => n.UserId == call.ReceiverId &&
+                           n.RelatedUserId == call.CallerId &&
+                           n.Type == NotificationType.VideoInvite &&
                            n.Message.Contains("calling"))
                     .ToListAsync();
-                    
+
                 if (callingNotifications.Any())
                 {
                     foreach (var notification in callingNotifications)
@@ -403,7 +403,7 @@ namespace Managly.Controllers
                     }
                     await _context.SaveChangesAsync();
                 }
-                
+
                 var caller = await _context.Users.FindAsync(call.CallerId);
                 var receiver = await _context.Users.FindAsync(call.ReceiverId);
 
@@ -428,7 +428,7 @@ namespace Managly.Controllers
                     await _context.SaveChangesAsync();
 
                     await _hubContext.Clients.User(receiver.Id).SendAsync("CallMissed", caller.Id);
-                    
+
                     await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
                         new
                         {
@@ -489,7 +489,7 @@ namespace Managly.Controllers
                         ? $"{c.Duration.Value.Minutes} min {c.Duration.Value.Seconds} sec"
                         : (c.Status == CallStatus.Missed ? "Missed Call" : "Ongoing"),
                     Timestamp = c.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Status = c.Status.ToString() 
+                    Status = c.Status.ToString()
                 })
                 .ToListAsync();
 
@@ -503,8 +503,8 @@ namespace Managly.Controllers
             if (user == null) return Unauthorized(new { error = "User not authenticated." });
 
             var call = await _context.VideoConferences
-                .Where(c => 
-                    (c.CallerId == senderId && c.ReceiverId == user.Id) || 
+                .Where(c =>
+                    (c.CallerId == senderId && c.ReceiverId == user.Id) ||
                     (c.CallerId == user.Id && c.ReceiverId == senderId))
                 .OrderByDescending(c => c.StartTime)
                 .FirstOrDefaultAsync();

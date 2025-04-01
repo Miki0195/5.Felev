@@ -58,9 +58,11 @@
     <Folder Include="wwwroot\js\ClockIn\" />
     <Folder Include="Models\DTOs\ClockIn\" />
     <Folder Include="Models\VideoConference\" />
+    <Folder Include="wwwroot\js\VideoConference\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\js\ClockIn\" />
+    <Content Remove="wwwroot\js\VideoConference\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Views\Account\Profile.cshtml">
