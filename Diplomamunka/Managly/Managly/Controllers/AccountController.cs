@@ -88,55 +88,6 @@ namespace Managly.Controllers
                 return RedirectToAction("Login", "Home");
             }
 
-            
-            string rank = "";
-            if (await _userManager.IsInRoleAsync(user, "Employee"))
-            {
-                rank = "Employee";
-            }
-            if (await _userManager.IsInRoleAsync(user, "Admin"))
-            {
-                rank = "Admin";
-            }
-            else if (await _userManager.IsInRoleAsync(user, "Manager"))
-            {
-                rank = "Manager";
-            }
-            
-            var userProjects = await _context.ProjectMembers
-                .Where(pm => pm.UserId == userId && pm.Project.Status == "In Progress")
-                .Include(pm => pm.Project)
-                .Select(pm => new 
-                {
-                    ProjectId = pm.Project.Id,
-                    ProjectName = pm.Project.Name ?? "Untitled Project",
-                    ProjectStatus = pm.Project.Status ?? "Not Started",
-                    ProjectPriority = pm.Project.Priority ?? "Medium",
-                    MemberRole = pm.Role ?? "Member",
-                    CompletedTasks = pm.Project.CompletedTasks,
-                    TotalTasks = pm.Project.TotalTasks > 0 ? pm.Project.TotalTasks : 1
-                })
-                .ToListAsync();
-            
-            var enrolledProjects = userProjects.Select(p => 
-            {
-                int progressPercentage = (int)Math.Round((double)p.CompletedTasks / p.TotalTasks * 100);
-                
-                return new ProjectViewModel
-                {
-                    Id = p.ProjectId,
-                    Name = p.ProjectName,
-                    Status = p.ProjectStatus,
-                    Priority = p.ProjectPriority,
-                    Role = p.MemberRole,
-                    PriorityClass = GetPriorityClass(p.ProjectPriority),
-                    StatusClass = GetStatusClass(p.ProjectStatus),
-                    CompletedTasks = p.CompletedTasks,
-                    TotalTasks = p.TotalTasks,
-                    ProgressPercentage = progressPercentage
-                };
-            }).ToList();
-
             string fullPhoneNumber = await _userManager.GetPhoneNumberAsync(user) ?? "";
             string selectedCountryCode = "+36"; // Default
             string phoneNumberWithoutCode = fullPhoneNumber;
@@ -164,10 +115,10 @@ namespace Managly.Controllers
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender ?? "",
                 ProfilePicturePath = user.ProfilePicturePath ?? "/images/default/default-profile.png", 
-                GenderOptions = new List<string> { "Male", "Female", "Other" },
-                Rank = rank,
-                EnrolledProjects = enrolledProjects
+                GenderOptions = new List<string> { "Male", "Female", "Other" }
             };
+
+            await LoadUserProjects(userId, model);
 
             return View(model);
         }
@@ -210,6 +161,7 @@ namespace Managly.Controllers
             {
                 model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                 model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                await LoadUserProjects(userId, model);
                 return View(model);
             }
 
@@ -231,6 +183,7 @@ namespace Managly.Controllers
                         ModelState.AddModelError("ProfilePicture", "Only image files (jpg, png, gif) are allowed");
                         model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                         model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                        await LoadUserProjects(userId, model);
                         return View(model);
                     }
 
@@ -239,6 +192,7 @@ namespace Managly.Controllers
                         ModelState.AddModelError("ProfilePicture", "File size should be less than 5MB");
                         model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                         model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                        await LoadUserProjects(userId, model);
                         return View(model);
                     }
 
@@ -263,6 +217,7 @@ namespace Managly.Controllers
                     ModelState.AddModelError("PhoneNumber", "Failed to update phone number");
                     model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                     model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                    await LoadUserProjects(userId, model);
                     return View(model);
                 }
 
@@ -281,9 +236,12 @@ namespace Managly.Controllers
                     }
                     model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                     model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                    await LoadUserProjects(userId, model);
                     return View(model);
                 }
 
+                await LoadUserProjects(userId, model);
+                
                 return View(model);
             }
             catch (Exception ex)
@@ -291,10 +249,63 @@ namespace Managly.Controllers
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred: " + ex.Message);
                 model.GenderOptions = new List<string> { "Male", "Female", "Other" };
                 model.CountryCodes = CountryCallingCodes.GetCountryCodes();
+                await LoadUserProjects(userId, model);
                 return View(model);
             }
         }
 
+        private async Task LoadUserProjects(string userId, UserProfile model)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            string rank = "";
+            if (await _userManager.IsInRoleAsync(user, "Employee"))
+            {
+                rank = "Employee";
+            }
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                rank = "Admin";
+            }
+            else if (await _userManager.IsInRoleAsync(user, "Manager"))
+            {
+                rank = "Manager";
+            }
+            model.Rank = rank;
+            
+            var userProjects = await _context.ProjectMembers
+                .Where(pm => pm.UserId == userId && pm.Project.Status == "In Progress")
+                .Include(pm => pm.Project)
+                .Select(pm => new 
+                {
+                    ProjectId = pm.Project.Id,
+                    ProjectName = pm.Project.Name ?? "Untitled Project",
+                    ProjectStatus = pm.Project.Status ?? "Not Started",
+                    ProjectPriority = pm.Project.Priority ?? "Medium",
+                    MemberRole = pm.Role ?? "Member",
+                    CompletedTasks = pm.Project.CompletedTasks,
+                    TotalTasks = pm.Project.TotalTasks > 0 ? pm.Project.TotalTasks : 1
+                })
+                .ToListAsync();
+            
+            model.EnrolledProjects = userProjects.Select(p => 
+            {
+                int progressPercentage = (int)Math.Round((double)p.CompletedTasks / p.TotalTasks * 100);
+                
+                return new ProjectViewModel
+                {
+                    Id = p.ProjectId,
+                    Name = p.ProjectName,
+                    Status = p.ProjectStatus,
+                    Priority = p.ProjectPriority,
+                    Role = p.MemberRole,
+                    PriorityClass = GetPriorityClass(p.ProjectPriority),
+                    StatusClass = GetStatusClass(p.ProjectStatus),
+                    CompletedTasks = p.CompletedTasks,
+                    TotalTasks = p.TotalTasks,
+                    ProgressPercentage = progressPercentage
+                };
+            }).ToList();
+        }
 
         [AllowAnonymous]
         public IActionResult AccessDenied()

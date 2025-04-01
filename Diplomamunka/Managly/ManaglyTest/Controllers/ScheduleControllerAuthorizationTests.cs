@@ -72,7 +72,7 @@ namespace Managly.Tests.Controllers
                 
             // Assert
             authorizeAttribute.Should().NotBeNull();
-            authorizeAttribute.Roles.Should().Be("Admin");
+            authorizeAttribute.Roles.Should().Be("Admin,Manager");
             
             // We can't directly test the framework's authorization behavior in a unit test,
             // but we can verify the attribute is present with the correct role requirement
@@ -118,7 +118,7 @@ namespace Managly.Tests.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, "user-id-1"),
                 new Claim(ClaimTypes.Name, "test@example.com")
-                // No Admin role claim
+                // No Admin or Manager role claim
             }));
             
             controller.ControllerContext = new ControllerContext
@@ -134,7 +134,7 @@ namespace Managly.Tests.Controllers
                 
             // Assert
             authorizeAttribute.Should().NotBeNull();
-            authorizeAttribute.Roles.Should().Be("Admin");
+            authorizeAttribute.Roles.Should().Be("Admin,Manager");
         }
     }
 } 
