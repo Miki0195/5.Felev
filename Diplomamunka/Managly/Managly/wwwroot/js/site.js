@@ -1,4 +1,4 @@
-﻿if (!window.chatSignalR) { 
+﻿if (!window.chatSignalR) {
     var connection = new signalR.HubConnectionBuilder()
         .withUrl("/chathub", { withCredentials: false })
         .withAutomaticReconnect()
@@ -47,7 +47,7 @@ function loadNotifications() {
         .then(response => response.json())
         .then(groupedNotifications => {
             console.log("Received notifications:", groupedNotifications);
-            
+
             const notificationList = document.getElementById("notificationList");
             let totalUnread = 0;
             notificationList.innerHTML = "";
@@ -73,10 +73,10 @@ function loadNotifications() {
                 // Create type group container
                 const typeContainer = document.createElement("div");
                 typeContainer.className = "notification-type-group";
-                
+
                 // Create unique ID for this group
                 const groupId = `notification-group-${index}`;
-                
+
                 // Add collapsible type header
                 typeContainer.innerHTML = `
                     <div class="dropdown-header d-flex justify-content-between align-items-center notification-group-header" 
@@ -106,12 +106,12 @@ function loadNotifications() {
                     // Old structure with direct notifications
                     const senderContainer = document.createElement("div");
                     senderContainer.className = "notification-sender-group";
-                    
+
                     typeGroup.notifications.forEach(notification => {
                         const notificationItem = createNotificationItem(notification, typeGroup.type);
                         senderContainer.appendChild(notificationItem);
                     });
-                    
+
                     groupContent.appendChild(senderContainer);
                 }
 
@@ -123,10 +123,10 @@ function loadNotifications() {
 
             // Add click handlers for group headers
             document.querySelectorAll('.notification-group-header').forEach(header => {
-                header.addEventListener('click', function() {
+                header.addEventListener('click', function () {
                     const icon = this.querySelector('.group-icon');
                     const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                    
+
                     // Rotate icon based on collapse state
                     icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
                     this.setAttribute('aria-expanded', !isExpanded);
@@ -148,7 +148,7 @@ function createSenderGroupContainer(senderGroup, type) {
     // Add collapsible sender header if there are multiple messages
     if (senderGroup.unreadCount > 1) {
         const groupId = `sender-group-${senderGroup.senderId}-${Date.now()}`;
-        
+
         senderContainer.innerHTML = `
             <div class="dropdown-header d-flex justify-content-between align-items-center sender-group-header" 
                  role="button"
@@ -168,7 +168,7 @@ function createSenderGroupContainer(senderGroup, type) {
         const groupContent = senderContainer.querySelector('.sender-group-content');
         const header = senderContainer.querySelector('.sender-group-header');
         const collapseElement = senderContainer.querySelector('.collapse');
-        
+
         // Add notifications for this sender
         senderGroup.notifications.forEach(notification => {
             const notificationItem = createNotificationItem(notification, type);
@@ -181,13 +181,13 @@ function createSenderGroupContainer(senderGroup, type) {
         });
 
         // Add click handler for the header
-        header.addEventListener('click', function(e) {
+        header.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const icon = this.querySelector('.sender-icon');
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
-            
+
             if (isExpanded) {
                 collapse.hide();
                 icon.style.transform = 'rotate(0deg)';
@@ -210,7 +210,7 @@ function createSenderGroupContainer(senderGroup, type) {
 function createNotificationItem(notification, type) {
     const item = document.createElement("a");
     item.className = `dropdown-item notification-item notification-type-${type}`;
-    
+
     // Add specific classes for video call notifications (type 1 is VideoInvite)
     if (type === 1) {
         if (notification.message.toLowerCase().includes('missed')) {
@@ -219,9 +219,9 @@ function createNotificationItem(notification, type) {
             item.classList.add('active-call');
         }
     }
-    
+
     item.href = notification.link;
-    
+
     const timestamp = new Date(notification.timestamp).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit'
@@ -244,9 +244,9 @@ function createNotificationItem(notification, type) {
             <div class="notification-message">
                 ${icon}${notification.message}
             </div>
-            ${notification.metaData?.messagePreview ? 
-                `<div class="message-preview">${notification.metaData.messagePreview}</div>` : 
-                ''}
+            ${notification.metaData?.messagePreview ?
+            `<div class="message-preview">${notification.metaData.messagePreview}</div>` :
+            ''}
             <small class="notification-timestamp">${timestamp}</small>
         </div>
     `;
@@ -308,7 +308,7 @@ function markNotificationAsRead(type, link) {
                     .forEach(item => {
                         const group = item.closest('.notification-group');
                         item.remove();
-                        
+
                         // If group is empty, remove it
                         if (group && !group.querySelector('.notification-item')) {
                             group.remove();
@@ -318,7 +318,7 @@ function markNotificationAsRead(type, link) {
                 // Update counts and check if all notifications are gone
                 const remainingItems = document.querySelectorAll('.notification-item');
                 if (remainingItems.length === 0) {
-                    document.getElementById("notificationList").innerHTML = 
+                    document.getElementById("notificationList").innerHTML =
                         '<p class="text-muted text-center py-3 mb-0">No new notifications</p>';
                 }
 
@@ -444,7 +444,7 @@ if (typeof connection !== "undefined") {
             if (existingItem) {
                 let timestampElement = existingItem.querySelector(".notification-timestamp");
                 if (timestampElement) {
-                    timestampElement.textContent = formattedTimestamp; 
+                    timestampElement.textContent = formattedTimestamp;
                 } else {
                     let newTimestamp = document.createElement("div");
                     newTimestamp.classList.add("notification-timestamp", "text-muted", "small");
@@ -479,7 +479,7 @@ if (typeof connection !== "undefined") {
                     markNotificationsAsRead(senderId, link);
                 };
 
-                notificationList.prepend(item); 
+                notificationList.prepend(item);
             }
 
             if (notificationList.childElementCount > 0) {
@@ -502,10 +502,9 @@ function deleteAllNotifications() {
             notificationCount.textContent = "0";
             notificationCount.classList.add("d-none");
             notificationBell.classList.remove("has-notifications");
-            deleteAllButton.classList.add("d-none"); 
+            deleteAllButton.classList.add("d-none");
         })
         .catch(err => console.error("❌ Error deleting notifications: ", err));
 }
-
 
 

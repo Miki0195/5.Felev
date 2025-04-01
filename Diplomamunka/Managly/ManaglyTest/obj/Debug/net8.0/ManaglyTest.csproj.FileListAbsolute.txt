@@ -457,3 +457,5 @@
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/ManaglyTest/obj/Debug/net8.0/ManaglyTest.pdb
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/ManaglyTest/obj/Debug/net8.0/ManaglyTest.genruntimeconfig.cache
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/ManaglyTest/obj/Debug/net8.0/ref/ManaglyTest.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/ManaglyTest/bin/Debug/net8.0/FluentAssertions.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/ManaglyTest/bin/Debug/net8.0/Moq.EntityFrameworkCore.dll

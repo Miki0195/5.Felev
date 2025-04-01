@@ -26,6 +26,11 @@ namespace Managly.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            if (Context.UserIdentifier == null)
+            {
+                throw new InvalidOperationException("UserIdentifier cannot be null.");
+            }
+
             string userId = Context.UserIdentifier;
             if (!connectedUsers.ContainsKey(userId))
             {
@@ -36,6 +41,11 @@ namespace Managly.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
+            if (Context.UserIdentifier == null)
+            {
+                throw new InvalidOperationException("UserIdentifier cannot be null.");
+            }
+
             string userId = Context.UserIdentifier;
             if (connectedUsers.ContainsKey(userId))
             {
@@ -46,6 +56,11 @@ namespace Managly.Hubs
 
         public async Task SendCallRequest(string receiverId)
         {
+            if (Context.User == null)
+            {
+                throw new InvalidOperationException("User cannot be null.");
+            }
+
             var sender = await _userManager.GetUserAsync(Context.User);
             if (sender == null)
             {
@@ -63,96 +78,25 @@ namespace Managly.Hubs
                 return;
             }
 
-            if (connectedUsers.TryGetValue(sender.Id, out string senderConnectionId))
+            if (connectedUsers.TryGetValue(sender.Id, out string? senderConnectionId) && senderConnectionId is not null)
             {
                 await Clients.Client(senderConnectionId).SendAsync("ReceiveCallId", existingCall.CallId);
             }
 
-            if (connectedUsers.TryGetValue(receiverId, out string connectionId))
+            if (connectedUsers.TryGetValue(receiverId, out string? connectionId) && connectionId is not null)
             {
                 await Clients.Client(connectionId).SendAsync("ReceiveCallRequest", sender.Id, senderName, existingCall.CallId);
             }
-
-            //try
-            //{
-            //    var newNotification = new Notification
-            //    {
-            //        UserId = receiverId,
-            //        Message = $"{senderName} invited you to a video call.",
-            //        Link = "/videoconference",
-            //        Type = NotificationType.VideoInvite,  // Add this
-            //        IsRead = false,
-            //        Timestamp = DateTime.Now,
-            //        RelatedUserId = sender.Id,  // Add this
-            //        MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
-            //        {
-            //            { "senderName", senderName }
-            //        })  // Add this
-            //    };
-
-            //    _context.Notifications.Add(newNotification);
-            //    await _context.SaveChangesAsync();
-
-            //    int unreadCount = await _context.Notifications
-            //        .Where(n => n.UserId == receiverId && !n.IsRead)
-            //        .CountAsync();
-
-            //    if (connectedUsers.TryGetValue(receiverId, out string notifyConnectionId))
-            //    {
-            //        await Clients.Client(notifyConnectionId).SendAsync("ReceiveNotification",
-            //            new
-            //            {
-            //                message = newNotification.Message,
-            //                link = newNotification.Link,
-            //                type = newNotification.Type,
-            //                relatedUserId = newNotification.RelatedUserId,
-            //                metaData = new Dictionary<string, string>
-            //                {
-            //                    { "senderName", senderName }
-            //                },
-            //                timestamp = newNotification.Timestamp
-            //            });
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"❌ Database Save Error: {ex.Message}");
-            //}
         }
 
 
         public async Task SendSignal(string receiverId, string signalData)
         {
-            if (connectedUsers.TryGetValue(receiverId, out string connectionId))
+            if (connectedUsers.TryGetValue(receiverId, out string? connectionId) && connectionId is not null)
             {
                 await Clients.Client(connectionId).SendAsync("ReceiveSignal", Context.UserIdentifier, signalData);
             }
         }
-
-        //public async Task AcceptCall(string callId)
-        //{
-        //    var call = await _context.VideoConferences.FindAsync(callId);
-        //    if (call == null)
-        //    {
-        //        return;
-        //    }
-
-        //    if (call.Status == CallStatus.Pending)
-        //    {
-        //        call.Status = CallStatus.Active;
-        //        await _context.SaveChangesAsync();
-        //    }
-
-        //    if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
-        //    {
-        //        await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
-        //    }
-
-        //    if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
-        //    {
-        //        await Clients.Client(receiverConnectionId).SendAsync("CallStarted", call.CallId);
-        //    }
-        //}
 
         public async Task EndCall(string callId)
         {
@@ -170,14 +114,33 @@ namespace Managly.Hubs
             var callDuration = call.EndTime.Value - call.StartTime;
             string durationText = $"{callDuration.Minutes} min {callDuration.Seconds} sec";
 
-            if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
+            if (connectedUsers.TryGetValue(call.CallerId, out string? callerConnectionId) && callerConnectionId is not null)
             {
                 await Clients.Client(callerConnectionId).SendAsync("CallEnded", callId, durationText);
             }
 
-            if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
+            if (connectedUsers.TryGetValue(call.ReceiverId, out string? receiverConnectionId) && receiverConnectionId is not null)
             {
                 await Clients.Client(receiverConnectionId).SendAsync("CallEnded", callId, durationText);
+            }
+        }
+
+        public async Task StartCall(string callId)
+        {
+            var call = await _context.VideoConferences.FirstOrDefaultAsync(c => c.CallId == callId);
+            if (call == null)
+            {
+                return;
+            }
+
+            if (connectedUsers.TryGetValue(call.ReceiverId, out string? receiverConnectionId) && receiverConnectionId is not null)
+            {
+                await Clients.Client(receiverConnectionId).SendAsync("CallStarted", call.CallId);
+            }
+
+            if (connectedUsers.TryGetValue(call.CallerId, out string? callerConnectionId) && callerConnectionId is not null)
+            {
+                await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
             }
         }
 
@@ -198,33 +161,14 @@ namespace Managly.Hubs
                 _ => "Unknown status"
             };
 
-            if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
+            if (connectedUsers.TryGetValue(call.CallerId, out string? callerConnectionId) && callerConnectionId is not null)
             {
                 await Clients.Client(callerConnectionId).SendAsync("ReceiveCallStatus", callId, statusMessage);
             }
 
-            if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
+            if (connectedUsers.TryGetValue(call.ReceiverId, out string? receiverConnectionId) && receiverConnectionId is not null)
             {
                 await Clients.Client(receiverConnectionId).SendAsync("ReceiveCallStatus", callId, statusMessage);
-            }
-        }
-
-        public async Task StartCall(string callId)
-        {
-            var call = await _context.VideoConferences.FirstOrDefaultAsync(c => c.CallId == callId);
-            if (call == null)
-            {
-                return;
-            }
-
-            if (connectedUsers.TryGetValue(call.ReceiverId, out string receiverConnectionId))
-            {
-                await Clients.Client(receiverConnectionId).SendAsync("CallStarted", call.CallId);
-            }
-
-            if (connectedUsers.TryGetValue(call.CallerId, out string callerConnectionId))
-            {
-                await Clients.Client(callerConnectionId).SendAsync("CallStarted", call.CallId);
             }
         }
     }

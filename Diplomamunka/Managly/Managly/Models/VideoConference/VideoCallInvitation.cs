@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Managly.Models;
 
-namespace Managly.Models
+namespace Managly.Models.VideoConference
 {
     public class VideoCallInvitation
     {
@@ -10,20 +11,20 @@ namespace Managly.Models
         public int Id { get; set; }
 
         [Required]
-        public string SenderId { get; set; }
+        public required string SenderId { get; set; }
 
         [Required]
-        public string ReceiverId { get; set; }
+        public required string ReceiverId { get; set; }
 
         [Required]
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public DateTime Timestamp { get; set; } = DateTime.Now;
 
         public bool IsAccepted { get; set; } = false;
 
         [ForeignKey("SenderId")]
-        public User Sender { get; set; }
+        public User? Sender { get; set; }
 
         [ForeignKey("ReceiverId")]
-        public User Receiver { get; set; }
+        public User? Receiver { get; set; }
     }
 }

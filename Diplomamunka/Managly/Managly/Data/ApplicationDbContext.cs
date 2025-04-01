@@ -1,5 +1,6 @@
 ﻿using System;
 using Managly.Models;
+using Managly.Models.VideoConference;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

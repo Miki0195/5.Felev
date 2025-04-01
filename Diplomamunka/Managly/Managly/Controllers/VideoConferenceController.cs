@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Managly.Data;
 using Managly.Models;
+using Managly.Models.VideoConference;
 using Managly.Models.Enums;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -89,7 +90,7 @@ namespace Managly.Controllers
                 {
                     SenderId = sender.Id,
                     ReceiverId = model.ReceiverId,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.Now,
                     IsAccepted = false
                 };
 
@@ -101,7 +102,7 @@ namespace Managly.Controllers
                     CallId = Guid.NewGuid().ToString(),
                     CallerId = sender.Id,
                     ReceiverId = model.ReceiverId,
-                    StartTime = DateTime.UtcNow,
+                    StartTime = DateTime.Now,
                     Status = CallStatus.Pending,  
                     IsEnded = false
                 };
@@ -113,10 +114,10 @@ namespace Managly.Controllers
                 {
                     UserId = model.ReceiverId,
                     Message = $"{sender.Name} {sender.LastName} is calling you!",
-                    Link = "/videoconference",
+                    Link = "api/videoconference",
                     Type = NotificationType.VideoInvite,
                     IsRead = false,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.Now,
                     RelatedUserId = sender.Id,
                     MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
                     {
@@ -232,23 +233,35 @@ namespace Managly.Controllers
             if (!call.IsEnded)
             {
                 call.IsEnded = true;
-                call.EndTime = DateTime.UtcNow;
+                call.EndTime = DateTime.Now;
 
-                // Find and mark any pending invitation as accepted
                 var pendingInvitation = await _context.VideoCallInvitations
                     .Where(i => i.ReceiverId == call.ReceiverId && i.SenderId == call.CallerId && !i.IsAccepted)
                     .FirstOrDefaultAsync();
 
                 if (pendingInvitation != null)
                 {
-                    Console.WriteLine($"Marking invitation from {pendingInvitation.SenderId} to {pendingInvitation.ReceiverId} as accepted during call end");
                     pendingInvitation.IsAccepted = true;
+                }
+
+                var callingNotifications = await _context.Notifications
+                    .Where(n => n.UserId == call.ReceiverId &&
+                           n.RelatedUserId == call.CallerId &&
+                           n.Type == NotificationType.VideoInvite &&
+                           n.Message.Contains("calling"))
+                    .ToListAsync();
+
+                if (callingNotifications.Any())
+                {
+                    foreach (var notification in callingNotifications)
+                    {
+                        _context.Notifications.Remove(notification);
+                    }
+                    await _context.SaveChangesAsync();
                 }
 
                 if (call.Status == CallStatus.Pending)
                 {
-                    // This is a call that was ended before the receiver accepted
-                    Console.WriteLine($"Call {callId} ended before receiver accepted - marking as missed");
                     call.Status = CallStatus.Missed;
                     
                     var caller = await _context.Users.FindAsync(call.CallerId);
@@ -260,7 +273,7 @@ namespace Managly.Controllers
                         {
                             UserId = receiver.Id,
                             Message = $"Missed call from {caller.Name} {caller.LastName}.",
-                            Link = "/videoconference",
+                            Link = "api/videoconference",
                             Type = NotificationType.VideoInvite,
                             IsRead = false,
                             Timestamp = DateTime.Now,
@@ -270,11 +283,8 @@ namespace Managly.Controllers
                                 { "senderName", $"{caller.Name} {caller.LastName}" }
                             })
                         };
-
-
                         _context.Notifications.Add(missedCallNotification);
                         await _context.SaveChangesAsync();
-
 
                         await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
                             new
@@ -290,14 +300,13 @@ namespace Managly.Controllers
                                 timestamp = missedCallNotification.Timestamp
 
                             });
-                        }
+                    }
                 }
                 else
                 {
                     call.Status = CallStatus.Ended;
                 }
 
-                // Save all changes at once
                 await _context.SaveChangesAsync();
             }
 
@@ -309,7 +318,6 @@ namespace Managly.Controllers
                 message = $"{callDuration.Minutes} min {callDuration.Seconds} sec";
             }
 
-            // Notify both users that the call has ended
             await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, message);
             await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId, message);
 
@@ -324,29 +332,6 @@ namespace Managly.Controllers
 
             return Ok(call);
         }
-        //[HttpGet("get-call/{callId}")]
-        //public async Task<IActionResult> GetCall(string callId)
-        //{
-        //    var call = await _context.VideoConferences.FirstOrDefaultAsync(c => c.CallId == callId);
-
-        //    if (call == null)
-        //    {
-        //        Console.WriteLine($"❌ No call found with ID {callId}");
-        //        return NotFound(new { error = "Call not found" });
-        //    }
-
-        //    Console.WriteLine($"📡 API Returning Call Details: ID={call.CallId}, Status={call.Status}, Caller={call.CallerId}, Receiver={call.ReceiverId}");
-
-        //    return Ok(new
-        //    {
-        //        CallId = call.CallId,
-        //        Status = call.Status,
-        //        CallerId = call.CallerId,
-        //        ReceiverId = call.ReceiverId
-        //    });
-        //}
-
-
 
         [HttpGet("get-user-calls")]
         public async Task<IActionResult> GetUserCalls()
@@ -400,67 +385,71 @@ namespace Managly.Controllers
             {
                 call.Status = CallStatus.Missed;
                 call.IsEnded = true;
-                call.EndTime = DateTime.UtcNow;
+                call.EndTime = DateTime.Now;
+                await _context.SaveChangesAsync();
                 
-                // Always mark any pending invitation as accepted when a call times out
-                var pendingInvitation = await _context.VideoCallInvitations
-                    .Where(i => i.ReceiverId == call.ReceiverId && i.SenderId == call.CallerId && !i.IsAccepted)
-                    .FirstOrDefaultAsync();
-
-                if (pendingInvitation != null)
+                var callingNotifications = await _context.Notifications
+                    .Where(n => n.UserId == call.ReceiverId && 
+                           n.RelatedUserId == call.CallerId && 
+                           n.Type == NotificationType.VideoInvite && 
+                           n.Message.Contains("calling"))
+                    .ToListAsync();
+                    
+                if (callingNotifications.Any())
                 {
-                    pendingInvitation.IsAccepted = true;
+                    foreach (var notification in callingNotifications)
+                    {
+                        _context.Notifications.Remove(notification);
+                    }
                     await _context.SaveChangesAsync();
                 }
                 
-                await _context.SaveChangesAsync();
-            }
+                var caller = await _context.Users.FindAsync(call.CallerId);
+                var receiver = await _context.Users.FindAsync(call.ReceiverId);
 
-            var caller = await _context.Users.FindAsync(call.CallerId);
-            var receiver = await _context.Users.FindAsync(call.ReceiverId);
-
-            if (receiver != null)
-            {
-                var missedCallNotification = new Notification
+                if (receiver != null)
                 {
-                    UserId = receiver.Id,
-                    Message = $"Missed call from {caller.Name} {caller.LastName}.",
-                    Link = "/videoconference",
-                    Type = NotificationType.VideoInvite,
-                    IsRead = false,
-                    Timestamp = DateTime.Now,
-                    RelatedUserId = caller.Id,
-                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    var missedCallNotification = new Notification
                     {
-                        { "senderName", $"{caller.Name} {caller.LastName}" }
-                    })
-                };
-
-                _context.Notifications.Add(missedCallNotification);
-                await _context.SaveChangesAsync();
-
-                await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
-                    new
-                    {
-                        message = missedCallNotification.Message,
-                        link = missedCallNotification.Link,
-                        type = missedCallNotification.Type,
-                        relatedUserId = missedCallNotification.RelatedUserId,
-                        metaData = new Dictionary<string, string>
+                        UserId = receiver.Id,
+                        Message = $"Missed call from {caller.Name} {caller.LastName}",
+                        Link = "api/videoconference",
+                        Type = NotificationType.VideoInvite,
+                        IsRead = false,
+                        Timestamp = DateTime.Now,
+                        RelatedUserId = caller.Id,
+                        MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
                         {
                             { "senderName", $"{caller.Name} {caller.LastName}" }
-                        },
-                        timestamp = missedCallNotification.Timestamp
+                        })
+                    };
 
-                    });
+                    _context.Notifications.Add(missedCallNotification);
+                    await _context.SaveChangesAsync();
+
+                    await _hubContext.Clients.User(receiver.Id).SendAsync("CallMissed", caller.Id);
+                    
+                    await _hubContext.Clients.User(receiver.Id).SendAsync("ReceiveNotification",
+                        new
+                        {
+                            id = missedCallNotification.Id,
+                            message = missedCallNotification.Message,
+                            link = missedCallNotification.Link,
+                            type = missedCallNotification.Type,
+                            relatedUserId = missedCallNotification.RelatedUserId,
+                            metaData = new Dictionary<string, string>
+                            {
+                                { "senderName", $"{caller.Name} {caller.LastName}" }
+                            },
+                            timestamp = missedCallNotification.Timestamp
+                        });
+                }
+
+                await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, "Missed Call");
             }
-
-            await _hubContext.Clients.User(call.CallerId).SendAsync("CallEnded", callId, "Missed Call");
-            await _hubContext.Clients.User(call.ReceiverId).SendAsync("CallEnded", callId, "Missed Call");
 
             return Ok(new { success = true });
         }
-
 
         [HttpPost("mark-call-active/{callId}")]
         public async Task<IActionResult> MarkCallActive(string callId)
@@ -513,7 +502,6 @@ namespace Managly.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized(new { error = "User not authenticated." });
 
-            // Find the most recent call between these two users
             var call = await _context.VideoConferences
                 .Where(c => 
                     (c.CallerId == senderId && c.ReceiverId == user.Id) || 
@@ -533,50 +521,6 @@ namespace Managly.Controllers
                 status = call.Status.ToString(),
                 isEnded = call.IsEnded
             });
-        }
-
-        [HttpGet("get-recent-contacts")]
-        public async Task<IActionResult> GetRecentContacts()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized(new { error = "User not authenticated." });
-
-            // Get recent calls for this user
-            var recentCalls = await _context.VideoConferences
-                .Where(c => c.CallerId == user.Id || c.ReceiverId == user.Id)
-                .OrderByDescending(c => c.StartTime)
-                .Take(10) // Get more than we need to ensure we have enough unique contacts
-                .ToListAsync();
-
-            // Extract unique contacts
-            var uniqueContacts = new List<object>();
-            var addedUserIds = new HashSet<string>();
-
-            foreach (var call in recentCalls)
-            {
-                string otherUserId = call.CallerId == user.Id ? call.ReceiverId : call.CallerId;
-                
-                // Skip if we already added this user
-                if (addedUserIds.Contains(otherUserId)) continue;
-                
-                // Get user details
-                var otherUser = await _context.Users.FindAsync(otherUserId);
-                if (otherUser == null) continue;
-                
-                addedUserIds.Add(otherUserId);
-                uniqueContacts.Add(new
-                {
-                    Id = otherUser.Id,
-                    Name = otherUser.Name,
-                    LastName = otherUser.LastName,
-                    FullName = $"{otherUser.Name} {otherUser.LastName}"
-                });
-                
-                // Only take top 3 contacts
-                if (uniqueContacts.Count >= 3) break;
-            }
-
-            return Ok(uniqueContacts);
         }
     }
 }

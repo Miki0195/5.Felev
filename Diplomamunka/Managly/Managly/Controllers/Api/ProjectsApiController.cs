@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
+using Managly.Models.Enums;
 
 namespace Managly.Controllers.Api
 {
@@ -214,13 +215,19 @@ namespace Managly.Controllers.Api
                         };
                         _context.ProjectMembers.Add(member);
 
-                        // Send notifications to team members
                         var notification = new Notification
                         {
                             UserId = memberId,
                             Message = $"You have been added to project: {project.Name}",
                             Link = $"/projects?projectId={project.Id}",
-                            IsRead = false
+                            Type = NotificationType.ProjectCreation,
+                            IsRead = false,
+                            Timestamp = DateTime.Now,
+                            RelatedUserId = currentUser.Id,
+                            MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                            {
+                                { "senderName", $"{currentUser.Name} {currentUser.LastName}" }
+                            })
                         };
                         _context.Notifications.Add(notification);
                     }
@@ -535,7 +542,14 @@ namespace Managly.Controllers.Api
                                 UserId = memberId,
                                 Message = $"You have been added to project: {project.Name}",
                                 Link = $"/projects?projectId={project.Id}",
-                                IsRead = false
+                                Type = NotificationType.ProjectMemberAdded,
+                                IsRead = false,
+                                Timestamp = DateTime.Now,
+                                RelatedUserId = currentUser.Id,
+                                MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                                {
+                                    { "senderName", $"{currentUser.Name} {currentUser.LastName}" }
+                                })
                             };
                             _context.Notifications.Add(notification);
                         }
@@ -615,8 +629,16 @@ namespace Managly.Controllers.Api
                     UserId = userId,
                     Message = $"Your role in project '{projectMember.Project.Name}' has been changed to {roleDto.Role}",
                     Link = $"/projects?projectId={id}",
-                    IsRead = false
+                    Type = NotificationType.ProjectRoleChange,
+                    IsRead = false,
+                    Timestamp = DateTime.Now,
+                    RelatedUserId = userId,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "userName", $"{projectMember.User.Name} {projectMember.User.LastName}" }
+                    })
                 };
+
                 _context.Notifications.Add(notification);
 
                 await _context.SaveChangesAsync();
@@ -690,8 +712,15 @@ namespace Managly.Controllers.Api
                 {
                     UserId = userId,
                     Message = $"You have been removed from project '{projectMember.Project.Name}'",
-                    Link = "/projects", // Cannot link to specific project since they've been removed
-                    IsRead = false
+                    Link = "/projects",
+                    Type = NotificationType.ProjectMemberRemove,
+                    IsRead = false,
+                    Timestamp = DateTime.Now,
+                    RelatedUserId = userId,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "userName", $"{projectMember.User.Name} {projectMember.User.LastName}" }
+                    })
                 };
                 _context.Notifications.Add(notification);
 
@@ -873,8 +902,15 @@ namespace Managly.Controllers.Api
                 {
                     UserId = taskDto.AssignedToId,
                     Message = $"You have been assigned a new task: {task.TaskTitle}",
-                    Link = $"/projects?projectId={id}&taskId={task.Id}",
-                    IsRead = false
+                    Link = $"/projects?projectId={project.Id}",
+                    Type = NotificationType.TaskAssigned,
+                    IsRead = false,
+                    Timestamp = DateTime.Now,
+                    RelatedUserId = taskDto.AssignedToId,
+                    MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "userName", $"{assignedUser.Name} {assignedUser.LastName}" }
+                    })
                 };
                 _context.Notifications.Add(notification);
 
@@ -1133,20 +1169,27 @@ namespace Managly.Controllers.Api
                     };
                     task.Assignments.Add(assignment);
 
+                    var userName = userDetails.ContainsKey(userId) ? userDetails[userId] : "Unknown User";
                     // Send notification only to newly assigned users
                     if (!existingAssignments.Contains(userId))
                     {
                         var notification = new Notification
                         {
                             UserId = userId,
-                            Message = $"You have been assigned to task: {task.TaskTitle}",
-                            Link = $"/projects?projectId={task.ProjectId}&taskId={task.Id}",
-                            IsRead = false
+                            Message = $"You have been assigned a new task: {task.TaskTitle}",
+                            Link = $"/projects?projectId={id}&taskId={task.Id}",
+                            Type = NotificationType.TaskUpdated,
+                            IsRead = false,
+                            Timestamp = DateTime.Now,
+                            RelatedUserId = userId,
+                            MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                            {
+                                { "userName", $"{userName}" }
+                            })
                         };
                         _context.Notifications.Add(notification);
 
                         // Log assignment activity with detailed information
-                        var userName = userDetails.ContainsKey(userId) ? userDetails[userId] : "Unknown User";
                         var assignActivity = new ActivityLog
                         {
                             ProjectId = task.Project.Id,
@@ -1383,9 +1426,15 @@ namespace Managly.Controllers.Api
                             UserId = projectLead.UserId,
                             Message = $"Task '{task.TaskTitle}' has been marked as completed",
                             Link = $"/projects?projectId={task.ProjectId}&taskId={task.Id}",
-                            IsRead = false
+                            Type = NotificationType.TaskCompleted,
+                            IsRead = false,
+                            Timestamp = DateTime.Now,
+                            RelatedUserId = projectLead.UserId,
+                            MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
+                            {
+                                { "userName", $"{projectLead.User.Name} {projectLead.User.LastName}" }
+                            })
                         };
-
                         _context.Notifications.Add(notification);
                     }
                 }

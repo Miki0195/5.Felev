@@ -6,8 +6,11 @@ namespace Managly.Models.Enums
         VideoInvite,
         ProjectCreation,
         ProjectMemberAdded,
+        ProjectMemberRemove,
+        ProjectRoleChange,
         TaskAssigned,
         TaskUpdated,
+        TaskCompleted
         // Easy to add new types here
     }
 } 
