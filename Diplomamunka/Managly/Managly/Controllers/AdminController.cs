@@ -110,7 +110,8 @@ namespace Managly.Controllers
                     TotalVacationDays = 20,
                     UsedVacationDays = 0,
                     VacationYear = DateTime.Now.Year,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true,
+                    CreatedDate = DateTime.Now
                 };
 
                 var result = await _userManager.CreateAsync(newUser, randomPassword);

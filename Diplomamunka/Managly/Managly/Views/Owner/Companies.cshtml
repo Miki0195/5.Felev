@@ -1,0 +1,139 @@
+@model List<Managly.Models.OwnerDashboard.CompanyViewModel>
+@{
+    ViewData["Title"] = "Company Management";
+    Layout = "~/Views/Shared/_OwnerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Company Management</h1>
+        <div class="input-group w-50">
+            <input type="text" id="companySearch" class="form-control" placeholder="Search companies...">
+            <button class="btn btn-primary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Companies Grid -->
+    <div class="row" id="companiesContainer">
+        @foreach (var company in Model)
+        {
+            <div class="col-xl-4 col-md-6 mb-4 company-item" data-name="@company.Name.ToLower()">
+                <div class="card company-card shadow h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold">@company.Name</h6>
+                        <span class="status-badge badge-@(company.LicenseStatus.ToLower())">
+                            @company.LicenseStatus
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="d-block">License Key</small>
+                            <p class="mb-0 font-monospace">@company.LicenseKey</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="d-block">Created Date</small>
+                            <p class="mb-0">@company.CreatedDate.ToString("MMM dd, yyyy")</p>
+                        </div>
+                        <div class="mb-3">
+                            <small class="d-block">Users</small>
+                            <p class="mb-0">@company.TotalUsers users</p>
+                        </div>
+                        @if (company.ExpirationDate.HasValue)
+                        {
+                            <div class="mb-3">
+                                <small class="d-block">License Expiration</small>
+                                <p class="mb-0">@company.ExpirationDate.Value.ToString("MMM dd, yyyy")</p>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("CompanyDetails", "Owner", new { id = company.Id })" class="btn btn-info">
+                                <i class="fas fa-eye me-1"></i> View Details
+                            </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCompanyModal"
+                                    data-company-id="@company.Id" data-company-name="@company.Name">
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- No Results -->
+    <div id="noResults" class="text-center py-5 d-none">
+        <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+        <h4>No companies found</h4>
+        <p class="text-muted">Try adjusting your search query</p>
+    </div>
+</div>
+
+<!-- Delete Company Modal -->
+<div class="modal fade" id="deleteCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Company</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="companyNameToDelete" class="fw-bold"></span>?</p>
+                <p class="text-danger">This action will:</p>
+                <ul class="text-danger">
+                    <li>Delete all users associated with this company</li>
+                    <li>Make the license key available for reuse</li>
+                    <li>Permanently remove all company data</li>
+                </ul>
+                <p class="text-danger fw-bold">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteCompany" asp-controller="Owner" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="companyIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">Delete Company</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set up delete company modal
+        document.getElementById('deleteCompanyModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const companyId = button.getAttribute('data-company-id');
+            const companyName = button.getAttribute('data-company-name');
+            
+            document.getElementById('companyIdToDelete').value = companyId;
+            document.getElementById('companyNameToDelete').textContent = companyName;
+        });
+        
+        // Set up search functionality
+        document.getElementById('companySearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const companies = document.querySelectorAll('.company-item');
+            let visibleCount = 0;
+            
+            companies.forEach(company => {
+                const companyName = company.getAttribute('data-name');
+                if (companyName.includes(searchTerm)) {
+                    company.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    company.classList.add('d-none');
+                }
+            });
+            
+            // Show/hide no results message
+            if (visibleCount === 0) {
+                document.getElementById('noResults').classList.remove('d-none');
+            } else {
+                document.getElementById('noResults').classList.add('d-none');
+            }
+        });
+    </script>
+} 

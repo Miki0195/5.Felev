@@ -104,20 +104,8 @@ public class Program
             app.UseHsts();
         }
 
-        using (var scope = app.Services.CreateScope())
-        {
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            // Ensure roles exist
-            string[] roles = { "Admin", "Employee", "Manager" }; // Add any roles you need
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-        }
+        // Initialize Seed Data for the Owner role and user
+        await SeedData.Initialize(app.Services);
 
         app.UseSession();
 

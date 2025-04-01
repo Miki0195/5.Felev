@@ -54,11 +54,11 @@ namespace Managly.Controllers
                 .Take(5)
                 .Select(m => new {
                     UserId = m.SenderId == userId ? m.ReceiverId : m.SenderId,
-                    UserName = m.SenderId == userId 
+                    UserName = m.SenderId == userId
                         ? (m.Receiver.Name + " " + m.Receiver.LastName)
                         : (m.Sender.Name + " " + m.Sender.LastName),
-                    ProfilePicture = m.SenderId == userId 
-                        ? m.Receiver.ProfilePicturePath 
+                    ProfilePicture = m.SenderId == userId
+                        ? m.Receiver.ProfilePicturePath
                         : m.Sender.ProfilePicturePath,
                     LastMessage = m.Content,
                     Timestamp = m.Timestamp
@@ -81,8 +81,8 @@ namespace Managly.Controllers
                 .Select(p => new {
                     p.Id,
                     p.Name,
-                    Progress = (p.TotalTasks > 0) 
-                        ? (double)p.CompletedTasks / p.TotalTasks * 100 
+                    Progress = (p.TotalTasks > 0)
+                        ? (double)p.CompletedTasks / p.TotalTasks * 100
                         : 0,
                     StartDate = p.CreatedAt.ToString("MMM dd, yyyy"),
                     EndDate = p.Deadline.HasValue ? p.Deadline.Value.ToString("MMM dd, yyyy") : "Ongoing",
@@ -138,45 +138,90 @@ namespace Managly.Controllers
         [HttpPost("layout")]
         public async Task<IActionResult> SaveLayout([FromBody] DashboardLayout layout)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            var existingLayout = await _context.DashboardLayouts
-                .FirstOrDefaultAsync(l => l.UserId == userId);
-
-            if (existingLayout != null)
+            try
             {
-                existingLayout.LayoutData = layout.LayoutData;
-                existingLayout.LastUpdated = DateTime.UtcNow;
-            }
-            else
-            {
-                _context.DashboardLayouts.Add(new DashboardLayout
+                if (layout == null || string.IsNullOrEmpty(layout.LayoutData))
                 {
-                    UserId = userId,
-                    LayoutData = layout.LayoutData,
-                    LastUpdated = DateTime.UtcNow
-                });
-            }
+                    return BadRequest(new { success = false, message = "Layout data is required" });
+                }
 
-            await _context.SaveChangesAsync();
-            return Ok(new { success = true });
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+                
+                var existingLayout = await _context.DashboardLayouts
+                    .FirstOrDefaultAsync(l => l.UserId == userId);
+
+                if (existingLayout != null)
+                {
+                    existingLayout.LayoutData = layout.LayoutData;
+                    existingLayout.LastUpdated = DateTime.UtcNow;
+                    _context.DashboardLayouts.Update(existingLayout);
+                }
+                else
+                {
+                    _context.DashboardLayouts.Add(new DashboardLayout
+                    {
+                        UserId = userId,
+                        LayoutData = layout.LayoutData,
+                        LastUpdated = DateTime.UtcNow
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, message = "Layout saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error saving layout", error = ex.Message });
+            }
         }
 
         [HttpGet("layout")]
         public async Task<IActionResult> GetLayout()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var layout = await _context.DashboardLayouts
-                .FirstOrDefaultAsync(l => l.UserId == userId);
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
 
-            return Json(new { layout?.LayoutData });
+                var layout = await _context.DashboardLayouts
+                    .FirstOrDefaultAsync(l => l.UserId == userId);
+
+                if (layout == null)
+                {
+                    return Ok(new { 
+                        success = false, 
+                        message = "No saved layout found for this user"
+                    });
+                }
+
+                return Ok(new {
+                    success = true,
+                    message = "Layout loaded successfully",
+                    layoutData = layout.LayoutData
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { 
+                    success = false, 
+                    message = "Error loading layout", 
+                    error = ex.Message 
+                });
+            }
         }
 
         [HttpGet("analytics")]
         public async Task<IActionResult> GetAnalytics()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             // Get tasks statistics
             var taskStats = await _context.TaskAssignments
                 .Include(t => t.Task)
@@ -201,16 +246,17 @@ namespace Managly.Controllers
             var activityData = await _context.Attendances
                 .Where(a => a.UserId == userId && a.CheckInTime >= now.AddDays(-30))
                 .GroupBy(a => a.CheckInTime.Date)
-                .Select(g => new { 
-                    Date = g.Key.ToString("MMM dd"), 
+                .Select(g => new {
+                    Date = g.Key.ToString("MMM dd"),
                     Count = g.Count(),
-                    Hours = g.Sum(a => (a.CheckOutTime.HasValue 
-                        ? (a.CheckOutTime.Value - a.CheckInTime).TotalHours 
+                    Hours = g.Sum(a => (a.CheckOutTime.HasValue
+                        ? (a.CheckOutTime.Value - a.CheckInTime).TotalHours
                         : (DateTime.Now - a.CheckInTime).TotalHours))
                 })
                 .ToListAsync();
 
-            return Json(new {
+            return Json(new
+            {
                 TaskStatistics = taskStats,
                 ProjectProgress = projectProgress,
                 ActivityTrend = activityData
@@ -221,7 +267,7 @@ namespace Managly.Controllers
         public async Task<IActionResult> GetReports()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             var projectReports = await _context.Projects
                 .Where(p => p.ProjectMembers.Any(m => m.UserId == userId))
                 .OrderByDescending(p => p.CreatedAt)
@@ -252,8 +298,8 @@ namespace Managly.Controllers
 
             // Get schedules for the current week
             var schedules = await _context.Schedules
-                .Where(s => s.UserId == userId && 
-                           s.ShiftDate >= startOfWeek && 
+                .Where(s => s.UserId == userId &&
+                           s.ShiftDate >= startOfWeek &&
                            s.ShiftDate <= endOfWeek)
                 .OrderBy(s => s.ShiftDate)
                 .Select(s => new {
@@ -269,8 +315,8 @@ namespace Managly.Controllers
 
             // Get leave/vacation days for the current week
             var leaves = await _context.Leaves
-                .Where(l => l.UserId == userId && 
-                           l.LeaveDate >= startOfWeek && 
+                .Where(l => l.UserId == userId &&
+                           l.LeaveDate >= startOfWeek &&
                            l.LeaveDate <= endOfWeek &&
                            (l.Status == "Approved" || l.Status == "Pending"))
                 .Select(l => new {
@@ -283,8 +329,10 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            return Json(new {
-                currentWeek = new {
+            return Json(new
+            {
+                currentWeek = new
+                {
                     start = startOfWeek.ToString("yyyy-MM-dd"),
                     end = endOfWeek.ToString("yyyy-MM-dd"),
                     today = today.ToString("yyyy-MM-dd")
@@ -311,7 +359,8 @@ namespace Managly.Controllers
 
                 if (currentSession == null)
                 {
-                    return Ok(new { 
+                    return Ok(new
+                    {
                         active = false,
                         message = "Not clocked in"
                     });
@@ -327,12 +376,13 @@ namespace Managly.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { 
-                    success = false, 
+                return StatusCode(500, new
+                {
+                    success = false,
                     error = "An error occurred while checking clock in status",
-                    details = ex.Message 
+                    details = ex.Message
                 });
             }
         }
     }
-} 
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Managly.Models.Enums;
 
 namespace Managly.Models
 {
@@ -11,7 +12,7 @@ namespace Managly.Models
         [MaxLength(100)]
         public string Key { get; set; } 
 
-        public bool IsActive { get; set; } = false; // False means that the License Key is currently not in use, but as soon it's assigned to a company it becomes true indicating it is being used
+        public LicensekeyStatus Status { get; set; } = LicensekeyStatus.Available;
 
         public int? AssignedToCompanyId { get; set; } // Foreign Key
 
@@ -20,6 +21,13 @@ namespace Managly.Models
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow; 
 
         public DateTime? ExpirationDate { get; set; } // For future implementation
+
+        [Obsolete("Use Status property instead. This property is only for backward compatibility.")]
+        public bool IsActive 
+        { 
+            get => Status == LicensekeyStatus.Active; 
+            set => Status = value ? LicensekeyStatus.Active : LicensekeyStatus.Available; 
+        }
     }
 
 }

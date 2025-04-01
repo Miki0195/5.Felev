@@ -40,6 +40,9 @@ namespace Managly.Models
         public int RemainingVacationDays { get => TotalVacationDays - UsedVacationDays; }
         public int VacationYear { get; set; } = DateTime.Now.Year; // Track the current year for resets
 
+        // Creation date
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
         public virtual ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
         public virtual ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     }

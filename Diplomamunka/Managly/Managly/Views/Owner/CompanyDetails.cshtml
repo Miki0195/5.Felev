@@ -1,0 +1,237 @@
+@model Managly.Models.OwnerDashboard.CompanyDetailsViewModel
+@{
+    ViewData["Title"] = "Company Details";
+    Layout = "~/Views/Shared/_OwnerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="@Url.Action("Companies", "Owner")" class="btn btn-outline-primary mb-2">
+                <i class="fas fa-arrow-left"></i> Back to Companies
+            </a>
+            <h1 class="h3 text-gray-800 mb-0">@Model.Name</h1>
+        </div>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCompanyModal">
+            <i class="fas fa-trash me-1"></i> Delete Company
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Company Info Card -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <h6 class="m-0 font-weight-bold">Company Information</h6>
+                    <span class="status-badge ms-auto badge-@Model.LicenseStatus.ToLower()">
+                        @Model.LicenseStatus
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="d-block ">License Key</small>
+                        <p class="mb-0 font-monospace">@Model.LicenseKey</p>
+                    </div>
+                    <div class="mb-3">
+                        <small class="d-block ">Created Date</small>
+                        <p class="mb-0">@Model.CreatedDate.ToString("MMM dd, yyyy")</p>
+                    </div>
+                    @if (Model.ExpirationDate.HasValue)
+                    {
+                        <div class="mb-3">
+                            <small class="d-block ">License Expiration</small>
+                            <p class="mb-0">@Model.ExpirationDate.Value.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    }
+                    <div class="mb-3">
+                        <small class="d-block ">Total Users</small>
+                        <p class="mb-0">@Model.Users.Count users</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Distribution Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">User Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="userDistributionChart"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Admin Users</span>
+                            <span class="badge bg-primary">@Model.AdminCount</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Manager Users</span>
+                            <span class="badge bg-success">@Model.ManagerCount</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Employee Users</span>
+                            <span class="badge bg-info">@Model.EmployeeCount</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User List Card -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Company Users</h6>
+                    <div class="input-group w-50">
+                        <input type="text" id="userSearch" class="form-control" placeholder="Search users...">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Creation Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                @foreach (var user in Model.Users)
+                                {
+                                    <tr class="user-row" data-name="@(user.Name.ToLower() + " " + user.LastName.ToLower())" data-email="@user.Email.ToLower()">
+                                        <td>@user.Name @user.LastName</td>
+                                        <td>@user.Email</td>
+                                        <td>
+                                            <span class="badge bg-@(user.Role == "Admin" ? "primary" : (user.Role == "Manager" ? "success" : "info"))">
+                                                @user.Role
+                                            </span>
+                                        </td>
+                                        <td>@user.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noUserResults" class="text-center py-4 d-none">
+                        <i class="fas fa-search fa-2x mb-3 "></i>
+                        <h5>No users found</h5>
+                        <p class="">Try adjusting your search query</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Company Modal -->
+<div class="modal fade" id="deleteCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Company</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span class="fw-bold">@Model.Name</span>?</p>
+                <p class="text-danger">This action will:</p>
+                <ul class="text-danger">
+                    <li>Delete all users (@Model.Users.Count) associated with this company</li>
+                    <li>Make the license key available for reuse</li>
+                    <li>Permanently remove all company data</li>
+                </ul>
+                <p class="text-danger fw-bold">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteCompany" asp-controller="Owner" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Delete Company</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // User search functionality
+        document.getElementById('userSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const userRows = document.querySelectorAll('.user-row');
+            let visibleCount = 0;
+            
+            userRows.forEach(row => {
+                const userName = row.getAttribute('data-name');
+                const userEmail = row.getAttribute('data-email');
+                
+                if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                    row.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    row.classList.add('d-none');
+                }
+            });
+            
+            // Show/hide no results message
+            if (visibleCount === 0 && userRows.length > 0) {
+                document.getElementById('noUserResults').classList.remove('d-none');
+            } else {
+                document.getElementById('noUserResults').classList.add('d-none');
+            }
+        });
+        
+        // User Distribution Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('userDistributionChart').getContext('2d');
+            
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Admin', 'Manager', 'Employee'],
+                    datasets: [{
+                        data: [@Model.AdminCount, @Model.ManagerCount, @Model.EmployeeCount],
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: document.body.classList.contains('light-mode') ? '#5a5c69' : '#f8f9fa'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: "rgb(23, 28, 36)",
+                            bodyFont: {
+                                size: 14
+                            },
+                            titleFont: {
+                                size: 14
+                            },
+                            titleMarginBottom: 10,
+                            padding: 15
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+            
+            // Update chart colors on dark/light mode switch
+            document.getElementById('darkModeSwitch').addEventListener('change', function() {
+                const isDarkMode = !document.body.classList.contains('light-mode');
+                chart.options.plugins.legend.labels.color = isDarkMode ? '#f8f9fa' : '#5a5c69';
+                chart.update();
+            });
+        });
+    </script>
+} 

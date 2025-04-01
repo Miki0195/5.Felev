@@ -1,0 +1,233 @@
+@model List<Managly.Models.OwnerDashboard.LicenseKeyViewModel>
+@{
+    ViewData["Title"] = "License Key Management";
+    Layout = "~/Views/Shared/_OwnerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">License Key Management</h1>
+        <div class="d-flex">
+            <div class="input-group me-3">
+                <input type="text" id="licenseKeySearch" class="form-control" placeholder="Search license keys...">
+                <button class="btn btn-primary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <a href="@Url.Action("GenerateLicenseKey", "Owner")" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> Generate Keys
+            </a>
+        </div>
+    </div>
+
+    <!-- License Key Status Summary -->
+    <div class="row mb-4 fade-in">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Active</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.Count(lk => lk.Status == "Active")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle card-icon text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Available</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.Count(lk => lk.Status == "Available")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-key card-icon text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Expired</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.Count(lk => lk.Status == "Expired")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-times card-icon text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Total</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.Count</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License Keys Table -->
+    <div class="card shadow mb-4 fade-in">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold">License Keys</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>License Key</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Created Date</th>
+                            <th>Expiration Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="licenseKeyTableBody">
+                        @foreach (var key in Model)
+                        {
+                            <tr class="license-key-row" data-key="@key.Key.ToLower()" data-status="@key.Status.ToLower()" data-company="@(key.AssignedToCompanyName?.ToLower() ?? "")">
+                                <td class="font-monospace">@key.Key</td>
+                                <td>
+                                    <span class="status-badge badge-@key.Status.ToLower()">
+                                        @key.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (key.AssignedToCompanyId.HasValue)
+                                    {
+                                        <a href="@Url.Action("CompanyDetails", "Owner", new { id = key.AssignedToCompanyId })">
+                                            @key.AssignedToCompanyName
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="">Not Assigned</span>
+                                    }
+                                </td>
+                                <td>@key.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (key.ExpirationDate.HasValue)
+                                    {
+                                        @key.ExpirationDate.Value.ToString("MMM dd, yyyy")
+                                    }
+                                    else
+                                    {
+                                        <span class="">No Expiration</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("EditLicenseKey", "Owner", new { id = key.Id })" class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (!key.AssignedToCompanyId.HasValue || key.Status == "Expired")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLicenseKeyModal"
+                                                    data-key-id="@key.Id" data-key-value="@key.Key">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- No Results Message -->
+            <div id="noLicenseKeyResults" class="text-center py-4 d-none">
+                <i class="fas fa-search fa-2x mb-3 "></i>
+                <h5>No license keys found</h5>
+                <p class="">Try adjusting your search query</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete License Key Modal -->
+<div class="modal fade" id="deleteLicenseKeyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete License Key</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete license key <span id="licenseKeyToDelete" class="fw-bold font-monospace"></span>?</p>
+                <p class="text-danger fw-bold">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteLicenseKey" asp-controller="Owner" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="licenseKeyIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">Delete License Key</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set up delete license key modal
+        document.getElementById('deleteLicenseKeyModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const keyId = button.getAttribute('data-key-id');
+            const keyValue = button.getAttribute('data-key-value');
+            
+            document.getElementById('licenseKeyIdToDelete').value = keyId;
+            document.getElementById('licenseKeyToDelete').textContent = keyValue;
+        });
+        
+        // Set up search functionality
+        document.getElementById('licenseKeySearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const keyRows = document.querySelectorAll('.license-key-row');
+            let visibleCount = 0;
+            
+            keyRows.forEach(row => {
+                const keyValue = row.getAttribute('data-key');
+                const keyStatus = row.getAttribute('data-status');
+                const keyCompany = row.getAttribute('data-company');
+                
+                if (keyValue.includes(searchTerm) || keyStatus.includes(searchTerm) || keyCompany.includes(searchTerm)) {
+                    row.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    row.classList.add('d-none');
+                }
+            });
+            
+            // Show/hide no results message
+            if (visibleCount === 0 && keyRows.length > 0) {
+                document.getElementById('noLicenseKeyResults').classList.remove('d-none');
+            } else {
+                document.getElementById('noLicenseKeyResults').classList.add('d-none');
+            }
+        });
+    </script>
+} 

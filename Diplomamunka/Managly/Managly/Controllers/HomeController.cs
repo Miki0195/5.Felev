@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Managly.Models;
+using Managly.Models.Enums;
 using Managly.Data;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
@@ -14,14 +15,15 @@ public class HomeController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
     }
 
     [Authorize]
@@ -31,6 +33,11 @@ public class HomeController : Controller
         if (user == null)
         {
             return RedirectToAction("Login");
+        }
+
+        if (await _userManager.IsInRoleAsync(user, "Owner"))
+        {
+            return RedirectToAction("Dashboard", "Owner");
         }
 
         var fullName = !string.IsNullOrEmpty(user.Name) && !string.IsNullOrEmpty(user.LastName)
@@ -120,6 +127,11 @@ public class HomeController : Controller
                     Response.Cookies.Delete("RememberMe_Ticked");
                 }
 
+                if (await _userManager.IsInRoleAsync(user, "Owner"))
+                {
+                    return RedirectToAction("Dashboard", "Owner");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -154,7 +166,7 @@ public class HomeController : Controller
             return View(model);
         }
 
-        var licenseKey = _context.LicenseKeys.FirstOrDefault(k => k.Key == model.LicenseKey && !k.IsActive);
+        var licenseKey = _context.LicenseKeys.FirstOrDefault(k => k.Key == model.LicenseKey && k.Status == LicensekeyStatus.Available);
         if (licenseKey == null)
         {
             ModelState.AddModelError("LicenseKey", "Invalid or inactive license key.");
@@ -182,7 +194,7 @@ public class HomeController : Controller
         _context.Companies.Add(company);
         await _context.SaveChangesAsync();
 
-        licenseKey.IsActive = true;
+        licenseKey.Status = LicensekeyStatus.Active;
         licenseKey.AssignedToCompanyId = company.Id;
         await _context.SaveChangesAsync();
 
@@ -190,6 +202,12 @@ public class HomeController : Controller
         if (!await roleManager.RoleExistsAsync("Admin"))
         {
             await roleManager.CreateAsync(new IdentityRole("Admin"));
+        }
+
+        // Create Owner role if it doesn't exist
+        if (!await roleManager.RoleExistsAsync("Owner"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("Owner"));
         }
 
         var adminUser = new User
@@ -204,7 +222,8 @@ public class HomeController : Controller
             Address = "",
             DateOfBirth = new DateTime(2000, 1, 1),
             Gender = "Other",
-            ProfilePicturePath = "/images/default/default-profile.png"
+            ProfilePicturePath = "/images/default/default-profile.png",
+            CreatedDate = DateTime.Now
         };
 
         var result = await _userManager.CreateAsync(adminUser, model.Password);
@@ -213,6 +232,17 @@ public class HomeController : Controller
         {
             await _userManager.AddToRoleAsync(adminUser, "Admin");
             await _signInManager.SignInAsync(adminUser, isPersistent: false);
+
+            // Log the company registration activity in OwnerActivityLogs
+            _context.OwnerActivityLogs.Add(new OwnerActivityLog
+            {
+                ActivityType = "CompanyRegistered",
+                Description = $"New company '{company.Name}' registered with license key '{model.LicenseKey}'",
+                CompanyName = company.Name,
+                CompanyId = company.Id
+            });
+            await _context.SaveChangesAsync();
+
             return RedirectToAction("Index", "Home");
         }
         else

@@ -1,0 +1,296 @@
+@model Managly.Models.OwnerDashboard.DashboardViewModel
+@{
+    ViewData["Title"] = "Owner Dashboard";
+    Layout = "~/Views/Shared/_OwnerLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Owner Dashboard</h1>
+    
+    <!-- Dashboard Summary Cards -->
+    <div class="row fade-in">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Companies</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.TotalCompanies</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Total Users</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.TotalUsers</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Active Licenses</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.TotalActiveLicenses</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-key card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card card-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">Available Licenses</div>
+                            <div class="h5 mb-0 font-weight-bold">@Model.TotalAvailableLicenses</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-key card-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row: Charts and Recent Activities -->
+    <div class="row fade-in">
+        <!-- Monthly Registrations Chart -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Monthly Company Registrations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="registrationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">Recent Activities</h6>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list">
+                        @if (Model.RecentActivities.Any())
+                        {
+                            @foreach (var activity in Model.RecentActivities)
+                            {
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon me-3">
+                                            @switch (activity.ActivityType)
+                                            {
+                                                case "CompanyRegistered":
+                                                    <i class="fas fa-building text-success"></i>
+                                                    break;
+                                                case "CompanyDeleted":
+                                                    <i class="fas fa-trash text-danger"></i>
+                                                    break;
+                                                case "LicenseKeysGenerated":
+                                                    <i class="fas fa-key text-info"></i>
+                                                    break;
+                                                case "LicenseKeyUpdated":
+                                                case "LicenseKeyRevoked":
+                                                    <i class="fas fa-edit text-warning"></i>
+                                                    break;
+                                                default:
+                                                    <i class="fas fa-info-circle"></i>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="activity-content">
+                                            <p class="mb-0">@activity.Description</p>
+                                            <small class="">@activity.Timestamp.ToString("MMM dd, yyyy hh:mm tt")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-center mb-0">No recent activities</p>
+                        }
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("Activities", "Owner")" class="btn btn-sm btn-primary">View All Activities</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Companies -->
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Recently Registered Companies</h6>
+                    <a href="@Url.Action("Companies", "Owner")" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <th>License Key</th>
+                                    <th>Status</th>
+                                    <th>Users</th>
+                                    <th>Registered On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var company in Model.RecentCompanies)
+                                {
+                                    <tr>
+                                        <td>@company.Name</td>
+                                        <td>@company.LicenseKey</td>
+                                        <td>
+                                            <span class="status-badge badge-@(company.LicenseStatus.ToLower())">
+                                                @company.LicenseStatus
+                                            </span>
+                                        </td>
+                                        <td>@company.TotalUsers</td>
+                                        <td>@company.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <a href="@Url.Action("CompanyDetails", "Owner", new { id = company.Id })" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Chart rendering logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('registrationsChart').getContext('2d');
+            
+            // Extract data from the model for the chart
+            const labels = @Html.Raw(Json.Serialize(Model.MonthlyRegistrations.Select(m => m.Month)));
+            const data = @Html.Raw(Json.Serialize(Model.MonthlyRegistrations.Select(m => m.CompanyCount)));
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 225);
+            gradient.addColorStop(0, "rgba(78, 115, 223, 0.8)");
+            gradient.addColorStop(1, "rgba(78, 115, 223, 0.1)");
+            
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Companies",
+                        data: data,
+                        lineTension: 0.3,
+                        backgroundColor: gradient,
+                        borderColor: "rgba(78, 115, 223, 1)",
+                        pointRadius: 3,
+                        pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHitRadius: 10,
+                        pointBorderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: document.body.classList.contains('light-mode') ? "#5a5c69" : "#f8f9fa"
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: document.body.classList.contains('light-mode') ? "#5a5c69" : "#f8f9fa",
+                                beginAtZero: true
+                            },
+                            grid: {
+                                color: "rgba(255, 255, 255, 0.1)",
+                                drawBorder: false,
+                                borderDash: [2],
+                                borderDashOffset: [2]
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: "rgb(23, 28, 36)",
+                            bodyFont: {
+                                size: 14
+                            },
+                            titleFont: {
+                                size: 14
+                            },
+                            titleMarginBottom: 10,
+                            padding: 15,
+                            displayColors: false
+                        }
+                    }
+                }
+            });
+            
+            // Update chart colors on dark/light mode switch
+            document.getElementById('darkModeSwitch').addEventListener('change', function() {
+                const isDarkMode = !document.body.classList.contains('light-mode');
+                chart.options.scales.x.ticks.color = isDarkMode ? "#f8f9fa" : "#5a5c69";
+                chart.options.scales.y.ticks.color = isDarkMode ? "#f8f9fa" : "#5a5c69";
+                chart.update();
+            });
+        });
+    </script>
+} 

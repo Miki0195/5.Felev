@@ -136,13 +136,12 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gridstack.js/7.2.3/gridstack-all.js"></script>
-    <script>
-        loadNotifications();
+    <script>loadNotifications();
 
         let grid;
         let widgetModal;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize GridStack
             grid = GridStack.init({
                 column: 12,
@@ -170,7 +169,7 @@
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    
+
                     const category = btn.dataset.category;
                     document.querySelectorAll('.widget-item').forEach(item => {
                         if (category === 'all' || item.dataset.category === category) {
@@ -189,7 +188,7 @@
 
         function addWidget(type) {
             let widget;
-            switch(type) {
+            switch (type) {
                 case 'tasks':
                     widget = createTasksWidget();
                     break;
@@ -240,24 +239,24 @@
             return {
                 x: 0, y: 0, w: 4, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-tasks"></i>
-                            <h3>My Tasks</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'tasks')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-tasks"></i>
+                                <h3>My Tasks</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'tasks')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="tasks-list">
+                                    Loading tasks...
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="tasks-list">
-                                Loading tasks...
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -265,24 +264,24 @@
             return {
                 x: 4, y: 0, w: 4, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-comments"></i>
-                            <h3>Recent Chats</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'chats')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-comments"></i>
+                                <h3>Recent Chats</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'chats')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="chats-list">
+                                    Loading chats...
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="chats-list">
-                                Loading chats...
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -290,24 +289,24 @@
             return {
                 x: 8, y: 0, w: 4, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-bell"></i>
-                            <h3>Notifications</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'notifications')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-bell"></i>
+                                <h3>Notifications</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'notifications')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="notifications-list">
+                                    Loading notifications...
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="notifications-list">
-                                Loading notifications...
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -315,24 +314,24 @@
             return {
                 x: 0, y: 4, w: 8, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-project-diagram"></i>
-                            <h3>Project Timeline</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'timeline')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-project-diagram"></i>
+                                <h3>Project Timeline</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'timeline')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="timeline-list">
+                                    <div class="empty-state">Timeline feature coming soon...</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="timeline-list">
-                                <div class="empty-state">Timeline feature coming soon...</div>
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -340,24 +339,24 @@
             return {
                 x: 8, y: 4, w: 4, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-video"></i>
-                            <h3>Video Meetings</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'meetings')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-video"></i>
+                                <h3>Video Meetings</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'meetings')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="meetings-list">
+                                    <div class="empty-state">Video meetings feature coming soon...</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="meetings-list">
-                                <div class="empty-state">Video meetings feature coming soon...</div>
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -365,24 +364,24 @@
             return {
                 x: 0, y: 8, w: 6, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-chart-bar"></i>
-                            <h3>Project Analytics</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'analytics')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-chart-bar"></i>
+                                <h3>Project Analytics</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'analytics')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="analytics-list">
+                                    <div class="empty-state">Analytics feature coming soon...</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="analytics-list">
-                                <div class="empty-state">Analytics feature coming soon...</div>
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -390,24 +389,24 @@
             return {
                 x: 6, y: 8, w: 6, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-file-alt"></i>
-                            <h3>Reports Overview</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'reports')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>Reports Overview</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'reports')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="reports-list">
+                                    <div class="empty-state">Reports feature coming soon...</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="widget-content">
-                            <div class="reports-list">
-                                <div class="empty-state">Reports feature coming soon...</div>
-                            </div>
-                        </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -415,27 +414,27 @@
             return {
                 x: 8, y: 0, w: 4, h: 4,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-calendar-alt"></i>
-                            <h3>Weekly Schedule</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'calendar')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-calendar-alt"></i>
+                                <h3>Weekly Schedule</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'calendar')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="widget-content">
-                            <div class="calendar-list">
-                                <div class="week-calendar">
-                                    <div class="week-header"></div>
-                                    <div class="week-body"></div>
+                            <div class="widget-content">
+                                <div class="calendar-list">
+                                    <div class="week-calendar">
+                                        <div class="week-header"></div>
+                                        <div class="week-body"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -443,35 +442,35 @@
             return {
                 x: 0, y: 0, w: 4, h: 2,
                 content: `
-                    <div class="widget">
-                        <div class="widget-header">
-                            <i class="fas fa-clock"></i>
-                            <h3>Clock In</h3>
-                            <div class="widget-actions">
-                                <button onclick="refreshWidget(this, 'clockin')" class="btn-refresh">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button onclick="removeWidget(this)" class="btn-close"></button>
-                            </div>
-                        </div>
-                        <div class="widget-content">
-                            <div class="clockin-widget">
-                                <div class="timer-display">
-                                    <div class="time" style="color: #42a5f5">00:00:00</div>
-                                    <div class="status text-muted">Not clocked in</div>
-                                </div>
-                                <div class="clockin-actions">
-                                    <button class="btn btn-success btn-clockin">
-                                        <i class="fas fa-play"></i> Clock In
+                        <div class="widget">
+                            <div class="widget-header">
+                                <i class="fas fa-clock"></i>
+                                <h3>Clock In</h3>
+                                <div class="widget-actions">
+                                    <button onclick="refreshWidget(this, 'clockin')" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i>
                                     </button>
-                                    <button class="btn btn-danger btn-clockout" style="display: none;">
-                                        <i class="fas fa-stop"></i> Clock Out
-                                    </button>
+                                    <button onclick="removeWidget(this)" class="btn-close"></button>
                                 </div>
                             </div>
+                            <div class="widget-content">
+                                <div class="clockin-widget">
+                                    <div class="timer-display">
+                                        <div class="time" style="color: #42a5f5">00:00:00</div>
+                                        <div class="status text-muted">Not clocked in</div>
+                                    </div>
+                                    <div class="clockin-actions">
+                                        <button class="btn btn-success btn-clockin">
+                                            <i class="fas fa-play"></i> Clock In
+                                        </button>
+                                        <button class="btn btn-danger btn-clockout" style="display: none;">
+                                            <i class="fas fa-stop"></i> Clock Out
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `
+                    `
             };
         }
 
@@ -479,8 +478,8 @@
             try {
                 const response = await fetch(`/api/Dashboard/${widgetType}`);
                 const data = await response.json();
-                
-                switch(widgetType) {
+
+                switch (widgetType) {
                     case 'tasks':
                         renderTasks(data, container);
                         break;
@@ -525,15 +524,15 @@
             }
 
             const html = tasks.map(task => `
-                <div class="task-item" data-task-id="${task.id}">
-                    <div class="task-header">
-                        <h4>${task.title}</h4>
-                        <span class="badge bg-${getPriorityColor(task.priority)}">${task.priority}</span>
+                    <div class="task-item" data-task-id="${task.id}">
+                        <div class="task-header">
+                            <h4>${task.title}</h4>
+                            <span class="badge bg-${getPriorityColor(task.priority)}">${task.priority}</span>
+                        </div>
+                        <div class="task-project">${task.projectName}</div>
+                        <div class="task-due-date">Due: ${task.dueDate}</div>
                     </div>
-                    <div class="task-project">${task.projectName}</div>
-                    <div class="task-due-date">Due: ${task.dueDate}</div>
-                </div>
-            `).join('');
+                `).join('');
 
             container.innerHTML = html;
         }
@@ -545,15 +544,15 @@
             }
 
             const html = chats.map(chat => `
-                <div class="chat-item" onclick="openChat('${chat.userId}')">
-                    <img src="${chat.profilePicture}" alt="${chat.userName}" class="chat-avatar">
-                    <div class="chat-details">
-                        <div class="chat-name">${chat.userName}</div>
-                        <div class="chat-message">${chat.lastMessage}</div>
+                    <div class="chat-item" onclick="openChat('${chat.userId}')">
+                        <img src="${chat.profilePicture}" alt="${chat.userName}" class="chat-avatar">
+                        <div class="chat-details">
+                            <div class="chat-name">${chat.userName}</div>
+                            <div class="chat-message">${chat.lastMessage}</div>
+                        </div>
+                        <div class="chat-time">${formatTimestamp(chat.timestamp)}</div>
                     </div>
-                    <div class="chat-time">${formatTimestamp(chat.timestamp)}</div>
-                </div>
-            `).join('');
+                `).join('');
 
             container.innerHTML = html;
         }
@@ -565,13 +564,13 @@
             }
 
             const html = notifications.map(notification => `
-                <div class="notification-item">
-                    <a href="${notification.link}" class="notification-link">
-                        <div class="notification-message">${notification.message}</div>
-                        <div class="notification-time">${notification.timestamp}</div>
-                    </a>
-                </div>
-            `).join('');
+                    <div class="notification-item">
+                        <a href="${notification.link}" class="notification-link">
+                            <div class="notification-message">${notification.message}</div>
+                            <div class="notification-time">${notification.timestamp}</div>
+                        </a>
+                    </div>
+                `).join('');
 
             container.innerHTML = html;
         }
@@ -583,29 +582,29 @@
             }
 
             const html = projects.map(project => `
-                <div class="timeline-item">
-                    <div class="timeline-header">
-                        <h4>${project.name}</h4>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                style="width: ${project.progress}%" 
-                                aria-valuenow="${project.progress}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100">
-                                ${Math.round(project.progress)}%
+                    <div class="timeline-item">
+                        <div class="timeline-header">
+                            <h4>${project.name}</h4>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: ${project.progress}%"
+                                    aria-valuenow="${project.progress}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
+                                    ${Math.round(project.progress)}%
+                                </div>
                             </div>
                         </div>
+                        <div class="timeline-details">
+                            <span class="timeline-date">
+                                <i class="fas fa-calendar"></i> ${project.startDate} - ${project.endDate}
+                            </span>
+                            <span class="timeline-tasks">
+                                <i class="fas fa-tasks"></i> ${project.completedTasks}/${project.taskCount} tasks completed
+                            </span>
+                        </div>
                     </div>
-                    <div class="timeline-details">
-                        <span class="timeline-date">
-                            <i class="fas fa-calendar"></i> ${project.startDate} - ${project.endDate}
-                        </span>
-                        <span class="timeline-tasks">
-                            <i class="fas fa-tasks"></i> ${project.completedTasks}/${project.taskCount} tasks completed
-                        </span>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
 
             container.innerHTML = html;
         }
@@ -617,77 +616,77 @@
             }
 
             const html = meetings.map(meeting => `
-                <div class="meeting-item">
-                    <div class="meeting-header">
-                        <h4>${meeting.title}</h4>
-                        <a href="${meeting.meetingLink}" class="btn btn-sm btn-primary" target="_blank">
-                            <i class="fas fa-video"></i> Join
-                        </a>
+                    <div class="meeting-item">
+                        <div class="meeting-header">
+                            <h4>${meeting.title}</h4>
+                            <a href="${meeting.meetingLink}" class="btn btn-sm btn-primary" target="_blank">
+                                <i class="fas fa-video"></i> Join
+                            </a>
+                        </div>
+                        <div class="meeting-details">
+                            <span class="meeting-date">
+                                <i class="fas fa-calendar"></i> ${meeting.date}
+                            </span>
+                            <span class="meeting-time">
+                                <i class="fas fa-clock"></i> ${meeting.time}
+                            </span>
+                            <span class="meeting-participants">
+                                <i class="fas fa-users"></i> ${meeting.participantCount} participants
+                            </span>
+                        </div>
                     </div>
-                    <div class="meeting-details">
-                        <span class="meeting-date">
-                            <i class="fas fa-calendar"></i> ${meeting.date}
-                        </span>
-                        <span class="meeting-time">
-                            <i class="fas fa-clock"></i> ${meeting.time}
-                        </span>
-                        <span class="meeting-participants">
-                            <i class="fas fa-users"></i> ${meeting.participantCount} participants
-                        </span>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
 
             container.innerHTML = html;
         }
 
         function renderAnalytics(data, container) {
             const taskStatsHtml = `
-                <div class="analytics-section">
-                    <h4>Task Status Distribution</h4>
-                    <div class="task-stats">
-                        ${data.taskStatistics.map(stat => `
-                            <div class="stat-item">
-                                <div class="stat-label">${stat.status}</div>
-                                <div class="stat-value">${stat.count}</div>
-                            </div>
-                        `).join('')}
+                    <div class="analytics-section">
+                        <h4>Task Status Distribution</h4>
+                        <div class="task-stats">
+                            ${data.taskStatistics.map(stat => `
+                                <div class="stat-item">
+                                    <div class="stat-label">${stat.status}</div>
+                                    <div class="stat-value">${stat.count}</div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
             const projectProgressHtml = `
-                <div class="analytics-section">
-                    <h4>Project Progress</h4>
-                    ${data.projectProgress.map(project => `
-                        <div class="project-progress">
-                            <div class="progress-label">${project.name}</div>
-                            <div class="progress">
-                                <div class="progress-bar bg-success" role="progressbar" 
-                                    style="width: ${project.progress}%" 
-                                    aria-valuenow="${project.progress}" 
-                                    aria-valuemin="0" 
-                                    aria-valuemax="100">
-                                    ${Math.round(project.progress)}%
+                    <div class="analytics-section">
+                        <h4>Project Progress</h4>
+                        ${data.projectProgress.map(project => `
+                            <div class="project-progress">
+                                <div class="progress-label">${project.name}</div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                        style="width: ${project.progress}%"
+                                        aria-valuenow="${project.progress}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100">
+                                        ${Math.round(project.progress)}%
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            const activityTrendHtml = `
-                <div class="analytics-section">
-                    <h4>Activity Trend</h4>
-                    <div class="activity-chart">
-                        ${data.activityTrend.map(activity => `
-                            <div class="activity-bar" style="height: ${activity.count * 10}px" 
-                                title="${activity.date}: ${activity.count} activities">
                             </div>
                         `).join('')}
                     </div>
-                </div>
-            `;
+                `;
+
+            const activityTrendHtml = `
+                    <div class="analytics-section">
+                        <h4>Activity Trend</h4>
+                        <div class="activity-chart">
+                            ${data.activityTrend.map(activity => `
+                                <div class="activity-bar" style="height: ${activity.count * 10}px"
+                                    title="${activity.date}: ${activity.count} activities">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
 
             container.innerHTML = taskStatsHtml + projectProgressHtml + activityTrendHtml;
         }
@@ -699,44 +698,44 @@
             }
 
             const html = reports.map(report => `
-                <div class="report-item">
-                    <div class="report-header">
-                        <h4>${report.projectName}</h4>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                style="width: ${report.progress}%" 
-                                aria-valuenow="${report.progress}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100">
-                                ${Math.round(report.progress)}%
+                    <div class="report-item">
+                        <div class="report-header">
+                            <h4>${report.projectName}</h4>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: ${report.progress}%"
+                                    aria-valuenow="${report.progress}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
+                                    ${Math.round(report.progress)}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="report-stats">
+                            <div class="stat-group">
+                                <div class="stat">
+                                    <span class="stat-label">Total Tasks</span>
+                                    <span class="stat-value">${report.tasksTotal}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Completed</span>
+                                    <span class="stat-value text-success">${report.tasksCompleted}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Pending</span>
+                                    <span class="stat-value text-warning">${report.tasksPending}</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Overdue</span>
+                                    <span class="stat-value text-danger">${report.tasksOverdue}</span>
+                                </div>
+                            </div>
+                            <div class="team-size">
+                                <i class="fas fa-users"></i> Team Size: ${report.teamSize}
                             </div>
                         </div>
                     </div>
-                    <div class="report-stats">
-                        <div class="stat-group">
-                            <div class="stat">
-                                <span class="stat-label">Total Tasks</span>
-                                <span class="stat-value">${report.tasksTotal}</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Completed</span>
-                                <span class="stat-value text-success">${report.tasksCompleted}</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Pending</span>
-                                <span class="stat-value text-warning">${report.tasksPending}</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Overdue</span>
-                                <span class="stat-value text-danger">${report.tasksOverdue}</span>
-                            </div>
-                        </div>
-                        <div class="team-size">
-                            <i class="fas fa-users"></i> Team Size: ${report.teamSize}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
 
             container.innerHTML = html;
         }
@@ -749,20 +748,20 @@
 
             const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const startDate = new Date(data.currentWeek.start);
-            
+
             // Create week header
             const headerHtml = weekDays.map((day, index) => {
                 const currentDate = new Date(startDate);
                 currentDate.setDate(startDate.getDate() + index);
                 const dateStr = currentDate.toISOString().split('T')[0];
                 const isToday = dateStr === data.currentWeek.today;
-                
+
                 return `
-                    <div class="week-day ${isToday ? 'today' : ''}">
-                        <div class="day-name">${day}</div>
-                        <div class="day-date">${currentDate.getDate()}</div>
-                    </div>
-                `;
+                        <div class="week-day ${isToday ? 'today' : ''}">
+                            <div class="day-name">${day}</div>
+                            <div class="day-date">${currentDate.getDate()}</div>
+                        </div>
+                    `;
             }).join('');
 
             // Create week body with schedules
@@ -782,24 +781,24 @@
                 const isToday = dateStr === data.currentWeek.today;
 
                 return `
-                    <div class="week-cell ${isToday ? 'today' : ''}">
-                        ${dayEvents.map(event => `
-                            <div class="schedule-event" style="${event.color ? `background-color: ${event.color};` : ''}">
-                                <div class="event-time">${event.startTime || ''}</div>
-                                <div class="event-title">${event.title}</div>
-                                ${event.description ? `<div class="event-desc">${event.description}</div>` : ''}
-                            </div>
-                        `).join('') || '<div class="no-events">No shifts</div>'}
-                    </div>
-                `;
+                        <div class="week-cell ${isToday ? 'today' : ''}">
+                            ${dayEvents.map(event => `
+                                <div class="schedule-event" style="${event.color ? `background-color: ${event.color};` : ''}">
+                                    <div class="event-time">${event.startTime || ''}</div>
+                                    <div class="event-title">${event.title}</div>
+                                    ${event.description ? `<div class="event-desc">${event.description}</div>` : ''}
+                                </div>
+                            `).join('') || '<div class="no-events">No shifts</div>'}
+                        </div>
+                    `;
             }).join('');
 
             container.innerHTML = `
-                <div class="week-calendar">
-                    <div class="week-header">${headerHtml}</div>
-                    <div class="week-body">${bodyHtml}</div>
-                </div>
-            `;
+                    <div class="week-calendar">
+                        <div class="week-header">${headerHtml}</div>
+                        <div class="week-body">${bodyHtml}</div>
+                    </div>
+                `;
 
             // Set up auto-refresh for next week
             const now = new Date();
@@ -807,7 +806,7 @@
             if (now > endOfWeek) {
                 refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
             } else {
-                const timeUntilNextWeek = endOfWeek.getTime() - now.getTime() + 1000; 
+                const timeUntilNextWeek = endOfWeek.getTime() - now.getTime() + 1000;
                 setTimeout(() => {
                     refreshWidget(container.closest('.widget').querySelector('.btn-refresh'), 'calendar');
                 }, timeUntilNextWeek);
@@ -816,15 +815,15 @@
 
         function formatDate(dateStr) {
             const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric' 
+            return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
             });
         }
 
         function getPriorityColor(priority) {
-            switch(priority.toLowerCase()) {
+            switch (priority.toLowerCase()) {
                 case 'high': return 'danger';
                 case 'medium': return 'warning';
                 case 'low': return 'success';
@@ -836,7 +835,7 @@
             const date = new Date(timestamp);
             const now = new Date();
             const diff = now - date;
-            
+
             if (diff < 86400000) { // Less than 24 hours
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             } else {
@@ -862,7 +861,7 @@
 
             const container = widgetContent.querySelector(`.${widgetType}-list`);
             if (!container) return;
-            
+
             container.innerHTML = '<div class="loading">Refreshing...</div>';
             await loadWidgetContent(widgetType, container);
         }
@@ -873,10 +872,10 @@
         }
 
         async function saveLayout() {
-            const serializedData = grid.save();
-            localStorage.setItem('dashboardLayout', JSON.stringify(serializedData));
-            
             try {
+                const serializedData = grid.save();
+                
+                // Only save to server, not localStorage
                 const response = await fetch('/api/Dashboard/layout', {
                     method: 'POST',
                     headers: {
@@ -887,31 +886,57 @@
                     })
                 });
 
-                if (response.ok) {
-                    showToast('Layout saved successfully!', 'success');
+                const data = await response.json();
+                console.log('Save layout response:', data); // Debug log
+                
+                if (response.ok && data.success) {
+                    showToast('Dashboard layout saved', 'success');
                 } else {
-                    throw new Error('Failed to save layout');
+                    throw new Error(data.message || 'Failed to save layout');
                 }
             } catch (error) {
                 console.error('Error saving layout:', error);
-                showToast('Failed to save layout', 'error');
+                showToast('Failed to save layout: ' + error.message, 'error');
             }
         }
 
         async function loadSavedLayout() {
             try {
-                const savedLayout = localStorage.getItem('dashboardLayout');
-                if (savedLayout) {
-                    grid.load(JSON.parse(savedLayout));
-                    
-                    document.querySelectorAll('.clockin-widget').forEach(container => {
-                        if (!container.dataset.initialized) {
-                            initializeClockInWidget(container);
-                        }
-                    });
+                // First try to get the user's layout from the server
+                const response = await fetch('/api/Dashboard/layout');
+                const data = await response.json();
+                
+                console.log('Server layout data:', data); // Debug log
+                
+                if (data && data.success && data.layoutData) {
+                    // If we have a layout from the server, use that
+                    try {
+                        const layoutData = JSON.parse(data.layoutData);
+                        // Don't save to localStorage to avoid pollution
+                        grid.load(layoutData);
+                        
+                        document.querySelectorAll('.clockin-widget').forEach(container => {
+                            if (!container.dataset.initialized) {
+                                initializeClockInWidget(container);
+                            }
+                        });
+                        return;
+                    } catch (parseError) {
+                        console.error('Error parsing layout data:', parseError);
+                        // If we can't parse the server layout, show empty dashboard
+                        showEmptyDashboardMessage("There was an error loading your dashboard layout.");
+                        return;
+                    }
+                } else {
+                    console.log('No layout found on server, showing empty dashboard');
+                    // No fallback to localStorage - just show empty dashboard message
+                    showEmptyDashboardMessage("Your dashboard is empty. Click 'Add Widget' to customize your dashboard.");
+                    return;
                 }
             } catch (error) {
-                console.error('Error loading layout:', error);
+                console.error('Error loading layout from server:', error);
+                // Show empty dashboard on error
+                showEmptyDashboardMessage("Could not connect to the server. Try refreshing the page.");
             }
         }
 
@@ -937,20 +962,20 @@
             toast.setAttribute('role', 'alert');
             toast.setAttribute('aria-live', 'assertive');
             toast.setAttribute('aria-atomic', 'true');
-            
+
             toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            
+                `;
+
             toastContainer.appendChild(toast);
             const bsToast = new bootstrap.Toast(toast);
             bsToast.show();
-            
+
             toast.addEventListener('hidden.bs.toast', () => {
                 toast.remove();
             });
@@ -1033,7 +1058,7 @@
                         headers: { 'Content-Type': 'application/json' }
                     });
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         updateWidgetState(true, data.checkInTime);
                         showToast('Successfully clocked in!', 'success');
@@ -1066,7 +1091,7 @@
                         headers: { 'Content-Type': 'application/json' }
                     });
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         updateWidgetState(false);
                         showToast('Successfully clocked out!', 'success');
@@ -1111,188 +1136,237 @@
                 initializeClockInWidget(container);
             });
         }
+
+        function showEmptyDashboardMessage(message) {
+            // Clear any existing items from grid
+            grid.removeAll();
+            
+            // Create a message element in the center of the dashboard
+            const emptyEl = document.createElement('div');
+            emptyEl.className = 'empty-dashboard-message';
+            emptyEl.innerHTML = `
+                <div class="message-container">
+                    <i class="fas fa-info-circle"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+            
+            // Add some styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .empty-dashboard-message {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    text-align: center;
+                    color: #6c757d;
+                    width: 100%;
+                    padding: 0 20px;
+                }
+                .empty-dashboard-message .message-container {
+                    max-width: 400px;
+                    margin: 0 auto;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 20px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                .empty-dashboard-message i {
+                    font-size: 48px;
+                    margin-bottom: 16px;
+                    color: #0d6efd;
+                }
+                .empty-dashboard-message p {
+                    font-size: 18px;
+                    margin-bottom: 0;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.querySelector('.grid-stack').appendChild(emptyEl);
+        }
     </script>
 }
 
 <style>
-.dashboard-container {
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 1.5rem;
-    min-height: calc(100vh - 60px); /* Adjust this value based on your navbar height */
-}
+    .dashboard-container {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 1.5rem;
+        min-height: calc(100vh - 60px); /* Adjust this value based on your navbar height */
+    }
 
-.dashboard-header {
-    margin-bottom: 2rem;
-}
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
 
-.week-calendar {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    .week-calendar {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-.week-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-}
+    .week-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
 
-.week-day {
-    padding: 0.5rem;
-    text-align: center;
-    border-right: 1px solid #e2e8f0;
-}
+    .week-day {
+        padding: 0.5rem;
+        text-align: center;
+        border-right: 1px solid #e2e8f0;
+    }
 
-.week-day:last-child {
-    border-right: none;
-}
+        .week-day:last-child {
+            border-right: none;
+        }
 
-.week-day.today {
-    background: #ebf8ff;
-    color: #2b6cb0;
-    font-weight: 600;
-}
+        .week-day.today {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            font-weight: 600;
+        }
 
-.day-name {
-    font-size: 0.8rem;
-    color: #64748b;
-}
+    .day-name {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
 
-.day-date {
-    font-size: 1rem;
-    font-weight: 500;
-    margin-top: 0.25rem;
-}
+    .day-date {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
 
-.week-body {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    min-height: 100px;
-}
+    .week-body {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        min-height: 100px;
+    }
 
-.week-cell {
-    padding: 0.5rem;
-    border-right: 1px solid #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
-    min-height: 100px;
-}
+    .week-cell {
+        padding: 0.5rem;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        min-height: 100px;
+    }
 
-.week-cell:last-child {
-    border-right: none;
-}
+        .week-cell:last-child {
+            border-right: none;
+        }
 
-.week-cell.today {
-    background: #ebf8ff;
-}
+        .week-cell.today {
+            background: #ebf8ff;
+        }
 
-.schedule-event {
-    background: #4299e1;
-    color: white;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    font-size: 0.8rem;
-}
+    .schedule-event {
+        background: #4299e1;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+    }
 
-.event-time {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
+    .event-time {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
 
-.event-title {
-    font-size: 0.75rem;
-    opacity: 0.9;
-}
+    .event-title {
+        font-size: 0.75rem;
+        opacity: 0.9;
+    }
 
-.event-desc {
-    font-size: 0.7rem;
-    opacity: 0.8;
-    margin-top: 0.25rem;
-}
+    .event-desc {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
 
-.no-events {
-    color: #a0aec0;
-    font-size: 0.8rem;
-    text-align: center;
-    padding: 1rem 0;
-}
+    .no-events {
+        color: #a0aec0;
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
 
-.clockin-widget {
-    padding: 1.5rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-}
+    .clockin-widget {
+        padding: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
 
-.timer-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .timer-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.timer-display .time {
-    font-size: 2.5rem;
-    font-weight: bold;
-    font-family: monospace;
-    color: #2d3748;
-    line-height: 1;
-}
+        .timer-display .time {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: monospace;
+            color: #2d3748;
+            line-height: 1;
+        }
 
-.timer-display .status {
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
+        .timer-display .status {
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
 
-.status.text-success {
-    color: #10B981;
-}
+    .status.text-success {
+        color: #10B981;
+    }
 
-.status.text-muted {
-    color: #6B7280;
-}
+    .status.text-muted {
+        color: #6B7280;
+    }
 
-.clockin-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
+    .clockin-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
 
-.clockin-actions button {
-    padding: 0.75rem 2rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    min-width: 140px;
-}
+        .clockin-actions button {
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
 
-.clockin-actions button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
+            .clockin-actions button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
 
-.btn-clockin {
-    background-color: #10B981;
-    border-color: #059669;
-}
+    .btn-clockin {
+        background-color: #10B981;
+        border-color: #059669;
+    }
 
-.btn-clockin:hover {
-    background-color: #059669;
-}
+        .btn-clockin:hover {
+            background-color: #059669;
+        }
 
-.btn-clockout {
-    background-color: #EF4444;
-    border-color: #DC2626;
-}
+    .btn-clockout {
+        background-color: #EF4444;
+        border-color: #DC2626;
+    }
 
-.btn-clockout:hover {
-    background-color: #DC2626;
-}
+        .btn-clockout:hover {
+            background-color: #DC2626;
+        }
 </style>
-

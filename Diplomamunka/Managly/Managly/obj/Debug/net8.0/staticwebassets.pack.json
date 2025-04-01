@@ -61,8 +61,8 @@
       "PackagePath": "staticwebassets/css/VideoConference/Index.css"
     },
     {
-      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/notifications.css",
-      "PackagePath": "staticwebassets/css/notifications.css"
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/owner-dashboard.css",
+      "PackagePath": "staticwebassets/css/owner-dashboard.css"
     },
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/site.css",
@@ -131,10 +131,6 @@
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/site.js",
       "PackagePath": "staticwebassets/js/site.js"
-    },
-    {
-      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/videoConference.js",
-      "PackagePath": "staticwebassets/js/videoConference.js"
     },
     {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/lib/bootstrap/LICENSE",

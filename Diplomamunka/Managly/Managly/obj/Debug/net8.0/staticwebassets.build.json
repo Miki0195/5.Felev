@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "aqBcsoaFyhz+AU13rjwS9TVoe4mH9E/ChD3xWXiX1I4=",
+  "Hash": "IUMAN5Lj55ySUaSAitAKbqukytnB4oNyQ1ZG/y0Kg/8=",
   "Source": "Managly",
   "BasePath": "_content/Managly",
   "Mode": "Default",
@@ -245,12 +245,12 @@
       "OriginalItemSpec": "wwwroot/css/Home/Register.css"
     },
     {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/notifications.css",
+      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/owner-dashboard.css",
       "SourceId": "Managly",
       "SourceType": "Discovered",
       "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
       "BasePath": "_content/Managly",
-      "RelativePath": "css/notifications.css",
+      "RelativePath": "css/owner-dashboard.css",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -261,7 +261,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot/css/notifications.css"
+      "OriginalItemSpec": "wwwroot/css/owner-dashboard.css"
     },
     {
       "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/css/Projects/Index.css",
@@ -642,25 +642,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/js/site.js"
-    },
-    {
-      "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/videoConference.js",
-      "SourceId": "Managly",
-      "SourceType": "Discovered",
-      "ContentRoot": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/",
-      "BasePath": "_content/Managly",
-      "RelativePath": "js/videoConference.js",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot/js/videoConference.js"
     },
     {
       "Identity": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/js/VideoConference/VideoConference.js",
