@@ -152,6 +152,9 @@ async function loadReportData() {
         showLoadingState('activeTasks');
         showLoadingState('teamProductivity');
         showLoadingState('overdueTasks');
+        showLoadingState('completedTasks');
+        showLoadingState('pendingTasks');
+        showLoadingState('totalTasks');
         
         const teamPerformanceTable = document.getElementById('teamPerformanceTable');
         if (teamPerformanceTable) {
@@ -174,8 +177,10 @@ async function loadReportData() {
         
         // Get date range
         const dateRangeFilter = document.getElementById('dateRangeFilter');
-        if (dateRangeFilter) {
-            const dateRange = dateRangeFilter.value;
+        const dateRange = dateRangeFilter ? dateRangeFilter.value : '30';
+        
+        // Only add date parameters if not "all time"
+        if (dateRange !== 'all') {
             if (dateRange === 'custom') {
                 const fromDate = document.getElementById('customDateFrom')?.value;
                 const toDate = document.getElementById('customDateTo')?.value;
@@ -192,6 +197,19 @@ async function loadReportData() {
                 queryParams.append('endDate', endDate.toISOString());
             }
         }
+        
+        // For logging/debugging - show the date range being used
+        let dateRangeInfo = "Date Range: ";
+        if (dateRange === 'all') {
+            dateRangeInfo += "All Time";
+        } else if (dateRange === 'custom') {
+            const fromDate = document.getElementById('customDateFrom')?.value;
+            const toDate = document.getElementById('customDateTo')?.value;
+            dateRangeInfo += `Custom (${fromDate || 'none'} to ${toDate || 'none'})`;
+        } else {
+            dateRangeInfo += `Last ${dateRange} days`;
+        }
+        console.log(dateRangeInfo);
         
         // Get project filter
         const projectFilter = document.getElementById('projectFilter');
@@ -231,13 +249,13 @@ async function loadReportData() {
         }
         
         // Generate the completed tasks data after we have the project metrics
-        const completedTasks = simulateCompletedTasksData(projectMetrics);
+        const completedTasks = simulateCompletedTasksData(projectMetrics, dateRange);
 
         // Show/hide UI elements based on filters
         updateUIVisibility(isProjectSelected);
         
-        updateQuickStats(projectMetrics, taskDistribution, isProjectSelected);
-        updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected);
+        updateQuickStats(projectMetrics, taskDistribution, isProjectSelected, dateRange);
+        updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected, dateRange);
         updateTeamPerformance(userProductivity);
     } catch (error) {
         console.error('Error loading report data:', error);
@@ -295,7 +313,9 @@ function updateActiveFilters() {
             const dateRange = dateRangeFilter.value;
             let dateFilterText = '';
             
-            if (dateRange === 'custom') {
+            if (dateRange === 'all') {
+                dateFilterText = 'All Time';
+            } else if (dateRange === 'custom') {
                 const fromDate = document.getElementById('customDateFrom')?.value;
                 const toDate = document.getElementById('customDateTo')?.value;
                 
@@ -457,8 +477,18 @@ function updateUIVisibility(isProjectSelected) {
     }
 }
 
-function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected) {
+function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected, dateRange) {
     try {
+        // Get date range label for display
+        let dateLabel = '';
+        if (dateRange === 'all') {
+            dateLabel = 'All Time';
+        } else if (dateRange === 'custom') {
+            dateLabel = 'Custom Range';
+        } else {
+            dateLabel = `Last ${dateRange} days`;
+        }
+
         // Update Total Projects count (visible when no project is selected)
         const totalProjectsElement = document.getElementById('totalProjects');
         if (totalProjectsElement) {
@@ -475,12 +505,24 @@ function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected) {
         const completedTasksElement = document.getElementById('completedTasks');
         if (completedTasksElement) {
             completedTasksElement.textContent = completedTasksCount;
+            
+            // Add date label to card title if applicable
+            const completedTasksTitle = document.getElementById('statsCardTitle');
+            if (completedTasksTitle && isProjectSelected) {
+                completedTasksTitle.innerHTML = `Completed Tasks <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
         
         // Update Active Tasks
         const activeTasksElement = document.getElementById('activeTasks');
         if (activeTasksElement) {
             activeTasksElement.textContent = activeTasksCount;
+            
+            // Update card title with date range
+            const activeTasksTitle = activeTasksElement.closest('.stat-card').querySelector('.text-muted.mb-1');
+            if (activeTasksTitle) {
+                activeTasksTitle.innerHTML = `Active Tasks <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
         
         // Update Team Productivity
@@ -488,6 +530,12 @@ function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected) {
         if (teamProductivityElement) {
             const productivity = totalTasksCount ? Math.round((completedTasksCount / totalTasksCount) * 100) : 0;
             teamProductivityElement.textContent = `${productivity}%`;
+            
+            // Update card title with date range
+            const productivityTitle = teamProductivityElement.closest('.stat-card').querySelector('.text-muted.mb-1');
+            if (productivityTitle) {
+                productivityTitle.innerHTML = `Team Productivity <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
         
         // Update Overdue Tasks
@@ -495,17 +543,35 @@ function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected) {
         if (overdueTasksElement) {
             const overdueTasks = projectMetrics.reduce((sum, p) => sum + (p.overdueTasks || 0), 0);
             overdueTasksElement.textContent = overdueTasks;
+            
+            // Update card title with date range
+            const overdueTitle = overdueTasksElement.closest('.stat-card').querySelector('.text-muted.mb-1');
+            if (overdueTitle) {
+                overdueTitle.innerHTML = `Overdue Tasks <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
         
         // Update project-specific cards (only shown when a project is selected)
         const pendingTasksElement = document.getElementById('pendingTasks');
         if (pendingTasksElement) {
             pendingTasksElement.textContent = pendingTasksCount;
+            
+            // Update card title with date range
+            const pendingTitle = pendingTasksElement.closest('.stat-card').querySelector('.text-muted.mb-1');
+            if (pendingTitle) {
+                pendingTitle.innerHTML = `Pending Tasks <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
         
         const totalTasksElement = document.getElementById('totalTasks');
         if (totalTasksElement) {
             totalTasksElement.textContent = totalTasksCount;
+            
+            // Update card title with date range
+            const totalTasksTitle = totalTasksElement.closest('.stat-card').querySelector('.text-muted.mb-1');
+            if (totalTasksTitle) {
+                totalTasksTitle.innerHTML = `Total Tasks <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
         }
     } catch (error) {
         console.error("Error updating quick stats:", error);
@@ -513,8 +579,18 @@ function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected) {
     }
 }
 
-function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected) {
+function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected, dateRange) {
     try {
+        // Get date range label for display
+        let dateLabel = '';
+        if (dateRange === 'all') {
+            dateLabel = 'All Time';
+        } else if (dateRange === 'custom') {
+            dateLabel = 'Custom Range';
+        } else {
+            dateLabel = `Last ${dateRange} days`;
+        }
+        
         // Destroy existing charts to prevent inconsistencies
         if (currentCharts.projectProgress) {
             currentCharts.projectProgress.destroy();
@@ -534,41 +610,41 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
             // Clear the canvas to ensure fresh rendering
             progressCtx.clearRect(0, 0, progressCanvas.width, progressCanvas.height);
             
+            // Update chart title with date range
+            const progressChartTitle = document.querySelector('#progressChartContainer h5');
+            if (progressChartTitle) {
+                progressChartTitle.innerHTML = `Project Progress <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
+            
             // Create a gradient fill for the line chart
             const gradient = progressCtx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, "rgba(78, 115, 223, 0.8)");
             gradient.addColorStop(1, "rgba(78, 115, 223, 0.1)");
             
             // Prepare data for the progress over time chart
-            const progressData = [];
-            const dateLabels = [];
+            let progressData = [];
+            let dateLabels = [];
             
-            // Ensure we have a stable dataset for the chart
+            // Check if we have valid data to display
             if (completedTasks && completedTasks.length > 0) {
-                // Use the stable data to create a deterministic timeline
+                // Sort tasks by completion date
                 const sortedTasks = [...completedTasks].sort((a, b) => 
                     new Date(a.completionDate).getTime() - new Date(b.completionDate).getTime()
                 );
                 
                 // Format dates for x-axis labels
-                dateLabels.push(...sortedTasks.map(task => {
+                dateLabels = sortedTasks.map(task => {
                     const date = new Date(task.completionDate);
                     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                }));
+                });
                 
                 // Get progress values for y-axis
-                progressData.push(...sortedTasks.map(task => task.progress));
+                progressData = sortedTasks.map(task => task.progress);
             } else {
-                // Fallback if no completed tasks data
-                dateLabels.push("No task data available");
-                progressData.push(0);
+                // Fallback if no completed tasks data within the date range
+                dateLabels = ["No task data available in this date range"];
+                progressData = [0];
             }
-            
-            // Log for debugging purposes
-            console.log("Creating Project Progress chart with data:", {
-                labels: dateLabels,
-                data: progressData
-            });
             
             // Create the chart with clear defaults
             currentCharts.projectProgress = new Chart(progressCtx, {
@@ -694,6 +770,12 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
         
         const distributionCtx = distributionCanvas.getContext('2d');
         if (!distributionCtx) return;
+        
+        // Update chart title with date range
+        const distributionChartTitle = document.querySelector('#taskDistributionContainer h5');
+        if (distributionChartTitle) {
+            distributionChartTitle.innerHTML = `Task Distribution <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+        }
         
         // Map status to a named color to ensure consistency
         const getStatusColor = (status) => {
@@ -938,12 +1020,11 @@ function showToast(message, type = 'info') {
 }
 
 // Simulate completed tasks data since we don't have a real API for this
-function simulateCompletedTasksData(projectMetrics) {
+function simulateCompletedTasksData(projectMetrics, dateRange) {
     try {
         // For demonstration, we'll create a simulated dataset
         const now = new Date();
         const data = [];
-        let cumulativeProgress = 0;
         
         // Generate a seed based on project ID (if available) for deterministic results
         const projectId = document.getElementById('projectFilter')?.value;
@@ -955,13 +1036,52 @@ function simulateCompletedTasksData(projectMetrics) {
             return Math.floor((x - Math.floor(x)) * max);
         };
         
-        // We'll take the total completed tasks and create events distributed over the past month
+        // Setup date limits based on selected date range
+        let startDate = null;
+        let endDate = new Date(); // Default to today
+        
+        if (dateRange !== 'all') {
+            if (dateRange === 'custom') {
+                const fromDateStr = document.getElementById('customDateFrom')?.value;
+                const toDateStr = document.getElementById('customDateTo')?.value;
+                
+                if (fromDateStr) {
+                    startDate = new Date(fromDateStr);
+                }
+                
+                if (toDateStr) {
+                    endDate = new Date(toDateStr);
+                    // Set to end of day
+                    endDate.setHours(23, 59, 59, 999);
+                }
+            } else {
+                // Parse days from date range
+                const days = parseInt(dateRange);
+                startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+            }
+        }
+        
+        console.log(`Date range for task completion simulation: ${startDate ? startDate.toISOString() : 'All time'} to ${endDate.toISOString()}`);
+        
+        // We'll take the total completed tasks and create events distributed over time
         const totalCompletedTasks = projectMetrics.reduce((sum, project) => sum + project.completedTasks, 0);
+        let cumulativeProgress = 0;
+        
+        // Determine the range for the random dates
+        // For "all time" use 365 days as a reasonable simulation range
+        const maxDaysBack = dateRange === 'all' ? 365 : (startDate ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) : 30);
         
         for (let i = 0; i < totalCompletedTasks; i++) {
-            // Create a deterministic date within the past month
-            const completionDate = new Date(now);
-            completionDate.setDate(now.getDate() - pseudoRandom(30));
+            // Create a deterministic date within the specified range
+            const completionDate = new Date(endDate);
+            const daysBack = pseudoRandom(maxDaysBack);
+            completionDate.setDate(completionDate.getDate() - daysBack);
+            
+            // Skip if the date is outside the specified range
+            if (startDate && completionDate < startDate) {
+                continue;
+            }
             
             // Calculate progress percentage (each task contributes to overall progress)
             const totalTasks = projectMetrics.reduce((sum, project) => sum + project.tasksCount, 0);
@@ -976,17 +1096,24 @@ function simulateCompletedTasksData(projectMetrics) {
             });
         }
         
+        // If we have no data after filtering, create a placeholder
+        if (data.length === 0) {
+            console.log("No tasks found within the selected date range");
+            return [];
+        }
+        
         // Sort by date
         data.sort((a, b) => a.completionDate - b.completionDate);
         
         // Normalize progress values to ensure the final value is 100% of completed tasks
         if (data.length > 0) {
-            const normalizationFactor = (totalCompletedTasks / projectMetrics.reduce((sum, p) => sum + p.tasksCount, 0)) * 100 / data[data.length - 1].progress;
+            const normalizationFactor = (data.length / projectMetrics.reduce((sum, p) => sum + p.tasksCount, 0)) * 100 / data[data.length - 1].progress;
             data.forEach(task => {
                 task.progress = task.progress * normalizationFactor;
             });
         }
         
+        console.log(`Generated ${data.length} completed tasks for the simulation`);
         return data;
     } catch (error) {
         console.error("Error simulating completed tasks data:", error);
