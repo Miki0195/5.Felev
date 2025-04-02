@@ -8,126 +8,207 @@
     }
 }
 
-/* General Styles for the Login Page */
 body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background-color: #f9f9f9;
-    font-family: Arial, sans-serif;
+    background-image: linear-gradient(135deg, #1e1e2f 0%, #2a2a3a 100%);
+    overflow: hidden;
 }
 
-.form-container {
-    display: flex;
-    flex-direction: column; 
-    align-items: center; 
-    width: 100%; 
-    max-width: 400px; 
-    margin: auto; 
-}
-
-
-/* Form Container */
-form {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.auth-container {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    padding: 0 15px;
 }
 
-/* Page Title */
-h2 {
+.auth-card {
+    background-color: rgba(25, 25, 35, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
     text-align: center;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+    background: linear-gradient(45deg, #4a6cf7, #6c47ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.form-floating {
     margin-bottom: 20px;
-    color: #333333;
 }
 
-/* Form Group Styling */
-.form-group {
-    margin-bottom: 20px;
-}
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 14px;
-        color: #555555;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #dddddd;
-        border-radius: 4px;
-        font-size: 14px;
-        background: #fdfdfd;
-    }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
-        }
-
-/* Error Messages */
-.text-danger {
-    font-size: 12px;
-    color: #ff4d4d;
-}
-
-/* Register Prompt */
-.form-group span {
-    font-size: 14px;
-    color: #555555;
-}
-
-.form-group a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-    .form-group a:hover {
-        text-decoration: underline;
-    }
-
-/* Submit Button */
-.submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    color: white;
+.form-control {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-radius: 10px;
+    height: 55px;
     font-size: 16px;
-    cursor: pointer;
 }
-    .submit-button:hover {
-        background-color: #0056b3;
+
+    .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 0 0.2rem rgba(74, 108, 247, 0.2);
+        color: #fff;
     }
+
+.form-floating > label {
+    color: rgba(255, 255, 255, 0.7);
+    padding-left: 16px;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: rgba(255, 255, 255, 0.9);
+    transform: scale(0.8) translateY(-0.5rem) translateX(0.1rem);
+}
 
 .password-container {
     position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
 }
 
-    .password-container input {
-        width: 100%;
-        padding-right: 40px; /* Leave space for the icon */
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    z-index: 10;
+}
+
+    .toggle-password:hover {
+        color: rgba(255, 255, 255, 0.9);
     }
 
-.toggle-password {
-    width: 40px;
-    position: absolute;
-    left: 360px; /* Place at the right end */
-    background-color: transparent;
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+    .remember-me input {
+        margin-right: 8px;
+    }
+
+.btn-login {
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(45deg, #4a6cf7, #6c47ff);
     border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color: #555;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(74, 108, 247, 0.4);
+    transition: all 0.3s ease;
+}
+
+    .btn-login:hover {
+        background: linear-gradient(45deg, #3a5ae6, #5c37ef);
+        box-shadow: 0 8px 20px rgba(74, 108, 247, 0.5);
+        transform: translateY(-2px);
+    }
+
+.register-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+    .register-link a {
+        color: #4a6cf7;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+        .register-link a:hover {
+            color: #6c47ff;
+            text-decoration: underline;
+        }
+
+.error-message {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+    border-left: 3px solid #ff6b6b;
+}
+
+/* Background animation */
+.bg-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.bg-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, rgba(74, 108, 247, 0.3), rgba(108, 71, 255, 0.15));
+    animation: float 15s infinite ease-in-out;
+}
+
+.bubble-1 {
+    width: 300px;
+    height: 300px;
+    left: -150px;
+    top: -150px;
+    animation-delay: 0s;
+}
+
+.bubble-2 {
+    width: 200px;
+    height: 200px;
+    right: -100px;
+    top: 30%;
+    animation-delay: 2s;
+}
+
+.bubble-3 {
+    width: 150px;
+    height: 150px;
+    bottom: 20%;
+    left: 15%;
+    animation-delay: 4s;
+}
+
+.bubble-4 {
+    width: 250px;
+    height: 250px;
+    bottom: -125px;
+    right: 20%;
+    animation-delay: 6s;
 }
