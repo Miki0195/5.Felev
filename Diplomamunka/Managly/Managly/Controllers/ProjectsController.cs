@@ -238,11 +238,13 @@ namespace Managly.Controllers
                         Description = t.Description ?? "No description",
                         FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
                         DueDate = (DateTime)t.DueDate,
-                        IsOverdue = t.DueDate.HasValue && t.DueDate.Value < DateTime.Today && t.Status != "Completed",
+                        IsOverdue = t.DueDate.HasValue && ((t.DueDate.Value < DateTime.Today && t.Status != "Completed") || (t.Status == "Completed" && t.DueDate.Value < t.CompletedAt.Value)),
                         Priority = t.Priority ?? "Medium",
                         PriorityCssClass = GetPriorityCssClass(t.Priority),
                         Status = t.Status ?? "Not Started",
                         StatusCssClass = GetStatusCssClass(t.Status),
+                        TimeSpent = t.TimeSpent,
+                        FormattedTimeSpent = FormatTimeSpent(t.TimeSpent),
                         AssignedUsers = t.Assignments?.Select(a => new AssignedUserViewModel
                         {
                             Id = a.User?.Id ?? string.Empty,
@@ -266,9 +268,15 @@ namespace Managly.Controllers
                     }).ToList()
                 };
 
+
                 ViewBag.CurrentUserId = currentUser.Id;
                 ViewBag.ProjectId = id;
+                foreach (var task in viewModel.Tasks.Where(t => t.IsOverdue))
+                {
+                    Console.WriteLine($"Overdue Task: {task.Title}, Due Date: {task.DueDate}");
+                }
 
+                _logger.LogInformation($"Successfully built view model for project {project.TotalTasks}");
                 _logger.LogInformation($"Successfully built view model for project {project.Name}");
 
                 // Return partial view for AJAX requests, full view otherwise
@@ -341,11 +349,13 @@ namespace Managly.Controllers
                 Description = t.Description ?? "No description",
                 FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
                 DueDate = (DateTime)t.DueDate,
-                IsOverdue = t.DueDate.HasValue && t.DueDate.Value < DateTime.Today && t.Status != "Completed", // Check if overdue
+                IsOverdue = t.DueDate.HasValue && ((t.DueDate.Value < DateTime.Today && t.Status != "Completed") || (t.Status == "Completed" && t.DueDate.Value < t.CompletedAt.Value)), // Check if overdue
                 Priority = t.Priority,
                 PriorityCssClass = GetPriorityCssClass(t.Priority),
                 Status = t.Status,
                 StatusCssClass = GetStatusCssClass(t.Status),
+                TimeSpent = t.TimeSpent,
+                FormattedTimeSpent = FormatTimeSpent(t.TimeSpent),
                 AssignedUsers = t.Assignments.Select(a => new AssignedUserViewModel
                 {
                     Id = a.User.Id,
@@ -492,10 +502,14 @@ namespace Managly.Controllers
                         Title = t.TaskTitle ?? "Untitled Task",
                         Description = t.Description ?? "No description",
                         FormattedDueDate = t.DueDate?.ToString("MMM dd, yyyy") ?? "No due date",
+                        DueDate = (DateTime)t.DueDate,
+                        IsOverdue = t.DueDate.HasValue && ((t.DueDate.Value < DateTime.Today && t.Status != "Completed") || (t.Status == "Completed" && t.DueDate.Value < t.CompletedAt.Value)),
                         Priority = t.Priority ?? "Medium",
                         PriorityCssClass = GetPriorityCssClass(t.Priority),
                         Status = t.Status ?? "Not Started",
                         StatusCssClass = GetStatusCssClass(t.Status),
+                        TimeSpent = t.TimeSpent,
+                        FormattedTimeSpent = FormatTimeSpent(t.TimeSpent),
                         AssignedUsers = t.Assignments?.Select(a => new AssignedUserViewModel
                         {
                             Id = a.User?.Id ?? string.Empty,
@@ -543,6 +557,55 @@ namespace Managly.Controllers
                 "low" => "priority-low",
                 _ => "secondary"
             };
+        }
+
+        private string FormatTimeSpent(float timeSpent)
+        {
+            if (timeSpent <= 0) return "N/A";
+
+            // Calculate whole days
+            int days = (int)Math.Floor(timeSpent);
+
+            // Calculate remaining hours
+            float fractionalDay = timeSpent - days;
+            int hours = (int)Math.Floor(fractionalDay * 24);
+
+            // Calculate remaining minutes
+            float fractionalHour = (fractionalDay * 24) - hours;
+            int minutes = (int)Math.Round(fractionalHour * 60);
+
+            // Handle case where minutes round to 60
+            if (minutes == 60)
+            {
+                hours++;
+                minutes = 0;
+                if (hours == 24)
+                {
+                    days++;
+                    hours = 0;
+                }
+            }
+
+            if (days == 0)
+            {
+                if (hours == 0)
+                {
+                    return $"{minutes}m";
+                }
+                return $"{hours}h {minutes}m";
+            }
+            else if (hours == 0 && minutes == 0)
+            {
+                return $"{days}d";
+            }
+            else if (minutes == 0)
+            {
+                return $"{days}d {hours}h";
+            }
+            else
+            {
+                return $"{days}d {hours}h {minutes}m";
+            }
         }
 
         [HttpPost("restore/{id}")]

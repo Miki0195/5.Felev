@@ -180,7 +180,7 @@ namespace Managly.Controllers.Api
                     Priority = projectDto.Priority,
                     CreatedById = currentUser.Id,
                     CompanyId = currentUser.CompanyId.Value,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
                     ProjectMembers = new List<ProjectMember>(),
                     Tasks = new List<Tasks>(),
                     Activities = new List<ActivityLog>(),
@@ -197,7 +197,7 @@ namespace Managly.Controllers.Api
                     ProjectId = project.Id,
                     UserId = currentUser.Id,
                     Role = "Project Lead",
-                    JoinedAt = DateTime.UtcNow
+                    JoinedAt = DateTime.Now
                 };
                 _context.ProjectMembers.Add(creatorMember);
 
@@ -211,7 +211,7 @@ namespace Managly.Controllers.Api
                             ProjectId = project.Id,
                             UserId = memberId,
                             Role = "Member",
-                            JoinedAt = DateTime.UtcNow
+                            JoinedAt = DateTime.Now
                         };
                         _context.ProjectMembers.Add(member);
 
@@ -288,12 +288,12 @@ namespace Managly.Controllers.Api
                 project.Deadline = DateTime.Parse(projectDto.Deadline);
                 project.Status = projectDto.Status;
                 project.Priority = projectDto.Priority;
-                project.UpdatedAt = DateTime.UtcNow;
+                project.UpdatedAt = DateTime.Now;
 
                 // Set CompletedAt when a project is marked as completed
                 if (statusChanged && project.Status == "Completed")
                 {
-                    project.CompletedAt = DateTime.UtcNow;
+                    project.CompletedAt = DateTime.Now;
                 }
 
                 // Create a summary of all changes
@@ -317,7 +317,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldName = oldName, newName = project.Name })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -333,7 +333,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldDescription = oldDescription, newDescription = project.Description })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -349,7 +349,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldDeadline = oldDeadline, newDeadLine = projectDto.Deadline })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -365,7 +365,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldStartDate = oldStartDate, newStartDate = projectDto.StartDate })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -381,7 +381,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldStatus = oldStatus, newStatus = project.Status })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -397,7 +397,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Project",
                         TargetId = project.Id.ToString(),
                         TargetName = project.Name,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new { oldPriority = oldPriority, newPriority = project.Priority })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -507,7 +507,7 @@ namespace Managly.Controllers.Api
                             ProjectId = project.Id,
                             UserId = memberId,
                             Role = "Member",
-                            JoinedAt = DateTime.UtcNow
+                            JoinedAt = DateTime.Now
                         };
                         _context.ProjectMembers.Add(member);
 
@@ -524,7 +524,7 @@ namespace Managly.Controllers.Api
                                 TargetType = "Member",
                                 TargetId = memberId,
                                 TargetName = $"{user.Name} {user.LastName}",
-                                Timestamp = DateTime.UtcNow,
+                                Timestamp = DateTime.Now,
                                 AdditionalData = JsonSerializer.Serialize(new
                                 {
                                     memberId = memberId,
@@ -610,7 +610,7 @@ namespace Managly.Controllers.Api
                     TargetType = "Member",
                     TargetId = userId,
                     TargetName = $"{projectMember.User.Name} {projectMember.User.LastName}",
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.Now,
                     AdditionalData = JsonSerializer.Serialize(new
                     {
                         memberId = userId,
@@ -694,7 +694,7 @@ namespace Managly.Controllers.Api
                     TargetType = "Member",
                     TargetId = userId,
                     TargetName = memberName,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = DateTime.Now,
                     AdditionalData = JsonSerializer.Serialize(new
                     {
                         memberId = userId,
@@ -820,6 +820,8 @@ namespace Managly.Controllers.Api
                 if (!DateTime.TryParse(taskDto.DueDate, out DateTime dueDate))
                     return BadRequest(new { error = "Invalid date format" });
 
+                var now = DateTime.Now;
+                
                 // Create the task
                 var task = new Tasks
                 {
@@ -830,7 +832,10 @@ namespace Managly.Controllers.Api
                     Priority = taskDto.Priority,
                     Status = "Pending",
                     CreatedById = currentUser.Id,
-                    AssignedDate = DateTime.UtcNow
+                    AssignedDate = now,
+                    UpdatedAt = now, // Set initial UpdatedAt timestamp
+                    TimeSpent = 0,   // Initialize TimeSpent to 0
+                    CompletedAt = null // Initialize CompletedAt to null
                 };
 
                 _context.Tasks.Add(task);
@@ -841,7 +846,7 @@ namespace Managly.Controllers.Api
                 {
                     TaskId = task.Id,
                     UserId = taskDto.AssignedToId,
-                    AssignedAt = DateTime.UtcNow
+                    AssignedAt = now
                 };
                 _context.TaskAssignments.Add(assignment);
 
@@ -857,7 +862,7 @@ namespace Managly.Controllers.Api
                     TargetType = "Task",
                     TargetId = task.Id.ToString(),
                     TargetName = task.TaskTitle,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = now,
                     AdditionalData = JsonSerializer.Serialize(new
                     {
                         taskId = task.Id,
@@ -866,6 +871,9 @@ namespace Managly.Controllers.Api
                         dueDate = task.DueDate?.ToString("yyyy-MM-dd"),
                         priority = task.Priority,
                         status = task.Status,
+                        createdAt = now,
+                        updatedAt = task.UpdatedAt,
+                        assignedDate = task.AssignedDate,
                         createdBy = $"{currentUser.Name} {currentUser.LastName}",
                         createdById = currentUser.Id,
                         projectId = project.Id,
@@ -883,7 +891,7 @@ namespace Managly.Controllers.Api
                     TargetType = "Task",
                     TargetId = task.Id.ToString(),
                     TargetName = task.TaskTitle,
-                    Timestamp = DateTime.UtcNow,
+                    Timestamp = now,
                     AdditionalData = JsonSerializer.Serialize(new
                     {
                         taskId = task.Id,
@@ -892,7 +900,7 @@ namespace Managly.Controllers.Api
                         assignedToName = $"{assignedUser.Name} {assignedUser.LastName}",
                         assignedBy = currentUser.Id,
                         assignedByName = $"{currentUser.Name} {currentUser.LastName}",
-                        assignedAt = DateTime.UtcNow
+                        assignedAt = now
                     })
                 };
                 _context.ActivityLogs.Add(assignActivity);
@@ -905,7 +913,7 @@ namespace Managly.Controllers.Api
                     Link = $"/projects?projectId={project.Id}",
                     Type = NotificationType.TaskAssigned,
                     IsRead = false,
-                    Timestamp = DateTime.Now,
+                    Timestamp = now,
                     RelatedUserId = taskDto.AssignedToId,
                     MetaData = JsonSerializer.Serialize(new Dictionary<string, string>
                     {
@@ -936,7 +944,11 @@ namespace Managly.Controllers.Api
                     DueDate = task.DueDate?.ToString("yyyy-MM-dd"),
                     task.Priority,
                     task.Status,
-                    AssignedUsers = new[] { assignedUserDetails }
+                    AssignedUsers = new[] { assignedUserDetails },
+                    task.AssignedDate,
+                    task.UpdatedAt,
+                    task.TimeSpent,
+                    task.CompletedAt
                 });
             }
             catch (Exception ex)
@@ -966,6 +978,9 @@ namespace Managly.Controllers.Api
                         t.Priority,
                         t.Status,
                         t.TimeSpent,
+                        t.AssignedDate,
+                        t.UpdatedAt,
+                        t.CompletedAt,
                         AssignedUsers = t.Assignments.Select(a => new
                         {
                             a.User.Id,
@@ -980,8 +995,7 @@ namespace Managly.Controllers.Api
                             t.CreatedBy.Name,
                             t.CreatedBy.LastName,
                             t.CreatedBy.ProfilePicturePath
-                        },
-                        t.AssignedDate
+                        }
                     })
                     .OrderByDescending(t => t.AssignedDate)
                     .ToListAsync();
@@ -1016,10 +1030,13 @@ namespace Managly.Controllers.Api
                     task.Id,
                     task.TaskTitle,
                     task.Description,
-                    DueDate = task.DueDate.ToString(),
+                    DueDate = task.DueDate?.ToString() ?? "",
                     task.Priority,
                     task.Status,
                     task.TimeSpent,
+                    task.AssignedDate,
+                    task.UpdatedAt,
+                    task.CompletedAt,
                     AssignedUsers = task.Assignments.Select(a => new
                     {
                         a.User.Id,
@@ -1035,7 +1052,6 @@ namespace Managly.Controllers.Api
                         task.CreatedBy.LastName,
                         task.CreatedBy.ProfilePicturePath
                     },
-                    task.AssignedDate,
                     task.ProjectId
                 });
             }
@@ -1095,7 +1111,38 @@ namespace Managly.Controllers.Api
                 task.Description = taskDto.Description;
                 task.DueDate = DateTime.Parse(taskDto.DueDate);
                 task.Priority = taskDto.Priority;
-                task.Status = taskDto.Status;
+                
+                // Update timestamp whenever any task property is updated
+                
+                // Handle status changes specifically
+                if (statusChanged)
+                {
+                    var oldTaskStatus = task.Status;
+                    task.Status = taskDto.Status;
+                    task.UpdatedAt = DateTime.Now;
+
+                    // If task is being completed, set completion time and calculate time spent
+                    if (oldTaskStatus != "Completed" && task.Status == "Completed")
+                    {
+                        task.CompletedAt = DateTime.Now;
+                        
+                        // Calculate time spent (in hours) from assignment to completion
+                        if (task.AssignedDate != null)
+                        {
+                            var timeSpan = task.CompletedAt.Value - task.AssignedDate;
+                            task.TimeSpent = (float)timeSpan.TotalHours / 24;
+                        }
+                        
+                        task.Project.CompletedTasks++;
+                    }
+                    // If task is being reopened, clear completion data
+                    else if (oldTaskStatus == "Completed" && task.Status != "Completed")
+                    {
+                        task.CompletedAt = null;
+                        task.TimeSpent = 0;
+                        task.Project.CompletedTasks--;
+                    }
+                }
 
                 // Create changes dictionary for activity log
                 var changes = new Dictionary<string, object>();
@@ -1103,7 +1150,15 @@ namespace Managly.Controllers.Api
                 if (descriptionChanged) changes.Add("description", new { oldValue = oldDescription, newValue = task.Description });
                 if (dueDateChanged) changes.Add("dueDate", new { oldValue = oldDueDate.ToString("yyyy-MM-dd"), newValue = task.DueDate?.ToString("yyyy-MM-dd") });
                 if (priorityChanged) changes.Add("priority", new { oldValue = oldPriority, newValue = task.Priority });
-                if (statusChanged) changes.Add("status", new { oldValue = oldStatus, newValue = task.Status });
+                if (statusChanged) 
+                {
+                    changes.Add("status", new { 
+                        oldValue = oldStatus, 
+                        newValue = task.Status,
+                        completedAt = task.CompletedAt,
+                        timeSpent = task.TimeSpent
+                    });
+                }
                 if (assignmentsChanged)
                 {
                     var assignmentChanges = new
@@ -1125,7 +1180,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(changes)
                     };
                     _context.ActivityLogs.Add(updateActivity);
@@ -1142,8 +1197,13 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
-                        AdditionalData = JsonSerializer.Serialize(new { oldStatus, newStatus = task.Status })
+                        Timestamp = DateTime.Now,
+                        AdditionalData = JsonSerializer.Serialize(new { 
+                            oldStatus, 
+                            newStatus = task.Status,
+                            completedAt = task.CompletedAt,
+                            timeSpent = task.TimeSpent
+                        })
                     };
                     _context.ActivityLogs.Add(statusActivity);
                 }
@@ -1165,7 +1225,7 @@ namespace Managly.Controllers.Api
                     {
                         TaskId = task.Id,
                         UserId = userId,
-                        AssignedAt = DateTime.UtcNow
+                        AssignedAt = DateTime.Now
                     };
                     task.Assignments.Add(assignment);
 
@@ -1198,7 +1258,7 @@ namespace Managly.Controllers.Api
                             TargetType = "Task",
                             TargetId = task.Id.ToString(),
                             TargetName = task.TaskTitle,
-                            Timestamp = DateTime.UtcNow,
+                            Timestamp = DateTime.Now,
                             AdditionalData = JsonSerializer.Serialize(new
                             {
                                 assignedTo = userId,
@@ -1223,7 +1283,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new
                         {
                             removedUser = userId,
@@ -1236,7 +1296,13 @@ namespace Managly.Controllers.Api
                 }
 
                 await _context.SaveChangesAsync();
-                return Ok();
+                return Ok(new { 
+                    id = task.Id,
+                    status = task.Status,
+                    updatedAt = task.UpdatedAt,
+                    completedAt = task.CompletedAt,
+                    timeSpent = task.TimeSpent
+                });
             }
             catch (Exception ex)
             {
@@ -1331,10 +1397,23 @@ namespace Managly.Controllers.Api
 
                 var oldStatus = task.Status;
                 task.Status = statusDto.Status;
+                
+                // Always update the UpdatedAt timestamp when status changes
+                task.UpdatedAt = DateTime.Now;
 
                 // Update project progress
                 if (oldStatus != "Completed" && statusDto.Status == "Completed")
                 {
+                    // Set completion timestamp
+                    task.CompletedAt = DateTime.Now;
+                    
+                    // Calculate time spent (in hours) from assignment to completion
+                    if (task.AssignedDate != null)
+                    {
+                        var timeSpan = task.CompletedAt.Value - task.AssignedDate;
+                        task.TimeSpent = (float)timeSpan.TotalHours / 24;
+                    }
+                    
                     task.Project.CompletedTasks++;
 
                     // Log task completion activity with detailed information
@@ -1346,7 +1425,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new
                         {
                             taskId = task.Id,
@@ -1355,13 +1434,17 @@ namespace Managly.Controllers.Api
                             newStatus = statusDto.Status,
                             completedBy = currentUser.Id,
                             completedByName = $"{currentUser.Name} {currentUser.LastName}",
-                            completedAt = DateTime.UtcNow
+                            completedAt = task.CompletedAt,
+                            timeSpent = task.TimeSpent
                         })
                     };
                     _context.ActivityLogs.Add(activity);
                 }
                 else if (oldStatus == "Completed" && statusDto.Status != "Completed")
                 {
+                    // If reopening a completed task, clear the completion time and reset time spent
+                    task.CompletedAt = null;
+                    task.TimeSpent = 0; // Reset time spent since task is no longer complete
                     task.Project.CompletedTasks--;
 
                     // Log task status update with detailed information
@@ -1373,7 +1456,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new
                         {
                             taskId = task.Id,
@@ -1382,7 +1465,7 @@ namespace Managly.Controllers.Api
                             newStatus = statusDto.Status,
                             reopenedBy = currentUser.Id,
                             reopenedByName = $"{currentUser.Name} {currentUser.LastName}",
-                            reopenedAt = DateTime.UtcNow
+                            reopenedAt = DateTime.Now
                         })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -1398,7 +1481,7 @@ namespace Managly.Controllers.Api
                         TargetType = "Task",
                         TargetId = task.Id.ToString(),
                         TargetName = task.TaskTitle,
-                        Timestamp = DateTime.UtcNow,
+                        Timestamp = DateTime.Now,
                         AdditionalData = JsonSerializer.Serialize(new
                         {
                             taskId = task.Id,
@@ -1407,7 +1490,7 @@ namespace Managly.Controllers.Api
                             newStatus = statusDto.Status,
                             changedBy = currentUser.Id,
                             changedByName = $"{currentUser.Name} {currentUser.LastName}",
-                            changedAt = DateTime.UtcNow
+                            changedAt = DateTime.Now
                         })
                     };
                     _context.ActivityLogs.Add(activity);
@@ -1440,7 +1523,16 @@ namespace Managly.Controllers.Api
                 }
 
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Task status updated successfully" });
+                return Ok(new { 
+                    message = "Task status updated successfully",
+                    task = new {
+                        id = task.Id,
+                        status = task.Status,
+                        updatedAt = task.UpdatedAt,
+                        completedAt = task.CompletedAt,
+                        timeSpent = task.TimeSpent
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -1761,7 +1853,55 @@ namespace Managly.Controllers.Api
             }
         }
 
+        /// <summary>
+        /// Helper method to get the total number of tasks based on various filters
+        /// </summary>
+        /// <param name="companyId">The company ID to filter tasks</param>
+        /// <param name="projectId">Optional project ID filter</param>
+        /// <param name="startDate">Optional start date filter</param>
+        /// <param name="endDate">Optional end date filter</param>
+        /// <param name="status">Optional status filter</param>
+        /// <returns>Total number of tasks matching the criteria</returns>
+        private async Task<int> GetTotalTasksCountAsync(int companyId, int? projectId = null,
+            DateTime? startDate = null, DateTime? endDate = null, string status = null)
+        {
+            try
+            {
+                // Start with base query filtering by company
+                var query = _context.Tasks
+                    .Include(t => t.Project)
+                    .Where(t => t.Project.CompanyId == companyId);
 
-        
+                // Apply optional project filter
+                if (projectId.HasValue)
+                {
+                    query = query.Where(t => t.ProjectId == projectId.Value);
+                }
+
+                // Apply optional date filters
+                if (startDate.HasValue)
+                {
+                    query = query.Where(t => t.AssignedDate >= startDate.Value);
+                }
+
+                if (endDate.HasValue)
+                {
+                    query = query.Where(t => t.AssignedDate <= endDate.Value);
+                }
+
+                // Apply optional status filter
+                if (!string.IsNullOrEmpty(status) && status != "all")
+                {
+                    query = query.Where(t => t.Status == status);
+                }
+
+                // Execute count query
+                return await query.CountAsync();
+            }
+            catch (Exception ex)
+            {
+                return 0; // Return 0 on error
+            }
+        }
     }
 }

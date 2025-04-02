@@ -48,6 +48,8 @@ namespace Managly.Models
         public string PriorityCssClass { get; set; }
         public string Status { get; set; }
         public string StatusCssClass { get; set; }
+        public float TimeSpent { get; set; }
+        public string FormattedTimeSpent { get; set; }
         public List<AssignedUserViewModel> AssignedUsers { get; set; }
     }
 

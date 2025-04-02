@@ -1216,7 +1216,7 @@ async function showTaskDetails(taskId) {
 
         document.getElementById('editTaskTitle').value = task.taskTitle;
         document.getElementById('editTaskDescription').value = task.description || '';
-        document.getElementById('editTaskDueDate').value = new Date(task.dueDate).toISOString().split('T')[0];
+        document.getElementById('editTaskDueDate').value = new Date(new Date(task.dueDate).setDate(new Date(task.dueDate).getDate() + 1)).toISOString().split('T')[0];
         document.getElementById('editTaskPriority').value = task.priority;
         document.getElementById('editTaskStatus').value = task.status;
 

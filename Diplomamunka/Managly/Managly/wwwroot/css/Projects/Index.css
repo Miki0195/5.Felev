@@ -488,6 +488,7 @@ select[multiple] {
 }
 
 .task-card {
+    position: relative;
     background: #fff;
     border-radius: 8px;
     padding: 15px;
@@ -544,13 +545,27 @@ select[multiple] {
 }
 
 .overdue-badge {
-    font-size: 0.7rem;
     padding: 0.25em 0.5em;
 }
 
 .task-card.overdue .task-meta span.text-danger {
     color: #dc3545;
     font-weight: bold;
+}
+
+.overdue-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(255, 0, 0, 0.2);
+    color: red;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 3px solid red;
+    padding: 10px 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .task-header {
@@ -1289,3 +1304,13 @@ select[multiple] {
 .view-all-activities .btn-link i {
     margin-right: 4px;
 }
+
+.task-time-spent {
+    font-size: 0.8rem;
+    color: #28a745;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+}
+
+

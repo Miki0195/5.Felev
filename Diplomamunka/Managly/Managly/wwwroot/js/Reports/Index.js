@@ -8,7 +8,7 @@ let toastInstances = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        initializeFilters();
+    initializeFilters();
         
         // Apply and clear filter buttons
         const applyFiltersBtn = document.getElementById("applyFilters");
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Initial data load
-        loadReportData();
+    loadReportData();
     } catch (error) {
         console.error("Error initializing page:", error);
         showToast("Error initializing page: " + error.message, "error");
@@ -102,8 +102,8 @@ async function initializeFilters() {
         if (window.jQuery && $.fn.select2) {
             $('#projectFilter, #teamFilter').select2({
                 placeholder: 'Select option',
-                allowClear: true
-            });
+            allowClear: true
+        });
         }
 
         // Load projects for filter
@@ -121,17 +121,17 @@ async function initializeFilters() {
 
         // Load team members for filter
         try {
-            const teamResponse = await fetch('/api/projectsapi/team-members');
+        const teamResponse = await fetch('/api/projectsapi/team-members');
             if (teamResponse.ok) {
-                const members = await teamResponse.json();
-                
-                const teamFilter = document.getElementById('teamFilter');
+        const members = await teamResponse.json();
+        
+        const teamFilter = document.getElementById('teamFilter');
                 if (teamFilter && members && Array.isArray(members)) {
-                    members.forEach(member => {
+            members.forEach(member => {
                         const option = new Option(`${member.name} ${member.lastName || ''}`, member.id);
-                        teamFilter.appendChild(option);
-                    });
-                }
+                teamFilter.appendChild(option);
+            });
+        }
             }
         } catch (error) {
             console.warn('Could not load team members:', error);
@@ -139,7 +139,7 @@ async function initializeFilters() {
 
     } catch (error) {
         console.error('Error initializing filters:', error);
-        showToast('Error initializing filters: ' + error.message, 'error');
+            showToast('Error initializing filters: ' + error.message, 'error');
     }
 }
 
@@ -161,14 +161,14 @@ async function loadReportData() {
             const tbody = teamPerformanceTable.querySelector('tbody');
             if (tbody) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="5" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
             }
         }
 
@@ -288,15 +288,15 @@ async function loadReportData() {
             const tbody = teamPerformanceTable.querySelector('tbody');
             if (tbody) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center text-danger">
+            <tr>
+                <td colspan="5" class="text-center text-danger">
                             <i class="fas fa-exclamation-circle me-2"></i>
-                            Error loading data. Please try again.
-                        </td>
-                    </tr>
-                `;
-            }
-        }
+                    Error loading data. Please try again.
+                </td>
+            </tr>
+        `;
+    }
+}
     }
 }
 
@@ -592,12 +592,12 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
         }
         
         // Destroy existing charts to prevent inconsistencies
-        if (currentCharts.projectProgress) {
-            currentCharts.projectProgress.destroy();
+    if (currentCharts.projectProgress) {
+        currentCharts.projectProgress.destroy();
             currentCharts.projectProgress = null;
-        }
-        if (currentCharts.taskDistribution) {
-            currentCharts.taskDistribution.destroy();
+    }
+    if (currentCharts.taskDistribution) {
+        currentCharts.taskDistribution.destroy();
             currentCharts.taskDistribution = null;
         }
 
@@ -647,11 +647,11 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
             }
             
             // Create the chart with clear defaults
-            currentCharts.projectProgress = new Chart(progressCtx, {
+    currentCharts.projectProgress = new Chart(progressCtx, {
                 type: 'line',
-                data: {
+        data: {
                     labels: dateLabels,
-                    datasets: [{
+            datasets: [{
                         label: "Cumulative Progress",
                         data: progressData,
                         lineTension: 0.3,
@@ -666,10 +666,10 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                         pointHitRadius: 10,
                         pointBorderWidth: 2,
                         fill: true
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
                     layout: {
                         padding: {
                             left: 10,
@@ -678,7 +678,7 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                             bottom: 0
                         }
                     },
-                    scales: {
+            scales: {
                         x: {
                             grid: {
                                 display: false,
@@ -700,7 +700,7 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                         y: {
                             ticks: {
                                 color: "#64748b",
-                                beginAtZero: true,
+                    beginAtZero: true,
                                 max: 100,
                                 callback: function(value) {
                                     return value + '%';
@@ -756,10 +756,10 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                                     return [`Progress: ${context.raw}%`];
                                 }
                             }
-                        }
-                    }
                 }
-            });
+            }
+        }
+    });
         } else if (isProjectSelected) {
             console.warn("Project Progress chart canvas not found, but a project is selected");
         }
@@ -794,19 +794,19 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
         const data = taskDistribution.map(t => t.count);
         const backgroundColors = taskDistribution.map(t => getStatusColor(t.status));
         
-        currentCharts.taskDistribution = new Chart(distributionCtx, {
-            type: 'doughnut',
-            data: {
+    currentCharts.taskDistribution = new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
                 labels: labels,
-                datasets: [{
+            datasets: [{
                     data: data,
                     backgroundColor: backgroundColors,
                     borderWidth: 0,
                     hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
+            }]
+        },
+        options: {
+            responsive: true,
                 maintainAspectRatio: false,
                 cutout: '70%',
                 plugins: {
@@ -854,61 +854,61 @@ function updateTeamPerformance(userProductivity) {
         
         const tbody = teamPerformanceTable.querySelector('tbody');
         if (!tbody) return;
-        
-        if (!userProductivity || userProductivity.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No data available</td></tr>';
-            return;
-        }
+    
+    if (!userProductivity || userProductivity.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No data available</td></tr>';
+        return;
+    }
 
-        tbody.innerHTML = userProductivity.map(user => {
-            const productivityPercentage = user.tasksAssigned > 0 
-                ? Math.round((user.tasksCompleted / user.tasksAssigned) * 100) 
-                : 0;
+    tbody.innerHTML = userProductivity.map(user => {
+        const productivityPercentage = user.tasksAssigned > 0 
+            ? Math.round((user.tasksCompleted / user.tasksAssigned) * 100) 
+            : 0;
 
-            return `
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="${user.profilePicturePath || '/images/default/default-profile.png'}" 
-                                class="rounded-circle me-2" 
-                                width="32" 
-                                height="32"
-                                alt="${user.name}">
-                            <div>
+        return `
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img src="${user.profilePicturePath || '/images/default/default-profile.png'}" 
+                             class="rounded-circle me-2" 
+                             width="32" 
+                             height="32"
+                             alt="${user.name}">
+                        <div>
                                 <div class="fw-bold">${user.name} ${user.lastName || ''}</div>
-                                <small class="text-muted">Tasks: ${user.tasksAssigned}</small>
+                            <small class="text-muted">Tasks: ${user.tasksAssigned}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="fw-bold">${user.tasksCompleted}</span> / ${user.tasksAssigned}
+                </td>
+                <td>
+                    <span class="fw-bold">${Math.round(user.totalWorkingHours)}</span> hrs
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="productivity-bar flex-grow-1 me-2">
+                            <div class="productivity-bar-fill" 
+                                 style="width: ${productivityPercentage}%">
                             </div>
                         </div>
-                    </td>
-                    <td>
-                        <span class="fw-bold">${user.tasksCompleted}</span> / ${user.tasksAssigned}
-                    </td>
-                    <td>
-                        <span class="fw-bold">${Math.round(user.totalWorkingHours)}</span> hrs
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="productivity-bar flex-grow-1 me-2">
-                                <div class="productivity-bar-fill" 
-                                    style="width: ${productivityPercentage}%">
-                                </div>
-                            </div>
-                            <span>${productivityPercentage}%</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="task-distribution">
-                            <span class="task-distribution-pill task-pill-completed">
-                                ${user.tasksCompleted} Done
-                            </span>
-                            <span class="task-distribution-pill task-pill-pending">
-                                ${user.tasksAssigned - user.tasksCompleted} Pending
-                            </span>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
+                        <span>${productivityPercentage}%</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="task-distribution">
+                        <span class="task-distribution-pill task-pill-completed">
+                            ${user.tasksCompleted} Done
+                        </span>
+                        <span class="task-distribution-pill task-pill-pending">
+                            ${user.tasksAssigned - user.tasksCompleted} Pending
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
     } catch (error) {
         console.error("Error updating team performance:", error);
         showToast("Error updating team performance data", "error");
@@ -934,31 +934,31 @@ function exportTeamData(format) {
         
         if (format === 'csv') {
             let csv = 'Team Member,Tasks Completed,Working Hours,Productivity Score\n';
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
                 if (cells.length < 4) return;
                 
                 const nameEl = cells[0].querySelector('.fw-bold');
                 const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
                 
-                const tasksCompleted = cells[1].textContent.trim();
-                const hours = cells[2].textContent.trim();
+            const tasksCompleted = cells[1].textContent.trim();
+            const hours = cells[2].textContent.trim();
                 
                 const productivityEl = cells[3].querySelector('span:last-child');
                 const productivity = productivityEl ? productivityEl.textContent.trim() : '0%';
-                
-                csv += `"${name}",${tasksCompleted},${hours},${productivity}\n`;
-            });
             
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+                csv += `"${name}",${tasksCompleted},${hours},${productivity}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
             a.download = `team-performance-${projectName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-        } else if (format === 'pdf') {
-            showToast('PDF export coming soon', 'info');
+        a.click();
+    } else if (format === 'pdf') {
+        showToast('PDF export coming soon', 'info');
         }
     } catch (error) {
         console.error("Error exporting team data:", error);

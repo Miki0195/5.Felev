@@ -74,6 +74,13 @@
                         <div class="task-meta">
                             <div>
                                 <small>Due: @task.FormattedDueDate</small>
+                                @if (task.Status == "Completed" && task.TimeSpent > 0)
+                                {
+                                    <br />
+                                    <span class="task-time-spent">
+                                        <i class="bi bi-clock-history me-1"></i>Time: @task.FormattedTimeSpent
+                                    </span>
+                                }
                             </div>
                             <div class="assigned-to">
                                 <small>Assigned to:</small>

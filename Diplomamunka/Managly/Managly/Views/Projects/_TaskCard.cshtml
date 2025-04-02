@@ -6,6 +6,12 @@
 
 <div class="task-card @Model.Priority.ToLower() @(isDone ? "completed" : "")"
      data-task-id="@Model.Id" onclick="showTaskDetails(@Model.Id)">
+
+    @if (Model.IsOverdue && isDone)
+    {
+        <div class="overdue-stamp">OVERDUE</div>
+    }
+
     <div class="task-header">
         <h5 class="task-title">@Model.Title</h5>
         <div class="d-flex align-items-center gap-2">
@@ -35,6 +41,25 @@
                 }
             </div>
         </div>
-        <span class="@(Model.IsOverdue && !isDone ? "text-danger fw-bold" : "")">Due: @Model.FormattedDueDate</span>
+        <div class="d-flex flex-column align-items-end">
+            @if (Model.IsOverdue && (!isDone || isDone))
+            {
+                <span class="overdue-badge overdue bg-danger text-white fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Due: @Model.FormattedDueDate
+                </span>
+            }
+            @if (!Model.IsOverdue)
+            {
+                <span>Due: @Model.FormattedDueDate</span>
+            }
+
+            @*<span class="@(Model.IsOverdue && (!isDone || isDone) ? "text-danger fw-bold" : "")">Due: @Model.FormattedDueDate</span>*@
+            @if (isDone && Model.TimeSpent > 0)
+            {
+                <span class="task-time-spent">
+                    <i class="bi bi-clock-history me-1"></i>Time: @Model.FormattedTimeSpent
+                </span>
+            }
+        </div>
     </div>
 </div>

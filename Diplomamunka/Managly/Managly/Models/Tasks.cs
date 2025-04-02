@@ -27,7 +27,11 @@ namespace Managly.Models
 
         public string Priority { get; set; } = "Medium"; // Add priority field
 
-        public float TimeSpent { get; set; } = 0;
+        public float TimeSpent { get; set; } = 0; // Time spent in hours
+
+        public DateTime? CompletedAt { get; set; } // Track when the task was completed
+        
+        public DateTime? UpdatedAt { get; set; } // Track when the task was last updated
 
         [Required]
         public string CreatedById { get; set; }  // Add this to track who created the task
