@@ -63,13 +63,13 @@ public class HomeController : Controller
     // -------------------------- LOGIN -------------------------- // 
     public IActionResult Login()
     {
-        var model = new Login
+        // If user is already signed in, redirect to appropriate page
+        if (User.Identity.IsAuthenticated)
         {
-            Email = Request.Cookies["RememberMe_Email"] ?? "",
-            Password = Request.Cookies["RememberMe_Password"] ?? "",
-            RememberMe = Request.Cookies["RememberMe_Ticked"] == "true"
-        };
+            return RedirectToAction("Index", "Home");
+        }
 
+        var model = new Login();
         return View(model);
     }
 
@@ -92,39 +92,6 @@ public class HomeController : Controller
                 if (user.IsUsingPreGeneratedPassword) 
                 {
                     return RedirectToAction("ChangePassword", "Account");
-                }
-
-                if (model.RememberMe)
-                {
-                    Response.Cookies.Append("RememberMe_Email", model.Email, new CookieOptions
-                    {
-                        Expires = DateTime.UtcNow.AddDays(30), 
-                        HttpOnly = true, 
-                        Secure = true, 
-                        IsEssential = true
-                    });
-
-                    Response.Cookies.Append("RememberMe_Password", model.Password, new CookieOptions
-                    {
-                        Expires = DateTime.UtcNow.AddDays(30),
-                        HttpOnly = true,
-                        Secure = true,
-                        IsEssential = true
-                    });
-
-                    Response.Cookies.Append("RememberMe_Ticked", "true", new CookieOptions
-                    {
-                        Expires = DateTime.UtcNow.AddDays(30),
-                        HttpOnly = true,
-                        Secure = true,
-                        IsEssential = true
-                    });
-                }
-                else
-                {
-                    Response.Cookies.Delete("RememberMe_Email");
-                    Response.Cookies.Delete("RememberMe_Password");
-                    Response.Cookies.Delete("RememberMe_Ticked");
                 }
 
                 if (await _userManager.IsInRoleAsync(user, "Owner"))
@@ -204,12 +171,6 @@ public class HomeController : Controller
             await roleManager.CreateAsync(new IdentityRole("Admin"));
         }
 
-        // Create Owner role if it doesn't exist
-        if (!await roleManager.RoleExistsAsync("Owner"))
-        {
-            await roleManager.CreateAsync(new IdentityRole("Owner"));
-        }
-
         var adminUser = new User
         {
             Name = model.AdminEmail.Split('@')[0],
@@ -262,14 +223,7 @@ public class HomeController : Controller
     {
         await _signInManager.SignOutAsync();
         HttpContext.Session.Clear();
-
-        if (Request.Cookies["RememberMe_Ticked"] != "true")
-        {
-            Response.Cookies.Delete("RememberMe_Email");
-            Response.Cookies.Delete("RememberMe_Password");
-            Response.Cookies.Delete("RememberMe_Ticked");
-        }
-
+        
         return RedirectToAction("Login", "Home");
     }
 

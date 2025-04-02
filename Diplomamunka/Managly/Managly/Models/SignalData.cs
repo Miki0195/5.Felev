@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Managly.Models
 {
@@ -16,4 +16,4 @@ namespace Managly.Models
         [JsonPropertyName("sdp")]
         public string Sdp { get; set; }
     }
-} 
+}

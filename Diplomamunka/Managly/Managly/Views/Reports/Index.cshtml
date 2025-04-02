@@ -2,125 +2,213 @@
     ViewData["Title"] = "Reports Dashboard";
 }
 
+<link rel="stylesheet" href="~/css/Reports/Index.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>
 
-<div class="reports-container">
+<div class="container">
+    <div class="form-header text-center">
+        <div class="header-icon">
+            <i class="bi bi-bar-chart-line"></i>
+        </div>
+        <h1>Reports Dashboard</h1>
+        <p>Analyze team performance and track project progress</p>
+    </div>
+
     <!-- Filters Section -->
-    <div class="filters-section bg-white p-4 rounded-lg shadow-sm mb-4">
-        <h4 class="mb-3">Report Filters</h4>
+    <div class="filter-card p-4 mb-4">
+        <h5 class="mb-4">Report Filters</h5>
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-md-4 mb-3">
                 <label class="form-label">Date Range</label>
                 <select class="form-select" id="dateRangeFilter">
                     <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
+                    <option value="30" selected>Last 30 days</option>
                     <option value="90">Last 90 days</option>
                     <option value="custom">Custom Range</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Project Status</label>
-                <select class="form-select" id="statusFilter">
-                    <option value="none" selected>-- Select Status --</option>
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Cancelled">Cancelled</option>
-                </select>
+            <div class="col-md-4 mb-3 date-picker-container" style="display: none;">
+                <label class="form-label">From</label>
+                <input type="date" id="customDateFrom" class="form-control">
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Priority</label>
-                <select class="form-select" id="priorityFilter">
-                    <option value="none" selected>-- Select Prioirty --</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Urgent</option>
-                </select>
+            <div class="col-md-4 mb-3 date-picker-container" style="display: none;">
+                <label class="form-label">To</label>
+                <input type="date" id="customDateTo" class="form-control">
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Team Members</label>
-                <select class="form-select" id="teamFilter">
-                    <option value="none" selected>-- Select Team Member --</option>
-                    <!-- Will be populated dynamically -->
-                </select>
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-4 mb-3">
                 <label class="form-label">Project</label>
                 <select class="form-select" id="projectFilter">
                     <option value="">All Projects</option>
                     <!-- Will be populated dynamically -->
                 </select>
             </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Team Member</label>
+                <select class="form-select" id="teamFilter">
+                    <option value="none" selected>All Team Members</option>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+        <div class="active-filters-container mt-3" id="activeFilters">
+            <!-- Active filters will appear here -->
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button id="applyFilters" class="btn btn-primary">
+                <i class="fas fa-filter me-2"></i>Apply Filters
+            </button>
+            <button id="clearFilters" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-times me-2"></i>Clear
+            </button>
         </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="quick-stats row g-3 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
-                <h6 class="text-muted mb-2">Total Projects</h6>
-                <h3 class="mb-0" id="totalProjects">0</h3>
-                <div class="progress mt-2" style="height: 4px;">
+            <div class="stat-card p-3 rounded-lg shadow-sm" id="projectsTasksCard">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary-soft">
+                        <i class="bi bi-briefcase" id="statsCardIcon"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1" id="statsCardTitle">Total Projects</h6>
+                        <h3 class="mb-0" id="totalProjects">0</h3>
+                        <h3 class="mb-0" id="completedTasks" style="display: none;">0</h3>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 4px;">
                     <div class="progress-bar bg-primary" style="width: 70%"></div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
-                <h6 class="text-muted mb-2">Active Tasks</h6>
-                <h3 class="mb-0" id="activeTasks">0</h3>
-                <div class="progress mt-2" style="height: 4px;">
+            <div class="stat-card p-3 rounded-lg shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success-soft">
+                        <i class="bi bi-list-task"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">Active Tasks</h6>
+                        <h3 class="mb-0" id="activeTasks">0</h3>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 4px;">
                     <div class="progress-bar bg-success" style="width: 60%"></div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
-                <h6 class="text-muted mb-2">Team Productivity</h6>
-                <h3 class="mb-0" id="teamProductivity">0%</h3>
-                <div class="progress mt-2" style="height: 4px;">
-                    <div class="progress-bar bg-info" style="width: 80%"></div>
+            <div class="stat-card p-3 rounded-lg shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger-soft">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">Overdue Tasks</h6>
+                        <h3 class="mb-0" id="overdueTasks">0</h3>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 4px;">
+                    <div class="progress-bar bg-danger" style="width: 30%"></div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
-                <h6 class="text-muted mb-2">Overdue Tasks</h6>
-                <h3 class="mb-0" id="overdueTasks">0</h3>
-                <div class="progress mt-2" style="height: 4px;">
-                    <div class="progress-bar bg-danger" style="width: 30%"></div>
+            <div class="stat-card p-3 rounded-lg shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info-soft">
+                        <i class="bi bi-lightning"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">Team Productivity</h6>
+                        <h3 class="mb-0" id="teamProductivity">0%</h3>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 4px;">
+                    <div class="progress-bar bg-info" style="width: 80%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Project-specific cards (shown only when a project is selected) -->
+        <div class="row g-3 mb-4 justify-content-center" id="projectSpecificCardsRow" style="display: none;">
+            <div class="col-md-3 project-specific-card">
+                <div class="stat-card p-3 rounded-lg shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning-soft">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="text-muted mb-1">Pending Tasks</h6>
+                            <h3 class="mb-0" id="pendingTasks">0</h3>
+                        </div>
+                    </div>
+                    <div class="progress mt-3" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 project-specific-card">
+                <div class="stat-card p-3 rounded-lg shadow-sm">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-secondary-soft">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="text-muted mb-1">Total Tasks</h6>
+                            <h3 class="mb-0" id="totalTasks">0</h3>
+                        </div>
+                    </div>
+                    <div class="progress mt-3" style="height: 4px;">
+                        <div class="progress-bar bg-secondary" style="width: 90%"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Section -->
+    <!-- Project Progress & Task Distribution -->
     <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="chart-card bg-white p-4 rounded-lg shadow-sm">
-                <h5 class="mb-4">Project Progress Overview</h5>
-                <canvas id="projectProgressChart"></canvas>
+        <div class="col-md-7" id="progressChartContainer" style="display: none;">
+            <div class="chart-card p-4 rounded-lg shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Project Progress</h5>
+                </div>
+                <div class="chart-container" style="position: relative; height: 300px;">
+                    <canvas id="projectProgressChart"></canvas>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="chart-card bg-white p-4 rounded-lg shadow-sm">
-                <h5 class="mb-4">Task Distribution</h5>
-                <canvas id="taskDistributionChart"></canvas>
+        <div class="col-md-5" id="taskDistributionContainer">
+            <div class="chart-card p-4 rounded-lg shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">Task Distribution</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary active" data-view="status">By Status</button>
+                        <button type="button" class="btn btn-outline-secondary" data-view="priority">By Priority</button>
+                    </div>
+                </div>
+                <div class="task-distribution-container">
+                    <canvas id="taskDistributionChart" height="300"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Team Performance -->
-    <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+    <div class="performance-card p-4 rounded-lg shadow-sm mb-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="mb-0">Team Performance</h5>
             <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportTeamData('csv')">
-                    Export CSV
+                    <i class="fas fa-file-csv me-2"></i> Export CSV
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportTeamData('pdf')">
-                    Export PDF
+                    <i class="fas fa-file-pdf me-2"></i> Export PDF
                 </button>
             </div>
         </div>
@@ -128,7 +216,7 @@
             <table class="table table-hover align-middle" id="teamPerformanceTable">
                 <thead>
                     <tr>
-                        <th>Member</th>
+                        <th>Team Member</th>
                         <th>Tasks Completed</th>
                         <th>Working Hours</th>
                         <th style="width: 25%">Productivity Score</th>
@@ -142,11 +230,6 @@
         </div>
     </div>
 </div>
-
-@section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/Reports/Index.css" />
-}
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

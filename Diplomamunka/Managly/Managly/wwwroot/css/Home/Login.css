@@ -1,14 +1,4 @@
-﻿@keyframes float {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-30px) rotate(10deg);
-    }
-}
-
-body {
+﻿body {
     background-color: #121212;
     color: #ffffff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -211,4 +201,14 @@ body {
     bottom: -125px;
     right: 20%;
     animation-delay: 6s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-30px) rotate(10deg);
+    }
 }

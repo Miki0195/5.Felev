@@ -30,13 +30,13 @@
 
             <form asp-action="Login" method="post">
                 <div class="form-floating">
-                    <input asp-for="Email" class="form-control" id="email" placeholder=" " value="@Model?.Email">
+                    <input asp-for="Email" class="form-control" id="email" placeholder=" ">
                     <label for="email">Email address</label>
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="form-floating password-container">
-                    <input asp-for="Password" type="password" class="form-control" id="password" placeholder=" " value="@Model?.Password">
+                    <input asp-for="Password" type="password" class="form-control" id="password" placeholder=" ">
                     <label for="password">Password</label>
                     <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggleIcon')">
                         <i id="toggleIcon" class="fas fa-eye"></i>

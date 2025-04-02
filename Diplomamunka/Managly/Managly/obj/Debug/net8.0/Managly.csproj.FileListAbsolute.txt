@@ -144,3 +144,12 @@
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/Managly.pdb
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/Managly.genruntimeconfig.cache
 /Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/obj/Debug/net8.0/ref/Managly.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/bin/Debug/net8.0/Microsoft.Bcl.Memory.dll
