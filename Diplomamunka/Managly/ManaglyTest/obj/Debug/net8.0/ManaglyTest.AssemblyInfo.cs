@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ManaglyTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+689d4d9e25c260997645b799daee322e1e7f5bd5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8ae861cbf0cc0d948124154317758876422e2bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ManaglyTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ManaglyTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

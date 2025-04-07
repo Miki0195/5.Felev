@@ -6,6 +6,9 @@ let currentCharts = {
 // Bootstrap toast instances container
 let toastInstances = [];
 
+// Track current task distribution view mode
+let currentTaskView = 'status';
+
 document.addEventListener('DOMContentLoaded', function() {
     try {
     initializeFilters();
@@ -254,8 +257,13 @@ async function loadReportData() {
         // Show/hide UI elements based on filters
         updateUIVisibility(isProjectSelected);
         
+        // Update quick stats using the task distribution by status
         updateQuickStats(projectMetrics, taskDistribution, isProjectSelected, dateRange);
-        updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected, dateRange);
+        
+        // Update charts (will internally call updateTaskDistributionView)
+        updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRange);
+        
+        // Update team performance table
         updateTeamPerformance(userProductivity);
     } catch (error) {
         console.error('Error loading report data:', error);
@@ -295,8 +303,8 @@ async function loadReportData() {
                 </td>
             </tr>
         `;
+        }
     }
-}
     }
 }
 
@@ -579,7 +587,7 @@ function updateQuickStats(projectMetrics, taskDistribution, isProjectSelected, d
     }
 }
 
-function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjectSelected, dateRange) {
+function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRange) {
     try {
         // Get date range label for display
         let dateLabel = '';
@@ -592,13 +600,9 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
         }
         
         // Destroy existing charts to prevent inconsistencies
-    if (currentCharts.projectProgress) {
-        currentCharts.projectProgress.destroy();
+        if (currentCharts.projectProgress) {
+            currentCharts.projectProgress.destroy();
             currentCharts.projectProgress = null;
-    }
-    if (currentCharts.taskDistribution) {
-        currentCharts.taskDistribution.destroy();
-            currentCharts.taskDistribution = null;
         }
 
         // Project Progress Chart (only if a project is selected)
@@ -647,11 +651,11 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
             }
             
             // Create the chart with clear defaults
-    currentCharts.projectProgress = new Chart(progressCtx, {
+            currentCharts.projectProgress = new Chart(progressCtx, {
                 type: 'line',
-        data: {
+                data: {
                     labels: dateLabels,
-            datasets: [{
+                    datasets: [{
                         label: "Cumulative Progress",
                         data: progressData,
                         lineTension: 0.3,
@@ -666,10 +670,10 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                         pointHitRadius: 10,
                         pointBorderWidth: 2,
                         fill: true
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
                     layout: {
                         padding: {
                             left: 10,
@@ -678,7 +682,7 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                             bottom: 0
                         }
                     },
-            scales: {
+                    scales: {
                         x: {
                             grid: {
                                 display: false,
@@ -700,7 +704,7 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                         y: {
                             ticks: {
                                 color: "#64748b",
-                    beginAtZero: true,
+                                beginAtZero: true,
                                 max: 100,
                                 callback: function(value) {
                                     return value + '%';
@@ -756,94 +760,203 @@ function updateCharts(projectMetrics, taskDistribution, completedTasks, isProjec
                                     return [`Progress: ${context.raw}%`];
                                 }
                             }
+                        }
+                    }
                 }
-            }
-        }
-    });
+            });
         } else if (isProjectSelected) {
             console.warn("Project Progress chart canvas not found, but a project is selected");
         }
 
-        // Task Distribution Chart (always displayed)
-        const distributionCanvas = document.getElementById('taskDistributionChart');
-        if (!distributionCanvas) return;
-        
-        const distributionCtx = distributionCanvas.getContext('2d');
-        if (!distributionCtx) return;
-        
-        // Update chart title with date range
-        const distributionChartTitle = document.querySelector('#taskDistributionContainer h5');
-        if (distributionChartTitle) {
-            distributionChartTitle.innerHTML = `Task Distribution <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
-        }
-        
-        // Map status to a named color to ensure consistency
-        const getStatusColor = (status) => {
-            const statusColors = {
-                'Completed': '#10b981',   // Green
-                'In Progress': '#f59e0b', // Amber
-                'Pending': '#3b82f6',     // Blue
-                'Not Started': '#3b82f6', // Blue (same as Pending)
-                'Overdue': '#ef4444'      // Red
-            };
-            return statusColors[status] || '#64748b'; // Default gray for unknown status
-        };
-        
-        // Prepare data and colors
-        const labels = taskDistribution.map(t => t.status);
-        const data = taskDistribution.map(t => t.count);
-        const backgroundColors = taskDistribution.map(t => getStatusColor(t.status));
-        
-    currentCharts.taskDistribution = new Chart(distributionCtx, {
-        type: 'doughnut',
-        data: {
-                labels: labels,
-            datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 0,
-                    hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    duration: 1000 // Consistent animation duration
-                }
-            }
-        });
+        // Update the task distribution chart
+        updateTaskDistributionView(currentTaskView);
     } catch (error) {
         console.error("Error updating charts:", error);
         showToast("Error updating charts", "error");
     }
 }
 
-function updateTaskDistributionView(view) {
+async function updateTaskDistributionView(view) {
     try {
         // This function would update the task distribution chart based on status or priority
-        // Will need backend support to provide data by priority
         console.log(`Changing task distribution view to: ${view}`);
         
-        // For now, just show a toast since the backend might not support this yet
-        if (view === 'priority') {
-            showToast('Priority view coming soon!', 'info');
+        // Get current filters
+        const projectFilter = document.getElementById('projectFilter');
+        const projectId = projectFilter?.value;
+        
+        // Save the current view for future reference
+        currentTaskView = view;
+        
+        // If no chart canvas exists, return early
+        const distributionCanvas = document.getElementById('taskDistributionChart');
+        if (!distributionCanvas) return;
+        
+        // Determine which endpoint to use based on view type
+        const endpoint = view === 'priority' 
+            ? '/api/reports/task-distribution-by-priority'
+            : '/api/reports/task-distribution';
+            
+        // Build query params
+        let queryParams = new URLSearchParams();
+        if (projectId) {
+            queryParams.append('projectId', projectId);
+        }
+        
+        try {
+            // Show loading state
+            const container = document.querySelector('.task-distribution-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Fetch the distribution data
+            const response = await fetch(`${endpoint}?${queryParams}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${view} distribution: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Recreate canvas (to avoid any lingering issues with the previous chart)
+            if (container) {
+                container.innerHTML = '<canvas id="taskDistributionChart" height="300"></canvas>';
+            }
+            
+            // Get the date range for labeling
+            const dateRangeFilter = document.getElementById('dateRangeFilter');
+            const dateRange = dateRangeFilter ? dateRangeFilter.value : '30';
+            let dateLabel = '';
+            if (dateRange === 'all') {
+                dateLabel = 'All Time';
+            } else if (dateRange === 'custom') {
+                dateLabel = 'Custom Range';
+            } else {
+                dateLabel = `Last ${dateRange} days`;
+            }
+            
+            // Update chart title with date range
+            const distributionChartTitle = document.querySelector('#taskDistributionContainer h5');
+            if (distributionChartTitle) {
+                distributionChartTitle.innerHTML = `Task Distribution <small class="text-muted fs-6 fw-normal">(${dateLabel})</small>`;
+            }
+            
+            // Get the new canvas context
+            const newCanvas = document.getElementById('taskDistributionChart');
+            if (!newCanvas) return;
+            
+            const ctx = newCanvas.getContext('2d');
+            if (!ctx) return;
+            
+            // Destroy existing chart if it exists
+            if (currentCharts.taskDistribution) {
+                currentCharts.taskDistribution.destroy();
+                currentCharts.taskDistribution = null;
+            }
+            
+            // Determine colors and labels based on the view type
+            let labels, values, backgroundColors;
+            
+            if (view === 'priority') {
+                // Map priority to a named color to ensure consistency
+                const getPriorityColor = (priority) => {
+                    const priorityColors = {
+                        'Low': '#20c997',      // Teal
+                        'Medium': '#fd7e14',   // Orange
+                        'High': '#dc3545',     // Red
+                        'Urgent': '#6610f2'    // Purple
+                    };
+                    return priorityColors[priority] || '#64748b'; // Default gray for unknown priority
+                };
+                
+                labels = data.map(item => item.priority);
+                values = data.map(item => item.count);
+                backgroundColors = data.map(item => getPriorityColor(item.priority));
+            } else {
+                // Map status to a named color to ensure consistency
+                const getStatusColor = (status) => {
+                    const statusColors = {
+                        'Completed': '#10b981',   // Green
+                        'In Progress': '#f59e0b', // Amber
+                        'Pending': '#3b82f6',     // Blue
+                        'Not Started': '#3b82f6', // Blue (same as Pending)
+                        'Overdue': '#ef4444'      // Red
+                    };
+                    return statusColors[status] || '#64748b'; // Default gray for unknown status
+                };
+                
+                labels = data.map(item => item.status);
+                values = data.map(item => item.count);
+                backgroundColors = data.map(item => getStatusColor(item.status));
+            }
+            
+            // Create a new chart
+            currentCharts.taskDistribution = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: view === 'priority' ? 'Tasks by Priority' : 'Tasks by Status',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000 // Consistent animation duration
+                    }
+                }
+            });
+        } catch (error) {
+            console.error(`Error fetching ${view} distribution:`, error);
+            showToast(`Failed to load task distribution by ${view}: ${error.message}`, 'error');
+            
+            // Revert to the previous view
+            const buttons = document.querySelectorAll('.btn-group [data-view]');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.view === 'status') {
+                    btn.classList.add('active');
+                }
+            });
         }
     } catch (error) {
         console.error("Error updating task distribution view:", error);
+        showToast(`Error updating chart view: ${error.message}`, 'error');
     }
 }
 
@@ -931,34 +1044,118 @@ function exportTeamData(format) {
             showToast('No data to export', 'warning');
             return;
         }
-        
+    
         if (format === 'csv') {
             let csv = 'Team Member,Tasks Completed,Working Hours,Productivity Score\n';
         
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
                 if (cells.length < 4) return;
                 
                 const nameEl = cells[0].querySelector('.fw-bold');
                 const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
                 
-            const tasksCompleted = cells[1].textContent.trim();
-            const hours = cells[2].textContent.trim();
+                const tasksCompleted = cells[1].textContent.trim();
+                const hours = cells[2].textContent.trim();
                 
                 const productivityEl = cells[3].querySelector('span:last-child');
                 const productivity = productivityEl ? productivityEl.textContent.trim() : '0%';
             
                 csv += `"${name}",${tasksCompleted},${hours},${productivity}\n`;
-        });
+            });
         
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
             a.download = `team-performance-${projectName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-    } else if (format === 'pdf') {
-        showToast('PDF export coming soon', 'info');
+            a.click();
+        } else if (format === 'pdf') {
+            // Get the jsPDF instance
+            const { jsPDF } = window.jspdf;
+            if (!jsPDF) {
+                showToast('PDF library not loaded. Please check your internet connection and try again.', 'error');
+                return;
+            }
+            
+            // Create a new PDF document
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            const dateRangeFilter = document.getElementById('dateRangeFilter');
+            const dateRange = dateRangeFilter?.value || '30';
+            let dateLabel = '';
+            if (dateRange === 'all') {
+                dateLabel = 'All Time';
+            } else if (dateRange === 'custom') {
+                const fromDate = document.getElementById('customDateFrom')?.value;
+                const toDate = document.getElementById('customDateTo')?.value;
+                if (fromDate && toDate) {
+                    dateLabel = `${fromDate} to ${toDate}`;
+                } else {
+                    dateLabel = 'Custom Range';
+                }
+            } else {
+                dateLabel = `Last ${dateRange} days`;
+            }
+            
+            // Add title
+            const title = `Team Performance Report - ${projectName}`;
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text(title, 14, 22);
+            
+            // Add date range
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Date Range: ${dateLabel}`, 14, 30);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 36);
+
+            // Create table data
+            const tableColumn = ["Team Member", "Tasks Completed", "Working Hours", "Productivity Score"];
+            const tableRows = [];
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 4) return;
+                
+                const nameEl = cells[0].querySelector('.fw-bold');
+                const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
+                
+                const tasksCompleted = cells[1].textContent.trim();
+                const hours = cells[2].textContent.trim();
+                
+                const productivityEl = cells[3].querySelector('span:last-child');
+                const productivity = productivityEl ? productivityEl.textContent.trim() : '0%';
+                
+                tableRows.push([name, tasksCompleted, hours, productivity]);
+            });
+            
+            // Add table to document
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 45,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [59, 130, 246],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 247, 255]
+                },
+                margin: { top: 45 }
+            });
+            
+            // Save PDF
+            const filename = `team-performance-${projectName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(filename);
+            
+            showToast('PDF exported successfully', 'success');
         }
     } catch (error) {
         console.error("Error exporting team data:", error);

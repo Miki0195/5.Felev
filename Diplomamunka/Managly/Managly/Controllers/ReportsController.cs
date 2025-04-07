@@ -232,5 +232,31 @@ namespace Managly.Controllers
                 return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
             }
         }
+
+        [HttpGet("api/reports/task-distribution-by-priority")]
+        public async Task<IActionResult> GetTaskDistributionByPriority([FromQuery] int? projectId)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var query = _context.Tasks
+                    .Include(t => t.Project)
+                    .Where(t => t.Project.CompanyId == currentUser.CompanyId);
+
+                if (projectId.HasValue)
+                    query = query.Where(t => t.ProjectId == projectId);
+
+                var distribution = await query
+                    .GroupBy(t => t.Priority ?? "Unknown")
+                    .Select(g => new { Priority = g.Key, Count = g.Count() })
+                    .ToListAsync();
+
+                return Ok(distribution);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
+        }
     }
 }
