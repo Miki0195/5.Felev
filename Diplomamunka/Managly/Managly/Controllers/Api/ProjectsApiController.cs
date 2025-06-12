@@ -1810,7 +1810,6 @@ namespace Managly.Controllers.Api
             }
         }
 
-        // ===================== OWN CODE ================ //
         [HttpGet("sidebar")]
         public async Task<IActionResult> GetProjectsForSidebar()
         {
@@ -1853,15 +1852,6 @@ namespace Managly.Controllers.Api
             }
         }
 
-        /// <summary>
-        /// Helper method to get the total number of tasks based on various filters
-        /// </summary>
-        /// <param name="companyId">The company ID to filter tasks</param>
-        /// <param name="projectId">Optional project ID filter</param>
-        /// <param name="startDate">Optional start date filter</param>
-        /// <param name="endDate">Optional end date filter</param>
-        /// <param name="status">Optional status filter</param>
-        /// <returns>Total number of tasks matching the criteria</returns>
         private async Task<int> GetTotalTasksCountAsync(int companyId, int? projectId = null,
             DateTime? startDate = null, DateTime? endDate = null, string status = null)
         {

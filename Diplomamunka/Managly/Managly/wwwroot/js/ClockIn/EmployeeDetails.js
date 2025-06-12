@@ -143,8 +143,8 @@ function renderWeeklySummary(weeklySummary) {
                 </div>
                 
                 <div class="weekly-card-body">
-                    <div class="donut-chart-container ${statusClass}" style="--percentage: ${completionPercentage}">
-                        <div class="donut-chart">
+                    <div class="donut-chart-container">
+                        <div class="donut-chart" style="--percentage: ${completionPercentage}">
                             <div class="donut-center">
                                 <div class="donut-hours">${week.totalHours}h</div>
                                 <div class="donut-target">of 40h</div>
@@ -170,6 +170,10 @@ function renderWeeklySummary(weeklySummary) {
                     </div>
                 </div>
             `;
+
+        // Apply the status class to the donut-chart-container separately
+        const donutContainer = weekCard.querySelector('.donut-chart-container');
+        donutContainer.classList.add(statusClass);
 
         summaryContainer.appendChild(weekCard);
     });

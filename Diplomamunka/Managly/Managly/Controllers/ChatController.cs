@@ -107,12 +107,12 @@ namespace Managly.Controllers
                 .OrderBy(m => m.Timestamp)
                 .Select(m => new
                 {
-                    m.Id,
-                    Content = m.IsDeleted ? "Deleted message" : m.Content,
-                    m.SenderId,
-                    m.Timestamp,
-                    m.IsDeleted,
-                    SenderProfilePicture = _context.Users
+                    id = m.Id,
+                    content = m.IsDeleted ? "Deleted message" : m.Content,
+                    senderId = m.SenderId,
+                    timestamp = m.Timestamp,
+                    isDeleted = m.IsDeleted,
+                    senderProfilePicture = _context.Users
                 .Where(u => u.Id == m.SenderId)
                 .Select(u => u.ProfilePicturePath)
                 .FirstOrDefault()
@@ -130,21 +130,51 @@ namespace Managly.Controllers
             {
                 if (jsonData.ValueKind == JsonValueKind.Undefined || jsonData.ValueKind == JsonValueKind.Null)
                 {
-                    return BadRequest(new { error = "Request body is missing." });
+                    return BadRequest(new { success = false, error = "Request body is missing." });
                 }
 
-                string senderId = jsonData.GetProperty("SenderId").GetString();
-                string receiverId = jsonData.GetProperty("ReceiverId").GetString();
-                string content = jsonData.GetProperty("Content").GetString();
+                // Try to get properties with both camelCase and PascalCase
+                string senderId = null;
+                string receiverId = null;
+                string content = null;
+
+                // Check for camelCase properties first (modern JSON convention)
+                if (jsonData.TryGetProperty("senderId", out var senderIdElement))
+                {
+                    senderId = senderIdElement.GetString();
+                }
+                // Fallback to PascalCase
+                else if (jsonData.TryGetProperty("SenderId", out senderIdElement))
+                {
+                    senderId = senderIdElement.GetString();
+                }
+
+                if (jsonData.TryGetProperty("receiverId", out var receiverIdElement))
+                {
+                    receiverId = receiverIdElement.GetString();
+                }
+                else if (jsonData.TryGetProperty("ReceiverId", out receiverIdElement))
+                {
+                    receiverId = receiverIdElement.GetString();
+                }
+
+                if (jsonData.TryGetProperty("content", out var contentElement))
+                {
+                    content = contentElement.GetString();
+                }
+                else if (jsonData.TryGetProperty("Content", out contentElement))
+                {
+                    content = contentElement.GetString();
+                }
 
                 if (string.IsNullOrWhiteSpace(senderId) || string.IsNullOrWhiteSpace(receiverId))
                 {
-                    return BadRequest(new { error = "SenderId and ReceiverId are required." });
+                    return BadRequest(new { success = false, error = "SenderId and ReceiverId are required." });
                 }
 
                 if (string.IsNullOrWhiteSpace(content))
                 {
-                    return BadRequest(new { error = "Message content cannot be empty." });
+                    return BadRequest(new { success = false, error = "Message content cannot be empty." });
                 }
 
                 var message = new Message
@@ -158,21 +188,22 @@ namespace Managly.Controllers
                 _context.Messages.Add(message);
                 await _context.SaveChangesAsync();
 
-                //await chatHub.Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, content);
-
-                //return Ok(new { success = true, message = "Message saved successfully" });
                 await chatHub.Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, content, message.Id);
 
-            // ✅ Return the message ID to the frontend
-            return Ok(new { success = true, message = "Message saved successfully", messageId = message.Id });
-                }
+                // Return the message ID in a consistent format
+                return Ok(new { 
+                    success = true, 
+                    message = "Message saved successfully", 
+                    messageId = message.Id 
+                });
+            }
             catch (KeyNotFoundException)
             {
-                return BadRequest(new { error = "Invalid JSON structure: Missing required properties." });
+                return BadRequest(new { success = false, error = "Invalid JSON structure: Missing required properties." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = $"Internal server error: {ex.Message}" });
+                return StatusCode(500, new { success = false, error = $"Internal server error: {ex.Message}" });
             }
         }
 
@@ -186,40 +217,85 @@ namespace Managly.Controllers
                 return Unauthorized();
             }
 
-            var chatUserIds = await _context.Messages
-                .Where(m => m.SenderId == userId || m.ReceiverId == userId)
-                .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
-                .Distinct()
-                .ToListAsync();
+            try
+            {
+                // Step 1: Get all distinct user IDs that the current user has chatted with
+                var chatUserIds = await _context.Messages
+                    .Where(m => m.SenderId == userId || m.ReceiverId == userId)
+                    .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
+                    .Distinct()
+                    .ToListAsync();
 
-            var usersWithLastMessage = await _context.Users
-                .Where(u => chatUserIds.Contains(u.Id))
-                .Select(u => new
+                // Step 2: Get basic information about these users
+                var chatUsers = await _context.Users
+                    .Where(u => chatUserIds.Contains(u.Id))
+                    .Select(u => new
+                    {
+                        u.Id,
+                        u.Name,
+                        u.LastName,
+                        u.ProfilePicturePath
+                    })
+                    .ToListAsync();
+
+                // Step 3: For each user, get the unread count
+                var unreadCounts = await _context.Messages
+                    .Where(m => m.ReceiverId == userId && !m.IsRead)
+                    .GroupBy(m => m.SenderId)
+                    .Select(g => new
+                    {
+                        SenderId = g.Key,
+                        Count = g.Count()
+                    })
+                    .ToDictionaryAsync(x => x.SenderId, x => x.Count);
+
+                // Step 4: Build result with all needed information
+                var result = new List<object>();
+                
+                foreach (var user in chatUsers)
                 {
-                    u.Id,
-                    FullName = u.Name + " " + u.LastName,
-                    ProfilePicturePath = u.ProfilePicturePath ?? "",
-                    IsOnline = _chatHub.IsUserOnline(u.Id),
-                    LastMessage = _context.Messages
-                        .Where(m => (m.SenderId == userId && m.ReceiverId == u.Id) ||
-                                    (m.SenderId == u.Id && m.ReceiverId == userId))
+                    // Step 5: Get the most recent message for this user pair
+                    var lastMessage = await _context.Messages
+                        .Where(m => (m.SenderId == userId && m.ReceiverId == user.Id) ||
+                                     (m.SenderId == user.Id && m.ReceiverId == userId))
                         .OrderByDescending(m => m.Timestamp)
                         .Select(m => new
                         {
-                            Content = m.IsDeleted ? "Deleted message" : m.Content,
-                            IsFromUser = m.SenderId == userId,
-                            IsDeleted = m.IsDeleted,
-                            IsRead = m.IsRead,
-                            Timestamp = m.Timestamp
+                            content = m.IsDeleted ? "Deleted message" : m.Content,
+                            isFromUser = m.SenderId == userId,
+                            isDeleted = m.IsDeleted,
+                            isRead = m.IsRead,
+                            timestamp = m.Timestamp
                         })
-                        .FirstOrDefault(),
-                    UnreadCount = _context.Messages
-                        .Count(m => m.SenderId == u.Id && m.ReceiverId == userId && !m.IsRead)
-                })
-                .OrderByDescending(u => u.LastMessage != null ? u.LastMessage.Timestamp : DateTime.MinValue)
-                .ToListAsync();
+                        .FirstOrDefaultAsync();
 
-            return Ok(usersWithLastMessage);
+                    // Add complete user info to result
+                    result.Add(new
+                    {
+                        id = user.Id,
+                        fullName = user.Name + " " + user.LastName,
+                        profilePicturePath = user.ProfilePicturePath ?? "/images/default/default-profile.png",
+                        isOnline = _chatHub.IsUserOnline(user.Id),
+                        lastMessage = lastMessage,
+                        unreadCount = unreadCounts.ContainsKey(user.Id) ? unreadCounts[user.Id] : 0
+                    });
+                }
+
+                // Sort by last message timestamp
+                result = result
+                    .OrderByDescending(u => {
+                        var lastMessage = u.GetType().GetProperty("lastMessage").GetValue(u, null);
+                        if (lastMessage == null) return DateTime.MinValue;
+                        return (DateTime)lastMessage.GetType().GetProperty("timestamp").GetValue(lastMessage, null);
+                    })
+                    .ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
         }
 
         [HttpPost("mark-as-read/{senderId}")]
@@ -251,10 +327,10 @@ namespace Managly.Controllers
             var user = await _context.Users
                 .Where(u => u.Id == userId)
                 .Select(u => new { 
-                    u.Id, 
-                    FullName = u.Name + " " + u.LastName, 
-                    u.ProfilePicturePath,
-                    IsOnline = _chatHub.IsUserOnline(userId)
+                    id = u.Id, 
+                    fullName = u.Name + " " + u.LastName, 
+                    profilePicturePath = u.ProfilePicturePath,
+                    isOnline = _chatHub.IsUserOnline(userId)
                 })
                 .FirstOrDefaultAsync();
 

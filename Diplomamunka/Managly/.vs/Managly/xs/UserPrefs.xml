@@ -1,46 +1,98 @@
 ﻿<Properties StartupConfiguration="{E04E5547-FD09-490D-B102-55B6442A62E8}|https">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.ManaglyTest PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Controllers/ReportsController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Managly/Controllers/DashboardController.cs">
     <Files>
-      <File FileName="Managly/Controllers/Api/ProjectsApiController.cs" />
+      <File FileName="Managly/Controllers/Api/ProjectsApiController.cs" Line="1812" Column="1" />
       <File FileName="Managly/Models/Enums/NotificationType.cs" />
       <File FileName="Managly/Controllers/VideoConferenceController.cs" />
-      <File FileName="Managly/Controllers/ProjectsController.cs" />
-      <File FileName="Managly/wwwroot/js/site.js" />
-      <File FileName="Managly/Hubs/ChatHub.cs" />
-      <File FileName="Managly/Hubs/VideoCallHub.cs" />
+      <File FileName="Managly/Controllers/ProjectsController.cs" Line="85" Column="1" />
+      <File FileName="Managly/wwwroot/js/site.js" Line="1" Column="1" />
+      <File FileName="Managly/Hubs/ChatHub.cs" Line="34" Column="14" />
+      <File FileName="Managly/Hubs/VideoCallHub.cs" Line="1" Column="1" />
       <File FileName="Managly/Views/Home/Index.cshtml" />
       <File FileName="Managly/Views/Home/Privacy.cshtml" />
       <File FileName="Managly/Views/Home/Register.cshtml" />
-      <File FileName="Managly/Controllers/ClockInController.cs" />
-      <File FileName="Managly/Controllers/ScheduleController.cs" />
+      <File FileName="Managly/Controllers/ClockInController.cs" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/ScheduleController.cs" Line="1" Column="1" />
       <File FileName="ManaglyTest/Controllers/ScheduleControllerTests.cs" />
       <File FileName="ManaglyTest/Controllers/ScheduleControllerEdgeCaseTests.cs" />
       <File FileName="ManaglyTest/Controllers/ScheduleControllerAuthorizationTests.cs" />
-      <File FileName="Managly/Data/ApplicationDbContext.cs" />
+      <File FileName="Managly/Data/ApplicationDbContext.cs" Line="1" Column="1" />
       <File FileName="ManaglyTest/Helpers/TestDbContextFactory.cs" />
       <File FileName="ManaglyTest/Controllers/ProjectsControllerTests.cs" />
       <File FileName="Managly/Models/ProjectMemberManagementViewModel.cs" />
       <File FileName="Managly/Models/ProjectViewModels.cs" />
-      <File FileName="Managly/Controllers/ReportsController.cs" Line="376" Column="55" />
+      <File FileName="Managly/Controllers/ReportsController.cs" Line="71" Column="1" />
       <File FileName="Managly/wwwroot/js/Reports/Index.js" />
+      <File FileName="Managly/Authorization/PreGeneratedPasswordHandler.cs" Line="1" Column="1" />
+      <File FileName="Managly/Authorization/PreGeneratedPasswordRequirement.cs" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/AccountController.cs" Line="14" Column="16" />
+      <File FileName="ManaglyTest/Controllers/AdminControllerTests.cs" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Controllers/ReportsControllerTests.cs" Line="1" Column="1" />
+      <File FileName="Managly/Data/SeedData.cs" Line="12" Column="10" />
+      <File FileName="Managly/Program.cs" Line="46" Column="8" />
+      <File FileName="Managly/wwwroot/css/Home/Register.css" />
+      <File FileName="Managly/wwwroot/css/Home/Login.css" />
+      <File FileName="Managly/Views/Schedule/MergedSchedule.cshtml" />
+      <File FileName="Managly/wwwroot/js/Schedule/MergedSchedule.js" Line="1" Column="1" />
+      <File FileName="Managly/Controllers/AdminController.cs" Line="101" Column="1" />
+      <File FileName="Managly/appsettings.json" Line="18" Column="36" />
+      <File FileName="Managly/wwwroot/js/Chat/chat.js" Line="937" Column="53" />
+      <File FileName="Managly/Controllers/ChatController.cs" Line="228" Column="1" />
+      <File FileName="Managly/Views/Chat/Index.cshtml" Line="177" Column="104" />
+      <File FileName="Managly/Views/ClockIn/EmployeeDetails.cshtml" Line="131" Column="1" />
+      <File FileName="Managly/wwwroot/js/ClockIn/EmployeeDetails.js" Line="146" Column="54" />
+      <File FileName="Managly/wwwroot/css/ClockIn/Index.css" Line="419" Column="22" />
+      <File FileName="Managly/Controllers/HomeController.cs" Line="62" Column="1" />
+      <File FileName="Managly/Controllers/DashboardController.cs" Line="224" Column="1" />
+      <File FileName="Managly/Controllers/NotificationController.cs" Line="79" Column="1" />
+      <File FileName="Managly/Controllers/OwnerController.cs" Line="55" Column="43" />
+      <File FileName="ManaglyTest/Controllers/AccountControllerTests.cs" Line="296" Column="10" />
+      <File FileName="ManaglyTest/Controllers/ChatControllerTests.cs" Line="758" Column="1" />
+      <File FileName="ManaglyTest/Controllers/DashboardControllerTests.cs" Line="273" Column="10" />
+      <File FileName="Managly/wwwroot/js/ClockIn/ClockIn.js" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/Account/AccessDenied.css" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/Account/ChangePassword.css" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/Account/Profile.css" Line="207" Column="33" />
+      <File FileName="Managly/wwwroot/css/Admin/CreateProfile.css" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/Admin/UserManagement.css" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/js/Projects/Index.js" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/js/Schedule/Manage.js" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/js/Schedule/ViewSchedule.js" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/owner-dashboard.css" Line="1" Column="1" />
+      <File FileName="Managly/Views/ClockIn/Index.cshtml" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/css/Chat/Index.css" Line="1" Column="1" />
+      <File FileName="ManaglyTest/Controllers/ClockInControllerTests.cs" Line="1" Column="1" />
+      <File FileName="Managly/wwwroot/js/VideoConference/VideoConference.js" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Managly" expanded="True">
             <Node name="Managly">
-              <Node name="Controllers" expanded="True">
+              <Node name="Authorization" expanded="True" />
+              <Node name="Controllers">
                 <Node name="Api" expanded="True" />
-                <Node name="ReportsController.cs" selected="True" />
+                <Node name="DashboardController.cs" selected="True" />
               </Node>
-              <Node name="wwwroot" expanded="True">
-                <Node name="js" expanded="True">
-                  <Node name="Reports" expanded="True" />
+              <Node name="Views" expanded="True">
+                <Node name="Chat" expanded="True" />
+                <Node name="ClockIn" expanded="True" />
+              </Node>
+              <Node name="wwwroot">
+                <Node name="css">
+                  <Node name="Account" expanded="True" />
+                  <Node name="Chat" expanded="True" />
                 </Node>
+                <Node name="js" expanded="True">
+                  <Node name="Projects" expanded="True" />
+                  <Node name="Schedule" expanded="True" />
+                  <Node name="VideoConference" expanded="True" />
+                </Node>
+                <Node name="uploads" expanded="True" />
               </Node>
             </Node>
           </Node>
@@ -48,9 +100,9 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <Debugger.DebugSourceFolders />
-  <MonoDevelop.Ide.ItemProperties.ManaglyTest PreferredExecutionTarget="MonoDevelop.Default" />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Managly PreferredExecutionTarget="/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app" />
 </Properties>

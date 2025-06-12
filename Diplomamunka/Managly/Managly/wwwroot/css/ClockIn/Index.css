@@ -416,19 +416,26 @@ h3 {
     height: 140px;
     margin: 0 auto;
     font-family: sans-serif;
+    background: white;
 }
 
 .donut-chart {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: conic-gradient( var(--chart-color) calc(var(--percentage) * 1%), #f1f1f1 0 );
+    background: conic-gradient(var(--chart-color) calc(var(--percentage) * 1%), #f1f1f1 0);
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
+/* Define default chart color */
+.donut-chart {
+    --chart-color: #f1f1f1;
+}
+
+/* Apply status colors only to the chart itself */
 .status-low .donut-chart {
     --chart-color: #FB8C00;
 }

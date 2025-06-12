@@ -69,7 +69,6 @@ namespace Managly.Controllers
                 if (projectId.HasValue)
                     query = query.Where(p => p.Id == projectId);
 
-                // ✅ Apply single Status filter (Ensure it does not break if empty)
                 if (!string.IsNullOrEmpty(status) && status != "all" && status != "none")
                     query = query.Where(p => p.Status == status);
 
@@ -110,11 +109,6 @@ namespace Managly.Controllers
                 });
             }
         }
-
-
-
-
-
 
         [HttpGet("api/reports/user-productivity")]
         public async Task<IActionResult> GetUserProductivity(

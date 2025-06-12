@@ -2,10 +2,11 @@
 using Managly.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Managly.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Managly.Hubs;
+using System.Security.Cryptography.X509Certificates;
+using System.Net;
 
 namespace Managly;
 
@@ -15,11 +16,38 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        var urls = builder.Configuration["Urls"];
+        if (string.IsNullOrEmpty(urls))
+        {
+            // Get ports from environment variables or use defaults
+            var httpPort = Environment.GetEnvironmentVariable("HTTP_PORT") ?? "5050";
+            var httpsPort = Environment.GetEnvironmentVariable("HTTPS_PORT") ?? "5051";
+
+            // Set URLs configuration
+            builder.Configuration["Urls"] = $"http://*:{httpPort};https://*:{httpsPort}";
+        }
+
+        // Use the configured URLs
+        builder.WebHost.UseUrls(builder.Configuration["Urls"].Split(';'));
+
+        // Configure Kestrel with your certificate
+        builder.WebHost.ConfigureKestrel(serverOptions =>
+        {
+            // Load certificate
+            var cert = X509Certificate2.CreateFromPemFile("localhost.crt", "localhost.key");
+
+            // Apply HTTPS configuration
+            serverOptions.ConfigureHttpsDefaults(httpsOptions =>
+            {
+                httpsOptions.ServerCertificate = cert;
+            });
+        });
+
         // Adatbázis kapcsolat hozzáadása
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(
                 builder.Configuration.GetConnectionString("DefaultConnection"),
-                new MySqlServerVersion(new Version(9, 2, 0)) // Add meg az aktuális MySQL verziódat
+                new MySqlServerVersion(new Version(8, 0, 0)) // Changed to 8.0.0 for better compatibility
             ));
 
         // Add services to the container.
@@ -30,47 +58,30 @@ public class Program
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
         {
-            options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
-            options.Cookie.HttpOnly = true; // Secure cookie
-            options.Cookie.IsEssential = true; // Ensure session works even without user consent
+            options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
         });
 
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.Cookie.HttpOnly = true; // Prevent JavaScript access
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Ensure cookies are only sent over HTTPS
-            options.ExpireTimeSpan = TimeSpan.FromDays(30); // ✅ Persistent login for 30 days
-            options.SlidingExpiration = true; // Reset expiration time on activity
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            options.SlidingExpiration = true;
+            options.LoginPath = "/Home/Login";
+            options.AccessDeniedPath = "/Account/AccessDenied";
         });
 
-        //builder.Services.AddCors(options =>
-        //{
-        //    options.AddPolicy("AllowAll",
-        //        builder => builder.AllowAnyOrigin()
-        //                          .AllowAnyMethod()
-        //                          .AllowAnyHeader());
-        //});
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("CorsPolicy",
                 builder => builder
-                    .WithOrigins("https://192.168.0.189:7221", "https://localhost:7221") // Add your actual frontend URLs
+                    .SetIsOriginAllowed(_ => true) // In development, allow any origin
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
         });
-
-        //builder.WebHost.ConfigureKestrel(serverOptions =>
-        //{
-        //    serverOptions.ListenAnyIP(7221, listenOptions =>
-        //    {
-        //        listenOptions.UseHttps("/Users/buchsbaummiklos/Documents/Elte/Managly/Managly/localhost.pfx", "yourpassword");
-        //    });
-        //    serverOptions.ListenAnyIP(5050); // HTTP for local testing
-        //});
-
-
-
 
         builder.Services.AddIdentity<User, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -83,24 +94,19 @@ public class Program
         });
 
         builder.Services.AddScoped<IAuthorizationHandler, PreGeneratedPasswordHandler>();
-
         builder.Services.AddScoped<ChatHub>();
-
         builder.Services.AddSingleton<EmailService>();
-
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.LoginPath = "/Home/Login";
-            options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect unauthorized users
-        });
 
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
+        {
+            // Development-specific configuration
+        }
+        else
         {
             app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
 
@@ -109,14 +115,39 @@ public class Program
 
         app.UseSession();
 
-        app.UseHttpsRedirection();
+        // Handle HTTPS redirection properly for both development and production
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.IsHttps)
+            {
+                await next();
+            }
+            else
+            {
+                // Parse URLs to get HTTPS port
+                var urls = builder.Configuration["Urls"].Split(';');
+                string httpsUrl = urls.FirstOrDefault(u => u.StartsWith("https://")) ?? "https://*:5051";
+
+                // Extract port
+                var httpsPort = int.Parse(httpsUrl.Split(':').Last());
+
+                var host = context.Request.Host;
+                var newHost = new HostString(host.Host, httpsPort);
+
+                var url = string.Concat(
+                    "https://",
+                    newHost.ToUriComponent(),
+                    context.Request.PathBase.ToUriComponent(),
+                    context.Request.Path.ToUriComponent(),
+                    context.Request.QueryString.ToUriComponent());
+
+                context.Response.Redirect(url);
+            }
+        });
+
         app.UseStaticFiles();
-
-
         app.UseRouting();
-
-        app.UseCors();
-
+        app.UseCors("CorsPolicy");
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -130,7 +161,6 @@ public class Program
                 var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var user = await userManager.FindByIdAsync(userId);
 
-                // ✅ Only log out the user if they are deleted, but NOT the admin who deleted them.
                 if (user == null)
                 {
                     await signInManager.SignOutAsync();
@@ -147,18 +177,11 @@ public class Program
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapHub<VideoCallHub>("/videocallhub").RequireCors("CorsPolicy");
-            endpoints.MapHub<ChatHub>("/chathub"); // ✅ Ensure this matches the correct namespace
+            endpoints.MapHub<ChatHub>("/chathub");
             endpoints.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Login}/{id?}");
-            endpoints.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
         });
-
-        //app.MapControllerRoute(
-        //    name: "default",
-        //    pattern: "{controller=Home}/{action=Login}/{id?}");
 
         app.Run();
     }

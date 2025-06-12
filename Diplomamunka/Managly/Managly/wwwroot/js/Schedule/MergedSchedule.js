@@ -349,7 +349,7 @@ function hideExportButtons() {
  * Loads active projects from the API
  */
 function loadActiveProjects() {
-    fetch('/api/Projects/active')
+    fetch('/Projects/active')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

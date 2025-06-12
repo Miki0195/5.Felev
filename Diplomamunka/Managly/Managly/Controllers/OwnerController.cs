@@ -45,7 +45,6 @@ namespace Managly.Controllers
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            // Create dashboard view model
             var model = new DashboardViewModel
             {
                 TotalCompanies = await _context.Companies.CountAsync(),
@@ -53,10 +52,9 @@ namespace Managly.Controllers
                 TotalActiveLicenses = await _context.LicenseKeys.CountAsync(lk => lk.Status == LicensekeyStatus.Active),
                 TotalAvailableLicenses = await _context.LicenseKeys.CountAsync(lk => lk.Status == LicensekeyStatus.Available),
                 TotalExpiredLicenses = await _context.LicenseKeys.CountAsync(lk => lk.Status == LicensekeyStatus.Expired),
-                TotalRevokedLicenses = 0, // For future implementation
+                TotalRevokedLicenses = 0, 
             };
 
-            // Get monthly registrations for the chart (last 6 months)
             var sixMonthsAgo = DateTime.Now.AddMonths(-6);
             var monthlyData = await _context.Companies
                 .Where(c => c.CreatedDate >= sixMonthsAgo)
@@ -81,7 +79,6 @@ namespace Managly.Controllers
                 });
             }
 
-            // Get recent activities
             model.RecentActivities = await _context.OwnerActivityLogs
                 .OrderByDescending(a => a.Timestamp)
                 .Take(4)
@@ -96,7 +93,6 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            // Get recent companies
             model.RecentCompanies = await _context.Companies
                 .OrderByDescending(c => c.CreatedDate)
                 .Take(5)
@@ -130,7 +126,7 @@ namespace Managly.Controllers
                     LicenseKey = c.LicenseKey,
                     CreatedDate = c.CreatedDate,
                     TotalUsers = _context.Users.Count(u => u.CompanyId == c.Id),
-                    LicenseStatus = "Active" // Default value
+                    LicenseStatus = "Active" 
                 })
                 .ToListAsync();
 
@@ -178,12 +174,10 @@ namespace Managly.Controllers
                 LicenseStatus = licenseKey?.ExpirationDate != null && licenseKey.ExpirationDate < DateTime.Now ? "Expired" : "Active"
             };
 
-            // Get users in the company
             var usersInCompany = await _context.Users
                 .Where(u => u.CompanyId == company.Id)
                 .ToListAsync();
 
-            // Count by role
             model.AdminCount = 0;
             model.ManagerCount = 0;
             model.EmployeeCount = 0;
@@ -200,7 +194,7 @@ namespace Managly.Controllers
                     LastName = user.LastName,
                     Email = user.Email,
                     Role = role,
-                    CreatedDate = user.CreatedDate // Placeholder - actual creation date might be different
+                    CreatedDate = user.CreatedDate 
                 });
 
                 if (role == "Admin")
@@ -227,18 +221,15 @@ namespace Managly.Controllers
                 return RedirectToAction("Companies");
             }
 
-            // Get all users in this company
             var usersInCompany = await _context.Users
                 .Where(u => u.CompanyId == company.Id)
                 .ToListAsync();
 
-            // Delete all users in the company
             foreach (var user in usersInCompany)
             {
                 await _userManager.DeleteAsync(user);
             }
 
-            // Update the license key to make it available again
             var licenseKey = await _context.LicenseKeys
                 .FirstOrDefaultAsync(lk => lk.Key == company.LicenseKey);
 
@@ -249,7 +240,6 @@ namespace Managly.Controllers
                 _context.LicenseKeys.Update(licenseKey);
             }
 
-            // Log the activity
             var activity = new OwnerActivityLog
             {
                 ActivityType = "CompanyDeleted",
@@ -260,7 +250,6 @@ namespace Managly.Controllers
             };
             _context.OwnerActivityLogs.Add(activity);
 
-            // Delete the company
             _context.Companies.Remove(company);
             await _context.SaveChangesAsync();
 
@@ -289,10 +278,8 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            // Check for expired licenses based on expiration date
             foreach (var key in licenseKeys.Where(k => k.Status != "Expired" && k.ExpirationDate.HasValue && k.ExpirationDate.Value < DateTime.Now))
             {
-                // Update the database entity if it should be expired
                 var dbKey = await _context.LicenseKeys.FindAsync(key.Id);
                 if (dbKey != null && dbKey.Status != LicensekeyStatus.Expired && dbKey.ExpirationDate < DateTime.Now)
                 {
@@ -330,7 +317,6 @@ namespace Managly.Controllers
 
             _context.LicenseKeys.Add(licenseKey);
 
-            // Log the activity
             var activity = new OwnerActivityLog
             {
                 ActivityType = "LicenseKeyGenerated",
@@ -382,14 +368,11 @@ namespace Managly.Controllers
                 return RedirectToAction("LicenseKeys");
             }
 
-            // Update expiration date
             licenseKey.ExpirationDate = model.ExpirationDate;
 
-            // Handle status changes
             var oldStatus = licenseKey.Status.ToString();
             LicensekeyStatus newStatus;
             
-            // Parse the new status
             if (!Enum.TryParse(model.Status, out newStatus))
             {
                 TempData["ErrorMessage"] = "Invalid license key status";
@@ -398,10 +381,8 @@ namespace Managly.Controllers
 
             if (newStatus != licenseKey.Status)
             {
-                // If changing from Active to Available
                 if (newStatus == LicensekeyStatus.Available && licenseKey.Status == LicensekeyStatus.Active)
                 {
-                    // If assigned to a company, we need to handle that relationship
                     if (licenseKey.AssignedToCompanyId.HasValue)
                     {
                         var company = await _context.Companies
@@ -409,7 +390,6 @@ namespace Managly.Controllers
                         
                         if (company != null)
                         {
-                            // Log this special case
                             var activity = new OwnerActivityLog
                             {
                                 ActivityType = "LicenseKeyRevoked",
@@ -425,11 +405,9 @@ namespace Managly.Controllers
                     }
                 }
                 
-                // Update the status
                 licenseKey.Status = newStatus;
             }
 
-            // Log the activity
             var statusActivity = new OwnerActivityLog
             {
                 ActivityType = "LicenseKeyUpdated",
@@ -456,14 +434,12 @@ namespace Managly.Controllers
                 return RedirectToAction("LicenseKeys");
             }
 
-            // Can't delete an active license key that's assigned to a company
             if (licenseKey.Status == LicensekeyStatus.Active && licenseKey.AssignedToCompanyId.HasValue)
             {
                 TempData["ErrorMessage"] = "Cannot delete an active license key that is assigned to a company";
                 return RedirectToAction("LicenseKeys");
             }
 
-            // Log the activity
             var activity = new OwnerActivityLog
             {
                 ActivityType = "LicenseKeyDeleted",
@@ -508,7 +484,6 @@ namespace Managly.Controllers
 
         private string GenerateUniqueKey()
         {
-            // Generate a unique key in the format "XXXXX-XXXXX-XXXXX-XXXXX"
             using (var rng = new RNGCryptoServiceProvider())
             {
                 var keyBytes = new byte[16];

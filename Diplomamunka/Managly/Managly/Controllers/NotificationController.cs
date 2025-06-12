@@ -58,13 +58,11 @@ namespace Managly.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // First get the notifications
             var notifications = await _context.Notifications
                 .Where(n => n.UserId == userId && !n.IsRead)
                 .OrderByDescending(n => n.Timestamp)
                 .ToListAsync();
 
-            // Then map them to DTOs in memory
             var notificationDtos = notifications.Select(n => new NotificationDto
             {
                 Id = n.Id,
@@ -78,7 +76,6 @@ namespace Managly.Controllers
                     : JsonSerializer.Deserialize<Dictionary<string, string>>(n.MetaData)
             }).ToList();
 
-            // Group by type first
             var groupedNotifications = notificationDtos
                 .GroupBy(n => n.Type)
                 .Select(typeGroup => new NotificationGroupDto

@@ -222,7 +222,6 @@ namespace Managly.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get tasks statistics
             var taskStats = await _context.TaskAssignments
                 .Include(t => t.Task)
                 .Where(t => t.UserId == userId)
@@ -230,7 +229,6 @@ namespace Managly.Controllers
                 .Select(g => new { Status = g.Key, Count = g.Count() })
                 .ToListAsync();
 
-            // Get project progress
             var projectProgress = await _context.Projects
                 .Where(p => p.ProjectMembers.Any(m => m.UserId == userId))
                 .Select(p => new {
@@ -241,7 +239,6 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            // Calculate activity over time (using Attendance)
             var now = DateTime.Now;
             var activityData = await _context.Attendances
                 .Where(a => a.UserId == userId && a.CheckInTime >= now.AddDays(-30))
@@ -296,7 +293,6 @@ namespace Managly.Controllers
             var startOfWeek = today.AddDays(-(int)today.DayOfWeek);
             var endOfWeek = startOfWeek.AddDays(6);
 
-            // Get schedules for the current week
             var schedules = await _context.Schedules
                 .Where(s => s.UserId == userId &&
                            s.ShiftDate >= startOfWeek &&
@@ -313,7 +309,6 @@ namespace Managly.Controllers
                 })
                 .ToListAsync();
 
-            // Get leave/vacation days for the current week
             var leaves = await _context.Leaves
                 .Where(l => l.UserId == userId &&
                            l.LeaveDate >= startOfWeek &&
@@ -351,7 +346,6 @@ namespace Managly.Controllers
                 if (user == null)
                     return Unauthorized(new { success = false, error = "User not found" });
 
-                // Get current session status
                 var currentSession = await _context.Attendances
                     .Where(a => a.UserId == user.Id && a.CheckOutTime == null)
                     .OrderByDescending(a => a.CheckInTime)

@@ -87,61 +87,122 @@ h3 {
         border-radius: 3px;
     }
 
-.user-recent-chat {
-    min-height: 100px;
-    width: 100%;
-    padding: 12px;
+.chat-user-item {
+    padding: 10px;
     border-radius: 10px;
     background: #ffffff;
-    border: 1px solid #ddd;
+    border: 1px solid #eee;
     cursor: pointer;
     transition: 0.3s;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 15px;
-    font-size: 16px;
-    color: #333;
+    gap: 12px;
+    margin-bottom: 8px;
     position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
 }
 
-    .user-recent-chat:hover {
-        background: #f0f0f5;
-    }
+.chat-user-item:hover {
+    background: #f5f7fb;
+}
 
-.recent-chat-img {
-    width: 45px;
-    height: 45px;
-    min-width: 45px;
+.chat-user-item.active {
+    background: #e6f2ff;
+    border-color: #0084ff;
+}
+
+.user-avatar {
+    position: relative;
+}
+
+.user-avatar img {
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.recent-chat-text {
+.message-profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.recent-chat-img {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    min-width: 0;
-    gap: 5px;
+}
+
+.user-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
 }
 
 .user-name {
-    margin: 0;
-    font-weight: bold;
-    color: #333;
-    font-size: 16px;
-}
-
-.message-preview {
-    margin: 0;
+    font-weight: 600;
     font-size: 14px;
-    color: #666;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100%;
+    max-width: 70%;
+}
+
+.last-message-time {
+    color: #999;
+    font-size: 11px;
+}
+
+.last-message-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.last-message-text {
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85%;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2ecc71;
+    border: 2px solid white;
+}
+
+.unread-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: bold;
+    background-color: #0084ff;
+    color: white;
+    border-radius: 10px;
+    padding: 0 5px;
 }
 
 .chat-area {
@@ -157,14 +218,40 @@ h3 {
 .chat-header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px 20px;
-    background: #0084ff;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 8px 8px 0 0;
-    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chat-header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.chat-header-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+}
+
+.chat-header-status {
+    font-size: 13px;
+    color: #666;
 }
 
 .user-info-container {
@@ -249,29 +336,29 @@ h3 {
 
 .message-wrapper {
     display: flex;
-    align-items: center;
-    max-width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+    max-width: 80%;
 }
 
-.message-wrapper.sent {
-    justify-content: flex-end;
-    text-align: right;
+.sent {
+    margin-left: auto;
+    flex-direction: row-reverse;
 }
 
-.message-wrapper.received {
-    justify-content: flex-start;
-    text-align: left;
+.received {
+    margin-right: auto;
+    flex-direction: row;
+}
+
+.message-wrapper.sent .message-content-wrapper {
+    align-items: flex-end;
 }
 
 .message-content-wrapper {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-}
-
-.message-wrapper.sent .message-content-wrapper {
-    align-items: flex-end;
 }
 
 .message-content-inner {
@@ -281,40 +368,26 @@ h3 {
 }
 
 .my-message, .other-message {
-    max-width: 90%;
-    padding: 10px 15px;
-    border-radius: 20px;
-    font-size: 15px;
-    line-height: 1.4;
+    border-radius: 18px;
+    padding: 10px 14px;
+    max-width: calc(100% - 50px);
     word-wrap: break-word;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-    margin: 0;
-    display: inline-block;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .my-message {
-    background: #0084ff;
+    background-color: #0084ff;
     color: white;
-    align-self: flex-end;
-    text-align: right;
     border-bottom-right-radius: 4px;
-    cursor: pointer;
+    margin-right: 8px;
 }
 
 .other-message {
-    background: #f0f0f0;
+    background-color: #f0f2f5;
     color: #333;
-    align-self: flex-start;
-    text-align: left;
     border-bottom-left-radius: 4px;
-}
-
-.message-profile-img {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
+    margin-left: 8px;
 }
 
 .sent .message-profile-img {
@@ -402,29 +475,29 @@ emoji-picker {
 
 .date-separator {
     text-align: center;
-    margin: 20px 0;
+    margin: 15px 0;
+    color: #666;
     font-size: 12px;
-    color: #888;
+    font-weight: 500;
     position: relative;
 }
 
-    .date-separator::before,
-    .date-separator::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 40%;
-        height: 1px;
-        background: #ccc;
-    }
+.date-separator:before, .date-separator:after {
+    content: "";
+    height: 1px;
+    background-color: #e0e0e0;
+    position: absolute;
+    top: 50%;
+    width: 20%;
+}
 
-    .date-separator::before {
-        left: 0;
-    }
+.date-separator:before {
+    left: 15%;
+}
 
-    .date-separator::after {
-        right: 0;
-    }
+.date-separator:after {
+    right: 15%;
+}
 
 .unread-message {
     font-weight: bold;
@@ -432,36 +505,9 @@ emoji-picker {
     border-left: 4px solid #0084ff;
 }
 
-.unread-badge {
-    background-color: red;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-    text-align: center;
-    border-radius: 50%;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    border: 2px solid white;
-}
-
 .deleted-message {
+    color: #999 !important;
     font-style: italic;
-    color: gray;
-    background-color: rgba(0, 0, 0, 0.05); /* Light gray background */
-    padding: 10px;
-    border-radius: 15px;
-    display: inline-block;
-    max-width: 70%;
-    pointer-events: none;
-    cursor: default;
 }
 
 .recent-chat-header {

@@ -32,7 +32,6 @@ namespace Managly.Data
 
         private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
         {
-            // Ensure roles exist
             string[] roleNames = { "Owner", "Admin", "Manager", "Employee" };
             
             foreach (var roleName in roleNames)
@@ -46,12 +45,10 @@ namespace Managly.Data
 
         private static async Task SeedOwner(UserManager<User> userManager)
         {
-            // Check if the Owner user exists
             var ownerUser = await userManager.FindByEmailAsync("owner@managly.com");
             
             if (ownerUser == null)
             {
-                // Create the Owner user
                 ownerUser = new User
                 {
                     UserName = "owner@managly.com",
@@ -71,19 +68,16 @@ namespace Managly.Data
                 
                 if (result.Succeeded)
                 {
-                    // Assign the Owner role
                     await userManager.AddToRoleAsync(ownerUser, "Owner");
                 }
             }
             else
             {
-                // Ensure the existing owner user has the Owner role
                 if (!await userManager.IsInRoleAsync(ownerUser, "Owner"))
                 {
                     await userManager.AddToRoleAsync(ownerUser, "Owner");
                 }
                 
-                // Ensure all required fields have values
                 bool needsUpdate = false;
                 
                 if (string.IsNullOrEmpty(ownerUser.Country))

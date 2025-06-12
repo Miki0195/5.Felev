@@ -60,10 +60,8 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    // -------------------------- LOGIN -------------------------- // 
     public IActionResult Login()
     {
-        // If user is already signed in, redirect to appropriate page
         if (User.Identity.IsAuthenticated)
         {
             return RedirectToAction("Index", "Home");
@@ -106,7 +104,6 @@ public class HomeController : Controller
         return View(new Login());
     }
 
-    // -------------------------- REGISTER -------------------------- //
     [HttpGet]
     public IActionResult Register()
     {
@@ -175,7 +172,7 @@ public class HomeController : Controller
         {
             Name = model.AdminEmail.Split('@')[0],
             Email = model.AdminEmail,
-            UserName = model.AdminEmail, // Required by Identity
+            UserName = model.AdminEmail, 
             CompanyId = company.Id,
             LastName = "",
             Country = "",
@@ -194,7 +191,6 @@ public class HomeController : Controller
             await _userManager.AddToRoleAsync(adminUser, "Admin");
             await _signInManager.SignInAsync(adminUser, isPersistent: false);
 
-            // Log the company registration activity in OwnerActivityLogs
             _context.OwnerActivityLogs.Add(new OwnerActivityLog
             {
                 ActivityType = "CompanyRegistered",
@@ -217,7 +213,6 @@ public class HomeController : Controller
         return View(model);
     }
 
-    // -------------------------- LOGOUT -------------------------- //
     [Authorize]
     public async Task<IActionResult> Logout()
     {

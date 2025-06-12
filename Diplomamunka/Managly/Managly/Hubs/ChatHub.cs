@@ -32,7 +32,6 @@ namespace Managly.Hubs
             string userId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(userId))
             {
-                // Add connection to user's connection set
                 _userConnections.AddOrUpdate(
                     userId,
                     new HashSet<string> { Context.ConnectionId },
@@ -42,10 +41,6 @@ namespace Managly.Hubs
                         return oldSet;
                     });
 
-                Console.WriteLine($"✅ [SignalR] User {userId} connected with connection ID: {Context.ConnectionId}");
-                Console.WriteLine($"✅ [SignalR] Active connections for user {userId}: {_userConnections[userId].Count}");
-
-                // Broadcast user's online status to all clients
                 await Clients.All.SendAsync("UserOnlineStatusChanged", userId, true);
             }
             else
@@ -61,23 +56,19 @@ namespace Managly.Hubs
             string userId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(userId))
             {
-                // Remove this connection from user's connection set
                 if (_userConnections.TryGetValue(userId, out var connections))
                 {
                     connections.Remove(Context.ConnectionId);
                     
-                    // If user has no more connections, remove them from dictionary
                     if (connections.Count == 0)
                     {
                         _userConnections.TryRemove(userId, out _);
                         
-                        // Only broadcast offline status if user has no more active connections
-                        Console.WriteLine($"✅ [SignalR] User {userId} is now offline (no active connections)");
                         await Clients.All.SendAsync("UserOnlineStatusChanged", userId, false);
                     }
                     else
                     {
-                        Console.WriteLine($"✅ [SignalR] User {userId} still has {connections.Count} active connections");
+                        Console.WriteLine($"[SignalR] User {userId} still has {connections.Count} active connections");
                     }
                 }
             }
@@ -87,8 +78,6 @@ namespace Managly.Hubs
 
         public async Task SendMessage(string senderId, string receiverId, string message)
         {
-            Console.WriteLine("✅ SendMessage method called");
-
             try
             {
                 var sender = await _context.Users.FindAsync(senderId);
@@ -96,16 +85,13 @@ namespace Managly.Hubs
 
                 if (sender == null || receiver == null)
                 {
-                    Console.WriteLine("❌ Sender or Receiver is null!");
+                    Console.WriteLine("❌ [SignalR] SendMessage: Sender or receiver user not found");
                     return;
                 }
 
-                Console.WriteLine($"📩 Creating notification for {receiver.Name} ({receiverId})");
-
-                // Create message preview (assuming you have this logic)
+                Console.WriteLine($"✅ [SignalR] SendMessage: From {senderId} to {receiverId}");
                 var messagePreview = message.Length > 30 ? message.Substring(0, 27) + "..." : message;
 
-                // Create the notification with the new structure
                 var notification = new Notification
                 {
                     UserId = receiverId,
@@ -126,10 +112,8 @@ namespace Managly.Hubs
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
-                // Get notification counts for the specific type
                 var unreadCounts = await GetUnreadCounts(receiverId, senderId);
 
-                // Create notification payload for SignalR
                 var notificationPayload = new
                 {
                     id = notification.Id,
@@ -143,19 +127,14 @@ namespace Managly.Hubs
                     senderUnreadCount = unreadCounts.senderUnread
                 };
 
-                Console.WriteLine($"🔔 Sending real-time notification with unread count: {unreadCounts.totalUnread}");
-
-                // Send the notification through SignalR
                 await Clients.User(receiverId).SendAsync("ReceiveNotification", notificationPayload);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error in SendMessage: {ex.Message}");
-                // Consider throwing the exception or handling it according to your error handling strategy
+                Console.WriteLine($"Error in SendMessage: {ex.Message}");
             }
         }
 
-        // Helper method to get various unread counts
         private async Task<(int totalUnread, int typeUnread, int senderUnread)> GetUnreadCounts(string userId, string senderId)
         {
             var totalUnread = await _context.Notifications
@@ -180,8 +159,6 @@ namespace Managly.Hubs
 
         public async Task MessageDeleted(string messageId)
         {
-            Console.WriteLine($"🔴 Deleting message {messageId} for all clients...");
-
             await Clients.All.SendAsync("MessageDeleted", messageId);
         }
 
@@ -203,28 +180,24 @@ namespace Managly.Hubs
         {
             try
             {
-                Console.WriteLine($"🔴 [SignalR] Trying to delete message {messageId} for user {userId}");
-
                 if (string.IsNullOrEmpty(userId))
                 {
-                    Console.WriteLine("❌ [SignalR] Error: User ID is null in MessageDeletedForMe");
                     return "User ID is null";
                 }
 
                 if (string.IsNullOrEmpty(messageId))
                 {
-                    Console.WriteLine("❌ [SignalR] Error: Message ID is null in MessageDeletedForMe");
                     return "Message ID is null";
                 }
 
-                Console.WriteLine($"✅ [SignalR] Sending MessageDeletedForMe event to user {userId}");
+                Console.WriteLine($"✅ [SignalR] MessageDeletedForMe: Message ID {messageId} deleted for user {userId}");
                 await Clients.User(userId).SendAsync("MessageDeletedForMe", messageId);
 
                 return "Success";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ [SignalR] Exception in MessageDeletedForMe: {ex.Message}");
+                Console.WriteLine($"❌ [SignalR] Error in MessageDeletedForMe: {ex.Message}");
                 return $"Error: {ex.Message}";
             }
         }

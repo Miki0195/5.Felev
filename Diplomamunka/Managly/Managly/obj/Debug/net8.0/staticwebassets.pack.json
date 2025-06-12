@@ -361,6 +361,14 @@
       "PackagePath": "staticwebassets/lib/jquery/dist/jquery.min.map"
     },
     {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/1f81ebce-a2c9-45a9-b3af-4d7d7182e1f2.png",
+      "PackagePath": "staticwebassets/uploads/1f81ebce-a2c9-45a9-b3af-4d7d7182e1f2.png"
+    },
+    {
+      "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/5feb23bb-3e07-4af3-b174-7e89dd59da3c.png",
+      "PackagePath": "staticwebassets/uploads/5feb23bb-3e07-4af3-b174-7e89dd59da3c.png"
+    },
+    {
       "Id": "/Users/buchsbaummiklos/Documents/Elte/5.Félév/5.FélévGit/5.Felev/Diplomamunka/Managly/Managly/wwwroot/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg",
       "PackagePath": "staticwebassets/uploads/c91db657-b474-4b70-a85d-540617b35994.jpg"
     },

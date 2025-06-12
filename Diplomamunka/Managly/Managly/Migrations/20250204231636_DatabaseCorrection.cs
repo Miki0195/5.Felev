@@ -11,10 +11,6 @@ namespace Managly.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "NotificationGroup",
-                table: "Messages");
-
             migrationBuilder.AddColumn<Guid>(
                 name: "NotificationGroup",
                 table: "Notifications",
@@ -30,14 +26,6 @@ namespace Managly.Migrations
             migrationBuilder.DropColumn(
                 name: "NotificationGroup",
                 table: "Notifications");
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "NotificationGroup",
-                table: "Messages",
-                type: "char(36)",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                collation: "ascii_general_ci");
         }
     }
 }

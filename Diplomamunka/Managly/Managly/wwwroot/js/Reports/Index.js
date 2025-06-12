@@ -303,8 +303,8 @@ async function loadReportData() {
                 </td>
             </tr>
         `;
-        }
     }
+}
     }
 }
 
@@ -651,11 +651,11 @@ function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRan
             }
             
             // Create the chart with clear defaults
-            currentCharts.projectProgress = new Chart(progressCtx, {
+    currentCharts.projectProgress = new Chart(progressCtx, {
                 type: 'line',
-                data: {
+        data: {
                     labels: dateLabels,
-                    datasets: [{
+            datasets: [{
                         label: "Cumulative Progress",
                         data: progressData,
                         lineTension: 0.3,
@@ -670,10 +670,10 @@ function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRan
                         pointHitRadius: 10,
                         pointBorderWidth: 2,
                         fill: true
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
                     layout: {
                         padding: {
                             left: 10,
@@ -682,7 +682,7 @@ function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRan
                             bottom: 0
                         }
                     },
-                    scales: {
+            scales: {
                         x: {
                             grid: {
                                 display: false,
@@ -704,7 +704,7 @@ function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRan
                         y: {
                             ticks: {
                                 color: "#64748b",
-                                beginAtZero: true,
+                    beginAtZero: true,
                                 max: 100,
                                 callback: function(value) {
                                     return value + '%';
@@ -760,10 +760,10 @@ function updateCharts(projectMetrics, completedTasks, isProjectSelected, dateRan
                                     return [`Progress: ${context.raw}%`];
                                 }
                             }
-                        }
-                    }
                 }
-            });
+            }
+        }
+    });
         } else if (isProjectSelected) {
             console.warn("Project Progress chart canvas not found, but a project is selected");
         }
@@ -898,18 +898,18 @@ async function updateTaskDistributionView(view) {
             
             // Create a new chart
             currentCharts.taskDistribution = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
+        type: 'doughnut',
+        data: {
                     labels: labels,
-                    datasets: [{
+            datasets: [{
                         data: values,
                         backgroundColor: backgroundColors,
                         borderWidth: 0,
                         hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
+            }]
+        },
+        options: {
+            responsive: true,
                     maintainAspectRatio: false,
                     cutout: '70%',
                     plugins: {
@@ -1045,32 +1045,32 @@ function exportTeamData(format) {
             return;
         }
     
-        if (format === 'csv') {
+    if (format === 'csv') {
             let csv = 'Team Member,Tasks Completed,Working Hours,Productivity Score\n';
         
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
                 if (cells.length < 4) return;
                 
                 const nameEl = cells[0].querySelector('.fw-bold');
                 const name = nameEl ? nameEl.textContent.trim() : 'Unknown';
                 
-                const tasksCompleted = cells[1].textContent.trim();
-                const hours = cells[2].textContent.trim();
+            const tasksCompleted = cells[1].textContent.trim();
+            const hours = cells[2].textContent.trim();
                 
                 const productivityEl = cells[3].querySelector('span:last-child');
                 const productivity = productivityEl ? productivityEl.textContent.trim() : '0%';
             
                 csv += `"${name}",${tasksCompleted},${hours},${productivity}\n`;
-            });
+        });
         
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
             a.download = `team-performance-${projectName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-        } else if (format === 'pdf') {
+        a.click();
+    } else if (format === 'pdf') {
             // Get the jsPDF instance
             const { jsPDF } = window.jspdf;
             if (!jsPDF) {

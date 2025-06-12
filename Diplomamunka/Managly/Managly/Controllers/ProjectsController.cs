@@ -83,7 +83,6 @@ namespace Managly.Controllers
             }
         }
 
-        // ============= OWN CODE
         [HttpGet("sidebarPartial")]
         public async Task<IActionResult> GetSidebarPartial([FromQuery] string filter = "all", [FromQuery] string search = "")
         {
